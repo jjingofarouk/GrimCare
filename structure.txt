@@ -1,0 +1,665 @@
+├── .git
+│   ├── FETCH_HEAD
+│   ├── HEAD
+│   ├── branches
+│   ├── config
+│   ├── description
+│   ├── hooks
+│   │   ├── applypatch-msg.sample
+│   │   ├── commit-msg.sample
+│   │   ├── fsmonitor-watchman.sample
+│   │   ├── post-update.sample
+│   │   ├── pre-applypatch.sample
+│   │   ├── pre-commit.sample
+│   │   ├── pre-merge-commit.sample
+│   │   ├── pre-push.sample
+│   │   ├── pre-rebase.sample
+│   │   ├── pre-receive.sample
+│   │   ├── prepare-commit-msg.sample
+│   │   ├── push-to-checkout.sample
+│   │   ├── sendemail-validate.sample
+│   │   └── update.sample
+│   ├── index
+│   ├── info
+│   │   └── exclude
+│   ├── logs
+│   │   ├── HEAD
+│   │   └── refs
+│   │       ├── heads
+│   │       │   └── main
+│   │       └── remotes
+│   │           └── origin
+│   │               └── HEAD
+│   ├── objects
+│   │   ├── info
+│   │   └── pack
+│   │       ├── pack-ecc1d3bbdc3fa3bc41459e19dd55ee5291ff3d49.idx
+│   │       ├── pack-ecc1d3bbdc3fa3bc41459e19dd55ee5291ff3d49.pack
+│   │       └── pack-ecc1d3bbdc3fa3bc41459e19dd55ee5291ff3d49.rev
+│   ├── packed-refs
+│   └── refs
+│       ├── heads
+│       │   └── main
+│       ├── remotes
+│       │   └── origin
+│       │       └── HEAD
+│       └── tags
+├── c.js
+├── g.js
+└── hospital-management-system
+    ├── .env
+    ├── .env.example
+    ├── .eslintrc.json
+    ├── .gitignore
+    ├── .prettierrc
+    ├── Dockerfile
+    ├── README.md
+    ├── api.md
+    ├── app
+    │   ├── Footer.jsx
+    │   ├── Footer.module.css
+    │   ├── Header.jsx
+    │   ├── Header.module.css
+    │   ├── Navbar.jsx
+    │   ├── Navbar.module.css
+    │   ├── Sidebar.jsx
+    │   ├── Sidebar.module.css
+    │   ├── accounting
+    │   │   ├── AccountingCard.jsx
+    │   │   ├── AccountingCard.module.css
+    │   │   ├── AccountingForm.jsx
+    │   │   ├── AccountingForm.module.css
+    │   │   ├── AccountingList.jsx
+    │   │   ├── AccountingList.module.css
+    │   │   ├── accountingService.js
+    │   │   ├── layout.jsx
+    │   │   └── page.jsx
+    │   ├── adt
+    │   │   ├── AdtCard.jsx
+    │   │   ├── AdtCard.module.css
+    │   │   ├── AdtForm.jsx
+    │   │   ├── AdtForm.module.css
+    │   │   ├── AdtList.jsx
+    │   │   ├── AdtList.module.css
+    │   │   ├── adtService.js
+    │   │   ├── layout.jsx
+    │   │   └── page.jsx
+    │   ├── api
+    │   │   ├── accounting
+    │   │   │   ├── [id]
+    │   │   │   │   └── route.js
+    │   │   │   └── route.js
+    │   │   ├── adt
+    │   │   │   ├── [id]
+    │   │   │   │   └── route.js
+    │   │   │   └── route.js
+    │   │   ├── appointment
+    │   │   │   ├── [id]
+    │   │   │   │   └── route.js
+    │   │   │   └── route.js
+    │   │   ├── auth
+    │   │   │   └── route.js
+    │   │   ├── billing
+    │   │   │   ├── [id]
+    │   │   │   │   └── route.js
+    │   │   │   └── route.js
+    │   │   ├── claim-mgmt
+    │   │   │   ├── [id]
+    │   │   │   │   └── route.js
+    │   │   │   └── route.js
+    │   │   ├── clinical
+    │   │   │   ├── [id]
+    │   │   │   │   └── route.js
+    │   │   │   └── route.js
+    │   │   ├── clinical-settings
+    │   │   │   ├── [id]
+    │   │   │   │   └── route.js
+    │   │   │   └── route.js
+    │   │   ├── cssd
+    │   │   │   ├── [id]
+    │   │   │   │   └── route.js
+    │   │   │   └── route.js
+    │   │   ├── dashboard
+    │   │   │   └── route.js
+    │   │   ├── dispensary
+    │   │   │   ├── [id]
+    │   │   │   │   └── route.js
+    │   │   │   └── route.js
+    │   │   ├── doctor
+    │   │   │   ├── [id]
+    │   │   │   │   └── route.js
+    │   │   │   └── route.js
+    │   │   ├── dynamic-report
+    │   │   │   ├── [id]
+    │   │   │   │   └── route.js
+    │   │   │   └── route.js
+    │   │   ├── emergency
+    │   │   │   ├── [id]
+    │   │   │   │   └── route.js
+    │   │   │   └── route.js
+    │   │   ├── fixed-assets
+    │   │   │   ├── [id]
+    │   │   │   │   └── route.js
+    │   │   │   └── route.js
+    │   │   ├── helpdesk
+    │   │   │   ├── [id]
+    │   │   │   │   └── route.js
+    │   │   │   └── route.js
+    │   │   ├── incentive
+    │   │   │   ├── [id]
+    │   │   │   │   └── route.js
+    │   │   │   └── route.js
+    │   │   ├── inventory
+    │   │   │   ├── [id]
+    │   │   │   │   └── route.js
+    │   │   │   └── route.js
+    │   │   ├── laboratory
+    │   │   │   ├── [id]
+    │   │   │   │   └── route.js
+    │   │   │   └── route.js
+    │   │   ├── maternity
+    │   │   │   ├── [id]
+    │   │   │   │   └── route.js
+    │   │   │   └── route.js
+    │   │   ├── medical-records
+    │   │   │   ├── [id]
+    │   │   │   │   └── route.js
+    │   │   │   └── route.js
+    │   │   ├── mkt-referral
+    │   │   │   ├── [id]
+    │   │   │   │   └── route.js
+    │   │   │   └── route.js
+    │   │   ├── nhif
+    │   │   │   ├── [id]
+    │   │   │   │   └── route.js
+    │   │   │   └── route.js
+    │   │   ├── nursing
+    │   │   │   ├── [id]
+    │   │   │   │   └── route.js
+    │   │   │   └── route.js
+    │   │   ├── operation-theatre
+    │   │   │   ├── [id]
+    │   │   │   │   └── route.js
+    │   │   │   └── route.js
+    │   │   ├── patient
+    │   │   │   ├── [id]
+    │   │   │   │   └── route.js
+    │   │   │   └── route.js
+    │   │   ├── pharmacy
+    │   │   │   ├── [id]
+    │   │   │   │   └── route.js
+    │   │   │   └── route.js
+    │   │   ├── procurement
+    │   │   │   ├── [id]
+    │   │   │   │   └── route.js
+    │   │   │   └── route.js
+    │   │   ├── queue-mngmt
+    │   │   │   ├── [id]
+    │   │   │   │   └── route.js
+    │   │   │   └── route.js
+    │   │   ├── radiology
+    │   │   │   ├── [id]
+    │   │   │   │   └── route.js
+    │   │   │   └── route.js
+    │   │   ├── reports
+    │   │   │   ├── [id]
+    │   │   │   │   └── route.js
+    │   │   │   └── route.js
+    │   │   ├── settings
+    │   │   │   ├── [id]
+    │   │   │   │   └── route.js
+    │   │   │   └── route.js
+    │   │   ├── social-service
+    │   │   │   ├── [id]
+    │   │   │   │   └── route.js
+    │   │   │   └── route.js
+    │   │   ├── substore
+    │   │   │   ├── [id]
+    │   │   │   │   └── route.js
+    │   │   │   └── route.js
+    │   │   ├── system-admin
+    │   │   │   ├── [id]
+    │   │   │   │   └── route.js
+    │   │   │   └── route.js
+    │   │   ├── utilities
+    │   │   │   ├── [id]
+    │   │   │   │   └── route.js
+    │   │   │   └── route.js
+    │   │   ├── vaccination
+    │   │   │   ├── [id]
+    │   │   │   │   └── route.js
+    │   │   │   └── route.js
+    │   │   └── verification
+    │   │       ├── [id]
+    │   │       │   └── route.js
+    │   │       └── route.js
+    │   ├── api.js
+    │   ├── appointment
+    │   │   ├── AppointmentCard.jsx
+    │   │   ├── AppointmentCard.module.css
+    │   │   ├── AppointmentForm.jsx
+    │   │   ├── AppointmentForm.module.css
+    │   │   ├── AppointmentList.jsx
+    │   │   ├── AppointmentList.module.css
+    │   │   ├── appointmentService.js
+    │   │   ├── layout.jsx
+    │   │   └── page.jsx
+    │   ├── auth
+    │   │   ├── LoginForm.jsx
+    │   │   ├── LoginForm.module.css
+    │   │   ├── RegisterForm.jsx
+    │   │   ├── RegisterForm.module.css
+    │   │   ├── authService.js
+    │   │   ├── layout.jsx
+    │   │   └── page.jsx
+    │   ├── auth.js
+    │   ├── billing
+    │   │   ├── BillingCard.jsx
+    │   │   ├── BillingCard.module.css
+    │   │   ├── BillingForm.jsx
+    │   │   ├── BillingForm.module.css
+    │   │   ├── BillingList.jsx
+    │   │   ├── BillingList.module.css
+    │   │   ├── billingService.js
+    │   │   ├── layout.jsx
+    │   │   └── page.jsx
+    │   ├── claim-mgmt
+    │   │   ├── ClaimCard.jsx
+    │   │   ├── ClaimCard.module.css
+    │   │   ├── ClaimForm.jsx
+    │   │   ├── ClaimForm.module.css
+    │   │   ├── ClaimList.jsx
+    │   │   ├── ClaimList.module.css
+    │   │   ├── claimService.js
+    │   │   ├── layout.jsx
+    │   │   └── page.jsx
+    │   ├── clinical
+    │   │   ├── ClinicalCard.jsx
+    │   │   ├── ClinicalCard.module.css
+    │   │   ├── ClinicalForm.jsx
+    │   │   ├── ClinicalForm.module.css
+    │   │   ├── ClinicalList.jsx
+    │   │   ├── ClinicalList.module.css
+    │   │   ├── clinicalService.js
+    │   │   ├── layout.jsx
+    │   │   └── page.jsx
+    │   ├── clinical-settings
+    │   │   ├── ClinicalSettingsCard.jsx
+    │   │   ├── ClinicalSettingsCard.module.css
+    │   │   ├── ClinicalSettingsForm.jsx
+    │   │   ├── ClinicalSettingsForm.module.css
+    │   │   ├── ClinicalSettingsList.jsx
+    │   │   ├── ClinicalSettingsList.module.css
+    │   │   ├── clinicalSettingsService.js
+    │   │   ├── layout.jsx
+    │   │   └── page.jsx
+    │   ├── constants.js
+    │   ├── cssd
+    │   │   ├── CssdCard.jsx
+    │   │   ├── CssdCard.module.css
+    │   │   ├── CssdForm.jsx
+    │   │   ├── CssdForm.module.css
+    │   │   ├── CssdList.jsx
+    │   │   ├── CssdList.module.css
+    │   │   ├── cssdService.js
+    │   │   ├── layout.jsx
+    │   │   └── page.jsx
+    │   ├── dashboard
+    │   │   ├── DashboardChart.jsx
+    │   │   ├── DashboardChart.module.css
+    │   │   ├── DashboardOverview.jsx
+    │   │   ├── DashboardOverview.module.css
+    │   │   ├── DashboardWidget.jsx
+    │   │   ├── DashboardWidget.module.css
+    │   │   ├── dashboardService.js
+    │   │   ├── layout.jsx
+    │   │   └── page.jsx
+    │   ├── dispensary
+    │   │   ├── DispensaryCard.jsx
+    │   │   ├── DispensaryCard.module.css
+    │   │   ├── DispensaryForm.jsx
+    │   │   ├── DispensaryForm.module.css
+    │   │   ├── DispensaryList.jsx
+    │   │   ├── DispensaryList.module.css
+    │   │   ├── dispensaryService.js
+    │   │   ├── layout.jsx
+    │   │   └── page.jsx
+    │   ├── doctor
+    │   │   ├── DoctorCard.jsx
+    │   │   ├── DoctorCard.module.css
+    │   │   ├── DoctorForm.jsx
+    │   │   ├── DoctorForm.module.css
+    │   │   ├── DoctorList.jsx
+    │   │   ├── DoctorList.module.css
+    │   │   ├── doctorService.js
+    │   │   ├── layout.jsx
+    │   │   └── page.jsx
+    │   ├── dynamic-report
+    │   │   ├── DynamicReportCard.jsx
+    │   │   ├── DynamicReportCard.module.css
+    │   │   ├── DynamicReportGenerator.jsx
+    │   │   ├── DynamicReportGenerator.module.css
+    │   │   ├── DynamicReportList.jsx
+    │   │   ├── DynamicReportList.module.css
+    │   │   ├── dynamicReportService.js
+    │   │   ├── layout.jsx
+    │   │   └── page.jsx
+    │   ├── emergency
+    │   │   ├── EmergencyCard.jsx
+    │   │   ├── EmergencyCard.module.css
+    │   │   ├── EmergencyForm.jsx
+    │   │   ├── EmergencyForm.module.css
+    │   │   ├── EmergencyList.jsx
+    │   │   ├── EmergencyList.module.css
+    │   │   ├── emergencyService.js
+    │   │   ├── layout.jsx
+    │   │   └── page.jsx
+    │   ├── fixed-assets
+    │   │   ├── FixedAssetsCard.jsx
+    │   │   ├── FixedAssetsCard.module.css
+    │   │   ├── FixedAssetsForm.jsx
+    │   │   ├── FixedAssetsForm.module.css
+    │   │   ├── FixedAssetsList.jsx
+    │   │   ├── FixedAssetsList.module.css
+    │   │   ├── fixedAssetsService.js
+    │   │   ├── layout.jsx
+    │   │   └── page.jsx
+    │   ├── globals.css
+    │   ├── helpdesk
+    │   │   ├── HelpdeskCard.jsx
+    │   │   ├── HelpdeskCard.module.css
+    │   │   ├── HelpdeskForm.jsx
+    │   │   ├── HelpdeskForm.module.css
+    │   │   ├── HelpdeskList.jsx
+    │   │   ├── HelpdeskList.module.css
+    │   │   ├── helpdeskService.js
+    │   │   ├── layout.jsx
+    │   │   └── page.jsx
+    │   ├── incentive
+    │   │   ├── IncentiveCard.jsx
+    │   │   ├── IncentiveCard.module.css
+    │   │   ├── IncentiveForm.jsx
+    │   │   ├── IncentiveForm.module.css
+    │   │   ├── IncentiveList.jsx
+    │   │   ├── IncentiveList.module.css
+    │   │   ├── incentiveService.js
+    │   │   ├── layout.jsx
+    │   │   └── page.jsx
+    │   ├── inventory
+    │   │   ├── InventoryCard.jsx
+    │   │   ├── InventoryCard.module.css
+    │   │   ├── InventoryForm.jsx
+    │   │   ├── InventoryForm.module.css
+    │   │   ├── InventoryList.jsx
+    │   │   ├── InventoryList.module.css
+    │   │   ├── inventoryService.js
+    │   │   ├── layout.jsx
+    │   │   └── page.jsx
+    │   ├── laboratory
+    │   │   ├── LaboratoryCard.jsx
+    │   │   ├── LaboratoryCard.module.css
+    │   │   ├── LaboratoryForm.jsx
+    │   │   ├── LaboratoryForm.module.css
+    │   │   ├── LaboratoryList.jsx
+    │   │   ├── LaboratoryList.module.css
+    │   │   ├── laboratoryService.js
+    │   │   ├── layout.jsx
+    │   │   └── page.jsx
+    │   ├── layout.jsx
+    │   ├── maternity
+    │   │   ├── MaternityCard.jsx
+    │   │   ├── MaternityCard.module.css
+    │   │   ├── MaternityForm.jsx
+    │   │   ├── MaternityForm.module.css
+    │   │   ├── MaternityList.jsx
+    │   │   ├── MaternityList.module.css
+    │   │   ├── layout.jsx
+    │   │   ├── maternityService.js
+    │   │   └── page.jsx
+    │   ├── medical-records
+    │   │   ├── MedicalRecordsCard.jsx
+    │   │   ├── MedicalRecordsCard.module.css
+    │   │   ├── MedicalRecordsForm.jsx
+    │   │   ├── MedicalRecordsForm.module.css
+    │   │   ├── MedicalRecordsList.jsx
+    │   │   ├── MedicalRecordsList.module.css
+    │   │   ├── layout.jsx
+    │   │   ├── medicalRecordsService.js
+    │   │   └── page.jsx
+    │   ├── middleware.js
+    │   ├── mkt-referral
+    │   │   ├── MktReferralCard.jsx
+    │   │   ├── MktReferralCard.module.css
+    │   │   ├── MktReferralForm.jsx
+    │   │   ├── MktReferralForm.module.css
+    │   │   ├── MktReferralList.jsx
+    │   │   ├── MktReferralList.module.css
+    │   │   ├── layout.jsx
+    │   │   ├── mktReferralService.js
+    │   │   └── page.jsx
+    │   ├── neon.js
+    │   ├── nhif
+    │   │   ├── NhifCard.jsx
+    │   │   ├── NhifCard.module.css
+    │   │   ├── NhifForm.jsx
+    │   │   ├── NhifForm.module.css
+    │   │   ├── NhifList.jsx
+    │   │   ├── NhifList.module.css
+    │   │   ├── layout.jsx
+    │   │   ├── nhifService.js
+    │   │   └── page.jsx
+    │   ├── nursing
+    │   │   ├── NursingCard.jsx
+    │   │   ├── NursingCard.module.css
+    │   │   ├── NursingForm.jsx
+    │   │   ├── NursingForm.module.css
+    │   │   ├── NursingList.jsx
+    │   │   ├── NursingList.module.css
+    │   │   ├── layout.jsx
+    │   │   ├── nursingService.js
+    │   │   └── page.jsx
+    │   ├── operation-theatre
+    │   │   ├── OperationTheatreCard.jsx
+    │   │   ├── OperationTheatreCard.module.css
+    │   │   ├── OperationTheatreForm.jsx
+    │   │   ├── OperationTheatreForm.module.css
+    │   │   ├── OperationTheatreList.jsx
+    │   │   ├── OperationTheatreList.module.css
+    │   │   ├── layout.jsx
+    │   │   ├── operationTheatreService.js
+    │   │   └── page.jsx
+    │   ├── page.jsx
+    │   ├── patient
+    │   │   ├── PatientCard.jsx
+    │   │   ├── PatientCard.module.css
+    │   │   ├── PatientForm.jsx
+    │   │   ├── PatientForm.module.css
+    │   │   ├── PatientList.jsx
+    │   │   ├── PatientList.module.css
+    │   │   ├── layout.jsx
+    │   │   ├── page.jsx
+    │   │   └── patientService.js
+    │   ├── pharmacy
+    │   │   ├── PharmacyCard.jsx
+    │   │   ├── PharmacyCard.module.css
+    │   │   ├── PharmacyForm.jsx
+    │   │   ├── PharmacyForm.module.css
+    │   │   ├── PharmacyList.jsx
+    │   │   ├── PharmacyList.module.css
+    │   │   ├── layout.jsx
+    │   │   ├── page.jsx
+    │   │   └── pharmacyService.js
+    │   ├── procurement
+    │   │   ├── ProcurementCard.jsx
+    │   │   ├── ProcurementCard.module.css
+    │   │   ├── ProcurementForm.jsx
+    │   │   ├── ProcurementForm.module.css
+    │   │   ├── ProcurementList.jsx
+    │   │   ├── ProcurementList.module.css
+    │   │   ├── layout.jsx
+    │   │   ├── page.jsx
+    │   │   └── procurementService.js
+    │   ├── queue-mngmt
+    │   │   ├── QueueCard.jsx
+    │   │   ├── QueueCard.module.css
+    │   │   ├── QueueForm.jsx
+    │   │   ├── QueueForm.module.css
+    │   │   ├── QueueList.jsx
+    │   │   ├── QueueList.module.css
+    │   │   ├── layout.jsx
+    │   │   ├── page.jsx
+    │   │   └── queueService.js
+    │   ├── radiology
+    │   │   ├── RadiologyCard.jsx
+    │   │   ├── RadiologyCard.module.css
+    │   │   ├── RadiologyForm.jsx
+    │   │   ├── RadiologyForm.module.css
+    │   │   ├── RadiologyList.jsx
+    │   │   ├── RadiologyList.module.css
+    │   │   ├── layout.jsx
+    │   │   ├── page.jsx
+    │   │   └── radiologyService.js
+    │   ├── reports
+    │   │   ├── ReportCard.jsx
+    │   │   ├── ReportCard.module.css
+    │   │   ├── ReportGenerator.jsx
+    │   │   ├── ReportGenerator.module.css
+    │   │   ├── ReportList.jsx
+    │   │   ├── ReportList.module.css
+    │   │   ├── layout.jsx
+    │   │   ├── page.jsx
+    │   │   └── reportService.js
+    │   ├── settings
+    │   │   ├── SettingsCard.jsx
+    │   │   ├── SettingsCard.module.css
+    │   │   ├── SettingsForm.jsx
+    │   │   ├── SettingsForm.module.css
+    │   │   ├── SettingsList.jsx
+    │   │   ├── SettingsList.module.css
+    │   │   ├── layout.jsx
+    │   │   ├── page.jsx
+    │   │   └── settingsService.js
+    │   ├── social-service
+    │   │   ├── SocialServiceCard.jsx
+    │   │   ├── SocialServiceCard.module.css
+    │   │   ├── SocialServiceForm.jsx
+    │   │   ├── SocialServiceForm.module.css
+    │   │   ├── SocialServiceList.jsx
+    │   │   ├── SocialServiceList.module.css
+    │   │   ├── layout.jsx
+    │   │   ├── page.jsx
+    │   │   └── socialServiceService.js
+    │   ├── substore
+    │   │   ├── SubstoreCard.jsx
+    │   │   ├── SubstoreCard.module.css
+    │   │   ├── SubstoreForm.jsx
+    │   │   ├── SubstoreForm.module.css
+    │   │   ├── SubstoreList.jsx
+    │   │   ├── SubstoreList.module.css
+    │   │   ├── layout.jsx
+    │   │   ├── page.jsx
+    │   │   └── substoreService.js
+    │   ├── system-admin
+    │   │   ├── SystemAdminCard.jsx
+    │   │   ├── SystemAdminCard.module.css
+    │   │   ├── SystemAdminForm.jsx
+    │   │   ├── SystemAdminForm.module.css
+    │   │   ├── SystemAdminList.jsx
+    │   │   ├── SystemAdminList.module.css
+    │   │   ├── layout.jsx
+    │   │   ├── page.jsx
+    │   │   └── systemAdminService.js
+    │   ├── tailwind.css
+    │   ├── useApi.js
+    │   ├── useAuth.js
+    │   ├── useTheme.js
+    │   ├── useToast.js
+    │   ├── utilities
+    │   │   ├── UtilitiesCard.jsx
+    │   │   ├── UtilitiesCard.module.css
+    │   │   ├── UtilitiesForm.jsx
+    │   │   ├── UtilitiesForm.module.css
+    │   │   ├── UtilitiesList.jsx
+    │   │   ├── UtilitiesList.module.css
+    │   │   ├── layout.jsx
+    │   │   ├── page.jsx
+    │   │   └── utilitiesService.js
+    │   ├── utils.js
+    │   ├── vaccination
+    │   │   ├── VaccinationCard.jsx
+    │   │   ├── VaccinationCard.module.css
+    │   │   ├── VaccinationForm.jsx
+    │   │   ├── VaccinationForm.module.css
+    │   │   ├── VaccinationList.jsx
+    │   │   ├── VaccinationList.module.css
+    │   │   ├── layout.jsx
+    │   │   ├── page.jsx
+    │   │   └── vaccinationService.js
+    │   └── verification
+    │       ├── VerificationCard.jsx
+    │       ├── VerificationCard.module.css
+    │       ├── VerificationForm.jsx
+    │       ├── VerificationForm.module.css
+    │       ├── VerificationList.jsx
+    │       ├── VerificationList.module.css
+    │       ├── layout.jsx
+    │       ├── page.jsx
+    │       └── verificationService.js
+    ├── deployment.md
+    ├── docker-compose.yml
+    ├── jest.config.js
+    ├── next.config.js
+    ├── package.json
+    ├── prisma
+    │   ├── migrations
+    │   └── schema.prisma
+    ├── public
+    │   ├── favicon.ico
+    │   ├── images
+    │   │   ├── accounting.svg
+    │   │   ├── adt.svg
+    │   │   ├── appointment.svg
+    │   │   ├── billing.svg
+    │   │   ├── claim-mgmt.svg
+    │   │   ├── clinical.svg
+    │   │   ├── cssd.svg
+    │   │   ├── dashboard.svg
+    │   │   ├── dispensary.svg
+    │   │   ├── doctor.svg
+    │   │   ├── dynamic-report.svg
+    │   │   ├── emergency.svg
+    │   │   ├── fixed-assets.svg
+    │   │   ├── helpdesk.svg
+    │   │   ├── incentive.svg
+    │   │   ├── inventory.svg
+    │   │   ├── laboratory.svg
+    │   │   ├── maternity.svg
+    │   │   ├── medical-records.svg
+    │   │   ├── mkt-referral.svg
+    │   │   ├── nhif.svg
+    │   │   ├── nursing.svg
+    │   │   ├── operation-theatre.svg
+    │   │   ├── patient.svg
+    │   │   ├── pharmacy.svg
+    │   │   ├── placeholder.jpg
+    │   │   ├── procurement.svg
+    │   │   ├── queue.svg
+    │   │   ├── radiology.svg
+    │   │   ├── settings.svg
+    │   │   ├── social-service.svg
+    │   │   ├── substore.svg
+    │   │   ├── system-admin.svg
+    │   │   ├── utilities.svg
+    │   │   ├── vaccination.svg
+    │   │   └── verification.svg
+    │   └── logo.png
+    ├── setup.md
+    ├── tests
+    │   ├── Footer.test.jsx
+    │   ├── Header.test.jsx
+    │   ├── Sidebar.test.jsx
+    │   ├── appointment.test.js
+    │   ├── auth.test.js
+    │   ├── patient.test.js
+    │   └── utils.test.js
+    └── tsconfig.json
