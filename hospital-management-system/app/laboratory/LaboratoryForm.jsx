@@ -1,3 +1,6 @@
+"use client";
+
+
 // laboratory/LaboratoryForm.jsx
 import React, { useState } from 'react';
 import styles from './LaboratoryForm.module.css';
