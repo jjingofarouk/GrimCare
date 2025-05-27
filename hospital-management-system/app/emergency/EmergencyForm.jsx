@@ -1,4 +1,6 @@
 // emergency/EmergencyForm.jsx
+"use client" ;
+
 import React, { useState } from 'react';
 import styles from './EmergencyForm.module.css';
 import { createEmergency } from './emergencyService';
