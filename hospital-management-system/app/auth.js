@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { useRouter } from 'next/navigation';
 
@@ -12,7 +11,7 @@ export const getUser = () => {
 };
 
 export const requireAuth = (WrappedComponent) => {
-  return (props) => {
+  const AuthenticatedComponent = (props) => {
     const router = useRouter();
     
     if (!isAuthenticated()) {
@@ -22,4 +21,9 @@ export const requireAuth = (WrappedComponent) => {
     
     return <WrappedComponent {...props} />;
   };
+
+  // Set a display name for the anonymous component
+  AuthenticatedComponent.displayName = `RequireAuth(${WrappedComponent.displayName || WrappedComponent.name || 'Component'})`;
+
+  return AuthenticatedComponent;
 };
