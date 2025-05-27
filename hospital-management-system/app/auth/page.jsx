@@ -1,7 +1,7 @@
 "use client";
 
 import LoginForm from './LoginForm';
-import RegisterForm from './components/RegisterForm';
+import RegisterForm from './RegisterForm';
 
 export default function AuthPage() {
   return (
