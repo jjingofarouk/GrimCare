@@ -3,40 +3,21 @@ import { NextResponse } from 'next/server';
 
 const prisma = new PrismaClient();
 
-export async function GET(request, { params }) {
+export async function GET() {
   try {
-    const utilityRecord = await prisma.utilityRecord.findUnique({
-      where: { id: parseInt(params.id) },
-    });
-    if (!utilityRecord) {
-      return NextResponse.json({ error: 'Utility record not found' }, { status: 404 });
-    }
-    return NextResponse.json(utilityRecord);
+    const utilityRecords = await prisma.utilityRecord.findMany();
+    return NextResponse.json(utilityRecords);
   } catch (error) {
-    return NextResponse.json({ error: 'Failed to fetch utility record' }, { status: 500 });
+    return NextResponse.json({ error: 'Failed to fetch utility records' }, { status: 500 });
   }
 }
 
-export async function PUT(request, { params }) {
+export async function POST(request) {
   try {
     const data = await request.json();
-    const utilityRecord = await prisma.utilityRecord.update({
-      where: { id: parseInt(params.id) },
-      data,
-    });
-    return NextResponse.json(utilityRecord);
+    const utilityRecord = await prisma.utilityRecord.create({ data });
+    return NextResponse.json(utilityRecord, { status: 201 });
   } catch (error) {
-    return NextResponse.json({ error: 'Failed to update utility record' }, { status: 500 });
-  }
-}
-
-export async function DELETE(request, { params }) {
-  try {
-    await prisma.utilityRecord.delete({
-      where: { id: parseInt(params.id) },
-    });
-    return NextResponse.json({ message: 'Utility record deleted' });
-  } catch (error) {
-    return NextResponse.json({ error: 'Failed to delete utility record' }, { status: 500 });
+    return NextResponse.json({ error: 'Failed to create utility record' }, { status: 500 });
   }
 }
