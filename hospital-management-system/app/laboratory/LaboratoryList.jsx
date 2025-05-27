@@ -1,3 +1,6 @@
+
+"use client";
+
 // laboratory/LaboratoryList.jsx
 import React, { useEffect, useState } from 'react';
 import styles from './LaboratoryList.module.css';
