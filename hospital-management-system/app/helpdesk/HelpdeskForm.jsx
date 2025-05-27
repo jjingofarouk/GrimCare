@@ -1,3 +1,6 @@
+
+"use client";
+
 // helpdesk/HelpdeskForm.jsx
 import React, { useState } from 'react';
 import styles from './HelpdeskForm.module.css';
