@@ -1,8 +1,14 @@
-"use client";
+'use client';
 
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
-import { HomeIcon, UserIcon, CalendarIcon, CalculatorIcon, CogIcon } from '@heroicons/react/24/outline';
+import { usePathname } from 'next/navigation';
+import {
+  HomeIcon,
+  UserIcon,
+  CalendarIcon,
+  CalculatorIcon,
+  CogIcon,
+} from '@heroicons/react/24/outline';
 import styles from './Sidebar.module.css';
 
 const navItems = [
@@ -14,7 +20,7 @@ const navItems = [
 ];
 
 export default function Sidebar() {
-  const router = useRouter();
+  const pathname = usePathname();
 
   return (
     <aside className={styles.sidebar}>
@@ -23,16 +29,14 @@ export default function Sidebar() {
       </div>
       <nav className={styles.nav}>
         <ul className={styles.navList}>
-          {navItems.map((item) => (
-            <li key={item.path}>
+          {navItems.map(({ name, path, icon: Icon }) => (
+            <li key={path}>
               <Link
-                href={item.path}
-                className={`${styles.navLink} ${
-                  router.pathname === item.path ? styles.active : ''
-                }`}
+                href={path}
+                className={`${styles.navLink} ${pathname === path ? styles.active : ''}`}
               >
-                <item.icon className={styles.icon} />
-                <span>{item.name}</span>
+                <Icon className={styles.icon} />
+                <span>{name}</span>
               </Link>
             </li>
           ))}
