@@ -1,0 +1,6 @@
+/* radiology/RadiologyList.module.css */
+.list {
+  display: grid;
+  gap: 16px;
+  padding: 16px;
+}
