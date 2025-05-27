@@ -41,4 +41,4 @@ const API_ROUTES = {
 
 const BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000';
 
-export { API_ROUTES, BASE_URL };
+export default { API_ROUTES, BASE_URL };
