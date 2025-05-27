@@ -1,3 +1,5 @@
+"use client";
+
 import { useState, useEffect } from 'react';
 import AccountingCard from './AccountingCard';
 import styles from './AccountingList.module.css';
