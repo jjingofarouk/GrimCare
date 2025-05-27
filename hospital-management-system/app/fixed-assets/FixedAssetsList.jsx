@@ -1,3 +1,5 @@
+"use client";
+
 // fixed-assets/FixedAssetsList.jsx
 import React, { useEffect, useState } from 'react';
 import styles from './FixedAssetsList.module.css';
