@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from 'react';
-import { UserCircleIcon, BellIcon, MenuIcon } from '@heroicons/react/24/outline';
+import { UserCircleIcon, BellIcon, Bars3Icon } from '@heroicons/react/24/outline';
 import styles from './Header.module.css';
 import Link from 'next/link';
 
@@ -12,7 +12,7 @@ export default function Header() {
     <header className={styles.header}>
       <div className={styles.container}>
         <div className={styles.left}>
-          <MenuIcon className={styles.icon} />
+          <Bars3Icon className={styles.icon} />
           <h1 className={styles.title}>Hospital Management System</h1>
         </div>
         <div className={styles.right}>
