@@ -28,6 +28,8 @@ export async function PUT(request, { params }) {
   } catch (error) {
     return NextResponse.json({ error: 'Failed to update verification record' }, { status: 500 });
   }
+}
+
 export async function DELETE(request, { params }) {
   try {
     await prisma.verificationRecord.delete({
