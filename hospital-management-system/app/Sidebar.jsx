@@ -1,29 +1,39 @@
 import Link from 'next/link';
-import { HomeIcon, UserIcon, CalendarIcon } from '@heroicons/react/24/outline';
+import { useRouter } from 'next/router';
+import { HomeIcon, UserIcon, CalendarIcon, CalculatorIcon, CogIcon } from '@heroicons/react/24/outline';
+import styles from './Sidebar.module.css';
+
+const navItems = [
+  { name: 'Dashboard', path: '/', icon: HomeIcon },
+  { name: 'Patients', path: '/patient', icon: UserIcon },
+  { name: 'Appointments', path: '/appointment', icon: CalendarIcon },
+  { name: 'Accounting', path: '/accounting', icon: CalculatorIcon },
+  { name: 'Settings', path: '/settings', icon: CogIcon },
+];
 
 export default function Sidebar() {
+  const router = useRouter();
+
   return (
-    <aside className="bg-secondary text-white w-64 min-h-screen p-4">
-      <nav>
-        <ul className="space-y-2">
-          <li>
-            <Link href="/" className="flex items-center space-x-2 p-2 hover:bg-gray-700 rounded">
-              <HomeIcon className="h-6 w-6" />
-              <span>Dashboard</span>
-            </Link>
-          </li>
-          <li>
-            <Link href="/patient" className="flex items-center space-x-2 p-2 hover:bg-gray-700 rounded">
-              <UserIcon className="h-6 w-6" />
-              <span>Patients</span>
-            </Link>
-          </li>
-          <li>
-            <Link href="/appointment" className="flex items-center space-x-2 p-2 hover:bg-gray-700 rounded">
-              <CalendarIcon className="h-6 w-6" />
-              <span>Appointments</span>
-            </Link>
-          </li>
+    <aside className={styles.sidebar}>
+      <div className={styles.logo}>
+        <img src="/logo.png" alt="HMS Logo" className={styles.logoImage} />
+      </div>
+      <nav className={styles.nav}>
+        <ul className={styles.navList}>
+          {navItems.map((item) => (
+            <li key={item.path}>
+              <Link
+                href={item.path}
+                className={`${styles.navLink} ${
+                  router.pathname === item.path ? styles.active : ''
+                }`}
+              >
+                <item.icon className={styles.icon} />
+                <span>{item.name}</span>
+              </Link>
+            </li>
+          ))}
         </ul>
       </nav>
     </aside>
