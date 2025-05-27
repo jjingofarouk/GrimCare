@@ -1,3 +1,4 @@
+import React from 'react';
 import AccountingForm from './AccountingForm';
 import AccountingList from './AccountingList';
 
