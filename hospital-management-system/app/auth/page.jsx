@@ -1,7 +1,7 @@
 import LoginForm from './LoginForm';
 import RegisterForm from './components/RegisterForm';
 
-export default AuthPage() {
+export default function AuthPage() {
   return (
     <div>
       <h2 className="text-2xl font-bold mb-4 text-center">Welcome</h2>
