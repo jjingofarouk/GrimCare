@@ -1,3 +1,5 @@
+"use client";
+
 // inventory/InventoryForm.jsx
 import React, { useState } from 'react';
 import styles from './InventoryForm.module.css';
