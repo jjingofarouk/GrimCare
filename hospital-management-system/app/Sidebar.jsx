@@ -1,3 +1,5 @@
+"use client";
+
 import Link from 'next/link';
 import { useRouter } from 'next/router';
 import { HomeIcon, UserIcon, CalendarIcon, CalculatorIcon, CogIcon } from '@heroicons/react/24/outline';
