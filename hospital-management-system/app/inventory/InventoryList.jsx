@@ -1,3 +1,5 @@
+
+"use client";
 // inventory/InventoryList.jsx
 import React, { useEffect, useState } from 'react';
 import styles from './InventoryList.module.css';
