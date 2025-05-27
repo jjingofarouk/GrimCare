@@ -1,3 +1,4 @@
+"use client"; 
 // emergency/EmergencyList.jsx
 import React, { useEffect, useState } from 'react';
 import styles from './EmergencyList.module.css';
