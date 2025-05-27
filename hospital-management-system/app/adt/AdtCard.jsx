@@ -1,3 +1,4 @@
+import React from 'react';
 import styles from './AdtCard.module.css';
 
 export default function AdtCard({ admission }) {
