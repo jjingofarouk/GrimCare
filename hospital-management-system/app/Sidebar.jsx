@@ -1,7 +1,7 @@
 "use client";
 
 import Link from 'next/link';
-import { useRouter } from 'next/router';
+import { useRouter } from 'next/navigation';
 import { HomeIcon, UserIcon, CalendarIcon, CalculatorIcon, CogIcon } from '@heroicons/react/24/outline';
 import styles from './Sidebar.module.css';
 
