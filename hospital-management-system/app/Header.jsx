@@ -1,3 +1,5 @@
+"use client";
+
 import { useState } from 'react';
 import { UserCircleIcon, BellIcon, MenuIcon } from '@heroicons/react/24/outline';
 import styles from './Header.module.css';
