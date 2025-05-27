@@ -1,0 +1,11 @@
+.widget {
+  @apply bg-white p-4 rounded-lg shadow-md;
+}
+
+.title {
+  @apply text-lg font-semibold mb-2;
+}
+
+.value {
+  @apply text-2xl font-bold;
+}
