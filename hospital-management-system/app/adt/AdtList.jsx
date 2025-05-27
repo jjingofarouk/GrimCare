@@ -1,5 +1,6 @@
 "use client";
 
+import React from 'react';
 import { useState, useEffect } from 'react';
 import AdtCard from './AdtCard';
 import styles from './AdtList.module.css';
