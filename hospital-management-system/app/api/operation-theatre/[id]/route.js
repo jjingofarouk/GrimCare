@@ -25,7 +25,7 @@ export async function PUT(request, { params }) {
       data,
     });
     return NextResponse.json(operationRecord);
-  } ttch (error) {
+  } catch (error) {
     return NextResponse.json({ error: 'Failed to update operation record' }, { status: 500 });
   }
 }
