@@ -1,6 +1,6 @@
-"use client";
+'use client';
 
-import { useState } from 'react';
+import React, { useState } from 'react';
 import { UserCircleIcon, BellIcon, Bars3Icon } from '@heroicons/react/24/outline';
 import styles from './Header.module.css';
 import Link from 'next/link';
