@@ -1,3 +1,5 @@
+"use client";
+
 // fixed-assets/FixedAssetsForm.jsx
 import React, { useState } from 'react';
 import styles from './FixedAssetsForm.module.css';
