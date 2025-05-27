@@ -1,5 +1,7 @@
 "use client" ;
 
+import React from 'react';
+
 import { useState, useEffect } from 'react';
 import styles from './AppointmentList.module.css';
 import AppointmentCard from './AppointmentCard';
