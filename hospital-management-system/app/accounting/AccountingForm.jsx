@@ -1,5 +1,6 @@
 "use client";
 
+import React from 'react';
 import { useState } from 'react';
 import styles from './AccountingForm.module.css';
 import { createTransaction } from './accountingService';
