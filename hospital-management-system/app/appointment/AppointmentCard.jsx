@@ -1,3 +1,4 @@
+import React from 'react';
 import styles from './AppointmentCard.module.css';
 
 export default function AppointmentCard({ appointment }) {
