@@ -1,10 +1,24 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
-
+/* globals.css */
 body {
-  font-family: 'Inter', sans-serif;
   margin: 0;
-  padding: 0;
-  box-sizing: border-box;
+  font-family: Inter, sans-serif;
+}
+
+.layout-container {
+  display: flex;
+  margin-top: 48px;
+  min-height: calc(100vh - 48px);
+}
+
+.main-content {
+  margin-left: 0;
+  padding: 1.5rem;
+  flex-grow: 1;
+  transition: margin-left 0.3s ease;
+}
+
+@media (max-width: 768px) {
+  .main-content {
+    padding: 1rem;
+  }
 }
