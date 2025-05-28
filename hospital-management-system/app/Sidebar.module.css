@@ -42,6 +42,19 @@
 .navItem {
   display: flex;
   flex-direction: column;
+  position: relative; /* Needed for pseudo-element positioning */
+}
+
+.navItem:not(:last-child)::after {
+  content: '';
+  display: block;
+  height: 1px;
+  background: linear-gradient(to right, transparent, rgba(209, 213, 219, 0.3), transparent); /* Subtle gradient separator */
+  margin: 0 1rem; /* Matches navLink padding for alignment */
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
 }
 
 .navLink {
@@ -137,5 +150,9 @@
   .subNavLink {
     padding: 0.5rem 1rem 0.5rem 2.5rem;
     font-size: 0.75rem;
+  }
+
+  .navItem:not(:last-child)::after {
+    margin: 0 0.5rem; /* Adjusted for smaller sidebar width */
   }
 }
