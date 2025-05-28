@@ -1,7 +1,6 @@
 'use client';
 import React, { useState } from 'react';
-import { Tabs, Tab, Box, Typography, Button } from '@mui/material';
-import { useRouter } from 'next/navigation';
+import { Tabs, Tab, Box, Typography } from '@mui/material'; // Removed Button
 import DoctorList from './DoctorList';
 import DoctorForm from './DoctorForm';
 import DoctorDetails from './DoctorDetails';
@@ -9,7 +8,6 @@ import DoctorDetails from './DoctorDetails';
 const DoctorPage = () => {
   const [tabValue, setTabValue] = useState(0);
   const [selectedDoctor, setSelectedDoctor] = useState(null);
-  const router = useRouter();
 
   const handleTabChange = (event, newValue) => {
     setTabValue(newValue);
