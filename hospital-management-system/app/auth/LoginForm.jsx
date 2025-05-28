@@ -1,54 +1,51 @@
-"use client" ;
-
-import React from 'react';
+'use client';
 import { useState } from 'react';
-import { useRouter } from 'next/navigation';
+import { useAuth } from '../useAuth';
 import styles from './LoginForm.module.css';
-import { login } from './authService';
 
 export default function LoginForm() {
-  const [formData, setFormData] = useState({ email: '', password: '' });
-  const [error, setError] = useState(null);
-  const router = useRouter();
-
-  const handleChange = (e) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
-  };
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [error, setError] = useState('');
+  const { login, loading } = useAuth();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setError('');
     try {
-      await login(formData);
-      router.push('/appointment');
+      await login(email, password);
     } catch (err) {
-      setError('Invalid credentials');
+      setError(err.message);
     }
   };
 
   return (
-    <form className={styles.form} onSubmit={handleSubmit}>
-      <div className={styles.field}>
-        <label>Email</label>
-        <input
-          type="email"
-          name="email"
-          value={formData.email}
-          onChange={handleChange}
-          required
-        />
-      </div>
-      <div className={styles.field}>
-        <label>Password</label>
-        <input
-          type="password"
-          name="password"
-          value={formData.password}
-          onChange={handleChange}
-          required
-        />
-      </div>
-      {error && <p className={styles.error}>{error}</p>}
-      <button type="submit" className={styles.button}>Login</button>
-    </form>
+    <div className={styles.container}>
+      <h2>Login</h2>
+      <form onSubmit={handleSubmit} className={styles.form}>
+        <div className={styles.field}>
+          <label>Email</label>
+          <input
+            type="email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            required
+          />
+        </div>
+        <div className={styles.field}>
+          <label>Password</label>
+          <input
+            type="password"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            required
+          />
+        </div>
+        {error && <p className={styles.error}>{error}</p>}
+        <button type="submit" className={styles.button} disabled={loading}>
+          {loading ? 'Logging in...' : 'Login'}
+        </button>
+      </form>
+    </div>
   );
 }
