@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from 'react';
+import { Container, Paper, Tabs, Tab, Box, Typography, MenuItem, Select, FormControl } from '@mui/material';
 import AppointmentList from './AppointmentList';
 import AppointmentForm from './AppointmentForm';
 import AppointmentConfirmation from './AppointmentConfirmation';
@@ -51,99 +52,105 @@ export default function AppointmentPage() {
     setSearchQuery(query);
   };
 
+  const handleTabChange = (event, newValue) => {
+    setActiveTab(newValue);
+  };
+
   return (
-    <div className={styles.container}>
+    <Container maxWidth="xl" className={styles.container}>
+      <Typography variant="h4" gutterBottom className={styles.title}>
+        Appointment Management
+      </Typography>
       <NotificationBanner />
-      <div className={styles.tabsContainer}>
-        <div className={styles.tabs}>
-          <button
-            className={`${styles.tab} ${activeTab === 'form' ? styles.active : ''}`}
-            onClick={() => setActiveTab('form')}
+      <Paper elevation={3} className={styles.paper}>
+        <Box className={styles.tabsWrapper}>
+          <Tabs
+            value={activeTab}
+            onChange={handleTabChange}
+            variant="scrollable"
+            scrollButtons="auto"
+            className={styles.tabs}
+            sx={{
+              '& .MuiTabs-flexContainer': {
+                flexWrap: 'nowrap',
+              },
+              '& .MuiTab-root': {
+                minWidth: { xs: 100, sm: 120 },
+                fontSize: { xs: '0.8rem', sm: '0.875rem' },
+              },
+            }}
           >
-            Book
-          </button>
-          <button
-            className={`${styles.tab} ${activeTab === 'list' ? styles.active : ''}`}
-            onClick={() => setActiveTab('list')}
-          >
-            List
-          </button>
-          <button
-            className={`${styles.tab} ${activeTab === 'history' ? styles.active : ''}`}
-            onClick={() => setActiveTab('history')}
-          >
-            History
-          </button>
-          <button
-            className={`${styles.tab} ${activeTab === 'schedule' ? styles.active : ''}`}
-            onClick={() => setActiveTab('schedule')}
-          >
-            Schedule
-          </button>
-        </div>
-      </div>
-      <div className={styles.content}>
-        {activeTab === 'form' && (
-          <AppointmentForm
-            patients={patients}
-            doctors={doctors}
-            onSuccess={handleSuccess}
-            appointment={selectedAppointment}
-          />
-        )}
-        {activeTab === 'list' && (
-          <>
-            <SearchBar onSearch={handleSearch} />
-            <AppointmentList
-              key={refreshKey}
-              onEdit={handleEdit}
-              searchQuery={searchQuery}
+            <Tab label="Book" value="form" />
+            <Tab label="List" value="list" />
+            <Tab label="History" value="history" />
+            <Tab label="Schedule" value="schedule" />
+          </Tabs>
+        </Box>
+        <Box className={styles.content}>
+          {activeTab === 'form' && (
+            <AppointmentForm
+              patients={patients}
+              doctors={doctors}
+              onSuccess={handleSuccess}
+              appointment={selectedAppointment}
             />
-          </>
-        )}
-        {activeTab === 'history' && (
-          <div>
-            <select
-              onChange={(e) => setActiveTab(`history-${e.target.value}`)}
-              className={styles.select}
-            >
-              <option value="">Select Patient</option>
-              {patients.map((patient) => (
-                <option key={patient.id} value={patient.id}>
-                  {patient.name}
-                </option>
-              ))}
-            </select>
-          </div>
-        )}
-        {activeTab.startsWith('history-') && (
-          <AppointmentHistory patientId={activeTab.split('-')[1]} />
-        )}
-        {activeTab === 'schedule' && (
-          <div>
-            <select
-              onChange={(e) => setActiveTab(`schedule-${e.target.value}`)}
-              className={styles.select}
-            >
-              <option value="">Select Doctor</option>
-              {doctors.map((doctor) => (
-                <option key={doctor.id} value={doctor.id}>
-                  {doctor.name}
-                </option>
-              ))}
-            </select>
-          </div>
-        )}
-        {activeTab.startsWith('schedule-') && (
-          <DoctorSchedule doctorId={activeTab.split('-')[1]} />
-        )}
-      </div>
+          )}
+          {activeTab === 'list' && (
+            <>
+              <SearchBar onSearch={handleSearch} />
+              <AppointmentList
+                key={refreshKey}
+                onEdit={handleEdit}
+                searchQuery={searchQuery}
+              />
+            </>
+          )}
+          {activeTab === 'history' && (
+            <FormControl fullWidth className={styles.select}>
+              <Select
+                value=""
+                onChange={(e) => setActiveTab(`history-${e.target.value}`)}
+                displayEmpty
+              >
+                <MenuItem value="">Select Patient</MenuItem>
+                {patients.map((patient) => (
+                  <MenuItem key={patient.id} value={patient.id}>
+                    {patient.name}
+                  </MenuItem>
+                ))}
+              </Select>
+            </FormControl>
+          )}
+          {activeTab.startsWith('history-') && (
+            <AppointmentHistory patientId={activeTab.split('-')[1]} />
+          )}
+          {activeTab === 'schedule' && (
+            <FormControl fullWidth className={styles.select}>
+              <Select
+                value=""
+                onChange={(e) => setActiveTab(`schedule-${e.target.value}`)}
+                displayEmpty
+              >
+                <MenuItem value="">Select Doctor</MenuItem>
+                {doctors.map((doctor) => (
+                  <MenuItem key={doctor.id} value={doctor.id}>
+                    {doctor.name}
+                  </MenuItem>
+                ))}
+              </Select>
+            </FormControl>
+          )}
+          {activeTab.startsWith('schedule-') && (
+            <DoctorSchedule doctorId={activeTab.split('-')[1]} />
+          )}
+        </Box>
+      </Paper>
       {showConfirmation && (
         <AppointmentConfirmation
           appointment={showConfirmation}
           onClose={() => setShowConfirmation(null)}
         />
       )}
-    </div>
+    </Container>
   );
 }
