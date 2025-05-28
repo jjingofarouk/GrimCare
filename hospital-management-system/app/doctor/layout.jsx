@@ -1,12 +1,22 @@
 import React from 'react';
+import { Outlet } from 'react-router-dom';
+import { AppBar, Toolbar, Typography, Container, Box } from '@mui/material';
 
-export default function DoctorLayout({ children }) {
+const DoctorLayout = () => {
   return (
-    <div className="min-h-screen bg-gray-100">
-      <header className="bg-blue-500 text-white p-4">
-        <h1 className="text-2xl font-bold">Doctor Management</h1>
-      </header>
-      <main className="p-4">{children}</main>
-    </div>
+    <Box sx={{ minHeight: '100vh', bgcolor: 'grey.100' }}>
+      <AppBar position="static" color="primary">
+        <Toolbar>
+          <Typography variant="h6" sx={{ fontWeight: 'bold' }}>
+            Doctor Management - Uganda Health System
+          </Typography>
+        </Toolbar>
+      </AppBar>
+      <Container sx={{ mt: 4, p: 2 }}>
+        <Outlet />
+      </Container>
+    </Box>
   );
-}
+};
+
+export default DoctorLayout;
