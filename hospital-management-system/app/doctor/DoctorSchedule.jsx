@@ -1,21 +1,17 @@
 'use client';
-import React from 'react';
-import { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useParams } from 'next/navigation';
 import { Table, TableBody, TableCell, TableHead, TableRow, Paper, Button, Box } from '@mui/material';
 import * as doctorService from './doctorService';
 import ScheduleForm from './ScheduleForm';
 
 const DoctorSchedule = () => {
-  const params = useParams();
-  const doctorId = params?.doctorId;
-
+  const { doctorId } = useParams();
   const [schedules, setSchedules] = useState([]);
   const [openForm, setOpenForm] = useState(false);
 
   useEffect(() => {
     const fetchSchedule = async () => {
-      if (!doctorId) return;
       const data = await doctorService.getDoctorSchedule(doctorId);
       setSchedules(data);
     };
@@ -24,7 +20,7 @@ const DoctorSchedule = () => {
 
   const handleAddSchedule = async (schedule) => {
     const newSchedule = await doctorService.createSchedule({ ...schedule, doctorId });
-    setSchedules((prev) => [...prev, newSchedule]);
+    setSchedules([...schedules, newSchedule]);
     setOpenForm(false);
   };
 
@@ -33,11 +29,7 @@ const DoctorSchedule = () => {
       <Button variant="contained" onClick={() => setOpenForm(true)} sx={{ mb: 2 }}>
         Add Schedule
       </Button>
-
-      {openForm && (
-        <ScheduleForm onSave={handleAddSchedule} onCancel={() => setOpenForm(false)} />
-      )}
-
+      {openForm && <ScheduleForm onSave={handleAddSchedule} onCancel={() => setOpenForm(false)} />}
       <Paper>
         <Table>
           <TableHead>
