@@ -1,6 +1,16 @@
-// clinical/ClinicalForm.jsx
-'use client';
+"use client";
+
 import React, { useState, useEffect } from 'react';
+import {
+  Box,
+  Button,
+  FormControl,
+  InputLabel,
+  MenuItem,
+  Select,
+  TextField,
+  Typography,
+} from '@mui/material';
 import styles from './ClinicalForm.module.css';
 
 export default function ClinicalForm({ patients, onSuccess, patientType }) {
@@ -56,148 +66,169 @@ export default function ClinicalForm({ patients, onSuccess, patientType }) {
   };
 
   return (
-    <form className={styles.form} onSubmit={handleSubmit}>
-      <div className={styles.field}>
-        <label>Patient</label>
-        <select name="patientId" value={formData.patientId} onChange={handleChange} required>
-          <option value="">Select Patient</option>
+    <Box component="form" className={styles.form} onSubmit={handleSubmit}>
+      <FormControl fullWidth className={styles.field}>
+        <InputLabel>Patient</InputLabel>
+        <Select
+          name="patientId"
+          value={formData.patientId}
+          onChange={handleChange}
+          required
+        >
+          <MenuItem value="">Select Patient</MenuItem>
           {patients.map((patient) => (
-            <option key={patient.id} value={patient.id}>
+            <MenuItem key={patient.id} value={patient.id}>
               {patient.name}
-            </option>
+            </MenuItem>
           ))}
-        </select>
-      </div>
-      <div className={styles.field}>
-        <label>Diagnosis</label>
-        <input
-          type="text"
-          name="diagnosis"
-          value={formData.diagnosis}
-          onChange={handleChange}
-          required
-        />
-      </div>
-      <div className={styles.field}>
-        <label>Treatment</label>
-        <textarea
-          name="treatment"
-          value={formData.treatment}
-          onChange={handleChange}
-          required
-        />
-      </div>
+        </Select>
+      </FormControl>
+      <TextField
+        label="Diagnosis"
+        name="diagnosis"
+        value={formData.diagnosis}
+        onChange={handleChange}
+        required
+        fullWidth
+        className={styles.field}
+      />
+      <TextField
+        label="Treatment"
+        name="treatment"
+        value={formData.treatment}
+        onChange={handleChange}
+        required
+        fullWidth
+        multiline
+        rows={4}
+        className={styles.field}
+      />
       {patientType === 'emergency' && (
-        <div className={styles.field}>
-          <label>Triage Status</label>
-          <select name="triageStatus" value={formData.triageStatus} onChange={handleChange} required>
-            <option value="">Select Triage Status</option>
-            <option value="critical">Critical</option>
-            <option value="emergency">Emergency</option>
-            <option value="urgent">Urgent</option>
-            <option value="semi-urgent">Semi-Urgent</option>
-            <option value="non-urgent">Non-Urgent</option>
-          </select>
-        </div>
+        <FormControl fullWidth className={styles.field}>
+          <InputLabel>Triage Status</InputLabel>
+          <Select
+            name="triageStatus"
+            value={formData.triageStatus}
+            onChange={handleChange}
+            required
+          >
+            <MenuItem value="">Select Triage Status</MenuItem>
+            <MenuItem value="critical">Critical</MenuItem>
+            <MenuItem value="emergency">Emergency</MenuItem>
+            <MenuItem value="urgent">Urgent</MenuItem>
+            <MenuItem value="semi-urgent">Semi-Urgent</MenuItem>
+            <MenuItem value="non-urgent">Non-Urgent</MenuItem>
+          </Select>
+        </FormControl>
       )}
       {patientType === 'inpatient' && (
         <>
-          <div className={styles.field}>
-            <label>Admission Date</label>
-            <input
-              type="date"
-              name="admissionDate"
-              value={formData.admissionDate}
+          <TextField
+            label="Admission Date"
+            name="admissionDate"
+            type="date"
+            value={formData.admissionDate}
+            onChange={handleChange}
+            required
+            fullWidth
+            className={styles.field}
+            InputLabelProps={{ shrink: true }}
+          />
+          <TextField
+            label="IP Number"
+            name="ipNumber"
+            value={formData.ipNumber}
+            onChange={handleChange}
+            required
+            fullWidth
+            className={styles.field}
+          />
+          <TextField
+            label="Department"
+            name="department"
+            value={formData.department}
+            onChange={handleChange}
+            required
+            fullWidth
+            className={styles.field}
+          />
+          <TextField
+            label="Admitting Doctor"
+            name="admittingDoctor"
+            value={formData.admittingDoctor}
+            onChange={handleChange}
+            required
+            fullWidth
+            className={styles.field}
+          />
+          <FormControl fullWidth className={styles.field}>
+            <InputLabel>Status</InputLabel>
+            <Select
+              name="status"
+              value={formData.status}
               onChange={handleChange}
               required
-            />
-          </div>
-          <div className={styles.field}>
-            <label>IP Number</label>
-            <input
-              type="text"
-              name="ipNumber"
-              value={formData.ipNumber}
-              onChange={handleChange}
-              required
-            />
-          </div>
-          <div className={styles.field}>
-            <label>Department</label>
-            <input
-              type="text"
-              name="department"
-              value={formData.department}
-              onChange={handleChange}
-              required
-            />
-          </div>
-          <div className={styles.field}>
-            <label>Admitting Doctor</label>
-            <input
-              type="text"
-              name="admittingDoctor"
-              value={formData.admittingDoctor}
-              onChange={handleChange}
-              required
-            />
-          </div>
-          <div className={styles.field}>
-            <label>Status</label>
-            <select name="status" value={formData.status} onChange={handleChange} required>
-              <option value="active">Active</option>
-              <option value="admitted">Admitted</option>
-              <option value="discharged">Discharged</option>
-            </select>
-          </div>
+            >
+              <MenuItem value="active">Active</MenuItem>
+              <MenuItem value="admitted">Admitted</MenuItem>
+              <MenuItem value="discharged">Discharged</MenuItem>
+            </Select>
+          </FormControl>
           {formData.status === 'discharged' && (
             <>
-              <div className={styles.field}>
-                <label>Discharge Date</label>
-                <input
-                  type="date"
-                  name="dischargeDate"
-                  value={formData.dischargeDate}
-                  onChange={handleChange}
-                  required
-                />
-              </div>
-              <div className={styles.field}>
-                <label>Discharging Doctor</label>
-                <input
-                  type="text"
-                  name="dischargingDoctor"
-                  value={formData.dischargingDoctor}
-                  onChange={handleChange}
-                  required
-                />
-              </div>
+              <TextField
+                label="Discharge Date"
+                name="dischargeDate"
+                type="date"
+                value={formData.dischargeDate}
+                onChange={handleChange}
+                required
+                fullWidth
+                className={styles.field}
+                InputLabelProps={{ shrink: true }}
+              />
+              <TextField
+                label="Discharging Doctor"
+                name="dischargingDoctor"
+                value={formData.dischargingDoctor}
+                onChange={handleChange}
+                required
+                fullWidth
+                className={styles.field}
+              />
             </>
           )}
         </>
       )}
       {(patientType === 'emergency' || patientType === 'outpatient') && (
-        <div className={styles.field}>
-          <label>Assigned Doctor</label>
-          <input
-            type="text"
-            name="assignedDoctor"
-            value={formData.assignedDoctor}
-            onChange={handleChange}
-            required
-          />
-        </div>
-      )}
-      <div className={styles.field}>
-        <label>Recent Results</label>
-        <textarea
-          name="recentResults"
-          value={formData.recentResults}
+        <TextField
+          label="Assigned Doctor"
+          name="assignedDoctor"
+          value={formData.assignedDoctor}
           onChange={handleChange}
+          required
+          fullWidth
+          className={styles.field}
         />
-      </div>
-      {error && <p className={styles.error}>{error}</p>}
-      <button type="submit" className={styles.button}>Create Record</button>
-    </form>
+      )}
+      <TextField
+        label="Recent Results"
+        name="recentResults"
+        value={formData.recentResults}
+        onChange={handleChange}
+        fullWidth
+        multiline
+        rows={4}
+        className={styles.field}
+      />
+      {error && (
+        <Typography color="error" className={styles.error}>
+          {error}
+        </Typography>
+      )}
+      <Button type="submit" variant="contained" className={styles.button}>
+        Create Record
+      </Button>
+    </Box>
   );
 }
