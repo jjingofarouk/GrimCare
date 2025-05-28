@@ -1,13 +1,18 @@
 'use client';
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { Box, Typography, Tabs, Tab, Paper, Table, TableBody, TableCell, TableHead, TableRow, Button, TextField, MenuItem, Autocomplete } from '@mui/material';
+import { Box, Typography, Tabs, Tab, Paper, Table, TableBody, TableCell, TableHead, TableRow, Button, TextField, MenuItem, Avatar } from '@mui/material';
 import * as doctorService from './doctorService';
 import ScheduleForm from './ScheduleForm';
 import PrescriptionForm from './PrescriptionForm';
 import CaseNoteForm from './CaseNoteForm';
 import DiagnosticOrderForm from './DiagnosticOrderForm';
 import LeaveRequestForm from './LeaveRequestForm';
+
+const mockPatients = [
+  { id: 1, name: 'John Doe', type: 'Inpatient', ward: 'Ward A', recordId: '1' },
+  { id: 2, name: 'Jane Smith', type: 'Outpatient', recordId: '2' },
+];
 
 const DoctorDetails = () => {
   const { doctorId } = useParams();
@@ -190,7 +195,7 @@ const DoctorDetails = () => {
               <TableBody>
                 {appointments.map((appt) => (
                   <TableRow key={appt.id}>
-                    <TableCell>{mockPatients.find((p) => p.id === appt.patientId)?.name}</TableCell>
+                    <TableCell>{mockPatients.find((p) => p.id === appt.patientId)?.name || 'Unknown'}</TableCell>
                     <TableCell>{appt.date}</TableCell>
                     <TableCell>{appt.time}</TableCell>
                     <TableCell>{appt.status}</TableCell>
@@ -232,7 +237,7 @@ const DoctorDetails = () => {
               <TableBody>
                 {prescriptions.map((prescription) => (
                   <TableRow key={prescription.id}>
-                    <TableCell>{mockPatients.find((p) => p.id === prescription.patientId)?.name}</TableCell>
+                    <TableCell>{mockPatients.find((p) => p.id === prescription.patientId)?.name || 'Unknown'}</TableCell>
                     <TableCell>{prescription.drugs.join(', ')}</TableCell>
                     <TableCell>{prescription.date}</TableCell>
                     <TableCell>{prescription.notes}</TableCell>
@@ -262,7 +267,7 @@ const DoctorDetails = () => {
               <TableBody>
                 {caseNotes.map((note) => (
                   <TableRow key={note.id}>
-                    <TableCell>{mockPatients.find((p) => p.id === note.patientId)?.name}</TableCell>
+                    <TableCell>{mockPatients.find((p) => p.id === note.patientId)?.name || 'Unknown'}</TableCell>
                     <TableCell>{note.note}</TableCell>
                     <TableCell>{note.visibility}</TableCell>
                     <TableCell>{note.date}</TableCell>
@@ -292,7 +297,7 @@ const DoctorDetails = () => {
               <TableBody>
                 {diagnosticOrders.map((order) => (
                   <TableRow key={order.id}>
-                    <TableCell>{mockPatients.find((p) => p.id === order.patientId)?.name}</TableCell>
+                    <TableCell>{mockPatients.find((p) => p.id === order.patientId)?.name || 'Unknown'}</TableCell>
                     <TableCell>{order.test}</TableCell>
                     <TableCell>{order.status}</TableCell>
                     <TableCell>{order.date}</TableCell>
