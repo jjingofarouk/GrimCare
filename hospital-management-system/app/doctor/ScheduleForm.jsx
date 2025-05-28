@@ -1,3 +1,4 @@
+'use client';
 import React, { useState } from 'react';
 import { TextField, Button, Box, MenuItem } from '@mui/material';
 
@@ -39,8 +40,12 @@ const ScheduleForm = ({ onSave, onCancel }) => {
         onChange={handleChange}
         fullWidth
         margin="normal"
-        required
-      />
+        select
+      >
+        {['08:00-11:00', '11:00-14:00', '14:00-17:00', '17:00-20:00', '20:00-23:00'].map((option) => (
+          <MenuItem key={option} value={option}>{option}</MenuItem>
+        ))}
+      </TextField>
       <TextField
         label="Type"
         name="type"
@@ -50,7 +55,7 @@ const ScheduleForm = ({ onSave, onCancel }) => {
         margin="normal"
         select
       >
-        {['Consultation', 'Surgery', 'Rounds', 'Meeting'].map((option) => (
+        {['Consultation', 'Surgery', 'Rounds', 'On-Call', 'Meeting'].map((option) => (
           <MenuItem key={option} value={option}>{option}</MenuItem>
         ))}
       </TextField>
@@ -63,7 +68,7 @@ const ScheduleForm = ({ onSave, onCancel }) => {
         margin="normal"
         select
       >
-        {['Ward A', 'Ward B', 'Ward C', 'ICU', 'OR 1', 'OR 2'].map((option) => (
+        {['Ward A', 'Ward B', 'Ward C', 'ICU', 'Theatre 1', 'Theatre 2', 'OPD Clinic'].map((option) => (
           <MenuItem key={option} value={option}>{option}</MenuItem>
         ))}
       </TextField>
