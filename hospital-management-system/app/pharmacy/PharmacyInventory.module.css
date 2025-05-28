@@ -1,0 +1,18 @@
+/* pharmacy/PharmacyInventory.module.css */
+.container {
+  padding: 20px;
+}
+
+.searchBar {
+  margin-bottom: 20px;
+}
+
+.grid {
+  background: #fff;
+}
+
+@media (max-width: 600px) {
+  .container {
+    padding: 10px;
+  }
+}
