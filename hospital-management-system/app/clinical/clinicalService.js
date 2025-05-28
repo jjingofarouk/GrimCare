@@ -17,7 +17,10 @@ export async function createClinicalRecord(data) {
       'Content-Type': 'application/json',
       Authorization: `Bearer ${localStorage.getItem('token')}`,
     },
-    body: JSON.stringify(data),
+    body: JSON.stringify({
+      ...data,
+      createdAt: new Date().toISOString(),
+    }),
   });
   if (!response.ok) throw new Error('Failed to create clinical record');
   return response.json();
