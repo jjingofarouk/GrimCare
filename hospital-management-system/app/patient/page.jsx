@@ -11,7 +11,6 @@ import { getPatients } from './patientService';
 import styles from './PatientPage.module.css';
 
 export default function PatientPage() {
-  const [patients, setPatients] = useState([]);
   const [selectedPatient, setSelectedPatient] = useState(null);
   const [activeTab, setActiveTab] = useState('form');
   const [searchQuery, setSearchQuery] = useState('');
