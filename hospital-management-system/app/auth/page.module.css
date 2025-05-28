@@ -1,0 +1,31 @@
+
+.container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  background-color: #f8f9fa;
+  padding: 1rem;
+}
+
+.title {
+  font-size: 2rem;
+  font-weight: bold;
+  margin-bottom: 1.5rem;
+  color: #333;
+}
+
+.toggleButton {
+  margin-top: 1rem;
+  background: none;
+  border: none;
+  color: #0070f3;
+  font-size: 1rem;
+  cursor: pointer;
+  text-decoration: underline;
+}
+
+.toggleButton:hover {
+  color: #005bb5;
+}
