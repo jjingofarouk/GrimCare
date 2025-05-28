@@ -1,3 +1,4 @@
+"use client";
 import React from 'react';
 import AdtForm from './AdtForm';
 import AdtList from './AdtList';
