@@ -1,25 +1,25 @@
-'use client';
+"use client";
 
-import React, { useState } from 'react';
-import './globals.css';
-import Header from './Header';
-import Sidebar from './Sidebar';
+import { useState } from "react";
+import Header from "./Header";
+import Sidebar from "./Sidebar";
+import "./globals.css";
 
 export default function RootLayout({ children }) {
-  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const [isSidebarOpen, setSidebarOpen] = useState(false);
 
   const toggleSidebar = () => {
-    setIsSidebarOpen(!isSidebarOpen);
+    setSidebarOpen(!isSidebarOpen);
   };
 
   return (
     <html lang="en">
-      <body className="antialiased bg-white text-black flex">
+      <body>
+        <Header toggleSidebar={toggleSidebar} />
         <Sidebar isOpen={isSidebarOpen} toggleSidebar={toggleSidebar} />
-        <div className="flex flex-col flex-1">
-          <Header toggleSidebar={toggleSidebar} />
-          <main className="main-content">{children}</main>
-        </div>
+        <main style={{ marginLeft: isSidebarOpen ? "250px" : "0", transition: "margin-left 0.3s ease-in-out" }}>
+          {children}
+        </main>
       </body>
     </html>
   );
