@@ -4,10 +4,11 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
-    "build": "next build",
+    "build": "prisma generate && next build",
     "start": "next start",
     "lint": "next lint",
-    "test": "jest"
+    "test": "jest",
+    "prepare": "echo 'Ready to commit hooks (if using Husky)'"
   },
   "dependencies": {
     "@emotion/react": "^11.11.4",
