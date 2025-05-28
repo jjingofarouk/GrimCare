@@ -1,19 +1,23 @@
+'use client';
 import React, { useState, useEffect } from 'react';
-import { TextField, Button, Box, MenuItem, FormControlLabel, Switch } from '@mui/material';
+import { TextField, Button, Box, MenuItem, FormControlLabel, Switch, Input } from '@mui/material';
 import styles from './DoctorForm.module.css';
 import * as doctorService from './doctorService';
 
 const DoctorForm = ({ doctor, onSave, onCancel }) => {
   const [formData, setFormData] = useState({
     name: '',
+    photo: '',
     specialty: '',
     department: '',
     ward: '',
     email: '',
     phone: '',
-    availability: true,
+    designation: '',
     qualifications: '',
     experience: '',
+    availabilityStatus: 'Available',
+    hospital: 'Mulago National Referral Hospital',
   });
 
   useEffect(() => {
@@ -27,8 +31,15 @@ const DoctorForm = ({ doctor, onSave, onCancel }) => {
     setFormData({ ...formData, [name]: value });
   };
 
-  const handleSwitchChange = (e) => {
-    setFormData({ ...formData, availability: e.target.checked });
+  const handleFileChange = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setFormData({ ...formData, photo: reader.result });
+      };
+      reader.readAsDataURL(file);
+    }
   };
 
   const handleSubmit = async (e) => {
@@ -45,13 +56,20 @@ const DoctorForm = ({ doctor, onSave, onCancel }) => {
     <Box component="form" className={styles.form} onSubmit={handleSubmit}>
       <TextField
         label="Name"
- strolled="true"
         name="name"
         value={formData.name}
         onChange={handleChange}
         fullWidth
         margin="normal"
         required
+      />
+      <Input
+        type="file"
+        name="photo"
+        onChange={handleFileChange}
+        fullWidth
+        inputProps={{ accept: 'image/*' }}
+        sx={{ mt: 2 }}
       />
       <TextField
         label="Specialty"
@@ -62,7 +80,7 @@ const DoctorForm = ({ doctor, onSave, onCancel }) => {
         margin="normal"
         select
       >
-        {['Cardiology', 'Neurology', 'Pediatrics', 'Orthopedics', 'General Medicine'].map((option) => (
+        {['Cardiology', 'Pediatrics', 'Orthopedics', 'Neurology', 'General Medicine'].map((option) => (
           <MenuItem key={option} value={option}>{option}</MenuItem>
         ))}
       </TextField>
@@ -75,7 +93,7 @@ const DoctorForm = ({ doctor, onSave, onCancel }) => {
         margin="normal"
         select
       >
-        {['Cardiology Dept', 'Neurology Dept', 'Pediatrics Dept', 'Orthopedics Dept', 'General Ward'].map((option) => (
+        {['Cardiology Unit', 'Pediatrics Unit', 'Orthopedics Unit', 'Neurology Unit', 'General Ward'].map((option) => (
           <MenuItem key={option} value={option}>{option}</MenuItem>
         ))}
       </TextField>
@@ -89,6 +107,19 @@ const DoctorForm = ({ doctor, onSave, onCancel }) => {
         select
       >
         {['Ward A', 'Ward B', 'Ward C', 'ICU', 'Emergency'].map((option) => (
+          <MenuItem key={option} value={option}>{option}</MenuItem>
+        ))}
+      </TextField>
+      <TextField
+        label="Designation"
+        name="designation"
+        value={formData.designation}
+        onChange={handleChange}
+        fullWidth
+        margin="normal"
+        select
+      >
+        {['Consultant', 'Registrar', 'Senior Medical Officer', 'Medical Officer'].map((option) => (
           <MenuItem key={option} value={option}>{option}</MenuItem>
         ))}
       </TextField>
@@ -129,10 +160,19 @@ const DoctorForm = ({ doctor, onSave, onCancel }) => {
         margin="normal"
         type="number"
       />
-      <FormControlLabel
-        control={<Switch checked={formData.availability} onChange={handleSwitchChange} />}
-        label="Available"
-      />
+      <TextField
+        label="Availability Status"
+        name="availabilityStatus"
+        value={formData.availabilityStatus}
+        onChange={handleChange}
+        fullWidth
+        margin="normal"
+        select
+      >
+        {['Available', 'On Leave', 'On Duty', 'In Surgery', 'In Consultation'].map((option) => (
+          <MenuItem key={option} value={option}>{option}</MenuItem>
+        ))}
+      </TextField>
       <Box mt={2} display="flex" gap={2}>
         <Button type="submit" variant="contained" color="primary">
           {doctor ? 'Update' : 'Add'} Doctor
