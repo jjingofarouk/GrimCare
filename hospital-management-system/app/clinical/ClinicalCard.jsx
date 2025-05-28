@@ -1,7 +1,7 @@
+"use client";
 
-// clinical/ClinicalCard.jsx
-'use client';
 import React from 'react';
+import { Card, CardContent, Typography, Box } from '@mui/material';
 import styles from './ClinicalCard.module.css';
 
 export default function ClinicalCard({ record }) {
@@ -28,33 +28,99 @@ export default function ClinicalCard({ record }) {
   const formattedDischargeDate = dischargeDate ? new Date(dischargeDate).toLocaleDateString() : '-';
 
   return (
-    <div className={styles.card}>
-      <h3 className={styles.title}>Clinical Record #{id}</h3>
-      <p><strong>Patient:</strong> {patient.name} (Age: {patient.age}, Sex: {patient.gender})</p>
-      <p><strong>Patient Type:</strong> {patientType.charAt(0).toUpperCase() + patientType.slice(1)}</p>
-      <p><strong>Diagnosis:</strong> {diagnosis}</p>
-      <p><strong>Treatment:</strong> {treatment}</p>
-      {patientType === 'emergency' && <p><strong>Triage Status:</strong> {triageStatus || '-'}</p>}
-      {patientType === 'inpatient' && (
-        <>
-          <p><strong>IP Number:</strong> {ipNumber || '-'}</p>
-          <p><strong>Department:</strong> {department || '-'}</p>
-          <p><strong>Admission Date:</strong> {formattedAdmissionDate}</p>
-          <p><strong>Admitting Doctor:</strong> {admittingDoctor || '-'}</p>
-          <p><strong>Status:</strong> {status.charAt(0).toUpperCase() + status.slice(1)}</p>
-          {status === 'discharged' && (
-            <>
-              <p><strong>Discharge Date:</strong> {formattedDischargeDate}</p>
-              <p><strong>Discharging Doctor:</strong> {dischargingDoctor || '-'}</p>
-            </>
-          )}
-        </>
-      )}
-      {(patientType === 'emergency' || patientType === 'outpatient') && (
-        <p><strong>Assigned Doctor:</strong> {assignedDoctor || '-'}</p>
-      )}
-      <p><strong>Recent Results:</strong> {recentResults || '-'}</p>
-      <p><strong>Created:</strong> {formattedDate}</p>
-    </div>
+    <Card className={styles.card}>
+      <CardContent>
+        <Typography variant="h6" className={styles.title}>
+          Clinical Record #{id}
+        </Typography>
+        <Box className={styles.field}>
+          <Typography>
+            <strong>Patient:</strong> {patient.name} (Age: {patient.age}, Sex: {patient.gender})
+          </Typography>
+        </Box>
+        <Box className={styles.field}>
+          <Typography>
+            <strong>Patient Type:</strong> {patientType.charAt(0).toUpperCase() + patientType.slice(1)}
+          </Typography>
+        </Box>
+        <Box className={styles.field}>
+          <Typography>
+            <strong>Diagnosis:</strong> {diagnosis}
+          </Typography>
+        </Box>
+        <Box className={styles.field}>
+          <Typography>
+            <strong>Treatment:</strong> {treatment}
+          </Typography>
+        </Box>
+        {patientType === 'emergency' && (
+          <Box className={styles.field}>
+            <Typography>
+              <strong>Triage Status:</strong> {triageStatus || '-'}
+            </Typography>
+          </Box>
+        )}
+        {patientType === 'inpatient' && (
+          <>
+            <Box className={styles.field}>
+              <Typography>
+                <strong>IP Number:</strong> {ipNumber || '-'}
+              </Typography>
+            </Box>
+            <Box className={styles.field}>
+              <Typography>
+                <strong>Department:</strong> {department || '-'}
+              </Typography>
+            </Box>
+            <Box className={styles.field}>
+              <Typography>
+                <strong>Admission Date:</strong> {formattedAdmissionDate}
+              </Typography>
+            </Box>
+            <Box className={styles.field}>
+              <Typography>
+                <strong>Admitting Doctor:</strong> {admittingDoctor || '-'}
+              </Typography>
+            </Box>
+            <Box className={styles.field}>
+              <Typography>
+                <strong>Status:</strong> {status.charAt(0).toUpperCase() + status.slice(1)}
+              </Typography>
+            </Box>
+            {status === 'discharged' && (
+              <>
+                <Box className={styles.field}>
+                  <Typography>
+                    <strong>Discharge Date:</strong> {formattedDischargeDate}
+                  </Typography>
+                </Box>
+                <Box className={styles.field}>
+                  <Typography>
+                    <strong>Discharging Doctor:</strong> {dischargingDoctor || '-'}
+                  </Typography>
+                </Box>
+              </>
+            )}
+          </>
+        )}
+        {(patientType === 'emergency' || patientType === 'outpatient') && (
+          <Box className={styles.field}>
+            <Typography>
+              <strong>Assigned Doctor:</strong> {assignedDoctor || '-'}
+            </Typography>
+          </Box>
+        )}
+        <Box className={styles.field}>
+          <Typography>
+            <strong>Recent Results:</strong> {recentResults || '-'}
+          </Typography>
+        </Box>
+        <Box className={styles.field}>
+          <Typography>
+            <strong>Created:</strong> {formattedDate}
+          </Typography>
+        </Box>
+      </CardContent>
+    </Card>
   );
 }
