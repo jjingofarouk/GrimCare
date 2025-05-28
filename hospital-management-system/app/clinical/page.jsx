@@ -2,7 +2,7 @@
 // clinical/ClinicalPage.jsx
 'use client';
 import React, { useState, useEffect } from 'react';
-import OutpatientRecords from './OutpatientRecords';
+import OutPatientRecords from './OutPatientRecords';
 import InpatientRecords from './InpatientRecords';
 import EmergencyRecords from './EmergencyRecords';
 import { getPatients } from '../patient/patientService';
