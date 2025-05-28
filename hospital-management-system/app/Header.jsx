@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
-import { UserCircleIcon, BellIcon, Bars3Icon, CogIcon, DocumentTextIcon, ShieldCheckIcon } from '@heroicons/react/24/outline';
+import { UserCircleIcon, BellIcon, Bars3Icon } from '@heroicons/react/24/outline';
 import Link from 'next/link';
 import styles from './Header.module.css';
 
@@ -13,7 +13,7 @@ export default function Header() {
       <div className={styles.container}>
         <div className={styles.left}>
           <Bars3Icon className={styles.icon} />
-          <h1 className={styles.title}>Hospital Management System</h1>
+          <h1 className={styles.title}>HMS</h1>
         </div>
         <div className={styles.right}>
           <BellIcon className={styles.icon} />
