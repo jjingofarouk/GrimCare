@@ -1,5 +1,5 @@
 // appointmentService.js
-import { API_ROUTES, BASE_URL } from '../api';
+//import { API_ROUTES, BASE_URL } from '../api';
 
 const dummyAppointments = [
   { id: 1, patient: { id: 1, name: "Aisha Nakato" }, doctor: { id: 1, name: "Dr. Musa Kiggundu" }, date: "2025-06-01T09:00:00Z", status: "SCHEDULED", reason: "Consultation", notes: "Fever and headache" },
