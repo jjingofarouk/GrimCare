@@ -1,17 +1,17 @@
+// app/Header.jsx (Revised)
 "use client";
 
 import React from "react";
 import { UserCircleIcon, BellIcon, Bars3Icon } from "@heroicons/react/24/outline";
 import Link from "next/link";
-import { useAuth } from "../useAuth";
-import { hasPermission } from "../auth";
+import { useAuth } from "./useAuth";
+import { hasPermission } from "./auth";
 import styles from "./Header.module.css";
 
 export default function Header({ toggleSidebar }) {
   const { user, logout } = useAuth();
-  const [isProfileOpen, setIsProfileOpen] = React.useState(false);
+  const [isProfileOpen, setProfileOpen] = React.useState(false);
 
-  // Define dropdown items with their required permissions
   const dropdownItems = [
     { name: "Profile", path: "/profile", permission: "Profile" },
     { name: "Settings", path: "/settings", permission: "Settings" },
@@ -33,7 +33,7 @@ export default function Header({ toggleSidebar }) {
           {user && (
             <div className={styles.profile}>
               <button
-                onClick={() => setIsProfileOpen(!isProfileOpen)}
+                onClick={() => setProfileOpen(!isProfileOpen)}
                 className={styles.profileButton}
               >
                 <UserCircleIcon className={styles.icon} />
@@ -50,7 +50,7 @@ export default function Header({ toggleSidebar }) {
                         key={path}
                         href={path}
                         className={styles.dropdownItem}
-                        onClick={() => setIsProfileOpen(false)}
+                        onClick={() => setProfileOpen(false)}
                       >
                         {name}
                       </Link>
@@ -59,7 +59,7 @@ export default function Header({ toggleSidebar }) {
                     className={styles.dropdownItem}
                     onClick={() => {
                       logout();
-                      setIsProfileOpen(false);
+                      setProfileOpen(false);
                     }}
                   >
                     Logout
@@ -72,4 +72,4 @@ export default function Header({ toggleSidebar }) {
       </div>
     </header>
   );
-}
+};
