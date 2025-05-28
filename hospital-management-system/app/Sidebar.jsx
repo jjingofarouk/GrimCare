@@ -66,11 +66,11 @@ const navItems = [
   { name: 'Settings', path: '/settings', icon: CogIcon },
 ];
 
-export default function Sidebar() {
+export default function Sidebar({ isOpen, toggleSidebar }) {
   const pathname = usePathname();
 
   return (
-    <aside className={styles.sidebar}>
+    <aside className={`${styles.sidebar} ${isOpen ? styles.open : ''}`}>
       <div className={styles.logo}>
         <img src="/logo.png" alt="HMS Logo" className={styles.logoImage} />
       </div>
@@ -81,6 +81,7 @@ export default function Sidebar() {
               <Link
                 href={path}
                 className={`${styles.navLink} ${pathname === path ? styles.active : ''}`}
+                onClick={toggleSidebar}
               >
                 <Icon className={styles.icon} />
                 <span>{name}</span>
