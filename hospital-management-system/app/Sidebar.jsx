@@ -26,18 +26,59 @@ import {
   UserPlusIcon,
   CubeIcon,
   WrenchScrewdriverIcon,
+  ChevronDownIcon,
 } from '@heroicons/react/24/outline';
 import styles from './Sidebar.module.css';
 
 const navItems = [
   { name: 'Dashboard', path: '/', icon: HomeIcon },
-  { name: 'Patients', path: '/patient', icon: UserIcon },
-  { name: 'Appointments', path: '/appointment', icon: CalendarIcon },
-  { name: 'Accounting', path: '/accounting', icon: CalculatorIcon },
+  {
+    name: 'Patients',
+    path: '/patient',
+    icon: UserIcon,
+    subItems: [
+      { name: 'Patient Records', path: '/patient/records' },
+      { name: 'Patient Admissions', path: '/patient/admissions' },
+    ],
+  },
+  {
+    name: 'Appointments',
+    path: '/appointment',
+    icon: CalendarIcon,
+    subItems: [
+      { name: 'Schedule', path: '/appointment/schedule' },
+      { name: 'Bookings', path: '/appointment/bookings' },
+    ],
+  },
+  {
+    name: 'Accounting',
+    path: '/accounting',
+    icon: CalculatorIcon,
+    subItems: [
+      { name: 'Ledger', path: '/accounting/ledger' },
+      { name: 'Reports', path: '/accounting/reports' },
+    ],
+  },
   { name: 'ADT', path: '/adt', icon: DocumentTextIcon },
-  { name: 'Billing', path: '/billing', icon: CurrencyDollarIcon },
+  {
+    name: 'Billing',
+    path: '/billing',
+    icon: CurrencyDollarIcon,
+    subItems: [
+      { name: 'Invoices', path: '/billing/invoices' },
+      { name: 'Payments', path: '/billing/payments' },
+    ],
+  },
   { name: 'Claim Management', path: '/claim-mgmt', icon: ShieldCheckIcon },
-  { name: 'Clinical', path: '/clinical', icon: BeakerIcon },
+  {
+    name: 'Clinical',
+    path: '/clinical',
+    icon: BeakerIcon,
+    subItems: [
+      { name: 'Patient Charts', path: '/clinical/charts' },
+      { name: 'Treatment Plans', path: '/clinical/plans' },
+    ],
+  },
   { name: 'CSSD', path: '/cssd', icon: TruckIcon },
   { name: 'Dispensary', path: '/dispensary', icon: BuildingStorefrontIcon },
   { name: 'Doctor', path: '/doctor', icon: UserCircleIcon },
@@ -45,7 +86,15 @@ const navItems = [
   { name: 'Fixed Assets', path: '/fixed-assets', icon: ArchiveBoxIcon },
   { name: 'Helpdesk', path: '/helpdesk', icon: WrenchScrewdriverIcon },
   { name: 'Incentive', path: '/incentive', icon: BanknotesIcon },
-  { name: 'Inventory', path: '/inventory', icon: CubeIcon },
+  {
+    name: 'Inventory',
+    path: '/inventory',
+    icon: CubeIcon,
+    subItems: [
+      { name: 'Stock', path: '/inventory/stock' },
+      { name: 'Supplies', path: '/inventory/supplies' },
+    ],
+  },
   { name: 'Laboratory', path: '/laboratory', icon: BeakerIcon },
   { name: 'Maternity', path: '/maternity', icon: HeartIcon },
   { name: 'Medical Records', path: '/medical-records', icon: DocumentMagnifyingGlassIcon },
@@ -68,6 +117,14 @@ const navItems = [
 
 export default function Sidebar({ isOpen, toggleSidebar }) {
   const pathname = usePathname();
+  const [openSubMenus, setOpenSubMenus] = React.useState({});
+
+  const toggleSubMenu = (name) => {
+    setOpenSubMenus((prev) => ({
+      ...prev,
+      [name]: !prev[name],
+    }));
+  };
 
   return (
     <aside className={`${styles.sidebar} ${isOpen ? styles.open : ''}`}>
@@ -76,16 +133,44 @@ export default function Sidebar({ isOpen, toggleSidebar }) {
       </div>
       <nav className={styles.nav}>
         <ul className={styles.navList}>
-          {navItems.map(({ name, path, icon: Icon }) => (
+          {navItems.map(({ name, path, icon: Icon, subItems }) => (
             <li key={path}>
-              <Link
-                href={path}
-                className={`${styles.navLink} ${pathname === path ? styles.active : ''}`}
-                onClick={toggleSidebar}
-              >
-                <Icon className={styles.icon} />
-                <span>{name}</span>
-              </Link>
+              <div className={styles.navItem}>
+                <Link
+                  href={path}
+                  className={`${styles.navLink} ${pathname === path ? styles.active : ''}`}
+                  onClick={() => {
+                    if (subItems) {
+                      toggleSubMenu(name);
+                    } else {
+                      toggleSidebar();
+                    }
+                  }}
+                >
+                  <Icon className={styles.icon} />
+                  <span>{name}</span>
+                  {subItems && (
+                    <ChevronDownIcon
+                      className={`${styles.chevron} ${openSubMenus[name] ? styles.rotate : ''}`}
+                    />
+                  )}
+                </Link>
+                {subItems && openSubMenus[name] && (
+                  <ul className={styles.subNavList}>
+                    {subItems.map((subItem) => (
+                      <li key={subItem.path}>
+                        <Link
+                          href={subItem.path}
+                          className={`${styles.subNavLink} ${pathname === subItem.path ? styles.active : ''}`}
+                          onClick={toggleSidebar}
+                        >
+                          <span>{subItem.name}</span>
+                        </Link>
+                      </li>
+                    ))}
+                  </ul>
+                )}
+              </div>
             </li>
           ))}
         </ul>
