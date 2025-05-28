@@ -8,7 +8,7 @@ import AppointmentCard from './AppointmentCard';
 import AppointmentFilter from './AppointmentFilter';
 import { getAppointments, updateAppointment } from './appointmentService';
 
-export default function AppointmentList({ onEdit }) {
+export default function AppointmentList({ onEdit, searchQuery }) {
   const [appointments, setAppointments] = useState([]);
   const [error, setError] = useState(null);
   const [filter, setFilter] = useState({ status: 'ALL', dateFrom: '', dateTo: '', doctorId: '', patientId: '' });
@@ -40,14 +40,18 @@ export default function AppointmentList({ onEdit }) {
     setFilter(newFilters);
   };
 
-  const filteredAppointments = appointments.filter((appt) => {
-    const matchesStatus = filter.status === 'ALL' || appt.status === filter.status;
-    const matchesDateFrom = !filter.dateFrom || new Date(appt.date) >= new Date(filter.dateFrom);
-    const matchesDateTo = !filter.dateTo || new Date(appt.date) <= new Date(filter.dateTo);
-    const matchesDoctor = !filter.doctorId || appt.doctor.id === filter.doctorId;
-    const matchesPatient = !filter.patientId || appt.patient.id === filter.patientId;
-    return matchesStatus && matchesDateFrom && matchesDateTo && matchesDoctor && matchesPatient;
-  });
+  const filteredAppointments = appointments
+    .filter((appt) => {
+      const matchesStatus = filter.status === 'ALL' || appt.status === filter.status;
+      const matchesDateFrom = !filter.dateFrom || new Date(appt.date) >= new Date(filter.dateFrom);
+      const matchesDateTo = !filter.dateTo || new Date(appt.date) <= new Date(filter.dateTo);
+      const matchesDoctor = !filter.doctorId || appt.doctor.id === filter.doctorId;
+      const matchesPatient = !filter.patientId || appt.patient.id === filter.patientId;
+      const matchesSearch = !searchQuery || 
+        appt.patient.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        appt.doctor.name.toLowerCase().includes(searchQuery.toLowerCase());
+      return matchesStatus && matchesDateFrom && matchesDateTo && matchesDoctor && matchesPatient && matchesSearch;
+    });
 
   return (
     <div className={styles.container}>
