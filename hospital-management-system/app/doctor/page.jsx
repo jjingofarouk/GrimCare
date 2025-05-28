@@ -1,6 +1,6 @@
 'use client';
 import React, { useState } from 'react';
-import { Tabs, Tab, Box, Typography } from '@mui/material'; // Removed Button
+import { Tabs, Tab, Box } from '@mui/material';
 import DoctorList from './DoctorList';
 import DoctorForm from './DoctorForm';
 import DoctorDetails from './DoctorDetails';
@@ -26,15 +26,13 @@ const DoctorPage = () => {
 
   return (
     <Box sx={{ p: 3 }}>
-      <Typography variant="h4" gutterBottom>
-        Doctor Management - Uganda Health System
-      </Typography>
       <Tabs 
         value={tabValue} 
         onChange={handleTabChange} 
-        sx={{ mb: 3 }} 
         variant="scrollable" 
-        scrollButtons="auto"
+        scrollButtons
+        allowScrollButtonsMobile
+        sx={{ mb: 3 }}
       >
         <Tab label="Doctor List" />
         <Tab label={selectedDoctor ? 'Edit Doctor' : 'Add Doctor'} />
