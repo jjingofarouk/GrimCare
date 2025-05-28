@@ -1,5 +1,5 @@
 'use client';
-
+import React from 'react';
 import { Card, CardContent, Typography, Chip, Avatar, Box, Button } from '@mui/material';
 import { useRouter } from 'next/navigation';
 import styles from './DoctorCard.module.css';
