@@ -1,6 +1,6 @@
 
 // AppointmentFilter.jsx
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import styles from './AppointmentFilter.module.css';
 
 export default function AppointmentFilter({ onFilter, patients = [], doctors = [] }) {
