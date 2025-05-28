@@ -89,11 +89,12 @@ export const searchPatients = async (query) => {
   );
 };
 
-export const getPatientHistory = async (patientId) => {
+export const getPatientHistory = async (id) => {
   await delay(300);
-  // Dummy patient history data
+  const patient = patientsDB.find((p) => p.id === id);
+  if (!patient) return [];
   return [
-    { date: '2025-01-10', note: 'Routine check-up, stable' },
-    { date: '2024-12-05', note: 'Treated for malaria' },
+    { date: '2025-01-10', note: `Routine check-up for ${patient.patientId}, stable` },
+    { date: '2024-12-05', note: `Treated ${patient.patientId} for malaria` },
   ];
 };
