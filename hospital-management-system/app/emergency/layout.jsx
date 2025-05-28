@@ -6,8 +6,6 @@ import Sidebar from '../Sidebar';
 const EmergencyLayout = ({ children }) => {
   return (
     <div>
-      <Navbar />
-      <Sidebar />
       <main>{children}</main>
     </div>
   );
