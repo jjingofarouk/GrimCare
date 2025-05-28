@@ -1,16 +1,14 @@
 // clinical/ClinicalForm.jsx
 'use client';
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import styles from './ClinicalForm.module.css';
-import { createClinicalRecord } from './clinicalService';
 
-export default function ClinicalForm({ patients, onSuccess }) {
+export default function ClinicalForm({ patients, onSuccess, patientType }) {
   const [formData, setFormData] = useState({
     patientId: '',
     diagnosis: '',
     treatment: '',
-    patientType: 'outpatient', // outpatient, inpatient, or emergency
-    triageStatus: '', // for ER: critical, emergency, urgent, semi-urgent, non-urgent
+    triageStatus: '',
     admissionDate: '',
     ipNumber: '',
     department: '',
@@ -19,9 +17,13 @@ export default function ClinicalForm({ patients, onSuccess }) {
     dischargingDoctor: '',
     assignedDoctor: '',
     recentResults: '',
-    status: 'active', // active, admitted, discharged
+    status: 'active',
   });
   const [error, setError] = useState(null);
+
+  useEffect(() => {
+    setFormData((prev) => ({ ...prev, patientType }));
+  }, [patientType]);
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -29,14 +31,13 @@ export default function ClinicalForm({ patients, onSuccess }) {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setError(null);
     try {
-      await createClinicalRecord(formData);
-      onSuccess();
+      await onSuccess(formData);
       setFormData({
         patientId: '',
         diagnosis: '',
         treatment: '',
-        patientType: 'outpatient',
         triageStatus: '',
         admissionDate: '',
         ipNumber: '',
@@ -47,9 +48,10 @@ export default function ClinicalForm({ patients, onSuccess }) {
         assignedDoctor: '',
         recentResults: '',
         status: 'active',
+        patientType,
       });
     } catch (err) {
-      setError('Failed to create clinical record');
+      setError('Failed to create record');
     }
   };
 
@@ -66,27 +68,6 @@ export default function ClinicalForm({ patients, onSuccess }) {
           ))}
         </select>
       </div>
-      <div className={styles.field}>
-        <label>Patient Type</label>
-        <select name="patientType" value={formData.patientType} onChange={handleChange} required>
-          <option value="outpatient">Outpatient</option>
-          <option value="inpatient">Inpatient</option>
-          <option value="emergency">Emergency</option>
-        </select>
-      </div>
-      {formData.patientType === 'emergency' && (
-        <div className={styles.field}>
-          <label>Triage Status</label>
-          <select name="triageStatus" value={formData.triageStatus} onChange={handleChange} required>
-            <option value="">Select Triage Status</option>
-            <option value="critical">Critical</option>
-            <option value="emergency">Emergency</option>
-            <option value="urgent">Urgent</option>
-            <option value="semi-urgent">Semi-Urgent</option>
-            <option value="non-urgent">Non-Urgent</option>
-          </select>
-        </div>
-      )}
       <div className={styles.field}>
         <label>Diagnosis</label>
         <input
@@ -106,7 +87,20 @@ export default function ClinicalForm({ patients, onSuccess }) {
           required
         />
       </div>
-      {formData.patientType === 'inpatient' && (
+      {patientType === 'emergency' && (
+        <div className={styles.field}>
+          <label>Triage Status</label>
+          <select name="triageStatus" value={formData.triageStatus} onChange={handleChange} required>
+            <option value="">Select Triage Status</option>
+            <option value="critical">Critical</option>
+            <option value="emergency">Emergency</option>
+            <option value="urgent">Urgent</option>
+            <option value="semi-urgent">Semi-Urgent</option>
+            <option value="non-urgent">Non-Urgent</option>
+          </select>
+        </div>
+      )}
+      {patientType === 'inpatient' && (
         <>
           <div className={styles.field}>
             <label>Admission Date</label>
@@ -182,7 +176,7 @@ export default function ClinicalForm({ patients, onSuccess }) {
           )}
         </>
       )}
-      {(formData.patientType === 'emergency' || formData.patientType === 'outpatient') && (
+      {(patientType === 'emergency' || patientType === 'outpatient') && (
         <div className={styles.field}>
           <label>Assigned Doctor</label>
           <input
@@ -203,9 +197,7 @@ export default function ClinicalForm({ patients, onSuccess }) {
         />
       </div>
       {error && <p className={styles.error}>{error}</p>}
-      <button type="submit" className={styles.button}>
-        Create Record
-      </button>
+      <button type="submit" className={styles.button}>Create Record</button>
     </form>
   );
 }
