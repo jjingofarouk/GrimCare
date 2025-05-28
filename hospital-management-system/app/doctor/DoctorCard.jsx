@@ -1,22 +1,59 @@
-'use client';
 import React from 'react';
+import { Card, CardContent, Typography, Chip, Avatar, Box, Button } from '@mui/material';
+import { useNavigate } from 'react-router-dom';
 import styles from './DoctorCard.module.css';
 
-export default function DoctorCard({ doctor }) {
-  const { id, name, specialty, phone } = doctor;
+const DoctorCard = ({ doctor, onEdit, onDelete }) => {
+  const navigate = useNavigate();
 
   return (
-    <div className={styles.card}>
-      <h3 className={styles.title}>Doctor #{id}</h3>
-      <p>
-        <strong>Name:</strong> {name}
-      </p>
-      <p>
-        <strong>Specialty:</strong> {specialty}
-      </p>
-      <p>
-        <strong>Phone:</strong> {phone || 'N/A'}
-      </p>
-    </div>
+    <Card className={styles.card}>
+      <CardContent>
+        <Box display="flex" alignItems="center" mb={2}>
+          <Avatar>{doctor.name[0]}</Avatar>
+          <Box ml={2}>
+            <Typography variant="h6">{doctor.name}</Typography>
+            <Typography variant="body2" color="textSecondary">{doctor.specialty}</Typography>
+          </Box>
+        </Box>
+        <Typography variant="body2"><strong>Department:</strong> {doctor.department}</Typography>
+        <Typography variant="body2"><strong>Ward:</strong> {doctor.ward}</Typography>
+        <Typography variant="body2"><strong>Email:</strong> {doctor.email}</Typography>
+        <Typography variant="body2"><strong>Phone:</strong> {doctor.phone}</Typography>
+        <Typography variant="body2"><strong>Status:</strong> 
+          <Chip 
+            label={doctor.availability ? 'Available' : 'Unavailable'} 
+            color={doctor.availability ? 'success' : 'error'} 
+            size="small"
+          />
+        </Typography>
+        <Box mt={2} display="flex" gap={1}>
+          <Button 
+            variant="outlined" 
+            size="small" 
+            onClick={() => onEdit(doctor)}
+          >
+            Edit
+          </Button>
+          <Button 
+            variant="outlined" 
+            color="error" 
+            size="small" 
+            onClick={() => onDelete(doctor.id)}
+          >
+            Delete
+          </Button>
+          <Button 
+            variant="contained" 
+            size="small" 
+            onClick={() => navigate(`/doctors/${doctor.id}/schedule`)}
+          >
+            View Schedule
+          </Button>
+        </Box>
+      </CardContent>
+    </Card>
   );
-}
+};
+
+export default DoctorCard;
