@@ -46,8 +46,8 @@ const navItems = [
     path: '/appointment',
     icon: CalendarIcon,
     subItems: [
-      { name: 'Schedule', path: '/appointment/schedule' },
-      { name: 'Bookings', path: '/appointment/bookings' },
+      { name: 'Schedule', path: '/appointment' },
+      { name: 'Bookings', path: '/appointment' },
     ],
   },
   {
