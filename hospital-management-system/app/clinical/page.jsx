@@ -49,7 +49,7 @@ export default function ClinicalPage() {
         </div>
       </div>
       <div className={styles.content}>
-        {activeTab === 'outpatient' && <OutpatientRecords patients={patients} />}
+        {activeTab === 'outpatient' && <OutPatientRecords patients={patients} />}
         {activeTab === 'inpatient' && <InpatientRecords patients={patients} />}
         {activeTab === 'emergency' && <EmergencyRecords patients={patients} />}
       </div>
