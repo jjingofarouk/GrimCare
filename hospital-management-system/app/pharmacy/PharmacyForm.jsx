@@ -1,78 +1,87 @@
 // pharmacy/PharmacyForm.jsx
-'use client';
 import React, { useState } from 'react';
+import { Box, Typography, TextField, Button, MenuItem } from '@mui/material';
+import { addMedication } from './pharmacyService';
 import styles from './PharmacyForm.module.css';
-import { createPrescription } from './pharmacyService';
 
 const PharmacyForm = () => {
   const [formData, setFormData] = useState({
-    patientName: '',
-    prescriptionId: '',
-    medication: '',
-    status: '',
-    date: '',
+    name: '',
+    category: '',
+    stock: 0,
+    price: 0,
+    expiry: '',
   });
 
   const handleChange = (e) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
+    const { name, value } = e.target;
+    setFormData(prev => ({ ...prev, [name]: value }));
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    try {
-      await createPrescription(formData);
-      alert('Prescription created');
-    } catch (error) {
-      alert('Error creating prescription');
-    }
+    await addMedication(formData);
+    setFormData({ name: '', category: '', stock: 0, price: 0, expiry: '' });
   };
 
   return (
-    <form className={styles.form} onSubmit={handleSubmit}>
-      <input
-        type="text"
-        name="patientName"
-        placeholder="Patient Name"
-        value={formData.patientName}
-        onChange={handleChange}
-        required
-      />
-      <input
-        type="text"
-        name="prescriptionId"
-        placeholder="Prescription ID"
-        value={formData.prescriptionId}
-        onChange={handleChange}
-        required
-      />
-      <input
-        type="text"
-        name="medication"
-        placeholder="Medication"
-        value={formData.medication}
-        onChange={handleChange}
-        required
-      />
-      <select
-        name="status"
-        value={formData.status}
-        onChange={handleChange}
-        required
-      >
-        <option value="">Select Status</option>
-        <option value="Filled">Filled</option>
-        <option value="Pending">Pending</option>
-        <option value="Cancelled">Cancelled</option>
-      </select>
-      <input
-        type="date"
-        name="date"
-        value={formData.date}
-        onChange={handleChange}
-        required
-      />
-      <button type="submit">Submit</button>
-    </form>
+    <Box className={styles.container}>
+      <Typography variant="h6" gutterBottom>Add New Medication</Typography>
+      <form onSubmit={handleSubmit} className={styles.form}>
+        <TextField
+          label="Medication Name"
+          name="name"
+          value={formData.name}
+          onChange={handleChange}
+          fullWidth
+          margin="normal"
+        />
+        <TextField
+          select
+          label="Category"
+          name="category"
+          value={formData.category}
+          onChange={handleChange}
+          fullWidth
+          margin="normal"
+        >
+          <MenuItem value="Analgesics">Analgesics</MenuItem>
+          <MenuItem value="Antibiotics">Antibiotics</MenuItem>
+          <MenuItem value="Antivirals">Antivirals</MenuItem>
+        </TextField>
+        <TextField
+          label="Stock"
+          name="stock"
+          type="number"
+          value={formData.stock}
+          onChange={handleChange}
+          fullWidth
+          margin="normal"
+        />
+        <TextField
+          label="Price"
+          name="price"
+          type="number"
+          value={formData.price}
+          onChange={handleChange}
+          fullWidth
+          margin="normal"
+        />
+        <TextField
+          label="Expiry Date"
+          name="expiry"
+          type="date"
+          value={formData.expiry}
+          onChange={handleChange}
+          fullWidth
+          margin="normal"
+          InputLabelProps={{ shrink: true }}
+        />
+        <Button type="submit" variant="contained">
+          Add Medication
+        </Button>
+      </form>
+    </Box>
   );
 };
 
