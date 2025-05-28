@@ -1,7 +1,5 @@
-
 "use client";
 
-// pharmacy/page.jsx
 import React, { useState } from 'react';
 import { Container, Grid, Paper, Tabs, Tab, Box, Typography } from '@mui/material';
 import PharmacyInventory from './PharmacyInventory';
@@ -25,20 +23,31 @@ const PharmacyPage = () => {
         Pharmacy Management System
       </Typography>
       <Paper elevation={3} className={styles.paper}>
-        <Tabs
-          value={activeTab}
-          onChange={handleTabChange}
-          variant="scrollable"
-          scrollButtons="auto"
-          className={styles.tabs}
-        >
-          <Tab label="Inventory" />
-          <Tab label="Orders" />
-          <Tab label="Suppliers" />
-          <Tab label="Reports" />
-          <Tab label="Settings" />
-          <Tab label="Add Medication" />
-        </Tabs>
+        <Box className={styles.tabsWrapper}>
+          <Tabs
+            value={activeTab}
+            onChange={handleTabChange}
+            variant="scrollable"
+            scrollButtons="auto"
+            className={styles.tabs}
+            sx={{
+              '& .MuiTabs-flexContainer': {
+                flexWrap: 'nowrap', // Prevent tabs from wrapping
+              },
+              '& .MuiTab-root': {
+                minWidth: { xs: 100, sm: 120 }, // Smaller tabs on mobile
+                fontSize: { xs: '0.8rem', sm: '0.875rem' }, // Responsive font size
+              },
+            }}
+          >
+            <Tab label="Inventory" />
+            <Tab label="Orders" />
+            <Tab label="Suppliers" />
+            <Tab label="Reports" />
+            <Tab label="Settings" />
+            <Tab label="Add Medication" />
+          </Tabs>
+        </Box>
         <Box className={styles.tabContent}>
           {activeTab === 0 && <PharmacyInventory />}
           {activeTab === 1 && <PharmacyOrders />}
