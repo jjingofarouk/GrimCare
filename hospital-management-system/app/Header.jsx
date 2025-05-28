@@ -1,12 +1,23 @@
-'use client';
+"use client";
 
-import React from 'react';
-import { UserCircleIcon, BellIcon, Bars3Icon } from '@heroicons/react/24/outline';
-import Link from 'next/link';
-import styles from './Header.module.css';
+import React from "react";
+import { UserCircleIcon, BellIcon, Bars3Icon } from "@heroicons/react/24/outline";
+import Link from "next/link";
+import { useAuth } from "../useAuth";
+import { hasPermission } from "../auth";
+import styles from "./Header.module.css";
 
 export default function Header({ toggleSidebar }) {
+  const { user, logout } = useAuth();
   const [isProfileOpen, setIsProfileOpen] = React.useState(false);
+
+  // Define dropdown items with their required permissions
+  const dropdownItems = [
+    { name: "Profile", path: "/profile", permission: "Profile" },
+    { name: "Settings", path: "/settings", permission: "Settings" },
+    { name: "Clinical Settings", path: "/clinical-settings", permission: "Clinical" },
+    { name: "System Admin", path: "/system-admin", permission: "System Admin" },
+  ];
 
   return (
     <header className={styles.header}>
@@ -19,24 +30,44 @@ export default function Header({ toggleSidebar }) {
         </div>
         <div className={styles.right}>
           <BellIcon className={styles.icon} />
-          <div className={styles.profile}>
-            <button
-              onClick={() => setIsProfileOpen(!isProfileOpen)}
-              className={styles.profileButton}
-            >
-              <UserCircleIcon className={styles.icon} />
-              <span className={styles.userName}>Admin</span>
-            </button>
-            {isProfileOpen && (
-              <div className={styles.dropdown}>
-                <Link href="/profile" className={styles.dropdownItem}>Profile</Link>
-                <Link href="/settings" className={styles.dropdownItem}>Settings</Link>
-                <Link href="/clinical-settings" className={styles.dropdownItem}>Clinical Settings</Link>
-                <Link href="/system-admin" className={styles.dropdownItem}>System Admin</Link>
-                <Link href="/auth/logout" className={styles.dropdownItem}>Logout</Link>
-              </div>
-            )}
-          </div>
+          {user && (
+            <div className={styles.profile}>
+              <button
+                onClick={() => setIsProfileOpen(!isProfileOpen)}
+                className={styles.profileButton}
+              >
+                <UserCircleIcon className={styles.icon} />
+                <span className={styles.userName}>{user.name || "User"}</span>
+              </button>
+              {isProfileOpen && (
+                <div className={styles.dropdown}>
+                  {dropdownItems
+                    .filter(({ permission }) =>
+                      hasPermission(user.role, permission)
+                    )
+                    .map(({ name, path }) => (
+                      <Link
+                        key={path}
+                        href={path}
+                        className={styles.dropdownItem}
+                        onClick={() => setIsProfileOpen(false)}
+                      >
+                        {name}
+                      </Link>
+                    ))}
+                  <button
+                    className={styles.dropdownItem}
+                    onClick={() => {
+                      logout();
+                      setIsProfileOpen(false);
+                    }}
+                  >
+                    Logout
+                  </button>
+                </div>
+              )}
+            </div>
+          )}
         </div>
       </div>
     </header>
