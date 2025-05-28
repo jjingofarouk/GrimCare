@@ -1,7 +1,23 @@
+// clinical/ClinicalCard.module.css
 .card {
-  @apply bg-white p-4 rounded-lg shadow-md mb-4;
+  background-color: white;
+  border-radius: 8px;
+  padding: 16px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 }
 
 .title {
-  @apply text-lg font-semibold mb-2;
+  font-size: 18px;
+  font-weight: bold;
+  margin-bottom: 12px;
+  color: #333;
+}
+
+.card p {
+  margin: 8px 0;
+  font-size: 14px;
+}
+
+.card p strong {
+  color: #333;
 }
