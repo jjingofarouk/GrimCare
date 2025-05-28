@@ -1,74 +1,63 @@
-
 .container {
-  max-width: 1200px;
-  margin: 0 auto;
   padding: 20px;
+  min-height: 100vh;
+  max-width: 100vw;
+  overflow-x: hidden;
+  box-sizing: border-box;
 }
 
-.tabsContainer {
+.title {
+  font-weight: 600;
+  margin-bottom: 20px;
+}
+
+.paper {
+  padding: 20px;
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.tabsWrapper {
   overflow-x: auto;
-  white-space: nowrap;
+  width: 100%;
   -webkit-overflow-scrolling: touch;
   scrollbar-width: none;
   -ms-overflow-style: none;
 }
 
-.tabsContainer::-webkit-scrollbar {
+.tabsWrapper::-webkit-scrollbar {
   display: none;
 }
 
 .tabs {
-  display: flex;
-  gap: 8px;
-  padding: 0 10px;
   margin-bottom: 20px;
-}
-
-.tab {
-  flex: 0 0 auto;
-  padding: 10px 20px;
-  background-color: #f0f0f0;
-  border: none;
-  border-radius: 4px;
-  cursor: pointer;
-  font-size: 16px;
-  font-weight: 500;
-  white-space: nowrap;
-  transition: background-color 0.3s;
-}
-
-.tab.active {
-  background-color: #007bff;
-  color: white;
-}
-
-.tab:hover {
-  background-color: #e0e0e0;
+  width: max-content;
 }
 
 .content {
-  background-color: white;
-  padding: 20px;
-  border-radius: 8px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  padding: 20px 0;
+  overflow-x: hidden;
 }
 
 @media (max-width: 600px) {
   .container {
     padding: 10px;
+    width: 100vw;
   }
 
-  .tabs {
-    gap: 6px;
-    padding: 0 5px;
+  .title {
+    font-size: 1.5rem;
   }
 
-  .tab {
-    padding: 8px 12px;
-    font-size: 14px;
+  .paper {
+    padding: 10px;
+  }
+
+  .tabsWrapper {
+    max-width: 100%;
   }
 
   .content {
-    padding: 10px;
+    padding: 10px 0;
   }
 }
