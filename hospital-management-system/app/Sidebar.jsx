@@ -1,4 +1,4 @@
-// Sidebar.jsx
+
 'use client';
 
 import React, { useEffect, useRef } from 'react';
@@ -79,7 +79,7 @@ export default function Sidebar({ isOpen, toggleSidebar }) {
     };
 
     document.addEventListener('mousedown', handleClickOutside);
-    document.addEventListener('touchstart', handleClickOutside);
+    document.addEventListener('touchstart', handleClickOutside); // Added for touch devices
     return () => {
       document.removeEventListener('mousedown', handleClickOutside);
       document.removeEventListener('touchstart', handleClickOutside);
@@ -87,55 +87,26 @@ export default function Sidebar({ isOpen, toggleSidebar }) {
   }, [isOpen, toggleSidebar]);
 
   return (
-    <>
-      {/* Hamburger button */}
-      <button
-        aria-label="Toggle Sidebar"
-        className={styles.hamburger}
-        onClick={() => {
-          if (isOpen) {
-            toggleSidebar();
-          } else {
-            toggleSidebar();
-          }
-        }}
-      >
-        {/* You can add hamburger icon SVG or component here */}
-        <svg
-          xmlns="http://www.w3.org/2000/svg"
-          className="h-6 w-6 text-gray-700"
-          fill="none"
-          viewBox="0 0 24 24"
-          stroke="currentColor"
-          strokeWidth={2}
-        >
-          <path strokeLinecap="round" strokeLinejoin="round" d="M4 6h16M4 12h16M4 18h16" />
-        </svg>
-      </button>
-
-      <aside ref={sidebarRef} className={`${styles.sidebar} ${isOpen ? styles.open : ''}`}>
-        <div className={styles.logo}>
-          <img src="/logo.png" alt="HMS Logo" className={styles.logoImage} />
-        </div>
-        <nav className={styles.nav}>
-          <ul className={styles.navList}>
-            {navItems.map(({ name, path, icon: Icon }) => (
-              <li key={path}>
-                <Link
-                  href={path}
-                  className={`${styles.navLink} ${pathname === path ? styles.active : ''}`}
-                  onClick={() => {
-                    toggleSidebar();
-                  }}
-                >
-                  <Icon className={styles.icon} />
-                  <span>{name}</span>
-                </Link>
-              </li>
-            ))}
-          </ul>
-        </nav>
-      </aside>
-    </>
+    <aside ref={sidebarRef} className={`${styles.sidebar} ${isOpen ? styles.open : ''}`}>
+      <div className={styles.logo}>
+        <img src="/logo.png" alt="HMS Logo" className={styles.logoImage} />
+      </div>
+      <nav className={styles.nav}>
+        <ul className={styles.navList}>
+          {navItems.map(({ name, path, icon: Icon }) => (
+            <li key={path}>
+              <Link
+                href={path}
+                className={`${styles.navLink} ${pathname === path ? styles.active : ''}`}
+                onClick={toggleSidebar}
+              >
+                <Icon className={styles.icon} />
+                <span>{name}</span>
+              </Link>
+            </li>
+          ))}
+        </ul>
+      </nav>
+    </aside>
   );
 }
