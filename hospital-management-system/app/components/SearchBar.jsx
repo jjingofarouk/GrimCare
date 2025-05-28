@@ -1,6 +1,7 @@
-// components/SearchBar.jsx
-'use client';
+"use client";
+
 import React, { useState } from 'react';
+import { Box, TextField, Button } from '@mui/material';
 import styles from './SearchBar.module.css';
 
 const SearchBar = ({ onSubmit }) => {
@@ -16,19 +17,27 @@ const SearchBar = ({ onSubmit }) => {
   };
 
   return (
-    <div className={styles.searchContainer}>
-      <input
+    <Box component="form" className={styles.searchContainer} onSubmit={handleSubmit}>
+      <TextField
         type="text"
         className={styles.searchInput}
         placeholder="Search by name, ID, or diagnosis..."
         value={query}
         onChange={handleChange}
         aria-label="Search records"
+        fullWidth
+        variant="outlined"
       />
-      <button type="submit" className={styles.searchButton} onClick={handleSubmit} aria-label="Search">
+      <Button
+        type="submit"
+        className={styles.searchButton}
+        onClick={handleSubmit}
+        aria-label="Search"
+        variant="contained"
+      >
         Search
-      </button>
-    </div>
+      </Button>
+    </Box>
   );
 };
 
