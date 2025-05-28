@@ -1,5 +1,4 @@
-"use client";
-
+'use client';
 import React, { useState } from 'react';
 import { Tabs, Tab, Box, Typography } from '@mui/material';
 import DoctorList from './DoctorList';
