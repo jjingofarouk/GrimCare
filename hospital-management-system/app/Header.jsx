@@ -1,18 +1,20 @@
 'use client';
 
-import React, { useState } from 'react';
+import React from 'react';
 import { UserCircleIcon, BellIcon, Bars3Icon } from '@heroicons/react/24/outline';
 import Link from 'next/link';
 import styles from './Header.module.css';
 
-export default function Header() {
-  const [isProfileOpen, setIsProfileOpen] = useState(false);
+export default function Header({ toggleSidebar }) {
+  const [isProfileOpen, setIsProfileOpen] = React.useState(false);
 
   return (
     <header className={styles.header}>
       <div className={styles.container}>
         <div className={styles.left}>
-          <Bars3Icon className={styles.icon} />
+          <button onClick={toggleSidebar} className={styles.menuButton}>
+            <Bars3Icon className={styles.icon} />
+          </button>
           <h1 className={styles.title}>HMS</h1>
         </div>
         <div className={styles.right}>
