@@ -22,8 +22,10 @@
 }
 
 .logoImage {
-  max-width: 120px;
-  height: auto;
+  width: 80px; /* Reduced from 120px */
+  height: 80px; /* Set equal height for circular shape */
+  border-radius: 50%; /* Makes the image circular */
+  object-fit: cover; /* Ensures image fits within circle without distortion */
 }
 
 .nav {
