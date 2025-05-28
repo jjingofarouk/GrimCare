@@ -1,11 +1,12 @@
-// clinical/OutpatientRecords.jsx
-'use client';
+"use client";
+
 import React, { useState, useEffect } from 'react';
-import styles from './ClinicalRecords.module.css';
+import { Container, Typography, Box } from '@mui/material';
 import ClinicalCard from './ClinicalCard';
 import ClinicalForm from './ClinicalForm';
 import SearchBar from '../components/SearchBar';
 import { getClinicalRecords, createClinicalRecord } from './clinicalService';
+import styles from './ClinicalRecords.module.css';
 
 export default function OutpatientRecords({ patients }) {
   const [records, setRecords] = useState([]);
@@ -54,16 +55,22 @@ export default function OutpatientRecords({ patients }) {
   };
 
   return (
-    <div className={styles.container}>
-      <h2 className={styles.title}>Outpatient Records</h2>
+    <Container maxWidth="xl" className={styles.container}>
+      <Typography variant="h5" className={styles.title}>
+        Outpatient Records
+      </Typography>
       <ClinicalForm patients={patients} onSuccess={handleSuccess} patientType="outpatient" />
       <SearchBar onSubmit={handleSearch} />
-      {error && <p className={styles.error}>{error}</p>}
-      <div className={styles.list}>
+      {error && (
+        <Typography color="error" className={styles.error}>
+          {error}
+        </Typography>
+      )}
+      <Box className={styles.list}>
         {filteredRecords.map((record) => (
           <ClinicalCard key={record.id} record={record} />
         ))}
-      </div>
-    </div>
+      </Box>
+    </Container>
   );
 }
