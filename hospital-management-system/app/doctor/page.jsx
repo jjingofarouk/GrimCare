@@ -1,16 +1,19 @@
 'use client';
 import React, { useState } from 'react';
-import { Tabs, Tab, Box, Typography } from '@mui/material';
+import { Tabs, Tab, Box, Typography, Button } from '@mui/material';
+import { useRouter } from 'next/navigation';
 import DoctorList from './DoctorList';
 import DoctorForm from './DoctorForm';
+import DoctorDetails from './DoctorDetails';
 
 const DoctorPage = () => {
   const [tabValue, setTabValue] = useState(0);
   const [selectedDoctor, setSelectedDoctor] = useState(null);
+  const router = useRouter();
 
   const handleTabChange = (event, newValue) => {
     setTabValue(newValue);
-    setSelectedDoctor(null);
+    if (newValue !== 1) setSelectedDoctor(null);
   };
 
   const handleEdit = (doctor) => {
@@ -18,21 +21,46 @@ const DoctorPage = () => {
     setTabValue(1);
   };
 
+  const handleViewDetails = (doctorId) => {
+    setSelectedDoctor({ id: doctorId });
+    setTabValue(2);
+  };
+
   return (
-    <Box>
+    <Box sx={{ p: 3 }}>
       <Typography variant="h4" gutterBottom>
-        Doctor Management
+        Doctor Management - Uganda Health System
       </Typography>
-      <Tabs value={tabValue} onChange={handleTabChange} sx={{ mb: 3 }}>
+      <Tabs 
+        value={tabValue} 
+        onChange={handleTabChange} 
+        sx={{ mb: 3 }} 
+        variant="scrollable" 
+        scrollButtons="auto"
+      >
         <Tab label="Doctor List" />
         <Tab label={selectedDoctor ? 'Edit Doctor' : 'Add Doctor'} />
+        <Tab label="Schedules" disabled={!selectedDoctor} />
+        <Tab label="Patients" disabled={!selectedDoctor} />
+        <Tab label="Appointments" disabled={!selectedDoctor} />
+        <Tab label="Prescriptions" disabled={!selectedDoctor} />
+        <Tab label="Case Notes" disabled={!selectedDoctor} />
+        <Tab label="Diagnostic Orders" disabled={!selectedDoctor} />
+        <Tab label="Leave Requests" disabled={!selectedDoctor} />
+        <Tab label="Performance" disabled={!selectedDoctor} />
       </Tabs>
-      {tabValue === 0 && <DoctorList onEdit={handleEdit} />}
+      {tabValue === 0 && <DoctorList onEdit={handleEdit} onViewDetails={handleViewDetails} />}
       {tabValue === 1 && (
         <DoctorForm
           doctor={selectedDoctor}
           onSave={() => setTabValue(0)}
           onCancel={() => setTabValue(0)}
+        />
+      )}
+      {tabValue >= 2 && selectedDoctor && (
+        <DoctorDetails
+          doctorId={selectedDoctor.id}
+          initialTab={tabValue - 2}
         />
       )}
     </Box>
