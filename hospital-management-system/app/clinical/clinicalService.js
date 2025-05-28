@@ -1,5 +1,5 @@
 // clinical/clinicalService.js
-import { API_ROUTES, BASE_URL } from '../api';
+//import { API_ROUTES, BASE_URL } from '../api';
 
 const dummyClinicalRecords = [
   {
