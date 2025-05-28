@@ -1,34 +1,41 @@
-'use client';
 import React, { useState, useEffect } from 'react';
-import styles from './DoctorList.module.css';
+import { Grid, Button, Box } from '@mui/material';
 import DoctorCard from './DoctorCard';
-import { getDoctors } from './doctorService';
+import * as doctorService from './doctorService';
+import styles from './DoctorList.module.css';
 
-export default function DoctorList() {
+const DoctorList = ({ onEdit }) => {
   const [doctors, setDoctors] = useState([]);
-  const [error, setError] = useState(null);
 
   useEffect(() => {
     const fetchDoctors = async () => {
-      try {
-        const data = await getDoctors();
-        setDoctors(data);
-      } catch (err) {
-        setError('Failed to fetch doctors');
-      }
+      const data = await doctorService.getDoctors();
+      setDoctors(data);
     };
     fetchDoctors();
   }, []);
 
+  const handleDelete = async (id) => {
+    await doctorService.deleteDoctor(id);
+    setDoctors(doctors.filter((doctor) => doctor.id !== id));
+  };
+
   return (
-    <div className={styles.container}>
-      <h2 className={styles.title}>Doctors</h2>
-      {error && <p className={styles.error}>{error}</p>}
-      <div className={styles.list}>
+    <Box className={styles.container}>
+      <Box mb={2}>
+        <Button variant="contained" onClick={() => onEdit(null)}>
+          Add New Doctor
+        </Button>
+      </Box>
+      <Grid container spacing={2}>
         {doctors.map((doctor) => (
-          <DoctorCard key={doctor.id} doctor={doctor} />
+          <Grid item xs={12} sm={6} md={4} key={doctor.id}>
+            <DoctorCard doctor={doctor} onEdit={onEdit} onDelete={handleDelete} />
+          </Grid>
         ))}
-      </div>
-    </div>
+      </Grid>
+    </Box>
   );
-}
+};
+
+export default DoctorList;
