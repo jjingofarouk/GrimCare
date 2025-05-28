@@ -1,3 +1,4 @@
+// Sidebar.jsx
 'use client';
 
 import React, { useEffect, useRef } from 'react';
@@ -78,8 +79,10 @@ export default function Sidebar({ isOpen, toggleSidebar }) {
     };
 
     document.addEventListener('mousedown', handleClickOutside);
+    document.addEventListener('touchstart', handleClickOutside); // Added for touch devices
     return () => {
       document.removeEventListener('mousedown', handleClickOutside);
+      document.removeEventListener('touchstart', handleClickOutside);
     };
   }, [isOpen, toggleSidebar]);
 
