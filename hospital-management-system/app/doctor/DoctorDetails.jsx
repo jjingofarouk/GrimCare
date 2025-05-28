@@ -1,6 +1,6 @@
 'use client';
 import React, { useState, useEffect } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams, useRouter } from 'next/navigation';
 import { Box, Typography, Tabs, Tab, Paper, Table, TableBody, TableCell, TableHead, TableRow, Button, TextField, MenuItem, Avatar } from '@mui/material';
 import * as doctorService from './doctorService';
 import ScheduleForm from './ScheduleForm';
@@ -16,7 +16,7 @@ const mockPatients = [
 
 const DoctorDetails = () => {
   const { doctorId } = useParams();
-  const navigate = useNavigate();
+  const router = useRouter();
   const [doctor, setDoctor] = useState(null);
   const [tabValue, setTabValue] = useState(0);
   const [schedules, setSchedules] = useState([]);
@@ -169,7 +169,7 @@ const DoctorDetails = () => {
                   <TableCell>{patient.type}</TableCell>
                   <TableCell>{patient.ward || 'OPD'}</TableCell>
                   <TableCell>
-                    <Button onClick={() => navigate(`/patients/${patient.recordId}`)}>
+                    <Button onClick={() => router(`/patients/${patient.recordId}`)}>
                       View Record
                     </Button>
                   </TableCell>
