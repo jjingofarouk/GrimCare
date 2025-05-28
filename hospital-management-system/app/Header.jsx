@@ -1,11 +1,10 @@
-// app/Header.jsx (Revised)
 "use client";
 
 import React from "react";
 import { UserCircleIcon, BellIcon, Bars3Icon } from "@heroicons/react/24/outline";
 import Link from "next/link";
 import { useAuth } from "./useAuth";
-import { hasPermission } from "./auth";
+import { hasPermission } from "./auth/auth";
 import styles from "./Header.module.css";
 
 export default function Header({ toggleSidebar }) {
@@ -37,7 +36,9 @@ export default function Header({ toggleSidebar }) {
                 className={styles.profileButton}
               >
                 <UserCircleIcon className={styles.icon} />
-                <span className={styles.userName}>{user.name || "User"}</span>
+                <span className={styles.userName}>
+                  {user.name || "User"} ({user.role})
+                </span>
               </button>
               {isProfileOpen && (
                 <div className={styles.dropdown}>
