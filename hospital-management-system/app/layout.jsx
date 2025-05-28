@@ -1,3 +1,6 @@
+import React from 'react';
+
+
 // app/layout.jsx
 import './globals.css';
 
