@@ -1,4 +1,3 @@
-
 "use client";
 
 import React, { useState, useEffect } from 'react';
@@ -55,31 +54,33 @@ export default function AppointmentPage() {
   return (
     <div className={styles.container}>
       <NotificationBanner />
-      <div className={styles.tabs}>
-        <button
-          className={`${styles.tab} ${activeTab === 'form' ? styles.active : ''}`}
-          onClick={() => setActiveTab('form')}
-        >
-          Book Appointment
-        </button>
-        <button
-          className={`${styles.tab} ${activeTab === 'list' ? styles.active : ''}`}
-          onClick={() => setActiveTab('list')}
-        >
-          Appointment List
-        </button>
-        <button
-          className={`${styles.tab} ${activeTab === 'history' ? styles.active : ''}`}
-          onClick={() => setActiveTab('history')}
-        >
-          Patient History
-        </button>
-        <button
-          className={`${styles.tab} ${activeTab === 'schedule' ? styles.active : ''}`}
-          onClick={() => setActiveTab('schedule')}
-        >
-          Doctor Schedule
-        </button>
+      <div className={styles.tabsContainer}>
+        <div className={styles.tabs}>
+          <button
+            className={`${styles.tab} ${activeTab === 'form' ? styles.active : ''}`}
+            onClick={() => setActiveTab('form')}
+          >
+            Book
+          </button>
+          <button
+            className={`${styles.tab} ${activeTab === 'list' ? styles.active : ''}`}
+            onClick={() => setActiveTab('list')}
+          >
+            List
+          </button>
+          <button
+            className={`${styles.tab} ${activeTab === 'history' ? styles.active : ''}`}
+            onClick={() => setActiveTab('history')}
+          >
+            History
+          </button>
+          <button
+            className={`${styles.tab} ${activeTab === 'schedule' ? styles.active : ''}`}
+            onClick={() => setActiveTab('schedule')}
+          >
+            Schedule
+          </button>
+        </div>
       </div>
       <div className={styles.content}>
         {activeTab === 'form' && (
