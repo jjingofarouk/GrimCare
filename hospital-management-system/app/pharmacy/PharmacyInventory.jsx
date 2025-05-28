@@ -1,7 +1,7 @@
 // pharmacy/PharmacyInventory.jsx
 import React, { useState, useEffect } from 'react';
 import { DataGrid } from '@mui/x-data-grid';
-import { TextField, Button, Box, Typography, IconButton } from '@mui/material';
+import { TextField, Box, Typography, IconButton } from '@mui/material';
 import { Search, Delete, Edit } from '@mui/icons-material';
 import { getInventory, updateStock, deleteMedication } from './pharmacyService';
 import styles from './PharmacyInventory.module.css';
