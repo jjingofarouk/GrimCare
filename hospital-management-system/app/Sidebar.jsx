@@ -1,9 +1,9 @@
-
 'use client';
-
 import React, { useEffect, useRef } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
+import { useAuth } from '../useAuth';
+import { hasPermission } from '../auth';
 import {
   HomeIcon,
   UserIcon,
@@ -69,6 +69,7 @@ const navItems = [
 
 export default function Sidebar({ isOpen, toggleSidebar }) {
   const pathname = usePathname();
+  const { user } = useAuth();
   const sidebarRef = useRef(null);
 
   useEffect(() => {
@@ -79,12 +80,14 @@ export default function Sidebar({ isOpen, toggleSidebar }) {
     };
 
     document.addEventListener('mousedown', handleClickOutside);
-    document.addEventListener('touchstart', handleClickOutside); // Added for touch devices
+    document.addEventListener('touchstart', handleClickOutside);
     return () => {
       document.removeEventListener('mousedown', handleClickOutside);
       document.removeEventListener('touchstart', handleClickOutside);
     };
   }, [isOpen, toggleSidebar]);
+
+  if (!user) return null;
 
   return (
     <aside ref={sidebarRef} className={`${styles.sidebar} ${isOpen ? styles.open : ''}`}>
@@ -93,18 +96,20 @@ export default function Sidebar({ isOpen, toggleSidebar }) {
       </div>
       <nav className={styles.nav}>
         <ul className={styles.navList}>
-          {navItems.map(({ name, path, icon: Icon }) => (
-            <li key={path}>
-              <Link
-                href={path}
-                className={`${styles.navLink} ${pathname === path ? styles.active : ''}`}
-                onClick={toggleSidebar}
-              >
-                <Icon className={styles.icon} />
-                <span>{name}</span>
-              </Link>
-            </li>
-          ))}
+          {navItems
+            .filter(({ name }) => hasPermission(user.role, name))
+            .map(({ name, path, icon: Icon }) => (
+              <li key={path}>
+                <Link
+                  href={path}
+                  className={`${styles.navLink} ${pathname === path ? styles.active : ''}`}
+                  onClick={toggleSidebar}
+                >
+                  <Icon className={styles.icon} />
+                  <span>{name}</span>
+                </Link>
+              </li>
+            ))}
         </ul>
       </nav>
     </aside>
