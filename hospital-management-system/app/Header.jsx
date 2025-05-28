@@ -72,4 +72,4 @@ export default function Header({ toggleSidebar }) {
       </div>
     </header>
   );
-};
+}
