@@ -1,4 +1,4 @@
-const API_ROUTES = {
+export const API_ROUTES = {
   ACCOUNTING: '/api/accounting',
   ADT: '/api/adt',
   APPOINTMENT: '/api/appointment',
@@ -39,6 +39,5 @@ const API_ROUTES = {
   VERIFICATION: '/api/verification',
 };
 
-const BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000';
+export const BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000';
 
-export default { API_ROUTES, BASE_URL };
