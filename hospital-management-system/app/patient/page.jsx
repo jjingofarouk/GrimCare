@@ -11,6 +11,7 @@ import { getPatients } from './patientService';
 import styles from './PatientPage.module.css';
 
 export default function PatientPage() {
+  const [patients, setPatients] = useState([]); // ✅ Added state for fetched patients
   const [selectedPatient, setSelectedPatient] = useState(null);
   const [activeTab, setActiveTab] = useState('form');
   const [searchQuery, setSearchQuery] = useState('');
@@ -22,7 +23,7 @@ export default function PatientPage() {
         const patientsData = await getPatients();
         setPatients(patientsData);
       } catch (err) {
-        console.error('Failed to fetch patients');
+        console.error('Failed to fetch patients', err);
       }
     };
     fetchData();
@@ -31,7 +32,7 @@ export default function PatientPage() {
   const handleSuccess = () => {
     setSelectedPatient(null);
     setActiveTab('list');
-    setRefreshKey((prev) => prev + 1);
+    setRefreshKey(prev => prev + 1);
   };
 
   const handleEdit = (patient) => {
@@ -55,11 +56,15 @@ export default function PatientPage() {
   return (
     <div className={styles.container}>
       <PatientNotification />
+
       <div className={styles.tabsContainer}>
         <div className={styles.tabs}>
           <button
-            className={`${styles.tab} ${activeTab === 'form' || activeTab === 'edit' ? styles.active : ''}`}
-            onClick={() => { setActiveTab('form'); setSelectedPatient(null); }}
+            className={`${styles.tab} ${['form', 'edit'].includes(activeTab) ? styles.active : ''}`}
+            onClick={() => {
+              setActiveTab('form');
+              setSelectedPatient(null);
+            }}
           >
             Register
           </button>
@@ -71,6 +76,7 @@ export default function PatientPage() {
           </button>
         </div>
       </div>
+
       <div className={styles.content}>
         {(activeTab === 'form' || activeTab === 'edit') && (
           <PatientForm
@@ -78,11 +84,13 @@ export default function PatientPage() {
             onSuccess={handleSuccess}
           />
         )}
+
         {activeTab === 'list' && (
           <>
             <SearchBar onSubmit={handleSearch} />
             <PatientListWithFilter
-              key={refreshKey}
+              key={refreshKey} // Triggers re-render on refresh
+              patients={patients} // ✅ Pass the fetched patients
               onEdit={handleEdit}
               onViewHistory={handleViewHistory}
               onSelect={handleViewDetails}
@@ -90,9 +98,11 @@ export default function PatientPage() {
             />
           </>
         )}
+
         {activeTab.startsWith('history-') && (
           <AppointmentHistory patientId={activeTab.split('-')[1]} />
         )}
+
         {activeTab === 'details' && (
           <PatientDetails
             patient={selectedPatient}
