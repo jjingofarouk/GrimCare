@@ -1,8 +1,9 @@
+// app/Sidebar.jsx (Revised)
 "use client";
 
 import React from "react";
 import Link from "next/link";
-import { hasPermission } from "./auth";
+import { hasPermission } from "./auth/auth";
 import { useAuth } from "./useAuth";
 import styles from "./Sidebar.module.css";
 
@@ -46,16 +47,16 @@ export default function Sidebar({ isOpen, toggleSidebar }) {
   ];
 
   return (
-    <aside className={`${styles.sidebar} ${isOpen ? styles.open : ""}`}>
+    <aside className={`${styles.sidebar} ${isOpen ? styles.open : styles.closed}`}>
       <button onClick={toggleSidebar} className={styles.closeButton}>
-        &times;
+        ×
       </button>
       <nav className={styles.nav}>
         {user &&
           menuItems
             .filter(({ permission }) => hasPermission(user.role, permission))
             .map(({ name, path }) => (
-              <Link key={path} href={path} className={styles.navItem}>
+              <Link key={path} href={path} className={styles.navItem} onClick={toggleSidebar}>
                 {name}
               </Link>
             ))}
