@@ -1,7 +1,8 @@
-
 import React from 'react';
 import './globals.css';
 import { Inter } from 'next/font/google';
+import Header from './Header';
+import Sidebar from './Sidebar';
 
 const inter = Inter({ subsets: ['latin'] });
 
@@ -13,7 +14,13 @@ export const metadata = {
 export default function RootLayout({ children }) {
   return (
     <html lang="en">
-      <body className={inter.className}>{children}</body>
+      <body className={inter.className}>
+        <Header />
+        <div className="layout-container">
+          <Sidebar />
+          <main className="main-content">{children}</main>
+        </div>
+      </body>
     </html>
   );
 }
