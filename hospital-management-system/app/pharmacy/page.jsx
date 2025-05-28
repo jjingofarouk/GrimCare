@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState } from 'react';
-import { Container, Grid, Paper, Tabs, Tab, Box, Typography } from '@mui/material';
+import { Container, Paper, Tabs, Tab, Box, Typography } from '@mui/material';
 import PharmacyInventory from './PharmacyInventory';
 import PharmacyOrders from './PharmacyOrders';
 import PharmacySuppliers from './PharmacySuppliers';
