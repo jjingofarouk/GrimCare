@@ -2,12 +2,15 @@
 // clinical/ClinicalPage.jsx
 'use client';
 import React, { useState, useEffect } from 'react';
-import ClinicalList from './ClinicalList';
-import ClinicalForm from './ClinicalForm';
+import OutpatientRecords from './OutpatientRecords';
+import InpatientRecords from './InpatientRecords';
+import EmergencyRecords from './EmergencyRecords';
 import { getPatients } from '../patient/patientService';
+import styles from './ClinicalPage.module.css';
 
 export default function ClinicalPage() {
   const [patients, setPatients] = useState([]);
+  const [activeTab, setActiveTab] = useState('outpatient');
 
   useEffect(() => {
     const fetchPatients = async () => {
@@ -21,16 +24,35 @@ export default function ClinicalPage() {
     fetchPatients();
   }, []);
 
-  const handleSuccess = () => {
-    console.log('Clinical record created');
-    // Trigger refresh of clinical list
-    window.dispatchEvent(new Event('refreshClinicalList'));
-  };
-
   return (
-    <div>
-      <ClinicalForm patients={patients} onSuccess={handleSuccess} />
-      <ClinicalList />
+    <div className={styles.container}>
+      <div className={styles.tabsContainer}>
+        <div className={styles.tabs}>
+          <button
+            className={`${styles.tab} ${activeTab === 'outpatient' ? styles.active : ''}`}
+            onClick={() => setActiveTab('outpatient')}
+          >
+            Outpatient
+          </button>
+          <button
+            className={`${styles.tab} ${activeTab === 'inpatient' ? styles.active : ''}`}
+            onClick={() => setActiveTab('inpatient')}
+          >
+            Inpatient
+          </button>
+          <button
+            className={`${styles.tab} ${activeTab === 'emergency' ? styles.active : ''}`}
+            onClick={() => setActiveTab('emergency')}
+          >
+            ER
+          </button>
+        </div>
+      </div>
+      <div className={styles.content}>
+        {activeTab === 'outpatient' && <OutpatientRecords patients={patients} />}
+        {activeTab === 'inpatient' && <InpatientRecords patients={patients} />}
+        {activeTab === 'emergency' && <EmergencyRecords patients={patients} />}
+      </div>
     </div>
   );
 }
