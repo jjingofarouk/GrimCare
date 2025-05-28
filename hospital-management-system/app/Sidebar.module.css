@@ -1,7 +1,8 @@
+/* Sidebar.module.css */
 .sidebar {
   width: 250px;
-  background-color: #ffffff;
-  border-right: 1px solid #e5e7eb;
+  background-color: #1f2937;
+  border-right: 1px solid #374151;
   position: fixed;
   top: 48px;
   bottom: 0;
@@ -18,14 +19,14 @@
 .logo {
   padding: 1rem;
   text-align: center;
-  border-bottom: 1px solid #e5e7eb;
+  border-bottom: 1px solid #374151;
 }
 
 .logoImage {
-  width: 80px; /* Reduced from 120px */
-  height: 80px; /* Set equal height for circular shape */
-  border-radius: 50%; /* Makes the image circular */
-  object-fit: cover; /* Ensures image fits within circle without distortion */
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  object-fit: cover;
 }
 
 .nav {
@@ -47,7 +48,7 @@
   display: flex;
   align-items: center;
   padding: 0.75rem 1.5rem;
-  color: #374151;
+  color: #d1d5db;
   text-decoration: none;
   font-size: 0.875rem;
   font-family: 'Inter', sans-serif;
@@ -55,13 +56,13 @@
 }
 
 .navLink:hover {
-  background-color: #f3f4f6;
-  color: #1f2937;
+  background-color: #374151;
+  color: #f9fafb;
 }
 
 .navLink.active {
-  background-color: #e5e7eb;
-  color: #1f2937;
+  background-color: #374151;
+  color: #f9fafb;
   font-weight: 600;
 }
 
@@ -69,13 +70,13 @@
   width: 1.25rem;
   height: 1.25rem;
   margin-right: 0.75rem;
-  color: #374151;
+  color: #d1d5db;
   transition: color 0.2s ease;
 }
 
 .navLink:hover .icon,
 .navLink.active .icon {
-  color: #1f2937;
+  color: #f9fafb;
 }
 
 .chevron {
@@ -93,14 +94,14 @@
   list-style: none;
   padding: 0;
   margin: 0;
-  background-color: #f9fafb;
+  background-color: #2d3748;
 }
 
 .subNavLink {
   display: flex;
   align-items: center;
   padding: 0.5rem 1.5rem 0.5rem 3rem;
-  color: #374151;
+  color: #d1d5db;
   text-decoration: none;
   font-size: 0.8125rem;
   font-family: 'Inter', sans-serif;
@@ -108,13 +109,13 @@
 }
 
 .subNavLink:hover {
-  background-color: #e5e7eb;
-  color: #1f2937;
+  background-color: #4b5563;
+  color: #f9fafb;
 }
 
 .subNavLink.active {
-  background-color: #d1d5db;
-  color: #1f2937;
+  background-color: #4b5563;
+  color: #f9fafb;
   font-weight: 500;
 }
 
@@ -136,57 +137,5 @@
   .subNavLink {
     padding: 0.5rem 1rem 0.5rem 2.5rem;
     font-size: 0.75rem;
-  }
-}
-
-@media (prefers-color-scheme: dark) {
-  .sidebar {
-    background-color: #1f2937;
-    border-right-color: #374151;
-  }
-
-  .logo {
-    border-bottom-color: #374151;
-  }
-
-  .navLink {
-    color: #d1d5db;
-  }
-
-  .navLink:hover {
-    background-color: #374151;
-    color: #f9fafb;
-  }
-
-  .navLink.active {
-    background-color: #374151;
-    color: #f9fafb;
-  }
-
-  .icon {
-    color: #d1d5db;
-  }
-
-  .navLink:hover .icon,
-  .navLink.active .icon {
-    color: #f9fafb;
-  }
-
-  .subNavList {
-    background-color: #2d3748;
-  }
-
-  .subNavLink {
-    color: #d1d5db;
-  }
-
-  .subNavLink:hover {
-    background-color: #4b5563;
-    color: #f9fafb;
-  }
-
-  .subNavLink.active {
-    background-color: #4b5563;
-    color: #f9fafb;
   }
 }
