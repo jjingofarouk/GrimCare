@@ -4,7 +4,6 @@
 import React, { useEffect, useState } from 'react';
 import styles from './PatientList.module.css';
 import PatientCard from './PatientCard';
-import SearchBar from '../SearchBar';
 import { getPatients } from './patientService';
 
 const PatientList = ({ onEdit, onViewHistory, searchQuery }) => {
