@@ -9,7 +9,7 @@ import AppointmentHistory from './AppointmentHistory';
 import DoctorSchedule from './DoctorSchedule';
 import NotificationBanner from './NotificationBanner';
 import SearchBar from './SearchBar';
-import { getAppointments, getDoctors, getPatients } from './appointmentService';
+import {  getDoctors, getPatients } from './appointmentService';
 import styles from './AppointmentPage.module.css';
 
 export default function AppointmentPage() {
