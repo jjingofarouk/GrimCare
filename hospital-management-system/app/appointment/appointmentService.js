@@ -6,7 +6,9 @@ export async function getAppointments() {
       Authorization: `Bearer ${localStorage.getItem('token')}`,
     },
   });
-  if (!response.ok) throw new Error('Failed to fetch appointments');
+  if (!response.ok) {
+    throw new Error('Failed to fetch appointments');
+  }
   return response.json();
 }
 
@@ -19,6 +21,23 @@ export async function createAppointment(data) {
     },
     body: JSON.stringify(data),
   });
-  if (!response.ok) throw new Error('Failed to create appointment');
+  if (!response.ok) {
+    throw new Error('Failed to create appointment');
+  }
+  return response.json();
+}
+
+export async function updateAppointment(id, data) {
+  const response = await fetch(`${BASE_URL}${API_ROUTES.APPOINTMENT}/${id}`, {
+    method: 'PUT',
+    headers: {
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${localStorage.getItem('token')}`,
+    },
+    body: JSON.stringify(data),
+  });
+  if (!response.ok) {
+    throw new Error('Failed to update appointment');
+  }
   return response.json();
 }
