@@ -1,6 +1,6 @@
 'use client';
 import React, { useState, useEffect } from 'react';
-import { TextField, Button, Box, MenuItem, FormControlLabel, Switch, Input } from '@mui/material';
+import { TextField, Button, Box, MenuItem, Input } from '@mui/material'; // Removed FormControlLabel, Switch
 import styles from './DoctorForm.module.css';
 import * as doctorService from './doctorService';
 
