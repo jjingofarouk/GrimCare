@@ -16,7 +16,7 @@
     "@heroicons/react": "^2.1.5",
     "@mui/icons-material": "^5.14.16",
     "@mui/material": "^5.14.17",
-    "@mui/x-data-grid": "^5.17.29",
+    "@mui/x-data-grid": "^5.17.4",
     "@prisma/client": "^5.17.0",
     "axios": "^1.7.2",
     "bcrypt": "^5.1.1",
@@ -29,14 +29,14 @@
     "tailwindcss": "^3.4.1"
   },
   "devDependencies": {
-    "@testing-library/jest-dom": "^6.4.2",
-    "@testing-library/react": "^14.1.2",
-    "autoprefixer": "^10.4.15",
+    "@testing-library/jest-dom": "^6.4.8",
+    "@testing-library/react": "^16.0.0",
+    "autoprefixer": "^10.4.20",
     "eslint": "^8.57.0",
     "eslint-config-next": "^13.5.11",
     "jest": "^29.7.0",
     "jest-environment-jsdom": "^29.7.0",
-    "postcss": "^8.4.38",
+    "postcss": "^8.4.41",
     "prisma": "^5.17.0"
   }
 }
