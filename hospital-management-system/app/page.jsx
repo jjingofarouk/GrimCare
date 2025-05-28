@@ -1,7 +1,5 @@
 
 import React from 'react';
-import Header from './Header';
-import Sidebar from './Sidebar';
 import DashboardOverview from './dashboard/DashboardOverview';
 
 export default function Home() {
