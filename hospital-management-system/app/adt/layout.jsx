@@ -1,7 +1,5 @@
 import React from 'react';
 
-
-
 export default function AdtLayout({ children }) {
   return (
     <div className="flex min-h-screen">
