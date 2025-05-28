@@ -1,3 +1,5 @@
+"use client";
+
 import React from 'react';
 import AppointmentList from './AppointmentList';
 import AppointmentForm from './AppointmentForm';
