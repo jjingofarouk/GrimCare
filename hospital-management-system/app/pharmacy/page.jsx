@@ -1,3 +1,6 @@
+
+"use client";
+
 // pharmacy/page.jsx
 import React, { useState } from 'react';
 import { Container, Grid, Paper, Tabs, Tab, Box, Typography } from '@mui/material';
