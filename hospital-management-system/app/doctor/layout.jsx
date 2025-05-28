@@ -1,8 +1,13 @@
-import React from 'react';
-import { Outlet } from 'react-router-dom';
+'use client';
+
+import { ReactNode } from 'react';
 import { AppBar, Toolbar, Typography, Container, Box } from '@mui/material';
 
-const DoctorLayout = () => {
+interface DoctorLayoutProps {
+  children: ReactNode;
+}
+
+const DoctorLayout = ({ children }: DoctorLayoutProps) => {
   return (
     <Box sx={{ minHeight: '100vh', bgcolor: 'grey.100' }}>
       <AppBar position="static" color="primary">
@@ -13,7 +18,7 @@ const DoctorLayout = () => {
         </Toolbar>
       </AppBar>
       <Container sx={{ mt: 4, p: 2 }}>
-        <Outlet />
+        {children}
       </Container>
     </Box>
   );
