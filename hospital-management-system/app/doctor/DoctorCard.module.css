@@ -1,7 +1,6 @@
 .card {
-  @apply bg-white p-4 rounded-lg shadow-md mb-4;
+  transition: transform 0.2s;
 }
-
-.title {
-  @apply text-lg font-semibold mb-2;
+.card:hover {
+  transform: translateY(-4px);
 }
