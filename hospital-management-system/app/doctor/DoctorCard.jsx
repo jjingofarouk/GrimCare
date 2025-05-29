@@ -1,19 +1,16 @@
-
+// DoctorCard.js
 'use client';
 import React from 'react';
 import { Card, CardContent, Typography, Chip, Avatar, Box, Button } from '@mui/material';
-import { useRouter } from 'next/navigation';
 import styles from './DoctorCard.module.css';
 import api from '../api';
 
-const DoctorCard = ({ doctor, onEdit, onSelect }) => {
-  const router = useRouter();
-
+const DoctorCard = ({ doctor, onEdit, onSelect, onDelete }) => {
   const handleViewDetails = () => {
     try {
       onSelect(doctor.id);
     } catch (error) {
-      console.error('Navigation error:', error);
+      console.error('Error selecting doctor:', error);
     }
   };
 
