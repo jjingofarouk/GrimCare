@@ -1,20 +1,20 @@
 import { NextResponse } from 'next/server';
-import { registerUser, loginUser } from '../../auth/authService';
+   import { registerUser, loginUser } from '@lib/auth';
 
-export async function POST(request) {
-  try {
-    const { action, ...data } = await request.json();
-
-    if (action === 'register') {
-      const result = await registerUser(data);
-      return NextResponse.json(result, { status: 201 });
-    } else if (action === 'login') {
-      const result = await loginUser(data);
-      return NextResponse.json(result, { status: 200 });
-    } else {
-      return NextResponse.json({ error: 'Invalid action' }, { status: 400 });
-    }
-  } catch (error) {
-    return NextResponse.json({ error: error.message }, { status: 400 });
-  }
-}
+   export async function POST(request) {
+     try {
+       const { action, email, password, name, role } = await request.json();
+       console.log(`API /auth: action=${action}, email=${email}`);
+       if (action === 'register') {
+         const result = await registerUser({ email, password, name, role });
+         return NextResponse.json(result, { status: 201 });
+       } else if (action === 'login') {
+         const result = await loginUser({ email, password });
+         return NextResponse.json(result, { status: 200 });
+       }
+       return NextResponse.json({ error: 'Invalid action' }, { status: 400 });
+     } catch (error) {
+       console.error(`API /auth error: ${error.message}`);
+       return NextResponse.json({ error: error.message }, { status: 400 });
+     }
+   }
