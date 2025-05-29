@@ -1,42 +1,78 @@
 import { PrismaClient } from '@prisma/client';
 import { NextResponse } from 'next/server';
+import { verifyToken } from '@/lib/auth';
 
 const prisma = new PrismaClient();
 
 export async function GET(request, { params }) {
   try {
+    const token = request.headers.get('authorization')?.split('Bearer ')[1];
+    if (!token || !verifyToken(token)) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+
     const doctor = await prisma.doctor.findUnique({
       where: { id: parseInt(params.id) },
+      include: { user: { select: { name: true, email: true } } },
     });
     if (!doctor) {
       return NextResponse.json({ error: 'Doctor not found' }, { status: 404 });
     }
     return NextResponse.json(doctor);
   } catch (error) {
+    console.error(error);
     return NextResponse.json({ error: 'Failed to fetch doctor' }, { status: 500 });
   }
 }
 
 export async function PUT(request, { params }) {
   try {
+    const token = request.headers.get('authorization')?.split('Bearer ')[1];
+    if (!token || !verifyToken(token)) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+
     const data = await request.json();
+    const { email, name, ...doctorData } = data;
+
+    // Update User if email or name provided
+    if (email || name) {
+      await prisma.user.update({
+        where: { id: (await prisma.doctor.findUnique({ where: { id: parseInt(params.id) } })).userId },
+        data: { email, name },
+      });
+    }
+
+    // Update Doctor profile
     const doctor = await prisma.doctor.update({
       where: { id: parseInt(params.id) },
-      data,
+      data: doctorData,
     });
     return NextResponse.json(doctor);
   } catch (error) {
+    console.error(error);
     return NextResponse.json({ error: 'Failed to update doctor' }, { status: 500 });
   }
 }
 
 export async function DELETE(request, { params }) {
   try {
-    await prisma.doctor.delete({
-      where: { id: parseInt(params.id) },
-    });
+    const token = request.headers.get('authorization')?.split('Bearer ')[1];
+    if (!token || !verifyToken(token)) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+
+    const doctor = await prisma.doctor.findUnique({ where: { id: parseInt(params.id) } });
+    if (!doctor) {
+      return NextResponse.json({ error: 'Doctor not found' }, { status: 404 });
+    }
+
+    // Delete associated User
+    await prisma.user.delete({ where: { id: doctor.userId } });
+
     return NextResponse.json({ message: 'Doctor deleted' });
   } catch (error) {
+    console.error(error);
     return NextResponse.json({ error: 'Failed to delete doctor' }, { status: 500 });
   }
 }
