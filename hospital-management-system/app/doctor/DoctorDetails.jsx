@@ -1,3 +1,4 @@
+
 'use client';
 import React, { useState, useEffect } from 'react';
 import { useParams, useRouter } from 'next/navigation';
@@ -8,17 +9,12 @@ import PrescriptionForm from './PrescriptionForm';
 import CaseNoteForm from './CaseNoteForm';
 import DiagnosticOrderForm from './DiagnosticOrderForm';
 import LeaveRequestForm from './LeaveRequestForm';
+import api from '../api';
 
-const mockPatients = [
-  { id: 1, name: 'John Doe', type: 'Inpatient', ward: 'Ward A', recordId: '1' },
-  { id: 2, name: 'Jane Smith', type: 'Outpatient', recordId: '2' },
-];
-
-const DoctorDetails = () => {
-  const { doctorId } = useParams();
+const DoctorDetails = ({ doctorId, initialTab = 0 }) => {
   const router = useRouter();
   const [doctor, setDoctor] = useState(null);
-  const [tabValue, setTabValue] = useState(0);
+  const [tabValue, setTabValue] = useState(initialTab);
   const [schedules, setSchedules] = useState([]);
   const [patients, setPatients] = useState([]);
   const [appointments, setAppointments] = useState([]);
@@ -35,24 +31,28 @@ const DoctorDetails = () => {
 
   useEffect(() => {
     const fetchData = async () => {
-      const doctorData = await doctorService.getDoctorById(doctorId);
-      const scheduleData = await doctorService.getDoctorSchedule(doctorId);
-      const patientData = await doctorService.getAssignedPatients(doctorId);
-      const appointmentData = await doctorService.getAppointments(doctorId);
-      const prescriptionData = await doctorService.getPrescriptions(doctorId);
-      const caseNoteData = await doctorService.getCaseNotes(doctorId);
-      const diagnosticData = await doctorService.getDiagnosticOrders(doctorId);
-      const leaveData = await doctorService.getLeaveRequests(doctorId);
-      const performanceData = await doctorService.getPerformanceSummary(doctorId, { period: 'week' });
-      setDoctor(doctorData);
-      setSchedules(scheduleData);
-      setPatients(patientData);
-      setAppointments(appointmentData);
-      setPrescriptions(prescriptionData);
-      setCaseNotes(caseNoteData);
-      setDiagnosticOrders(diagnosticData);
-      setLeaveRequests(leaveData);
-      setPerformance(performanceData);
+      try {
+        const doctorData = await doctorService.getDoctorById(doctorId);
+        const scheduleData = await doctorService.getDoctorSchedule(doctorId);
+        const patientData = await doctorService.getAssignedPatients(doctorId);
+        const appointmentData = await doctorService.getAppointments(doctorId);
+        const prescriptionData = await doctorService.getPrescriptions(doctorId);
+        const caseNoteData = await doctorService.getCaseNotes(doctorId);
+        const diagnosticData = await doctorService.getDiagnosticOrders(doctorId);
+        const leaveData = await doctorService.getLeaveRequests(doctorId);
+        const performanceData = await doctorService.getPerformanceSummary(doctorId, { period: 'week' });
+        setDoctor(doctorData);
+        setSchedules(scheduleData);
+        setPatients(patientData);
+        setAppointments(appointmentData);
+        setPrescriptions(prescriptionData);
+        setCaseNotes(caseNoteData);
+        setDiagnosticOrders(diagnosticData);
+        setLeaveRequests(leaveData);
+        setPerformance(performanceData);
+      } catch (error) {
+        console.error('Error fetching doctor details:', error);
+      }
     };
     fetchData();
   }, [doctorId]);
@@ -62,53 +62,93 @@ const DoctorDetails = () => {
   };
 
   const handleAddSchedule = async (schedule) => {
-    const newSchedule = await doctorService.createSchedule({ ...schedule, doctorId });
-    setSchedules([...schedules, newSchedule]);
-    setOpenScheduleForm(false);
+    try {
+      const newSchedule = await doctorService.createSchedule({ ...schedule, doctorId });
+      setSchedules([...schedules, newSchedule]);
+      setOpenScheduleForm(false);
+    } catch (error) {
+      console.error('Error adding schedule:', error);
+    }
   };
 
   const handleAddPrescription = async (prescription) => {
-    const newPrescription = await doctorService.createPrescription({ ...prescription, doctorId });
-    setPrescriptions([...prescriptions, newPrescription]);
-    setOpenPrescriptionForm(false);
+    try {
+      const newPrescription = await doctorService.createPrescription({ ...prescription, doctorId });
+      setPrescriptions([...prescriptions, newPrescription]);
+      setOpenPrescriptionForm(false);
+    } catch (error) {
+      console.error('Error adding prescription:', error);
+    }
   };
 
   const handleAddCaseNote = async (caseNote) => {
-    const newCaseNote = await doctorService.createCaseNote({ ...caseNote, doctorId });
-    setCaseNotes([...caseNotes, newCaseNote]);
-    setOpenCaseNoteForm(false);
+    try {
+      const newCaseNote = await doctorService.createCaseNote({ ...caseNote, doctorId });
+      setCaseNotes([...caseNotes, newCaseNote]);
+      setOpenCaseNoteForm(false);
+    } catch (error) {
+      console.error('Error adding case note:', error);
+    }
   };
 
   const handleAddDiagnosticOrder = async (order) => {
-    const newOrder = await doctorService.createDiagnosticOrder({ ...order, doctorId });
-    setDiagnosticOrders([...diagnosticOrders, newOrder]);
-    setOpenDiagnosticForm(false);
+    try {
+      const newOrder = await doctorService.createDiagnosticOrder({ ...order, doctorId });
+      setDiagnosticOrders([...diagnosticOrders, newOrder]);
+      setOpenDiagnosticForm(false);
+    } catch (error) {
+      console.error('Error adding diagnostic order:', error);
+    }
   };
 
   const handleAddLeaveRequest = async (request) => {
-    const newRequest = await doctorService.createLeaveRequest({ ...request, doctorId });
-    setLeaveRequests([...leaveRequests, newRequest]);
-    setOpenLeaveForm(false);
+    try {
+      const newRequest = await doctorService.createLeaveRequest({ ...request, doctorId });
+      setLeaveRequests([...leaveRequests, newRequest]);
+      setOpenLeaveForm(false);
+    } catch (error) {
+      console.error('Error adding leave request:', error);
+    }
   };
 
   const handleUpdateAppointmentStatus = async (appointmentId, status) => {
-    const updated = await doctorService.updateAppointmentStatus(appointmentId, status);
-    setAppointments(appointments.map((appt) => appt.id === appointmentId ? updated : appt));
+    try {
+      const updated = await doctorService.updateAppointmentStatus(appointmentId, status);
+      setAppointments(appointments.map((appt) => appt.id === appointmentId ? updated : appt));
+    } catch (error) {
+      console.error('Error updating appointment status:', error);
+    }
   };
 
-  if (!doctor) return null;
+  const handleViewPatient = (patientRecordId) => {
+    router.push(`${api.API_ROUTES.PATIENT}/${patientRecordId}`);
+  };
+
+  if (!doctor) return <Typography>Loading...</Typography>;
 
   return (
     <Box p={3}>
-      <Typography variant="h4" gutterBottom>{doctor.name} - Details</Typography>
+      <Typography variant="h4" gutterBottom>
+        {doctor.user.name} - Details
+      </Typography>
       <Box display="flex" alignItems="center" mb={3}>
         <Avatar src={doctor.photo} sx={{ width: 80, height: 80, mr: 2 }} />
         <Box>
-          <Typography variant="h6">{doctor.name} ({doctor.designation})</Typography>
-          <Typography variant="body1">{doctor.specialty} - {doctor.department}</Typography>
-          <Typography variant="body2">{doctor.email} | {doctor.phone}</Typography>
-          <Typography variant="body2">Qualifications: {doctor.qualifications}</Typography>
-          <Typography variant="body2">Experience: {doctor.experience} years</Typography>
+          <Typography variant="h6">
+            {doctor.user.name} ({doctor.designation})
+          </Typography>
+          <Typography variant="body1">
+            {doctor.specialty} - {doctor.department}
+          </Typography>
+          <Typography variant="body2">
+            {doctor.user.email} | {doctor.phone}
+          </Typography>
+          <Typography variant="body2">
+            Qualifications: {doctor.qualifications}
+          </Typography>
+          <Typography variant="body2">
+            Experience: {doctor.experience} years
+          </Typography>
         </Box>
       </Box>
       <Tabs value={tabValue} onChange={handleTabChange} sx={{ mb: 3 }}>
@@ -140,7 +180,7 @@ const DoctorDetails = () => {
               <TableBody>
                 {schedules.map((schedule) => (
                   <TableRow key={schedule.id}>
-                    <TableCell>{schedule.date}</TableCell>
+                    <TableCell>{new Date(schedule.date).toLocaleDateString()}</TableCell>
                     <TableCell>{schedule.time}</TableCell>
                     <TableCell>{schedule.type}</TableCell>
                     <TableCell>{schedule.location}</TableCell>
@@ -165,11 +205,11 @@ const DoctorDetails = () => {
             <TableBody>
               {patients.map((patient) => (
                 <TableRow key={patient.id}>
-                  <TableCell>{patient.name}</TableCell>
+                  <TableCell>{patient.user.name}</TableCell>
                   <TableCell>{patient.type}</TableCell>
                   <TableCell>{patient.ward || 'OPD'}</TableCell>
                   <TableCell>
-                    <Button onClick={() => router(`/patients/${patient.recordId}`)}>
+                    <Button onClick={() => handleViewPatient(patient.recordId)}>
                       View Record
                     </Button>
                   </TableCell>
@@ -195,8 +235,8 @@ const DoctorDetails = () => {
               <TableBody>
                 {appointments.map((appt) => (
                   <TableRow key={appt.id}>
-                    <TableCell>{mockPatients.find((p) => p.id === appt.patientId)?.name || 'Unknown'}</TableCell>
-                    <TableCell>{appt.date}</TableCell>
+                    <TableCell>{appt.patient.user.name}</TableCell>
+                    <TableCell>{new Date(appt.date).toLocaleDateString()}</TableCell>
                     <TableCell>{appt.time}</TableCell>
                     <TableCell>{appt.status}</TableCell>
                     <TableCell>
@@ -206,7 +246,7 @@ const DoctorDetails = () => {
                         onChange={(e) => handleUpdateAppointmentStatus(appt.id, e.target.value)}
                         size="small"
                       >
-                        {['Confirmed', 'Pending', 'Cancelled', 'Seen', 'No-Show', 'Follow-Up'].map((option) => (
+                        {['CONFIRMED', 'PENDING', 'CANCELLED', 'SEEN', 'NO_SHOW', 'FOLLOW_UP'].map((option) => (
                           <MenuItem key={option} value={option}>{option}</MenuItem>
                         ))}
                       </TextField>
@@ -237,9 +277,9 @@ const DoctorDetails = () => {
               <TableBody>
                 {prescriptions.map((prescription) => (
                   <TableRow key={prescription.id}>
-                    <TableCell>{mockPatients.find((p) => p.id === prescription.patientId)?.name || 'Unknown'}</TableCell>
+                    <TableCell>{prescription.patient.user.name}</TableCell>
                     <TableCell>{prescription.drugs.join(', ')}</TableCell>
-                    <TableCell>{prescription.date}</TableCell>
+                    <TableCell>{new Date(prescription.date).toLocaleDateString()}</TableCell>
                     <TableCell>{prescription.notes}</TableCell>
                   </TableRow>
                 ))}
@@ -254,23 +294,22 @@ const DoctorDetails = () => {
             Add Case Note
           </Button>
           {openCaseNoteForm && <CaseNoteForm onSave={handleAddCaseNote} onCancel={() => setOpenCaseNoteForm(false)} patients={patients} />}
+        />
           <Paper>
             <Table>
               <TableHead>
-                <TableRow>
-                  <TableCell>Patient</TableCell>
-                  <TableCell>Note</TableCell>
-                  <TableCell>Visibility</TableCell>
-                  <TableCell>Date</TableCell>
-                </TableRow>
-              </TableHead>
+                <TableCell>Patient</TableCell>
+                <TableCell>Note</TableCell>
+                <TableCell>Visibility</TableCell>
+                <TableCell>Date</TableCell>
+              </TableRow>
               <TableBody>
                 {caseNotes.map((note) => (
                   <TableRow key={note.id}>
-                    <TableCell>{mockPatients.find((p) => p.id === note.patientId)?.name || 'Unknown'}</TableCell>
+                    <TableCell>{note.patient.user.name}</TableCell>
                     <TableCell>{note.note}</TableCell>
                     <TableCell>{note.visibility}</TableCell>
-                    <TableCell>{note.date}</TableCell>
+                    <TableCell>{new Date(note.date).toLocaleDateString()}</TableCell>
                   </TableRow>
                 ))}
               </TableBody>
@@ -297,10 +336,10 @@ const DoctorDetails = () => {
               <TableBody>
                 {diagnosticOrders.map((order) => (
                   <TableRow key={order.id}>
-                    <TableCell>{mockPatients.find((p) => p.id === order.patientId)?.name || 'Unknown'}</TableCell>
+                    <TableCell>{order.patient.user.name}</TableCell>
                     <TableCell>{order.test}</TableCell>
                     <TableCell>{order.status}</TableCell>
-                    <TableCell>{order.date}</TableCell>
+                    <TableCell>{new Date(order.date).toLocaleDateString()}</TableCell>
                   </TableRow>
                 ))}
               </TableBody>
@@ -327,8 +366,8 @@ const DoctorDetails = () => {
               <TableBody>
                 {leaveRequests.map((request) => (
                   <TableRow key={request.id}>
-                    <TableCell>{request.startDate}</TableCell>
-                    <TableCell>{request.endDate}</TableCell>
+                    <TableCell>{new Date(request.startDate).toLocaleDateString()}</TableCell>
+                    <TableCell>{new Date(request.endDate).toLocaleDateString()}</TableCell>
                     <TableCell>{request.status}</TableCell>
                     <TableCell>{request.leaveBalance}</TableCell>
                   </TableRow>
@@ -347,7 +386,6 @@ const DoctorDetails = () => {
         </Box>
       )}
     </Box>
-  );
-};
-
-export default DoctorDetails;
+  );};
+}
+  export default DoctorDetails;
