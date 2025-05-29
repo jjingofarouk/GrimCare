@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback } from "react";
 import { useRouter } from "next/navigation";
-import { getCurrentUser, getRoleRedirect } from "./lib/auth";
+import { getCurrentUser, getRoleRedirect } from "../lib/auth";
 
 export const useAuth = () => {
   const [user, setUser] = useState(null);
@@ -10,10 +10,32 @@ export const useAuth = () => {
   const [error, setError] = useState(null);
   const router = useRouter();
 
+  const getTokenFromCookies = () => {
+    if (typeof document === 'undefined') return null;
+    const cookies = document.cookie.split(';').reduce((acc, cookie) => {
+      const [name, value] = cookie.trim().split('=');
+      acc[name] = value;
+      return acc;
+    }, {});
+    return cookies['token'] || null;
+  };
+
+  const setAuthCookie = (token) => {
+    if (typeof document !== 'undefined') {
+      document.cookie = `token=${token}; path=/; max-age=86400; SameSite=Strict; Secure`;
+    }
+  };
+
+  const clearAuthCookie = () => {
+    if (typeof document !== 'undefined') {
+      document.cookie = `token=; path=/; max-age=0; SameSite=Strict`;
+    }
+  };
+
   const checkAuth = useCallback(async () => {
     console.log("Starting checkAuth");
     try {
-      const token = typeof window !== "undefined" ? localStorage.getItem("token") : null;
+      const token = getTokenFromCookies();
       console.log("Token retrieved:", token);
       if (token) {
         console.log("Calling getCurrentUser");
@@ -30,9 +52,7 @@ export const useAuth = () => {
     } catch (err) {
       console.error("checkAuth error:", err.message, err.stack);
       setError(err.message);
-      if (typeof window !== "undefined") {
-        localStorage.removeItem("token");
-      }
+      clearAuthCookie();
       setUser(null);
       console.log("Error occurred, redirecting to /auth");
       router.push("/auth");
@@ -59,10 +79,8 @@ export const useAuth = () => {
       console.log("Login response status:", response.status);
       const data = await response.json();
       if (response.ok) {
-        if (typeof window !== "undefined") {
-          localStorage.setItem("token", data.token);
-          console.log("Token saved:", data.token);
-        }
+        setAuthCookie(data.token);
+        console.log("Token saved:", data.token);
         setUser(data.user);
         const redirectPath = getRoleRedirect(data.user.role);
         console.log("Login successful, redirecting to:", redirectPath);
@@ -89,10 +107,8 @@ export const useAuth = () => {
       console.log("Register response status:", response.status);
       const data = await response.json();
       if (response.ok) {
-        if (typeof window !== "undefined") {
-          localStorage.setItem("token", data.token);
-          console.log("Token saved:", data.token);
-        }
+        setAuthCookie(data.token);
+        console.log("Token saved:", data.token);
         setUser(data.user);
         const redirectPath = getRoleRedirect(data.user.role);
         console.log("Register successful, redirecting to:", redirectPath);
@@ -109,9 +125,7 @@ export const useAuth = () => {
 
   const logout = () => {
     console.log("Logging out");
-    if (typeof window !== "undefined") {
-      localStorage.removeItem("token");
-    }
+    clearAuthCookie();
     setUser(null);
     setError(null);
     router.push("/auth");
