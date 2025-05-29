@@ -1,14 +1,14 @@
+// useAuth.js
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
-import { useRouter } from "next/navigation";
 import { getCurrentUser, getRoleRedirect } from "./lib/auth";
 
 export const useAuth = () => {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const router = useRouter();
+  const [redirectPath, setRedirectPath] = useState(null);
 
   const getTokenFromCookies = () => {
     if (typeof document === 'undefined') return null;
@@ -42,25 +42,25 @@ export const useAuth = () => {
         const userData = await getCurrentUser(token);
         console.log("User data retrieved:", userData);
         setUser(userData);
-        const redirectPath = getRoleRedirect(userData.role);
-        console.log("Redirecting to:", redirectPath);
-        router.push(redirectPath);
+        const path = getRoleRedirect(userData.role);
+        console.log("Setting redirect path:", path);
+        setRedirectPath(path);
       } else {
-        console.log("No token, redirecting to /auth");
-        router.push("/auth");
+        console.log("No token, setting redirect to /auth");
+        setRedirectPath("/auth");
       }
     } catch (err) {
       console.error("checkAuth error:", err.message, err.stack);
       setError(err.message);
       clearAuthCookie();
       setUser(null);
-      console.log("Error occurred, redirecting to /auth");
-      router.push("/auth");
+      console.log("Error occurred, setting redirect to /auth");
+      setRedirectPath("/auth");
     } finally {
       console.log("Setting loading to false");
       setLoading(false);
     }
-  }, [router]);
+  }, []);
 
   useEffect(() => {
     console.log("Running checkAuth effect");
@@ -82,15 +82,17 @@ export const useAuth = () => {
         setAuthCookie(data.token);
         console.log("Token saved:", data.token);
         setUser(data.user);
-        const redirectPath = getRoleRedirect(data.user.role);
-        console.log("Login successful, redirecting to:", redirectPath);
-        router.push(redirectPath);
+        const path = getRoleRedirect(data.user.role);
+        console.log("Login successful, setting redirect to:", path);
+        setRedirectPath(path);
+        return { success: true, redirectPath: path };
       } else {
         throw new Error(data.error || "Login failed");
       }
     } catch (error) {
       console.error("Login error:", error.message, error.stack);
       setError(error.message);
+      setRedirectPath("/auth");
       throw error;
     }
   };
@@ -110,15 +112,17 @@ export const useAuth = () => {
         setAuthCookie(data.token);
         console.log("Token saved:", data.token);
         setUser(data.user);
-        const redirectPath = getRoleRedirect(data.user.role);
-        console.log("Register successful, redirecting to:", redirectPath);
-        router.push(redirectPath);
+        const path = getRoleRedirect(data.user.role);
+        console.log("Register successful, setting redirect to:", path);
+        setRedirectPath(path);
+        return { success: true, redirectPath: path };
       } else {
         throw new Error(data.error || "Registration failed");
       }
     } catch (error) {
       console.error("Register error:", error.message, error.stack);
       setError(error.message);
+      setRedirectPath("/auth");
       throw error;
     }
   };
@@ -128,8 +132,9 @@ export const useAuth = () => {
     clearAuthCookie();
     setUser(null);
     setError(null);
-    router.push("/auth");
+    setRedirectPath("/auth");
+    return { success: true, redirectPath: "/auth" };
   };
 
-  return { user, loading, error, login, register, logout };
+  return { user, loading, error, redirectPath, login, register, logout };
 };
