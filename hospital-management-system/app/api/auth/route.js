@@ -18,3 +18,5 @@ import { NextResponse } from 'next/server';
        return NextResponse.json({ error: error.message }, { status: 400 });
      }
    }
+   
+   console.log('JWT_SECRET:', process.env.JWT_SECRET);
