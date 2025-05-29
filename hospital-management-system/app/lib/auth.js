@@ -66,49 +66,63 @@ export const hasPermission = (userRole, featureName) => {
 };
 
 export const verifyToken = async (token) => {
+  console.log("Verifying token in verifyToken:", token);
   try {
-    if (!token) return null;
+    if (!token) {
+      console.log("No token provided");
+      return null;
+    }
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    console.log("Token decoded:", decoded);
     if (decoded.exp * 1000 < Date.now()) {
+      console.log("Token expired");
       return null;
     }
     return decoded;
   } catch (error) {
-    console.error('Token verification failed:', error);
+    console.error("Token verification failed:", error.message, error.stack);
     return null;
   }
 };
 
 export const getRoleRedirect = (role) => {
+  console.log("Getting redirect for role:", role);
   return ROLE_REDIRECTS[role] || '/dashboard';
 };
 
 export const getCurrentUser = async (token) => {
+  console.log("Starting getCurrentUser with token:", token);
   try {
-    console.log("Verifying token:", token);
-    const decoded = jwt.verify(token, process.env.JWT_SECRET);
-    console.log("Decoded token:", decoded);
+    const decoded = await verifyToken(token);
+    if (!decoded) {
+      throw new Error("Invalid or expired token");
+    }
+    console.log("Decoded token in getCurrentUser:", decoded);
     const user = await prisma.user.findUnique({ where: { id: decoded.userId } });
     if (!user) {
+      console.log("User not found for ID:", decoded.userId);
       throw new Error("User not found");
     }
-    console.log("Fetched user:", user);
+    console.log("User fetched:", user);
     return { id: user.id, email: user.email, name: user.name, role: user.role };
   } catch (error) {
-    console.error("getCurrentUser error:", error.message);
-    throw new Error("Invalid token");
+    console.error("getCurrentUser error:", error.message, error.stack);
+    throw error;
   }
 };
 
 export const loginUser = async ({ email, password }) => {
+  console.log("Starting loginUser for:", email);
   try {
     const user = await prisma.user.findUnique({ where: { email } });
     if (!user) {
+      console.log("User not found for email:", email);
       throw new Error("Invalid credentials");
     }
 
     const isPasswordValid = await bcrypt.compare(password, user.password);
     if (!isPasswordValid) {
+      console.log("Invalid password for user:", email);
       throw new Error("Invalid credentials");
     }
 
@@ -117,23 +131,25 @@ export const loginUser = async ({ email, password }) => {
       process.env.JWT_SECRET,
       { expiresIn: "1d" }
     );
-
+    console.log("Login token generated:", token);
     return { user: { id: user.id, email: user.email, name: user.name, role: user.role }, token };
   } catch (error) {
-    console.error("loginUser error:", error.message);
+    console.error("loginUser error:", error.message, error.stack);
     throw new Error(error.message || "Login failed");
   }
 };
 
 export const registerUser = async ({ email, password, name, role }) => {
+  console.log("Starting registerUser for:", email);
   try {
     const existingUser = await prisma.user.findUnique({ where: { email } });
     if (existingUser) {
+      console.log("User already exists:", email);
       throw new Error("User already exists");
     }
 
     const hashedPassword = await bcrypt.hash(password, 10);
-
+    console.log("Password hashed for:", email);
     const user = await prisma.user.create({
       data: {
         email,
@@ -142,16 +158,17 @@ export const registerUser = async ({ email, password, name, role }) => {
         role: role || "USER",
       },
     });
+    console.log("User created:", user);
 
     const token = jwt.sign(
       { userId: user.id, email: user.email, role: user.role },
       process.env.JWT_SECRET,
       { expiresIn: "1d" }
     );
-
+    console.log("Register token generated:", token);
     return { user: { id: user.id, email: user.email, name: user.name, role: user.role }, token };
   } catch (error) {
-    console.error("registerUser error:", error.message);
+    console.error("registerUser error:", error.message, error.stack);
     throw new Error(error.message || "Registration failed");
   }
 };
