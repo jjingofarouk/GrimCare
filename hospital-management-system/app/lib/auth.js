@@ -16,25 +16,35 @@ export const ROLE_PERMISSIONS = {
     'Fixed Assets', 'Helpdesk', 'Incentive', 'Inventory', 'Laboratory', 'Maternity',
     'Medical Records', 'Marketing Referral', 'NHIF', 'Nursing', 'Operation Theatre',
     'Pharmacy', 'Procurement', 'Queue Management', 'Radiology', 'Reports',
-    'Social Service', 'Substore', 'System Admin', 'Utilities', 'Vaccination', 'Settings'
+    'Social Service', 'Substore', 'System Admin', 'Utilities', 'Vaccination',
+    'Profile', 'Settings', 'Clinical Settings', 'System Admin'
   ],
   NURSE: [
     'Dashboard', 'Patients', 'Appointments', 'Clinical', 'Maternity', 'Nursing',
-    'Operation Theatre', 'Queue Management'
+    'Operation Theatre', 'Queue Management', 'Profile', 'Settings'
   ],
   DOCTOR: [
     'Dashboard', 'Patients', 'Appointments', 'Clinical', 'Medical Records',
-    'Operation Theatre', 'Radiology', 'Laboratory'
+    'Operation Theatre', 'Radiology', 'Laboratory', 'Profile', 'Settings'
   ],
   HELP_DESK: [
-    'Dashboard', 'Helpdesk', 'Queue Management'
+    'Dashboard', 'Helpdesk', 'Queue Management', 'Profile', 'Settings'
   ],
   LAB_TECHNICIAN: [
-    'Dashboard', 'Laboratory', 'Radiology'
+    'Dashboard', 'Laboratory', 'Radiology', 'Profile', 'Settings'
   ],
   USER: [
-    'Dashboard', 'Patients', 'Appointments'
+    'Dashboard', 'Patients', 'Appointments', 'Profile', 'Settings'
   ]
+};
+
+export const ROLE_REDIRECTS = {
+  ADMIN: '/system-admin',
+  NURSE: '/nursing',
+  DOCTOR: '/clinical',
+  HELP_DESK: '/helpdesk',
+  LAB_TECHNICIAN: '/laboratory',
+  USER: '/dashboard'
 };
 
 export const isAuthenticated = () => {
@@ -63,4 +73,8 @@ export const verifyToken = async (token) => {
     console.error('Token verification failed:', error);
     return null;
   }
+};
+
+export const getRoleRedirect = (role) => {
+  return ROLE_REDIRECTS[role] || '/dashboard';
 };
