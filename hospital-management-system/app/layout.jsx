@@ -1,21 +1,31 @@
+// app/layout.js
 "use client";
 
-import React, { useState, Suspense } from "react";
+import React, { useEffect, useState, Suspense } from "react";
+import { useRouter } from "next/navigation";
 import Header from "./Header";
 import Sidebar from "./Sidebar";
 import { useAuth } from "./useAuth";
 import { Box, Typography, Alert } from "@mui/material";
 
 export default function RootLayout({ children }) {
-  const { user, loading, error } = useAuth();
+  const { user, loading, error, redirectPath } = useAuth();
   const [isSidebarOpen, setSidebarOpen] = useState(false);
+  const router = useRouter();
 
   const toggleSidebar = () => {
     setSidebarOpen(!isSidebarOpen);
   };
 
+  useEffect(() => {
+    if (redirectPath && router) {
+      console.log("Navigating to:", redirectPath);
+      router.push(redirectPath);
+    }
+  }, [redirectPath, router]);
+
   if (loading) {
-    return <Box />; // Empty box instead of spinner
+    return <Box />;
   }
 
   if (error) {
@@ -29,7 +39,7 @@ export default function RootLayout({ children }) {
   }
 
   if (!user) {
-    return null; // Redirect handled in useAuth.js or middleware
+    return null; // Redirect handled by useAuth's redirectPath
   }
 
   return (
