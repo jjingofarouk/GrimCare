@@ -8,7 +8,7 @@ import PrescriptionForm from './PrescriptionForm';
 import CaseNoteForm from './CaseNoteForm';
 import DiagnosticOrderForm from './DiagnosticOrderForm';
 import LeaveRequestForm from './LeaveRequestForm';
-import api from '@/lib/api';
+import api from '../api';
 
 const DoctorDetails = ({ doctorId, initialTab = 0 }) => {
   const router = useRouter();
@@ -365,7 +365,7 @@ const DoctorDetails = ({ doctorId, initialTab = 0 }) => {
               </TableHead>
               <TableBody>
                 {leaveRequests.map((request) => (
-                  <TableRow key={request.id">
+                  <TableRow key={request.id}>
                     <TableCell>{new Date(request.startDate).toLocaleDateString()}</TableCell>
                     <TableCell>{new Date(request.endDate).toLocaleDateString()}</TableCell>
                     <TableCell>{request.status}</TableCell>
