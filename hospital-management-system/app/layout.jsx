@@ -1,7 +1,7 @@
 // app/layout.jsx
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Header from './Header';
 import Sidebar from './Sidebar';
 import { useAuth } from './useAuth';
@@ -17,20 +17,25 @@ export default function RootLayout({ children }) {
     setSidebarOpen(!isSidebarOpen);
   };
 
+  useEffect(() => {
+    if (!loading && !user) {
+      router.push('/auth');
+    }
+  }, [user, loading, router]);
+
   if (loading) {
     return <div>Loading...</div>;
-  }
-
-  if (!user) {
-    router.push('/auth');
-    return null;
   }
 
   return (
     <html lang="en">
       <body className={styles.body}>
-        <Header toggleSidebar={toggleSidebar} />
-        <Sidebar isOpen={isSidebarOpen} toggleSidebar={toggleSidebar} />
+        {user && (
+          <>
+            <Header toggleSidebar={toggleSidebar} />
+            <Sidebar isOpen={isSidebarOpen} toggleSidebar={toggleSidebar} />
+          </>
+        )}
         <main className={styles.main}>
           {children}
         </main>
