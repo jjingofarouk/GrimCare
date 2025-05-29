@@ -2,7 +2,7 @@
 
 import React from "react";
 import Link from "next/link";
-import { hasPermission } from "../lib/auth";
+import { hasPermission } from "@lib/auth";
 import { useAuth } from "./useAuth";
 import styles from "./Sidebar.module.css";
 
