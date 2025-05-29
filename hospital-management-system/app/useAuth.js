@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { getCurrentUser, getRoleRedirect } from "../lib/auth";
+import { getCurrentUser, getRoleRedirect } from "./lib/auth";
 
 export const useAuth = () => {
   const [user, setUser] = useState(null);
