@@ -45,7 +45,6 @@ export default function Sidebar({ isOpen, toggleSidebar }) {
     { name: "Vaccination", path: "/vaccination", permission: "Vaccination" },
   ];
 
-  if (!user) return null; // Don't render sidebar if not authenticated
 
   return (
     <aside className={`${styles.sidebar} ${isOpen ? styles.open : styles.closed}`}>
