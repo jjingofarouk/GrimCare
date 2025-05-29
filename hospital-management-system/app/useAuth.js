@@ -1,8 +1,8 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useRouter } from "next/navigation";
-import { getCurrentUser, getRoleRedirect } from "./lib/auth";
+import { getCurrentUser, getRoleRedirect } from "../lib/auth";
 
 export const useAuth = () => {
   const [user, setUser] = useState(null);
@@ -10,31 +10,45 @@ export const useAuth = () => {
   const [error, setError] = useState(null);
   const router = useRouter();
 
-  useEffect(() => {
-    const checkAuth = async () => {
-      try {
-        const token = localStorage.getItem("token");
-        if (token) {
-          const userData = await getCurrentUser(token);
-          setUser(userData);
-          router.push(getRoleRedirect(userData.role));
-        } else {
-          router.push("/auth");
-        }
-      } catch (err) {
-        console.error("Auth error:", err.message);
-        setError(err.message);
-        localStorage.removeItem("token");
-        setUser(null);
+  const checkAuth = useCallback(async () => {
+    console.log("Starting checkAuth");
+    try {
+      const token = typeof window !== "undefined" ? localStorage.getItem("token") : null;
+      console.log("Token retrieved:", token);
+      if (token) {
+        console.log("Calling getCurrentUser");
+        const userData = await getCurrentUser(token);
+        console.log("User data retrieved:", userData);
+        setUser(userData);
+        const redirectPath = getRoleRedirect(userData.role);
+        console.log("Redirecting to:", redirectPath);
+        router.push(redirectPath);
+      } else {
+        console.log("No token, redirecting to /auth");
         router.push("/auth");
-      } finally {
-        setLoading(false);
       }
-    };
-    checkAuth();
+    } catch (err) {
+      console.error("checkAuth error:", err.message, err.stack);
+      setError(err.message);
+      if (typeof window !== "undefined") {
+        localStorage.removeItem("token");
+      }
+      setUser(null);
+      console.log("Error occurred, redirecting to /auth");
+      router.push("/auth");
+    } finally {
+      console.log("Setting loading to false");
+      setLoading(false);
+    }
   }, [router]);
 
+  useEffect(() => {
+    console.log("Running checkAuth effect");
+    checkAuth();
+  }, [checkAuth]);
+
   const login = async (email, password) => {
+    console.log("Starting login for:", email);
     try {
       setError(null);
       const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/auth`, {
@@ -42,21 +56,29 @@ export const useAuth = () => {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ action: "login", email, password }),
       });
+      console.log("Login response status:", response.status);
       const data = await response.json();
       if (response.ok) {
-        localStorage.setItem("token", data.token);
+        if (typeof window !== "undefined") {
+          localStorage.setItem("token", data.token);
+          console.log("Token saved:", data.token);
+        }
         setUser(data.user);
-        router.push(getRoleRedirect(data.user.role));
+        const redirectPath = getRoleRedirect(data.user.role);
+        console.log("Login successful, redirecting to:", redirectPath);
+        router.push(redirectPath);
       } else {
         throw new Error(data.error || "Login failed");
       }
     } catch (error) {
+      console.error("Login error:", error.message, error.stack);
       setError(error.message);
       throw error;
     }
   };
 
   const register = async (email, password, name, role) => {
+    console.log("Starting register for:", email);
     try {
       setError(null);
       const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/auth`, {
@@ -64,22 +86,32 @@ export const useAuth = () => {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ action: "register", email, password, name, role }),
       });
+      console.log("Register response status:", response.status);
       const data = await response.json();
       if (response.ok) {
-        localStorage.setItem("token", data.token);
+        if (typeof window !== "undefined") {
+          localStorage.setItem("token", data.token);
+          console.log("Token saved:", data.token);
+        }
         setUser(data.user);
-        router.push(getRoleRedirect(data.user.role));
+        const redirectPath = getRoleRedirect(data.user.role);
+        console.log("Register successful, redirecting to:", redirectPath);
+        router.push(redirectPath);
       } else {
         throw new Error(data.error || "Registration failed");
       }
     } catch (error) {
+      console.error("Register error:", error.message, error.stack);
       setError(error.message);
       throw error;
     }
   };
 
   const logout = () => {
-    localStorage.removeItem("token");
+    console.log("Logging out");
+    if (typeof window !== "undefined") {
+      localStorage.removeItem("token");
+    }
     setUser(null);
     setError(null);
     router.push("/auth");
