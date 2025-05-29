@@ -1,26 +1,39 @@
 // app/middleware.js
 import { NextResponse } from 'next/server';
-import { hasPermission } from './lib/auth'; // Note: ./lib/auth, not ./auth
+import { hasPermission } from './lib/auth';
 import jwt from 'jsonwebtoken';
 
 export async function middleware(request) {
   const { pathname } = request.nextUrl;
-  const token = request.cookies.get('token')?.value; // Get token from cookies
+  const token = request.headers.get('authorization')?.replace('Bearer ', '');
 
-  const publicRoutes = ['/auth', '/api/auth'];
-  if (publicRoutes.some((route) => pathname.startsWith(route))) {
+  console.log(`Middleware: Path=${pathname}, Token=${token ? '[present]' : 'none'}, JWT_SECRET=${process.env.JWT_SECRET ? '[present]' : 'missing'}`);
+
+  // Validate JWT_SECRET
+  if (!process.env.JWT_SECRET) {
+    console.error('JWT_SECRET environment variable is missing');
+    return NextResponse.redirect(new URL('/auth', request.url));
+  }
+
+  // Public routes
+  const publicRoutes = ['/auth', '/api/auth', '/'];
+  if (publicRoutes.some((route) => pathname === route || pathname.startsWith(route))) {
     return NextResponse.next();
   }
 
+  // Check token presence
   if (!token) {
     console.warn(`No token found, redirecting to /auth for path: ${pathname}`);
     return NextResponse.redirect(new URL('/auth', request.url));
   }
 
   try {
+    // Verify token
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    console.log(`Middleware: Token decoded, role=${decoded.role}`);
     const userRole = decoded.role;
 
+    // Route to feature mapping
     const routeToFeatureMap = {
       '/dashboard': 'Dashboard',
       '/patient': 'Patients',
@@ -47,7 +60,7 @@ export async function middleware(request) {
       '/operation-theatre': 'Operation Theatre',
       '/pharmacy': 'Pharmacy',
       '/procurement': 'Procurement',
-      '/queue-mngmt': 'Queue Management',
+      '/queue-mgmt': 'Queue Management', // Fixed typo
       '/radiology': 'Radiology',
       '/reports': 'Reports',
       '/social-service': 'Social Service',
@@ -62,6 +75,7 @@ export async function middleware(request) {
       pathname.startsWith(route)
     );
 
+    // Check permissions
     if (featureName && !hasPermission(userRole, routeToFeatureMap[featureName])) {
       console.warn(`User role ${userRole} lacks permission for ${featureName}, redirecting to /dashboard`);
       return NextResponse.redirect(new URL('/dashboard', request.url));
@@ -101,7 +115,7 @@ export const config = {
     '/operation-theatre/:path*',
     '/pharmacy/:path*',
     '/procurement/:path*',
-    '/queue-mngmt/:path*',
+    '/queue-mgmt/:path*', // Fixed typo
     '/radiology/:path*',
     '/reports/:path*',
     '/social-service/:path*',
@@ -112,6 +126,3 @@ export const config = {
     '/settings/:path*',
   ],
 };
-
-console.log('JWT_SECRET:', process.env.JWT_SECRET);
-
