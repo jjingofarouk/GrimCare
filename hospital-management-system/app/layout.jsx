@@ -4,7 +4,7 @@ import React, { useState, Suspense } from "react";
 import Header from "./Header";
 import Sidebar from "./Sidebar";
 import { useAuth } from "./useAuth";
-import { Box, CircularProgress, Typography, Alert } from "@mui/material";
+import { Box, Typography, Alert } from "@mui/material";
 
 export default function RootLayout({ children }) {
   const { user, loading, error } = useAuth();
@@ -15,31 +15,12 @@ export default function RootLayout({ children }) {
   };
 
   if (loading) {
-    return (
-      <Box
-        sx={{
-          display: "flex",
-          justifyContent: "center",
-          alignItems: "center",
-          minHeight: "100vh",
-        }}
-      >
-        <CircularProgress />
-      </Box>
-    );
+    return <Box />; // Empty box instead of spinner
   }
 
   if (error) {
     return (
-      <Box
-        sx={{
-          display: "flex",
-          justifyContent: "center",
-          alignItems: "center",
-          minHeight: "100vh",
-          p: 2,
-        }}
-      >
+      <Box sx={{ display: "flex", justifyContent: "center", alignItems: "center", minHeight: "100vh", p: 2 }}>
         <Alert severity="error">
           <Typography>Authentication error: {error}</Typography>
         </Alert>
@@ -62,7 +43,7 @@ export default function RootLayout({ children }) {
         }}
       >
         <Header toggleSidebar={toggleSidebar} />
-        <Suspense fallback={<CircularProgress />}>
+        <Suspense fallback={<Box />}>
           <Box
             component="main"
             sx={{
