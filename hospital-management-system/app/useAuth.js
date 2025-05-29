@@ -1,34 +1,42 @@
+"use client";
+
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { getCurrentUser, getRoleRedirect } from "./lib/auth";
+import { getCurrentUser, getRoleRedirect } from "../lib/auth";
 
 export const useAuth = () => {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
   const router = useRouter();
 
   useEffect(() => {
     const checkAuth = async () => {
-      const token = localStorage.getItem("token");
-      if (token) {
-        try {
+      try {
+        const token = localStorage.getItem("token");
+        if (token) {
           const userData = await getCurrentUser(token);
           setUser(userData);
-          // Redirect to role-specific page after authentication
           router.push(getRoleRedirect(userData.role));
-        } catch (error) {
-          localStorage.removeItem("token");
-          setUser(null);
+        } else {
           router.push("/auth");
         }
+      } catch (err) {
+        console.error("Auth error:", err.message);
+        setError(err.message);
+        localStorage.removeItem("token");
+        setUser(null);
+        router.push("/auth");
+      } finally {
+        setLoading(false);
       }
-      setLoading(false);
     };
     checkAuth();
   }, [router]);
 
   const login = async (email, password) => {
     try {
+      setError(null);
       const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/auth`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -43,12 +51,14 @@ export const useAuth = () => {
         throw new Error(data.error || "Login failed");
       }
     } catch (error) {
-      throw new Error(error.message);
+      setError(error.message);
+      throw error;
     }
   };
 
   const register = async (email, password, name, role) => {
     try {
+      setError(null);
       const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/auth`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -63,15 +73,17 @@ export const useAuth = () => {
         throw new Error(data.error || "Registration failed");
       }
     } catch (error) {
-      throw new Error(error.message);
+      setError(error.message);
+      throw error;
     }
   };
 
   const logout = () => {
     localStorage.removeItem("token");
     setUser(null);
+    setError(null);
     router.push("/auth");
   };
 
-  return { user, loading, login, register, logout };
+  return { user, loading, error, login, register, logout };
 };
