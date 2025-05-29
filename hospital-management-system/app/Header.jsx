@@ -1,4 +1,3 @@
-// app/Header.jsx (Revised)
 "use client";
 
 import React from "react";
