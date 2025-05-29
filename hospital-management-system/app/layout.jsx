@@ -1,71 +1,26 @@
-// app/layout.js
-"use client";
+'use client';
 
-import React, { useEffect, useState, Suspense } from "react";
-import { useRouter } from "next/navigation";
-import Header from "./Header";
-import Sidebar from "./Sidebar";
-import { useAuth } from "./useAuth";
-import { Box, Typography, Alert } from "@mui/material";
+import React, { useState } from 'react';
+import './globals.css';
+import Header from './Header';
+import Sidebar from './Sidebar';
 
 export default function RootLayout({ children }) {
-  const { user, loading, error, redirectPath } = useAuth();
-  const [isSidebarOpen, setSidebarOpen] = useState(false);
-  const router = useRouter();
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
   const toggleSidebar = () => {
-    setSidebarOpen(!isSidebarOpen);
+    setIsSidebarOpen(!isSidebarOpen);
   };
 
-  useEffect(() => {
-    if (redirectPath && router) {
-      console.log("Navigating to:", redirectPath);
-      router.push(redirectPath);
-    }
-  }, [redirectPath, router]);
-
-  if (loading) {
-    return <Box />;
-  }
-
-  if (error) {
-    return (
-      <Box sx={{ display: "flex", justifyContent: "center", alignItems: "center", minHeight: "100vh", p: 2 }}>
-        <Alert severity="error">
-          <Typography>Authentication error: {error}</Typography>
-        </Alert>
-      </Box>
-    );
-  }
-
-  if (!user) {
-    return null; // Redirect handled by useAuth's redirectPath
-  }
-
   return (
-    <Box sx={{ display: "flex", minHeight: "100vh" }}>
-      <Sidebar isOpen={isSidebarOpen} toggleSidebar={toggleSidebar} />
-      <Box
-        sx={{
-          flex: 1,
-          marginLeft: { xs: 0, lg: isSidebarOpen ? "280px" : "0" },
-          transition: "margin-left 0.3s ease-in-out",
-        }}
-      >
+    <html lang="en">
+      <body>
         <Header toggleSidebar={toggleSidebar} />
-        <Suspense fallback={<Box />}>
-          <Box
-            component="main"
-            sx={{
-              padding: { xs: "4rem 0.5rem 1rem", sm: "5rem 1rem 1rem" },
-              maxWidth: "1400px",
-              margin: "0 auto",
-            }}
-          >
-            {children}
-          </Box>
-        </Suspense>
-      </Box>
-    </Box>
+        <div className="layout-container">
+          <Sidebar isOpen={isSidebarOpen} toggleSidebar={toggleSidebar} />
+          <main className="main-content">{children}</main>
+        </div>
+      </body>
+    </html>
   );
 }

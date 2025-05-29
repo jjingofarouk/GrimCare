@@ -1,33 +1,27 @@
-// useAuth.js
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
 import { getCurrentUser, getRoleRedirect } from "./lib/auth";
 
 export const useAuth = () => {
-  const [user, setUser] = useState(null);
+  const [user, setUser] = useState({});
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [redirectPath, setRedirectPath] = useState(null);
 
   const getTokenFromCookies = () => {
-    if (typeof document === 'undefined') return null;
-    const cookies = document.cookie.split(';').reduce((acc, cookie) => {
-      const [name, value] = cookie.trim().split('=');
-      acc[name] = value;
-      return acc;
-    }, {});
-    return cookies['token'] || null;
+    if (typeof document === "undefined") return null;
+    return document.cookie.match(/(?:^|;\s*)token=([^;]*)/)?.[1] || null;
   };
 
   const setAuthCookie = (token) => {
-    if (typeof document !== 'undefined') {
+    if (typeof document !== "undefined") {
       document.cookie = `token=${token}; path=/; max-age=86400; SameSite=Strict; Secure`;
     }
   };
 
   const clearAuthCookie = () => {
-    if (typeof document !== 'undefined') {
+    if (typeof document !== "undefined") {
       document.cookie = `token=; path=/; max-age=0; SameSite=Strict`;
     }
   };
@@ -41,31 +35,29 @@ export const useAuth = () => {
         console.log("Calling getCurrentUser");
         const userData = await getCurrentUser(token);
         console.log("User data retrieved:", userData);
-        setUser(userData);
-        const path = getRoleRedirect(userData.role);
-        console.log("Setting redirect path:", path);
-        setRedirectPath(path);
+        setUser(userData || {});
+        setRedirectPath(getRoleRedirect(userData?.role));
       } else {
         console.log("No token, setting redirect to /auth");
         setRedirectPath("/auth");
       }
     } catch (err) {
-      console.error("checkAuth error:", err.message, err.stack);
+      console.error("checkAuth error:", err.message);
       setError(err.message);
       clearAuthCookie();
-      setUser(null);
-      console.log("Error occurred, setting redirect to /auth");
+      setUser({});
       setRedirectPath("/auth");
     } finally {
-      console.log("Setting loading to false");
       setLoading(false);
     }
   }, []);
 
   useEffect(() => {
-    console.log("Running checkAuth effect");
-    checkAuth();
-  }, [checkAuth]);
+    if (!user?.role) {
+      console.log("Running checkAuth effect");
+      checkAuth();
+    }
+  }, [user, checkAuth]);
 
   const login = async (email, password) => {
     console.log("Starting login for:", email);
@@ -80,47 +72,14 @@ export const useAuth = () => {
       const data = await response.json();
       if (response.ok) {
         setAuthCookie(data.token);
-        console.log("Token saved:", data.token);
-        setUser(data.user);
-        const path = getRoleRedirect(data.user.role);
-        console.log("Login successful, setting redirect to:", path);
-        setRedirectPath(path);
-        return { success: true, redirectPath: path };
+        setUser(data.user || {});
+        setRedirectPath(getRoleRedirect(data.user?.role));
+        return { success: true, redirectPath };
       } else {
         throw new Error(data.error || "Login failed");
       }
     } catch (error) {
-      console.error("Login error:", error.message, error.stack);
-      setError(error.message);
-      setRedirectPath("/auth");
-      throw error;
-    }
-  };
-
-  const register = async (email, password, name, role) => {
-    console.log("Starting register for:", email);
-    try {
-      setError(null);
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/auth`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ action: "register", email, password, name, role }),
-      });
-      console.log("Register response status:", response.status);
-      const data = await response.json();
-      if (response.ok) {
-        setAuthCookie(data.token);
-        console.log("Token saved:", data.token);
-        setUser(data.user);
-        const path = getRoleRedirect(data.user.role);
-        console.log("Register successful, setting redirect to:", path);
-        setRedirectPath(path);
-        return { success: true, redirectPath: path };
-      } else {
-        throw new Error(data.error || "Registration failed");
-      }
-    } catch (error) {
-      console.error("Register error:", error.message, error.stack);
+      console.error("Login error:", error.message);
       setError(error.message);
       setRedirectPath("/auth");
       throw error;
@@ -130,11 +89,11 @@ export const useAuth = () => {
   const logout = () => {
     console.log("Logging out");
     clearAuthCookie();
-    setUser(null);
+    setUser({});
     setError(null);
     setRedirectPath("/auth");
     return { success: true, redirectPath: "/auth" };
   };
 
-  return { user, loading, error, redirectPath, login, register, logout };
+  return { user, loading, error, redirectPath, login, logout };
 };
