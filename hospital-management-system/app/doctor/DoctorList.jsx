@@ -4,21 +4,30 @@ import { Grid, Button, Box } from '@mui/material';
 import DoctorCard from './DoctorCard';
 import * as doctorService from './doctorService';
 import styles from './DoctorList.module.css';
+import api from '@/lib/api';
 
 const DoctorList = ({ onEdit }) => {
   const [doctors, setDoctors] = useState([]);
 
   useEffect(() => {
     const fetchDoctors = async () => {
-      const data = await doctorService.getDoctors();
-      setDoctors(data);
+      try {
+        const data = await doctorService.getDoctors();
+        setDoctors(data);
+      } catch (error) {
+        console.error(error);
+      }
     };
     fetchDoctors();
   }, []);
 
   const handleDelete = async (id) => {
-    await doctorService.deleteDoctor(id);
-    setDoctors(doctors.filter((doctor) => doctor.id !== id));
+    try {
+      await doctorService.deleteDoctor(id);
+      setDoctors(doctors.filter((doctor) => doctor.id !== id));
+    } catch (error) {
+      console.error(error);
+    }
   };
 
   return (
