@@ -52,36 +52,35 @@ export const ROLE_REDIRECTS = {
 };
 
 export const isAuthenticated = () => {
-  if (typeof window === 'undefined') return false;
-  return !!localStorage.getItem('token');
+  return false; // Not used in middleware; rely on cookies
 };
 
 export const getToken = () => {
-  if (typeof window === 'undefined') return null;
-  return localStorage.getItem('token');
+  return null; // Not used; tokens are handled via cookies
 };
 
 export const hasPermission = (userRole, featureName) => {
+  console.log(`Checking permission for role: ${userRole}, feature: ${featureName}`);
   return ROLE_PERMISSIONS[userRole]?.includes(featureName) || false;
 };
 
 export const verifyToken = async (token) => {
-  console.log("Verifying token in verifyToken:", token);
+  console.log("Verifying token:", token);
   try {
     if (!token) {
       console.log("No token provided");
-      return null;
+      throw new Error("No token provided");
     }
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
     console.log("Token decoded:", decoded);
     if (decoded.exp * 1000 < Date.now()) {
       console.log("Token expired");
-      return null;
+      throw new Error("Token expired");
     }
     return decoded;
   } catch (error) {
     console.error("Token verification failed:", error.message, error.stack);
-    return null;
+    throw error;
   }
 };
 
@@ -94,9 +93,6 @@ export const getCurrentUser = async (token) => {
   console.log("Starting getCurrentUser with token:", token);
   try {
     const decoded = await verifyToken(token);
-    if (!decoded) {
-      throw new Error("Invalid or expired token");
-    }
     console.log("Decoded token in getCurrentUser:", decoded);
     const user = await prisma.user.findUnique({ where: { id: decoded.userId } });
     if (!user) {
