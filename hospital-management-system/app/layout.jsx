@@ -4,7 +4,7 @@ import React, { useState, Suspense } from "react";
 import Header from "./Header";
 import Sidebar from "./Sidebar";
 import { useAuth } from "./useAuth";
-import { Box, CircularProgress } from "@mui/material";
+import { Box, CircularProgress, Typography, Alert } from "@mui/material";
 
 export default function RootLayout({ children }) {
   const { user, loading, error } = useAuth();
@@ -29,8 +29,26 @@ export default function RootLayout({ children }) {
     );
   }
 
-  if (!user || error) {
-    return null; // Router push is handled in useAuth.js
+  if (error) {
+    return (
+      <Box
+        sx={{
+          display: "flex",
+          justifyContent: "center",
+          alignItems: "center",
+          minHeight: "100vh",
+          p: 2,
+        }}
+      >
+        <Alert severity="error">
+          <Typography>Authentication error: {error}</Typography>
+        </Alert>
+      </Box>
+    );
+  }
+
+  if (!user) {
+    return null; // Redirect handled in useAuth.js
   }
 
   return (
