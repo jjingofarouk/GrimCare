@@ -48,7 +48,7 @@ export default function RootLayout({ children }) {
   }
 
   if (!user) {
-    return null; // Redirect handled in useAuth.js
+    return null; // Redirect handled in useAuth.js or middleware
   }
 
   return (
