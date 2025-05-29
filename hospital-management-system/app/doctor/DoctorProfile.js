@@ -1,12 +1,15 @@
+
 'use client';
 import React, { useState, useEffect } from 'react';
-import { Box, Typography, Card, CardContent, Avatar, Chip, Grid } from '@mui/material';
+import { useBox, Typography, Card, CardContent, Avatar, Chip, Grid, Button } from '@mui/material';
 import * as doctorService from './doctorService';
+import { useRouter } from 'next/navigation';
 import api from '../api';
 
 const DoctorProfile = ({ doctorId }) => {
   const [doctor, setDoctor] = useState(null);
   const [loading, setLoading] = useState(true);
+  const router = useRouter();
 
   useEffect(() => {
     const fetchDoctor = async () => {
@@ -19,8 +22,20 @@ const DoctorProfile = ({ doctorId }) => {
         setLoading(false);
       }
     };
-    fetchDoctor();
+    if (doctorId) {
+      fetchDoctor();
+    } else {
+      setLoading(false);
+    }
   }, [doctorId]);
+
+  const handleViewFullDetails = () => {
+    try {
+      router.push(`/doctors/${doctorId}`);
+    } catch (error) {
+      console.error('Navigation error:', error);
+    }
+  };
 
   if (loading) {
     return <Typography>Loading...</Typography>;
@@ -31,28 +46,28 @@ const DoctorProfile = ({ doctorId }) => {
   }
 
   return (
-    <Box sx={{ maxWidth: 800, mx: 'auto', p: 3 }}>
+    <Box sx={{ maxWidth: 600, mx: 'auto', p: 3 }}>
       <Card>
         <CardContent>
           <Box display="flex" alignItems="center" mb={3}>
-            <Avatar src={doctor.photo || '/default-avatar.png'} sx={{ width: 100, height: 100, mr: 2 }} />
+            <Avatar src={doctor.photo || '/default-avatar.png'} sx={{ width: 100, height: 100, mr: 2' }} />
             <Box>
               <Typography variant="h5">{doctor.user.name}</Typography>
               <Typography variant="subtitle1" color="textSecondary">
                 {doctor.designation} - {doctor.specialty}
               </Typography>
-              <Chip 
-                label={doctor.availabilityStatus} 
-                color={doctor.availabilityStatus === 'AVAILABLE' ? 'success' : 'error'} 
-                size="small" 
-                sx={{ mt: 1 }}
+              <Chip
+                label={doctor.availabilityStatus}
+                color={doctor.availabilityStatus === 'AVAILABLE' ? 'success' : 'error'}
+                size="small"
               />
+                sx={{ mt: 1 }}
             </Box>
           </Box>
           <Grid container spacing={2}>
-            <Grid item xs={12} sm={6}>
+            <GridItem xs={12} sm={6}>
               <Typography variant="body1"><strong>Email:</strong> {doctor.user.email}</Typography>
-            </Grid>
+            </GridItem>
             <Grid item xs={12} sm={6}>
               <Typography variant="body1"><strong>Phone:</strong> {doctor.phone || 'N/A'}</Typography>
             </Grid>
@@ -70,6 +85,11 @@ const DoctorProfile = ({ doctorId }) => {
             </Grid>
             <Grid item xs={12}>
               <Typography variant="body1"><strong>Hospital:</strong> {doctor.hospital}</Typography>
+            </Grid>
+            <Grid item xs={12}>
+              <Button variant="contained" onClick={handleViewFullDetails}>
+                View Full Profile
+              </Button>
             </Grid>
           </Grid>
         </CardContent>
