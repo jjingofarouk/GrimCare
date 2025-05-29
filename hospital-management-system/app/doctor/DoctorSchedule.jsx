@@ -4,6 +4,7 @@ import { useParams } from 'next/navigation';
 import { Table, TableBody, TableCell, TableHead, TableRow, Paper, Button, Box } from '@mui/material';
 import * as doctorService from './doctorService';
 import ScheduleForm from './ScheduleForm';
+import api from '@/lib/api';
 
 const DoctorSchedule = () => {
   const { doctorId } = useParams();
@@ -12,16 +13,24 @@ const DoctorSchedule = () => {
 
   useEffect(() => {
     const fetchSchedule = async () => {
-      const data = await doctorService.getDoctorSchedule(doctorId);
-      setSchedules(data);
+      try {
+        const data = await doctorService.getDoctorSchedule(doctorId);
+        setSchedules(data);
+      } catch (error) {
+        console.error(error);
+      }
     };
     fetchSchedule();
   }, [doctorId]);
 
   const handleAddSchedule = async (schedule) => {
-    const newSchedule = await doctorService.createSchedule({ ...schedule, doctorId });
-    setSchedules([...schedules, newSchedule]);
-    setOpenForm(false);
+    try {
+      const newSchedule = await doctorService.createSchedule({ ...schedule, doctorId });
+      setSchedules([...schedules, newSchedule]);
+      setOpenForm(false);
+    } catch (error) {
+      console.error(error);
+    }
   };
 
   return (
@@ -43,7 +52,7 @@ const DoctorSchedule = () => {
           <TableBody>
             {schedules.map((schedule) => (
               <TableRow key={schedule.id}>
-                <TableCell>{schedule.date}</TableCell>
+                <TableCell>{new Date(schedule.date).toLocaleDateString()}</TableCell>
                 <TableCell>{schedule.time}</TableCell>
                 <TableCell>{schedule.type}</TableCell>
                 <TableCell>{schedule.location}</TableCell>
