@@ -2,7 +2,7 @@
 
 import React from "react";
 import Link from "next/link";
-import { hasPermission } from "./auth";
+import { hasPermission } from "../lib/auth";
 import { useAuth } from "./useAuth";
 import styles from "./Sidebar.module.css";
 
@@ -45,28 +45,26 @@ export default function Sidebar({ isOpen, toggleSidebar }) {
     { name: "Vaccination", path: "/vaccination", permission: "Vaccination" },
   ];
 
+  if (!user) return null; // Don't render sidebar if not authenticated
+
   return (
     <aside className={`${styles.sidebar} ${isOpen ? styles.open : styles.closed}`}>
       <button onClick={toggleSidebar} className={styles.closeButton}>
         ×
       </button>
       <nav className={styles.nav}>
-        {user ? (
-          menuItems
-            .filter(({ permission }) => hasPermission(user.role, permission))
-            .map(({ name, path }) => (
-              <Link
-                key={path}
-                href={path}
-                className={styles.navItem}
-                onClick={toggleSidebar}
-              >
-                {name}
-              </Link>
-            ))
-        ) : (
-          <div className={styles.navItem}>Please log in</div>
-        )}
+        {menuItems
+          .filter(({ permission }) => hasPermission(user.role, permission))
+          .map(({ name, path }) => (
+            <Link
+              key={path}
+              href={path}
+              className={styles.navItem}
+              onClick={() => toggleSidebar()}
+            >
+              {name}
+            </Link>
+          ))}
       </nav>
     </aside>
   );
