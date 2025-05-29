@@ -4,7 +4,7 @@ import React from "react";
 import { UserCircleIcon, BellIcon, Bars3Icon } from "@heroicons/react/24/outline";
 import Link from "next/link";
 import { useAuth } from "./useAuth";
-import { hasPermission } from "@lib/auth";
+import { hasPermission } from "./lib/auth";
 import styles from "./Header.module.css";
 
 export default function Header({ toggleSidebar }) {
