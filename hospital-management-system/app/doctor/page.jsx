@@ -4,6 +4,7 @@ import { Tabs, Tab, Box } from '@mui/material';
 import DoctorList from './DoctorList';
 import DoctorForm from './DoctorForm';
 import DoctorDetails from './DoctorDetails';
+import api from '../api';
 
 const DoctorPage = () => {
   const [tabValue, setTabValue] = useState(0);
@@ -19,7 +20,7 @@ const DoctorPage = () => {
     setTabValue(1);
   };
 
-  const handleViewDetails = (doctorId) => {
+  const handleSelectDoctor = (doctorId) => {
     setSelectedDoctor({ id: doctorId });
     setTabValue(2);
   };
@@ -45,7 +46,7 @@ const DoctorPage = () => {
         <Tab label="Leave Requests" disabled={!selectedDoctor} />
         <Tab label="Performance" disabled={!selectedDoctor} />
       </Tabs>
-      {tabValue === 0 && <DoctorList onEdit={handleEdit} onViewDetails={handleViewDetails} />}
+      {tabValue === 0 && <DoctorList onEdit={handleEdit} onSelect={handleSelectDoctor} />}
       {tabValue === 1 && (
         <DoctorForm
           doctor={selectedDoctor}
