@@ -18,8 +18,6 @@ export default function Header({ toggleSidebar }) {
     { name: "System Admin", path: "/system-admin", permission: "System Admin" },
   ];
 
-  if (!user) return null; // Don't render header if not authenticated
-
   return (
     <header className={styles.header}>
       <div className={styles.container}>
@@ -31,45 +29,49 @@ export default function Header({ toggleSidebar }) {
         </div>
         <div className={styles.right}>
           <BellIcon className={styles.icon} />
-          <div className={styles.profile}>
-            <button
-              onClick={() => setProfileOpen(!isProfileOpen)}
-              className={styles.profileButton}
-            >
-              <UserCircleIcon className={styles.icon} />
-              <div className={styles.userInfo}>
-                <span className={styles.userName}>{user.name || "User"}</span>
-                <span className={styles.userRole}>{user.role}</span>
-              </div>
-            </button>
-            {isProfileOpen && (
-              <div className={styles.dropdown}>
-                {dropdownItems
-                  .filter(({ permission }) =>
-                    hasPermission(user.role, permission)
-                  )
-                  .map(({ name, path }) => (
-                    <Link
-                      key={path}
-                      href={path}
-                      className={styles.dropdownItem}
-                      onClick={() => setProfileOpen(false)}
-                    >
-                      {name}
-                    </Link>
-                  ))}
-                <button
-                  className={styles.dropdownItem}
-                  onClick={() => {
-                    logout();
-                    setProfileOpen(false);
-                  }}
-                >
-                  Logout
-                </button>
-              </div>
-            )}
-          </div>
+          {user ? (
+            <div className={styles.profile}>
+              <button
+                onClick={() => setProfileOpen(!isProfileOpen)}
+                className={styles.profileButton}
+              >
+                <UserCircleIcon className={styles.icon} />
+                <div className={styles.userInfo}>
+                  <span className={styles.userName}>{user.name || "User"}</span>
+                  <span className={styles.userRole}>{user.role}</span>
+                </div>
+              </button>
+              {isProfileOpen && (
+                <div className={styles.dropdown}>
+                  {dropdownItems
+                    .filter(({ permission }) => hasPermission(user.role, permission))
+                    .map(({ name, path }) => (
+                      <Link
+                        key={path}
+                        href={path}
+                        className={styles.dropdownItem}
+                        onClick={() => setProfileOpen(false)}
+                      >
+                        {name}
+                      </Link>
+                    ))}
+                  <button
+                    className={styles.dropdownItem}
+                    onClick={() => {
+                      logout();
+                      setProfileOpen(false);
+                    }}
+                  >
+                    Logout
+                  </button>
+                </div>
+              )}
+            </div>
+          ) : (
+            <Link href="/login" className={styles.loginLink}>
+              Login
+            </Link>
+          )}
         </div>
       </div>
     </header>
