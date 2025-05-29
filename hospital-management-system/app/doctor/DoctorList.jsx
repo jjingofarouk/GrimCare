@@ -4,7 +4,7 @@ import { Grid, Button, Box } from '@mui/material';
 import DoctorCard from './DoctorCard';
 import * as doctorService from './doctorService';
 import styles from './DoctorList.module.css';
-import api from '@/lib/api';
+import api from '../api';
 
 const DoctorList = ({ onEdit }) => {
   const [doctors, setDoctors] = useState([]);
