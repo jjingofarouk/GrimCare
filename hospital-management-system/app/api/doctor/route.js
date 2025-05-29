@@ -1,6 +1,6 @@
 import { PrismaClient } from '@prisma/client';
 import { NextResponse } from 'next/server';
-import { verifyToken } from '@/lib/auth'; // Assume a JWT verification utility
+import { verifyToken } from '@/lib/auth';
 
 const prisma = new PrismaClient();
 
@@ -10,7 +10,6 @@ export async function GET(request) {
     if (!token || !verifyToken(token)) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
-
     const doctors = await prisma.doctor.findMany({
       include: { user: { select: { name: true, email: true } } },
     });
@@ -27,11 +26,8 @@ export async function POST(request) {
     if (!token || !verifyToken(token)) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
-
     const data = await request.json();
     const { email, name, password, ...doctorData } = data;
-
-    // Create User with DOCTOR role
     const user = await prisma.user.create({
       data: {
         email,
@@ -40,15 +36,12 @@ export async function POST(request) {
         role: 'DOCTOR',
       },
     });
-
-    // Create Doctor profile
     const doctor = await prisma.doctor.create({
       data: {
         userId: user.id,
         ...doctorData,
       },
     });
-
     return NextResponse.json(doctor, { status: 201 });
   } catch (error) {
     console.error(error);
