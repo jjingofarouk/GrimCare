@@ -1,4 +1,8 @@
 import jwt from 'jsonwebtoken';
+import bcrypt from 'bcryptjs';
+import { PrismaClient } from '@prisma/client';
+
+const prisma = new PrismaClient();
 
 export const ROLES = {
   ADMIN: 'ADMIN',
@@ -77,4 +81,77 @@ export const verifyToken = async (token) => {
 
 export const getRoleRedirect = (role) => {
   return ROLE_REDIRECTS[role] || '/dashboard';
+};
+
+export const getCurrentUser = async (token) => {
+  try {
+    console.log("Verifying token:", token);
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    console.log("Decoded token:", decoded);
+    const user = await prisma.user.findUnique({ where: { id: decoded.userId } });
+    if (!user) {
+      throw new Error("User not found");
+    }
+    console.log("Fetched user:", user);
+    return { id: user.id, email: user.email, name: user.name, role: user.role };
+  } catch (error) {
+    console.error("getCurrentUser error:", error.message);
+    throw new Error("Invalid token");
+  }
+};
+
+export const loginUser = async ({ email, password }) => {
+  try {
+    const user = await prisma.user.findUnique({ where: { email } });
+    if (!user) {
+      throw new Error("Invalid credentials");
+    }
+
+    const isPasswordValid = await bcrypt.compare(password, user.password);
+    if (!isPasswordValid) {
+      throw new Error("Invalid credentials");
+    }
+
+    const token = jwt.sign(
+      { userId: user.id, email: user.email, role: user.role },
+      process.env.JWT_SECRET,
+      { expiresIn: "1d" }
+    );
+
+    return { user: { id: user.id, email: user.email, name: user.name, role: user.role }, token };
+  } catch (error) {
+    console.error("loginUser error:", error.message);
+    throw new Error(error.message || "Login failed");
+  }
+};
+
+export const registerUser = async ({ email, password, name, role }) => {
+  try {
+    const existingUser = await prisma.user.findUnique({ where: { email } });
+    if (existingUser) {
+      throw new Error("User already exists");
+    }
+
+    const hashedPassword = await bcrypt.hash(password, 10);
+
+    const user = await prisma.user.create({
+      data: {
+        email,
+        password: hashedPassword,
+        name,
+        role: role || "USER",
+      },
+    });
+
+    const token = jwt.sign(
+      { userId: user.id, email: user.email, role: user.role },
+      process.env.JWT_SECRET,
+      { expiresIn: "1d" }
+    );
+
+    return { user: { id: user.id, email: user.email, name: user.name, role: user.role }, token };
+  } catch (error) {
+    console.error("registerUser error:", error.message);
+    throw new Error(error.message || "Registration failed");
+  }
 };
