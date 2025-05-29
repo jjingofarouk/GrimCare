@@ -3,6 +3,7 @@ import React from 'react';
 import { Card, CardContent, Typography, Chip, Avatar, Box, Button } from '@mui/material';
 import { useRouter } from 'next/navigation';
 import styles from './DoctorCard.module.css';
+import api from '@/lib/api';
 
 const DoctorCard = ({ doctor, onEdit, onDelete }) => {
   const router = useRouter();
@@ -11,24 +12,23 @@ const DoctorCard = ({ doctor, onEdit, onDelete }) => {
     <Card className={styles.card}>
       <CardContent>
         <Box display="flex" alignItems="center" mb={2}>
-          <Avatar src={doctor.photo || '/default-avatar.png'}>{doctor.name[0]}</Avatar>
+          <Avatar src={doctor.photo || '/default-avatar.png'}>{doctor.user.name[0]}</Avatar>
           <Box ml={2}>
-            <Typography variant="h6">{doctor.name}</Typography>
+            <Typography variant="h6">{doctor.user.name}</Typography>
             <Typography variant="body2" color="textSecondary">{doctor.designation} - {doctor.specialty}</Typography>
           </Box>
         </Box>
         <Typography variant="body2"><strong>Department:</strong> {doctor.department}</Typography>
         <Typography variant="body2"><strong>Ward:</strong> {doctor.ward}</Typography>
-        <Typography variant="body2"><strong>Email:</strong> {doctor.email}</Typography>
+        <Typography variant="body2"><strong>Email:</strong> {doctor.user.email}</Typography>
         <Typography variant="body2"><strong>Phone:</strong> {doctor.phone}</Typography>
         <Typography variant="body2"><strong>Status:</strong> 
           <Chip 
             label={doctor.availabilityStatus} 
-            color={doctor.availabilityStatus === 'Available' ? 'success' : 'error'} 
+            color={doctor.availabilityStatus === 'AVAILABLE' ? 'success' : 'error'} 
             size="small"
           />
         </Typography>
-        <Typography variant="body2"><strong>Patients Today:</strong> {doctor.performance?.patientsToday || 0}</Typography>
         <Box mt={2} display="flex" gap={1}>
           <Button 
             variant="outlined" 
