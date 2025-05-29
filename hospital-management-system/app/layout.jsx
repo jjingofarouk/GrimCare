@@ -4,13 +4,11 @@ import React, { useState, Suspense } from "react";
 import Header from "./Header";
 import Sidebar from "./Sidebar";
 import { useAuth } from "./useAuth";
-import { useRouter } from "next/navigation";
 import { Box, CircularProgress } from "@mui/material";
 
 export default function RootLayout({ children }) {
-  const { user, loading } = useAuth();
+  const { user, loading, error } = useAuth();
   const [isSidebarOpen, setSidebarOpen] = useState(false);
-  const router = useRouter();
 
   const toggleSidebar = () => {
     setSidebarOpen(!isSidebarOpen);
@@ -31,9 +29,8 @@ export default function RootLayout({ children }) {
     );
   }
 
-  if (!user) {
-    router.push("/auth");
-    return null;
+  if (!user || error) {
+    return null; // Router push is handled in useAuth.js
   }
 
   return (
