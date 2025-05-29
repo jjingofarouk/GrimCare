@@ -1,10 +1,11 @@
+// app/middleware.js
 import { NextResponse } from 'next/server';
-import { getToken, hasPermission } from './auth';
+import { hasPermission } from './lib/auth'; // Note: ./lib/auth, not ./auth
 import jwt from 'jsonwebtoken';
 
 export async function middleware(request) {
-  const token = getToken();
   const { pathname } = request.nextUrl;
+  const token = request.cookies.get('token')?.value; // Get token from cookies
 
   const publicRoutes = ['/auth', '/api/auth'];
   if (publicRoutes.some((route) => pathname.startsWith(route))) {
@@ -12,6 +13,7 @@ export async function middleware(request) {
   }
 
   if (!token) {
+    console.warn(`No token found, redirecting to /auth for path: ${pathname}`);
     return NextResponse.redirect(new URL('/auth', request.url));
   }
 
@@ -61,11 +63,13 @@ export async function middleware(request) {
     );
 
     if (featureName && !hasPermission(userRole, routeToFeatureMap[featureName])) {
+      console.warn(`User role ${userRole} lacks permission for ${featureName}, redirecting to /dashboard`);
       return NextResponse.redirect(new URL('/dashboard', request.url));
     }
 
     return NextResponse.next();
   } catch (error) {
+    console.error(`Middleware error: ${error.message}, redirecting to /auth`);
     return NextResponse.redirect(new URL('/auth', request.url));
   }
 }
