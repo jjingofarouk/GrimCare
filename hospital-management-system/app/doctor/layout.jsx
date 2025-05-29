@@ -1,3 +1,6 @@
+
+
+"use client";
 // app/doctor/layout.jsx
 import React from 'react';
 import { AppBar, Toolbar, Typography, Container, Box } from '@mui/material';
