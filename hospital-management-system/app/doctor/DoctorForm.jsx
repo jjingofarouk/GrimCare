@@ -1,28 +1,45 @@
-'use client';
+
+       'use client';
 import React, { useState, useEffect } from 'react';
-import { TextField, Button, Box, MenuItem, Input } from '@mui/material'; // Removed FormControlLabel, Switch
+import { TextField, Button, Box, MenuItem, Input } from '@mui/material';
 import styles from './DoctorForm.module.css';
 import * as doctorService from './doctorService';
+import api from '@/lib/api';
 
 const DoctorForm = ({ doctor, onSave, onCancel }) => {
   const [formData, setFormData] = useState({
     name: '',
+    email: '',
+    password: '',
     photo: '',
     specialty: '',
     department: '',
     ward: '',
-    email: '',
     phone: '',
     designation: '',
     qualifications: '',
     experience: '',
-    availabilityStatus: 'Available',
+    availabilityStatus: 'AVAILABLE',
     hospital: 'Mulago National Referral Hospital',
   });
 
   useEffect(() => {
     if (doctor) {
-      setFormData(doctor);
+      setFormData({
+        name: doctor.user.name,
+        email: doctor.user.email,
+        password: '',
+        photo: doctor.photo || '',
+        specialty: doctor.specialty,
+        department: doctor.department,
+        ward: doctor.ward || '',
+        phone: doctor.phone || '',
+        designation: doctor.designation,
+        qualifications: doctor.qualifications || '',
+        experience: doctor.experience || '',
+        availabilityStatus: doctor.availabilityStatus,
+        hospital: doctor.hospital,
+      });
     }
   }, [doctor]);
 
@@ -62,6 +79,26 @@ const DoctorForm = ({ doctor, onSave, onCancel }) => {
         fullWidth
         margin="normal"
         required
+      />
+      <TextField
+        label="Email"
+        name="email"
+        value={formData.email}
+        onChange={handleChange}
+        fullWidth
+        margin="normal"
+        type="email"
+        required
+      />
+      <TextField
+        label="Password"
+        name="password"
+        value={formData.password}
+        onChange={handleChange}
+        fullWidth
+        margin="normal"
+        type="password"
+        required={!doctor}
       />
       <Input
         type="file"
@@ -124,15 +161,6 @@ const DoctorForm = ({ doctor, onSave, onCancel }) => {
         ))}
       </TextField>
       <TextField
-        label="Email"
-        name="email"
-        value={formData.email}
-        onChange={handleChange}
-        fullWidth
-        margin="normal"
-        type="email"
-      />
-      <TextField
         label="Phone"
         name="phone"
         value={formData.phone}
@@ -169,7 +197,7 @@ const DoctorForm = ({ doctor, onSave, onCancel }) => {
         margin="normal"
         select
       >
-        {['Available', 'On Leave', 'On Duty', 'In Surgery', 'In Consultation'].map((option) => (
+        {['AVAILABLE', 'ON_LEAVE', 'ON_DUTY', 'IN_SURGERY', 'IN_CONSULTATION'].map((option) => (
           <MenuItem key={option} value={option}>{option}</MenuItem>
         ))}
       </TextField>
