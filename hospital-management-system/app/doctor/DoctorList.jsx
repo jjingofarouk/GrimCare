@@ -1,3 +1,4 @@
+
 'use client';
 import React, { useState, useEffect } from 'react';
 import { Grid, Button, Box } from '@mui/material';
@@ -6,7 +7,7 @@ import * as doctorService from './doctorService';
 import styles from './DoctorList.module.css';
 import api from '../api';
 
-const DoctorList = ({ onEdit }) => {
+const DoctorList = ({ onEdit, onSelect }) => {
   const [doctors, setDoctors] = useState([]);
 
   useEffect(() => {
@@ -15,7 +16,7 @@ const DoctorList = ({ onEdit }) => {
         const data = await doctorService.getDoctors();
         setDoctors(data);
       } catch (error) {
-        console.error(error);
+        console.error('Error fetching doctors:', error);
       }
     };
     fetchDoctors();
@@ -26,7 +27,7 @@ const DoctorList = ({ onEdit }) => {
       await doctorService.deleteDoctor(id);
       setDoctors(doctors.filter((doctor) => doctor.id !== id));
     } catch (error) {
-      console.error(error);
+      console.error('Error deleting doctor:', error);
     }
   };
 
@@ -40,7 +41,12 @@ const DoctorList = ({ onEdit }) => {
       <Grid container spacing={2}>
         {doctors.map((doctor) => (
           <Grid item xs={12} sm={6} md={4} key={doctor.id}>
-            <DoctorCard doctor={doctor} onEdit={onEdit} onDelete={handleDelete} />
+            <DoctorCard
+              doctor={doctor}
+              onEdit={onEdit}
+              onSelect={onSelect}
+              onDelete={handleDelete}
+            />
           </Grid>
         ))}
       </Grid>
