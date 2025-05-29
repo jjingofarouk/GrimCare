@@ -4,7 +4,6 @@ import React, { useState, useEffect } from 'react';
 import { TextField, Button, Box, MenuItem, Input } from '@mui/material';
 import styles from './DoctorForm.module.css';
 import * as doctorService from './doctorService';
-import api from '../api';
 
 const DoctorForm = ({ doctor, onSave, onCancel }) => {
   const [formData, setFormData] = useState({
