@@ -1,10 +1,13 @@
-
 'use client';
 import React from 'react';
 import { Box, Typography, Button } from '@mui/material';
 
 class ErrorBoundary extends React.Component {
-  state = { hasError: false, error: null };
+  constructor(props) {
+    super(props);
+    this.state = { hasError: false, error: null };
+    this.handleReset = this.handleReset.bind(this);
+  }
 
   static getDerivedStateFromError(error) {
     return { hasError: true, error };
@@ -14,9 +17,9 @@ class ErrorBoundary extends React.Component {
     console.error('Error caught by boundary:', error, errorInfo);
   }
 
-  handleReset = () => {
+  handleReset() {
     this.setState({ hasError: false, error: null });
-  };
+  }
 
   render() {
     if (this.state.hasError) {
@@ -34,6 +37,7 @@ class ErrorBoundary extends React.Component {
         </Box>
       );
     }
+
     return this.props.children;
   }
 }
