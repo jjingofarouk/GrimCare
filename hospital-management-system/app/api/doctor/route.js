@@ -1,6 +1,6 @@
 import { PrismaClient } from '@prisma/client';
    import { NextResponse } from 'next/server';
-   import { verifyToken } from '@lib/auth';
+   import { verifyToken } from '../../lib/auth';
    import bcrypt from 'bcryptjs';
 
    const prisma = new PrismaClient();
