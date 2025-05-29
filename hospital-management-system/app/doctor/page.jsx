@@ -1,4 +1,3 @@
-
 'use client';
 import React, { useState } from 'react';
 import { Tabs, Tab, Box } from '@mui/material';
@@ -9,7 +8,7 @@ import ErrorBoundary from '../components/ErrorBoundary';
 import api from '../api';
 
 const DoctorPage = () => {
-  const [tabValue, setTabValue] = useState(0');
+  const [tabValue, setTabValue] = useState('0');
   const [selectedDoctor, setSelectedDoctor] = useState(null);
 
   const handleTabChange = (event, newValue) => {
