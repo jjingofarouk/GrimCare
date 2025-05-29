@@ -1,7 +1,6 @@
-// app/useAuth.js (Revised)
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { getCurrentUser } from "./auth/authService";
+import { getCurrentUser, getRoleRedirect } from "../lib/auth";
 
 export const useAuth = () => {
   const [user, setUser] = useState(null);
@@ -15,15 +14,18 @@ export const useAuth = () => {
         try {
           const userData = await getCurrentUser(token);
           setUser(userData);
+          // Redirect to role-specific page after authentication
+          router.push(getRoleRedirect(userData.role));
         } catch (error) {
           localStorage.removeItem("token");
           setUser(null);
+          router.push("/auth");
         }
       }
       setLoading(false);
     };
     checkAuth();
-  }, []);
+  }, [router]);
 
   const login = async (email, password) => {
     try {
@@ -36,7 +38,7 @@ export const useAuth = () => {
       if (response.ok) {
         localStorage.setItem("token", data.token);
         setUser(data.user);
-        router.push("/dashboard");
+        router.push(getRoleRedirect(data.user.role));
       } else {
         throw new Error(data.error || "Login failed");
       }
@@ -56,7 +58,7 @@ export const useAuth = () => {
       if (response.ok) {
         localStorage.setItem("token", data.token);
         setUser(data.user);
-        router.push("/dashboard");
+        router.push(getRoleRedirect(data.user.role));
       } else {
         throw new Error(data.error || "Registration failed");
       }
