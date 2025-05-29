@@ -1,10 +1,11 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, Suspense } from "react";
 import Header from "./Header";
 import Sidebar from "./Sidebar";
 import { useAuth } from "./useAuth";
 import { useRouter } from "next/navigation";
+import { Box, CircularProgress } from "@mui/material";
 
 export default function RootLayout({ children }) {
   const { user, loading } = useAuth();
@@ -16,7 +17,18 @@ export default function RootLayout({ children }) {
   };
 
   if (loading) {
-    return <div>Loading...</div>;
+    return (
+      <Box
+        sx={{
+          display: "flex",
+          justifyContent: "center",
+          alignItems: "center",
+          minHeight: "100vh",
+        }}
+      >
+        <CircularProgress />
+      </Box>
+    );
   }
 
   if (!user) {
@@ -25,14 +37,29 @@ export default function RootLayout({ children }) {
   }
 
   return (
-    <div style={{ display: "flex", minHeight: "100vh" }}>
+    <Box sx={{ display: "flex", minHeight: "100vh" }}>
       <Sidebar isOpen={isSidebarOpen} toggleSidebar={toggleSidebar} />
-      <div style={{ flex: 1, marginLeft: isSidebarOpen ? "280px" : "0", transition: "margin-left 0.3s ease-in-out" }}>
+      <Box
+        sx={{
+          flex: 1,
+          marginLeft: { xs: 0, lg: isSidebarOpen ? "280px" : "0" },
+          transition: "margin-left 0.3s ease-in-out",
+        }}
+      >
         <Header toggleSidebar={toggleSidebar} />
-        <main style={{ padding: "5rem 1rem 1rem", maxWidth: "1400px", margin: "0 auto" }}>
-          {children}
-        </main>
-      </div>
-    </div>
+        <Suspense fallback={<CircularProgress />}>
+          <Box
+            component="main"
+            sx={{
+              padding: { xs: "4rem 0.5rem 1rem", sm: "5rem 1rem 1rem" },
+              maxWidth: "1400px",
+              margin: "0 auto",
+            }}
+          >
+            {children}
+          </Box>
+        </Suspense>
+      </Box>
+    </Box>
   );
 }
