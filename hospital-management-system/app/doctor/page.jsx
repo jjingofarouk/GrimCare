@@ -1,66 +1,74 @@
+
 'use client';
 import React, { useState } from 'react';
 import { Tabs, Tab, Box } from '@mui/material';
 import DoctorList from './DoctorList';
 import DoctorForm from './DoctorForm';
 import DoctorDetails from './DoctorDetails';
-import api from '../api';
+import ErrorBoundary from '../components/ErrorBoundary';
+import api from '@/lib/api-doctor';
 
 const DoctorPage = () => {
-  const [tabValue, setTabValue] = useState(0);
+  const [tabValue, setTabValue] = useState(0');
   const [selectedDoctor, setSelectedDoctor] = useState(null);
 
   const handleTabChange = (event, newValue) => {
     setTabValue(newValue);
-    if (newValue !== 1) setSelectedDoctor(null);
+    if (newValue !== '1') {
+      setSelectedDoctor(null);
+    }
   };
 
   const handleEdit = (doctor) => {
     setSelectedDoctor(doctor);
-    setTabValue(1);
+    setTabValue('1');
   };
 
-  const handleSelectDoctor = (doctorId) => {
+  const handleDoctorSelect = (doctorId) => {
     setSelectedDoctor({ id: doctorId });
-    setTabValue(2);
+    setTabValue('2');
   };
 
   return (
-    <Box sx={{ p: 3 }}>
-      <Tabs 
-        value={tabValue} 
-        onChange={handleTabChange} 
-        variant="scrollable" 
-        scrollButtons
-        allowScrollButtonsMobile
-        sx={{ mb: 3 }}
-      >
-        <Tab label="Doctor List" />
-        <Tab label={selectedDoctor ? 'Edit Doctor' : 'Add Doctor'} />
-        <Tab label="Schedules" disabled={!selectedDoctor} />
-        <Tab label="Patients" disabled={!selectedDoctor} />
-        <Tab label="Appointments" disabled={!selectedDoctor} />
-        <Tab label="Prescriptions" disabled={!selectedDoctor} />
-        <Tab label="Case Notes" disabled={!selectedDoctor} />
-        <Tab label="Diagnostic Orders" disabled={!selectedDoctor} />
-        <Tab label="Leave Requests" disabled={!selectedDoctor} />
-        <Tab label="Performance" disabled={!selectedDoctor} />
-      </Tabs>
-      {tabValue === 0 && <DoctorList onEdit={handleEdit} onSelect={handleSelectDoctor} />}
-      {tabValue === 1 && (
-        <DoctorForm
-          doctor={selectedDoctor}
-          onSave={() => setTabValue(0)}
-          onCancel={() => setTabValue(0)}
-        />
-      )}
-      {tabValue >= 2 && selectedDoctor && (
-        <DoctorDetails
-          doctorId={selectedDoctor.id}
-          initialTab={tabValue - 2}
-        />
-      )}
-    </Box>
+    <ErrorBoundary>
+      <Box sx={{ padding: '24px' }}>
+        <Tabs
+          value={tabValue}
+          onChange={handleTabChange}
+          variant="scrollable"
+          scrollButtons
+          allowScrollButtonsMobile
+          sx={{ marginBottom: '24px' }}
+        >
+          <Tab label="Doctor List" />
+          <Tab label={selectedDoctor ? 'Edit Doctor' : 'Add Doctor'} />
+          <Tab label="Schedules" disabled={!selectedDoctor} />
+          <Tab label="Patients" disabled={!selectedDoctor} />
+          <Tab label="Appointments" disabled={!selectedDoctor} />
+          <Tab label="Prescriptions" disabled={!selectedDoctor} />
+          <Tab label="Case Notes" disabled={!selectedDoctor} />
+          <Tab label="Diagnostic Orders" disabled={!selectedDoctor} />
+          <Tab label="Leave Requests" disabled={!selectedDoctor} />
+          <Tab label="Performance" disabled={!selectedDoctor} />
+        </Tabs>
+        {tabValue === '0' && (
+          <DoctorList onEdit={handleEdit} onSelect={handleDoctorSelect} />
+        )}
+        {tabValue === '1' && (
+          <DoctorForm
+            doctor={selectedDoctor}
+            onSave={() => setTabValue('0')}
+            onCancel={() => setTabValue('0')}
+          />
+        )}
+        {tabValue >= '2' && selectedDoctor && (
+          <DoctorDetails
+            doctorId={selectedDoctor.id}
+            initialTab={parseInt(tabValue) - 2}
+          />
+        )}
+      </Box>
+    </ErrorBoundary>
   );
 };
 
