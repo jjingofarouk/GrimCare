@@ -1,4 +1,3 @@
-
 'use client';
 import React, { useState, useEffect } from 'react';
 import { useParams, useRouter } from 'next/navigation';
@@ -9,7 +8,7 @@ import PrescriptionForm from './PrescriptionForm';
 import CaseNoteForm from './CaseNoteForm';
 import DiagnosticOrderForm from './DiagnosticOrderForm';
 import LeaveRequestForm from './LeaveRequestForm';
-import api from '../api';
+import api from '@/lib/api';
 
 const DoctorDetails = ({ doctorId, initialTab = 0 }) => {
   const router = useRouter();
@@ -293,16 +292,17 @@ const DoctorDetails = ({ doctorId, initialTab = 0 }) => {
           <Button variant="contained" onClick={() => setOpenCaseNoteForm(true)} sx={{ mb: 2 }}>
             Add Case Note
           </Button>
-          {openCaseNoteForm && <CaseNoteForm onSave={handleAddCaseNote} onCancel={() => setOpenCaseNoteForm(false)} patients={patients} />}
-        />
+          {openCaseNoteForm && <CaseNoteForm onClose={() => setOpenCaseNoteForm(false)} onSave={handleAddCaseNote} patients={patients} />}
           <Paper>
             <Table>
               <TableHead>
-                <TableCell>Patient</TableCell>
-                <TableCell>Note</TableCell>
-                <TableCell>Visibility</TableCell>
-                <TableCell>Date</TableCell>
-              </TableRow>
+                <TableRow>
+                  <TableCell>Patient</TableCell>
+                  <TableCell>Note</TableCell>
+                  <TableCell>Visibility</TableCell>
+                  <TableCell>Date</TableCell>
+                </TableRow>
+              </TableHead>
               <TableBody>
                 {caseNotes.map((note) => (
                   <TableRow key={note.id}>
@@ -365,7 +365,7 @@ const DoctorDetails = ({ doctorId, initialTab = 0 }) => {
               </TableHead>
               <TableBody>
                 {leaveRequests.map((request) => (
-                  <TableRow key={request.id}>
+                  <TableRow key={request.id">
                     <TableCell>{new Date(request.startDate).toLocaleDateString()}</TableCell>
                     <TableCell>{new Date(request.endDate).toLocaleDateString()}</TableCell>
                     <TableCell>{request.status}</TableCell>
@@ -386,6 +386,7 @@ const DoctorDetails = ({ doctorId, initialTab = 0 }) => {
         </Box>
       )}
     </Box>
-  );};
-}
-  export default DoctorDetails;
+  );
+};
+
+export default DoctorDetails;
