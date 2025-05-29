@@ -6,7 +6,7 @@ import DoctorList from './DoctorList';
 import DoctorForm from './DoctorForm';
 import DoctorDetails from './DoctorDetails';
 import ErrorBoundary from '../components/ErrorBoundary';
-import api from '@/lib/api-doctor';
+import api from '../api';
 
 const DoctorPage = () => {
   const [tabValue, setTabValue] = useState(0');
