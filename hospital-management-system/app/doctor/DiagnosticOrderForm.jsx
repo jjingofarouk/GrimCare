@@ -1,7 +1,7 @@
 'use client';
 import React, { useState } from 'react';
 import { TextField, Button, Box, Autocomplete } from '@mui/material';
-import api from '../api';
+
 
 const DiagnosticOrderForm = ({ onSave, onCancel, patients }) => {
   const [formData, setFormData] = useState({
