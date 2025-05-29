@@ -1,20 +1,32 @@
-'use client';
+"use client";
+
 import React from "react";
-import { useState } from 'react';
-import { useAuth } from '../useAuth';
-import styles from './RegisterForm.module.css';
+import { useState } from "react";
+import { useAuth } from "../useAuth";
+import {
+  TextField,
+  Button,
+  Typography,
+  Box,
+  Alert,
+  MenuItem,
+  Select,
+  InputLabel,
+  FormControl,
+  CircularProgress,
+} from "@mui/material";
 
 export default function RegisterForm() {
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [name, setName] = useState('');
-  const [role, setRole] = useState('USER');
-  const [error, setError] = useState('');
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [name, setName] = useState("");
+  const [role, setRole] = useState("USER");
+  const [error, setError] = useState("");
   const { register, loading } = useAuth();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setError('');
+    setError("");
     try {
       await register(email, password, name, role);
     } catch (err) {
@@ -23,52 +35,138 @@ export default function RegisterForm() {
   };
 
   return (
-    <div className={styles.container}>
-      <h2>Register</h2>
-      <form onSubmit={handleSubmit} className={styles.form}>
-        <div className={styles.field}>
-          <label>Name</label>
-          <input
-            type="text"
-            value={name}
-            onChange={(e) => setName(e.target.value)}
+    <Box
+      sx={{
+        display: "flex",
+        flexDirection: "column",
+        gap: 2,
+      }}
+    >
+      <Typography
+        variant="h5"
+        align="center"
+        sx={{ fontWeight: 600, color: "#1e3a8a" }}
+      >
+        Register
+      </Typography>
+      <Box component="form" onSubmit={handleSubmit} sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
+        <TextField
+          label="Name"
+          type="text"
+          value={name}
+          onChange={(e) => setName(e.target.value)}
+          required
+          fullWidth
+          variant="outlined"
+          sx={{
+            "& .MuiOutlinedInput-root": {
+              borderRadius: 2,
+              "&:hover fieldset": {
+                borderColor: "#3b82f6",
+              },
+              "&.Mui-focused fieldset": {
+                borderColor: "#3b82f6",
+                boxShadow: "0 0 0 3px rgba(59, 130, 246, 0.1)",
+              },
+            },
+          }}
+        />
+        <TextField
+          label="Email"
+          type="email"
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
+          required
+          fullWidth
+          variant="outlined"
+          sx={{
+            "& .MuiOutlinedInput-root": {
+              borderRadius: 2,
+              "&:hover fieldset": {
+                borderColor: "#3b82f6",
+              },
+              "&.Mui-focused fieldset": {
+                borderColor: "#3b82f6",
+                boxShadow: "0 0 0 3px rgba(59, 130, 246, 0.1)",
+              },
+            },
+          }}
+        />
+        <TextField
+          label="Password"
+          type="password"
+          value={password}
+          onChange={(e) => setPassword(e.target.value)}
+          required
+          fullWidth
+          variant="outlined"
+          sx={{
+            "& .MuiOutlinedInput-root": {
+              borderRadius: 2,
+              "&:hover fieldset": {
+                borderColor: "#3b82f6",
+              },
+              "&.Mui-focused fieldset": {
+                borderColor: "#3b82f6",
+                boxShadow: "0 0 0 3px rgba(59, 130, 246, 0.1)",
+              },
+            },
+          }}
+        />
+        <FormControl
+          fullWidth
+          variant="outlined"
+          sx={{
+            "& .MuiOutlinedInput-root": {
+              borderRadius: 2,
+              "&:hover fieldset": {
+                borderColor: "#3b82f6",
+              },
+              "&.Mui-focused fieldset": {
+                borderColor: "#3b82f6",
+                boxShadow: "0 0 0 3px rgba(59, 130, 246, 0.1)",
+              },
+            },
+          }}
+        >
+          <InputLabel>Role</InputLabel>
+          <Select
+            value={role}
+            onChange={(e) => setRole(e.target.value)}
+            label="Role"
             required
-          />
-        </div>
-        <div className={styles.field}>
-          <label>Email</label>
-          <input
-            type="email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            required
-          />
-        </div>
-        <div className={styles.field}>
-          <label>Password</label>
-          <input
-            type="password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            required
-          />
-        </div>
-        <div className={styles.field}>
-          <label>Role</label>
-          <select value={role} onChange={(e) => setRole(e.target.value)} required>
-            <option value="USER">User</option>
-            <option value="ADMIN">Admin</option>
-            <option value="NURSE">Nurse</option>
-            <option value="DOCTOR">Doctor</option>
-            <option value="HELP_DESK">Help Desk</option>
-            <option value="LAB_TECHNICIAN">Lab Technician</option>
-          </select>
-        </div>
-        {error && <p className={styles.error}>{error}</p>}
-        <button type="submit" className={styles.button} disabled={loading}>
-          {loading ? 'Registering...' : 'Register'}
-        </button>
-      </form>
-    </div>
+          >
+            <MenuItem value="USER">User</MenuItem>
+            <MenuItem value="ADMIN">Admin</MenuItem>
+            <MenuItem value="NURSE">Nurse</MenuItem>
+            <MenuItem value="DOCTOR">Doctor</MenuItem>
+            <MenuItem value="HELP_DESK">Help Desk</MenuItem>
+            <MenuItem value="LAB_TECHNICIAN">Lab Technician</MenuItem>
+          </Select>
+        </FormControl>
+        {error && (
+          <Alert severity="error" sx={{ borderRadius: 2 }}>
+            {error}
+          </Alert>
+        )}
+        <Button
+          type="submit"
+          variant="contained"
+          disabled={loading}
+          sx={{
+            borderRadius: 2,
+            padding: "12px",
+            bgcolor: "#3b82f6",
+            "&:hover": { bgcolor: "#2563eb" },
+            "&:disabled": { bgcolor: "#93c5fd" },
+            textTransform: "none",
+            fontSize: "1rem",
+            fontWeight: 500,
+          }}
+        >
+          {loading ? <CircularProgress size={24} color="inherit" /> : "Register"}
+        </Button>
+      </Box>
+    </Box>
   );
 }
