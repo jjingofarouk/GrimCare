@@ -1,6 +1,7 @@
 'use client';
 import React, { useState } from 'react';
 import { TextField, Button, Box } from '@mui/material';
+import api from '@/lib/api';
 
 const LeaveRequestForm = ({ onSave, onCancel }) => {
   const [formData, setFormData] = useState({
