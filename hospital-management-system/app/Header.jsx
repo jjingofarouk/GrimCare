@@ -1,3 +1,4 @@
+// app/Header.jsx (Fixed)
 "use client";
 
 import React from "react";
@@ -22,9 +23,11 @@ export default function Header({ toggleSidebar }) {
     <header className={styles.header}>
       <div className={styles.container}>
         <div className={styles.left}>
-          <button onClick={toggleSidebar} className={styles.menuButton}>
-            <Bars3Icon className={styles.icon} />
-          </button>
+          {user && (
+            <button onClick={toggleSidebar} className={styles.menuButton}>
+              <Bars3Icon className={styles.icon} />
+            </button>
+          )}
           <h1 className={styles.title}>HMS</h1>
         </div>
         <div className={styles.right}>
