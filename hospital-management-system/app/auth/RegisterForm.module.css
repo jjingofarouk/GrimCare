@@ -1,23 +1,97 @@
+.container {
+  background: #ffffff;
+  border-radius: 16px;
+  padding: 2rem;
+  width: 100%;
+  max-width: 400px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+  backdrop-filter: blur(10px);
+}
+
+h2 {
+  font-size: 1.75rem;
+  font-weight: 600;
+  color: #1e3a8a;
+  text-align: center;
+  margin-bottom: 1.5rem;
+}
+
 .form {
-  @apply bg-white p-6 rounded-lg shadow-md max-w-sm mx-auto;
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
 }
 
 .field {
-  @apply mb-4;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
 }
 
-.field label {
-  @apply block text-sm font-medium mb-1;
+label {
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: #374151;
 }
 
-.field input, .field select {
-  @apply w-full p-2 border rounded-md;
+input, select {
+  padding: 0.75rem;
+  border: 1px solid #d1d5db;
+  border-radius: 8px;
+  font-size: 1rem;
+  color: #1f2937;
+  transition: border-color 0.3s ease, box-shadow 0.3s ease;
 }
 
-.button {
-  @apply bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600;
+input:focus, select:focus {
+  outline: none;
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+select {
+  appearance: none;
+  background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%23374151'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M19 9l-7 7-7-7'/%3E%3C/svg%3E") no-repeat right 0.75rem center/16px 16px;
 }
 
 .error {
-  @apply text-red-500 text-sm mt-2;
+  color: #dc2626;
+  font-size: 0.875rem;
+  text-align: center;
+}
+
+.button {
+  padding: 0.75rem;
+  background: #3b82f6;
+  color: #ffffff;
+  font-size: 1rem;
+  font-weight: 500;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background 0.3s ease, transform 0.2s ease;
+}
+
+.button:hover {
+  background: #2563eb;
+}
+
+.button:disabled {
+  background: #93c5fd;
+  cursor: not-allowed;
+}
+
+@media (max-width: 768px) {
+  .container {
+    padding: 1.5rem;
+    max-width: 90%;
+  }
+
+  h2 {
+    font-size: 1.5rem;
+  }
+
+  input, select, .button {
+    font-size: 0.875rem;
+  }
 }
