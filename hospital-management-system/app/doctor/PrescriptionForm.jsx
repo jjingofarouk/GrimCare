@@ -1,6 +1,7 @@
 'use client';
 import React, { useState } from 'react';
 import { TextField, Button, Box, Autocomplete } from '@mui/material';
+import api from '@/lib/api';
 
 const PrescriptionForm = ({ onSave, onCancel, patients }) => {
   const [formData, setFormData] = useState({
@@ -29,7 +30,7 @@ const PrescriptionForm = ({ onSave, onCancel, patients }) => {
     <Box component="form" onSubmit={handleSubmit} sx={{ maxWidth: 600, mx: 'auto', p: 2 }}>
       <Autocomplete
         options={patients}
-        getOptionLabel={(option) => option.name}
+        getOptionLabel={(option) => option.user.name}
         onChange={(e, value) => setFormData({ ...formData, patientId: value?.id || '' })}
         renderInput={(params) => <TextField {...params} label="Patient" margin="normal" required />}
       />
