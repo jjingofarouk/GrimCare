@@ -4,7 +4,7 @@ import { useParams } from 'next/navigation';
 import { Table, TableBody, TableCell, TableHead, TableRow, Paper, Button, Box } from '@mui/material';
 import * as doctorService from './doctorService';
 import ScheduleForm from './ScheduleForm';
-import api from '@/lib/api';
+import api from '../api';
 
 const DoctorSchedule = () => {
   const { doctorId } = useParams();
