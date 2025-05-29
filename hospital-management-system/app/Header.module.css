@@ -1,6 +1,6 @@
 .header {
-  background-color: #f8f9fa;
-  border-bottom: 1px solid #e5e7eb;
+  background-color: #1f2937;
+  border-bottom: 1px solid #374151;
   padding: 1rem;
   position: fixed;
   top: 0;
@@ -31,7 +31,7 @@
 .title {
   font-size: 1.5rem;
   font-weight: bold;
-  color: #1f2937;
+  color: #d1d5db;
 }
 
 .right {
@@ -43,7 +43,7 @@
 .icon {
   width: 24px;
   height: 24px;
-  color: #4b5563;
+  color: #d1d5db;
 }
 
 .profile {
@@ -63,7 +63,7 @@
 }
 
 .profileButton:hover {
-  background-color: #e5e7eb;
+  background-color: #374151;
 }
 
 .userInfo {
@@ -75,20 +75,20 @@
 .userName {
   font-size: 1rem;
   font-weight: 600;
-  color: #1f2937;
+  color: #d1d5db;
 }
 
 .userRole {
   font-size: 0.75rem;
-  color: #6b7280;
+  color: #9ca3af;
 }
 
 .dropdown {
   position: absolute;
   top: 100%;
   right: 0;
-  background-color: #ffffff;
-  border: 1px solid #e5e7eb;
+  background-color: #1f2937;
+  border: 1px solid #374151;
   border-radius: 4px;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
   z-index: 1200;
@@ -98,7 +98,7 @@
 .dropdownItem {
   display: block;
   padding: 0.75rem 1rem;
-  color: #1f2937;
+  color: #d1d5db;
   text-decoration: none;
   font-size: 0.875rem;
   transition: background-color 0.2s ease;
@@ -110,7 +110,7 @@
 }
 
 .dropdownItem:hover {
-  background-color: #f0f0f0;
+  background-color: #374151;
 }
 
 @media (max-width: 768px) {
