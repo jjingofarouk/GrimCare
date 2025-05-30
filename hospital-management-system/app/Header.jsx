@@ -17,16 +17,17 @@ import {
   useMediaQuery,
   useTheme,
   Button,
+  Tooltip,
 } from '@mui/material';
 import MenuIcon from '@mui/icons-material/Menu';
 import AccountCircle from '@mui/icons-material/AccountCircle';
+import LockIcon from '@mui/icons-material/Lock';
 import { useAuth } from './useAuth';
 import { useRouter } from 'next/navigation';
 import { ROLE_PERMISSIONS } from './lib/auth';
-import styles from "./Header.module.css";
 
-// Define menu items with corresponding routes and required permissions
-const MENU_ITEMS = [
+// Menu items for logged-in users (role-based)
+const AUTH_MENU_ITEMS = [
   { label: 'Dashboard', route: '/dashboard', permission: 'Dashboard' },
   { label: 'Patients', route: '/patient', permission: 'Patients' },
   { label: 'Appointments', route: '/appointment', permission: 'Appointments' },
@@ -36,7 +37,13 @@ const MENU_ITEMS = [
   { label: 'Helpdesk', route: '/helpdesk', permission: 'Helpdesk' },
   { label: 'Laboratory', route: '/laboratory', permission: 'Laboratory' },
   { label: 'Settings', route: '/settings', permission: 'Settings' },
-  // Add more items as needed, matching ROLE_PERMISSIONS keys
+];
+
+// Default menu items for logged-out users
+const GUEST_MENU_ITEMS = [
+  { label: 'Home', route: '/' },
+  { label: 'About', route: '/about' },
+  { label: 'Login', route: '/auth' },
 ];
 
 export default function Header({ toggleSidebar }) {
@@ -44,15 +51,15 @@ export default function Header({ toggleSidebar }) {
   const router = useRouter();
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('md')); // Mobile: < 900px
-  const [anchorEl, setAnchorEl] = useState(null); // For user profile menu
-  const [mobileMenuOpen, setMobileMenuOpen] = useState(false); // For mobile drawer
+  const [anchorEl, setAnchorEl] = useState(null); // Profile menu
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false); // Mobile drawer
 
-  // Filter menu items based on user's role permissions
-  const allowedMenuItems = user
-    ? MENU_ITEMS.filter((item) =>
+  // Select menu items based on login status
+  const menuItems = user
+    ? AUTH_MENU_ITEMS.filter((item) =>
         ROLE_PERMISSIONS[user.role]?.includes(item.permission)
       )
-    : [];
+    : GUEST_MENU_ITEMS;
 
   const handleProfileMenuOpen = (event) => {
     setAnchorEl(event.currentTarget);
@@ -77,7 +84,7 @@ export default function Header({ toggleSidebar }) {
     setMobileMenuOpen(false);
   };
 
-  // Render mobile menu as a drawer
+  // Mobile menu drawer
   const mobileMenu = (
     <Drawer
       anchor="left"
@@ -91,7 +98,7 @@ export default function Header({ toggleSidebar }) {
         </Typography>
         <Divider sx={{ bgcolor: '#fff', mb: 2 }} />
         <List>
-          {allowedMenuItems.map((item) => (
+          {menuItems.map((item) => (
             <ListItem
               key={item.route}
               onClick={() => handleMenuItemClick(item.route)}
@@ -118,12 +125,12 @@ export default function Header({ toggleSidebar }) {
       }}
     >
       <Toolbar sx={{ justifyContent: 'space-between' }}>
-        {/* Left Side: Hamburger (mobile) and Logo */}
+        {/* Left: Hamburger (mobile) and Logo */}
         <Box sx={{ display: 'flex', alignItems: 'center' }}>
           {isMobile && (
             <IconButton
               color="inherit"
-              aria-label="open drawer"
+              aria-label="open menu"
               edge="start"
               onClick={handleMobileMenuToggle}
               sx={{ mr: 2 }}
@@ -134,7 +141,7 @@ export default function Header({ toggleSidebar }) {
           <IconButton
             color="inherit"
             onClick={toggleSidebar}
-            sx={{ mr: 2, display: { xs: 'block', md: 'block' } }}
+            sx={{ mr: 2 }}
           >
             <MenuIcon />
           </IconButton>
@@ -142,7 +149,7 @@ export default function Header({ toggleSidebar }) {
             variant="h6"
             noWrap
             sx={{ fontWeight: 600, cursor: 'pointer' }}
-            onClick={() => router.push(user ? getRoleRedirect(user.role) : '/auth')}
+            onClick={() => router.push(user ? '/dashboard' : '/')}
           >
             HMS
           </Typography>
@@ -151,7 +158,7 @@ export default function Header({ toggleSidebar }) {
         {/* Center: Navigation Links (Desktop) */}
         {!isMobile && (
           <Box sx={{ display: 'flex', gap: 2 }}>
-            {allowedMenuItems.map((item) => (
+            {menuItems.map((item) => (
               <Button
                 key={item.route}
                 color="inherit"
@@ -168,47 +175,73 @@ export default function Header({ toggleSidebar }) {
           </Box>
         )}
 
-        {/* Right Side: User Profile */}
-        {user && (
-          <Box sx={{ display: 'flex', alignItems: 'center' }}>
-            <Typography
-              variant="body2"
-              sx={{ mr: 1, display: { xs: 'none', sm: 'block' } }}
-            >
-              {user.name}
-            </Typography>
-            <IconButton
-              size="large"
-              edge="end"
-              aria-label="account of current user"
-              aria-controls="profile-menu"
-              aria-haspopup="true"
-              onClick={handleProfileMenuOpen}
-              color="inherit"
-            >
-              <AccountCircle />
-            </IconButton>
-            <Menu
-              id="profile-menu"
-              anchorEl={anchorEl}
-              open={Boolean(anchorEl)}
-              onClose={handleProfileMenuClose}
-              sx={{ mt: 1 }}
-            >
-              <MenuItem
-                onClick={() => {
-                  router.push('/profile');
-                  handleProfileMenuClose();
+        {/* Right: User Profile or Login Prompt */}
+        <Box sx={{ display: 'flex', alignItems: 'center' }}>
+          {user ? (
+            <>
+              <Typography
+                variant="body2"
+                sx={{ mr: 1, display: { xs: 'none', sm: 'block' } }}
+              >
+                {user.name}
+              </Typography>
+              <IconButton
+                size="large"
+                edge="end"
+                aria-label="account of current user"
+                aria-controls="profile-menu"
+                aria-haspopup="true"
+                onClick={handleProfileMenuOpen}
+                color="inherit"
+                sx={{ '&:hover': { bgcolor: 'rgba(255, 255, 255, 0.1)' } }}
+              >
+                <AccountCircle />
+              </IconButton>
+              <Menu
+                id="profile-menu"
+                anchorEl={anchorEl}
+                open={Boolean(anchorEl)}
+                onClose={handleProfileMenuClose}
+                sx={{ mt: 1 }}
+              >
+                <MenuItem
+                  onClick={() => {
+                    router.push('/profile');
+                    handleProfileMenuClose();
+                  }}
+                >
+                  Profile
+                </MenuItem>
+                <MenuItem onClick={handleLogout}>Logout</MenuItem>
+              </Menu>
+            </>
+          ) : (
+            <Tooltip title="Log in to unlock features">
+              <IconButton
+                size="large"
+                edge="end"
+                aria-label="log in"
+                onClick={() => router.push('/auth')}
+                color="inherit"
+                sx={{
+                  animation: 'pulse 2s infinite',
+                  '&:hover': { bgcolor: 'rgba(255, 255, 255, 0.1)' },
                 }}
               >
-                Profile
-              </MenuItem>
-              <MenuItem onClick={handleLogout}>Logout</MenuItem>
-            </Menu>
-          </Box>
-        )}
+                <LockIcon />
+              </IconButton>
+            </Tooltip>
+          )}
+        </Box>
       </Toolbar>
       {isMobile && mobileMenu}
+      <style jsx global>{`
+        @keyframes pulse {
+          0% { transform: scale(1); }
+          50% { transform: scale(1.2); }
+          100% { transform: scale(1); }
+        }
+      `}</style>
     </AppBar>
   );
 }
