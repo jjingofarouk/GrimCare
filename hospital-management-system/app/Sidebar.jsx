@@ -26,7 +26,7 @@ import MedicalServicesIcon from '@mui/icons-material/MedicalServices';
 import CleaningServicesIcon from '@mui/icons-material/CleaningServices';
 import LocalPharmacyIcon from '@mui/icons-material/LocalPharmacy';
 import PersonIcon from '@mui/icons-material/Person';
-import WarningIcon from '@mui/icons-material/Warning'; // Replaced EmergencyIcon
+import WarningIcon from '@mui/icons-material/Warning';
 import InventoryIcon from '@mui/icons-material/Inventory';
 import HelpIcon from '@mui/icons-material/Help';
 import CardGiftcardIcon from '@mui/icons-material/CardGiftcard';
@@ -40,7 +40,7 @@ import TheaterComedyIcon from '@mui/icons-material/TheaterComedy';
 import StoreIcon from '@mui/icons-material/Store';
 import ShoppingCartIcon from '@mui/icons-material/ShoppingCart';
 import QueueIcon from '@mui/icons-material/Queue';
-import BiotechIcon from '@mui/icons-material/Biotech'; // Renamed RadiologyIcon for clarity
+import BiotechIcon from '@mui/icons-material/Biotech';
 import AssessmentIcon from '@mui/icons-material/Assessment';
 import VolunteerActivismIcon from '@mui/icons-material/VolunteerActivism';
 import StorageIcon from '@mui/icons-material/Storage';
@@ -64,7 +64,7 @@ export default function Sidebar({ isOpen, toggleSidebar }) {
       { name: 'CSSD', path: '/cssd', permission: 'CSSD', icon: <CleaningServicesIcon /> },
       { name: 'Dispensary', path: '/dispensary', permission: 'Dispensary', icon: <LocalPharmacyIcon /> },
       { name: 'Doctor', path: '/doctor', permission: 'Doctor', icon: <PersonIcon /> },
-      { name: 'Emergency', path: '/emergency', permission: 'Emergency', icon: <WarningIcon /> }, // Updated icon
+      { name: 'Emergency', path: '/emergency', permission: 'Emergency', icon: <WarningIcon /> },
       { name: 'Fixed Assets', path: '/fixed-assets', permission: 'Fixed Assets', icon: <InventoryIcon /> },
       { name: 'Helpdesk', path: '/helpdesk', permission: 'Helpdesk', icon: <HelpIcon /> },
       { name: 'Incentive', path: '/incentive', permission: 'Incentive', icon: <CardGiftcardIcon /> },
@@ -106,7 +106,7 @@ export default function Sidebar({ isOpen, toggleSidebar }) {
       </Box>
       <List className={styles.nav}>
         {menuItems
-          .filter(({ permission }) => user?.role && hasPermission(user.role, permission))
+          .filter(({ permission }) => !user || (user?.role && hasPermission(user.role, permission)))
           .map(({ name, path, icon }) => (
             <ListItem
               key={path}
