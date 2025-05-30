@@ -5,7 +5,6 @@ import jwt from 'jsonwebtoken';
 export async function middleware(request) {
   const { pathname } = request.nextUrl;
 
-  // Retrieve token from header or cookies
   const token =
     request.headers.get('authorization')?.replace('Bearer ', '') ||
     request.cookies.get('token')?.value;
@@ -16,19 +15,16 @@ export async function middleware(request) {
     }, JWT_SECRET=${process.env.JWT_SECRET ? '[present]' : 'missing'}`
   );
 
-  // Validate JWT_SECRET
   if (!process.env.JWT_SECRET) {
     console.error('JWT_SECRET environment variable is missing');
     return NextResponse.redirect(new URL('/auth', request.url));
   }
 
-  // Public routes (no authentication required)
-  const publicRoutes = ['/auth', '/api/auth', '/'];
+  const publicRoutes = ['/auth', '/api/auth', '/', '/access-denied'];
   if (publicRoutes.some((route) => pathname.startsWith(route))) {
     return NextResponse.next();
   }
 
-  // Authentication required for protected routes
   if (!token) {
     console.warn(`No token found, redirecting to /auth for path: ${pathname}`);
     return NextResponse.redirect(new URL('/auth', request.url));
@@ -37,7 +33,6 @@ export async function middleware(request) {
   try {
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
 
-    // Ensure token isn't expired
     if (decoded.exp && decoded.exp * 1000 < Date.now()) {
       console.warn('Token expired, redirecting to /auth');
       return NextResponse.redirect(new URL('/auth', request.url));
@@ -45,7 +40,6 @@ export async function middleware(request) {
 
     const userRole = decoded.role;
 
-    // Define route-to-feature mapping
     const routeToFeatureMap = {
       '/dashboard': 'Dashboard',
       '/patient': 'Patients',
@@ -81,9 +75,9 @@ export async function middleware(request) {
       '/utilities': 'Utilities',
       '/vaccination': 'Vaccination',
       '/settings': 'Settings',
+      '/clinical-settings': 'Clinical Settings',
     };
 
-    // Check permissions
     const featureName = Object.keys(routeToFeatureMap).find((route) =>
       pathname.startsWith(route)
     );
@@ -92,9 +86,21 @@ export async function middleware(request) {
       !hasPermission(userRole, routeToFeatureMap[featureName])
     ) {
       console.warn(
-        `User role ${userRole} lacks permission for ${featureName}, redirecting to /dashboard`
+        `User role ${userRole} lacks permission for ${featureName}, redirecting to /access-denied`
       );
-      return NextResponse.redirect(new URL('/dashboard', request.url));
+      return NextResponse.redirect(new URL('/access-denied', request.url));
+    }
+
+    // Check for Doctor record for DOCTOR role
+    if (userRole === 'DOCTOR' && featureName && routeToFeatureMap[featureName] === 'Clinical') {
+      const user = await prisma.user.findUnique({
+        where: { id: decoded.userId },
+        include: { doctor: true },
+      });
+      if (!user?.doctor) {
+        console.warn(`No Doctor record for user ${decoded.userId}, redirecting to /doctor/setup`);
+        return NextResponse.redirect(new URL('/doctor/setup', request.url));
+      }
     }
 
     return NextResponse.next();
@@ -104,7 +110,6 @@ export async function middleware(request) {
   }
 }
 
-// Define matcher for protected routes
 export const config = {
   matcher: [
     '/dashboard/:path*',
@@ -141,5 +146,6 @@ export const config = {
     '/utilities/:path*',
     '/vaccination/:path*',
     '/settings/:path*',
+    '/clinical-settings/:path*',
   ],
 };
