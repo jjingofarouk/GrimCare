@@ -26,7 +26,7 @@ import MedicalServicesIcon from '@mui/icons-material/MedicalServices';
 import CleaningServicesIcon from '@mui/icons-material/CleaningServices';
 import LocalPharmacyIcon from '@mui/icons-material/LocalPharmacy';
 import PersonIcon from '@mui/icons-material/Person';
-import EmergencyIcon from '@mui/icons-material/Emergency';
+import WarningIcon from '@mui/icons-material/Warning'; // Replaced EmergencyIcon
 import InventoryIcon from '@mui/icons-material/Inventory';
 import HelpIcon from '@mui/icons-material/Help';
 import CardGiftcardIcon from '@mui/icons-material/CardGiftcard';
@@ -40,7 +40,7 @@ import TheaterComedyIcon from '@mui/icons-material/TheaterComedy';
 import StoreIcon from '@mui/icons-material/Store';
 import ShoppingCartIcon from '@mui/icons-material/ShoppingCart';
 import QueueIcon from '@mui/icons-material/Queue';
-import RadiologyIcon from '@mui/icons-material/Biotech';
+import BiotechIcon from '@mui/icons-material/Biotech'; // Renamed RadiologyIcon for clarity
 import AssessmentIcon from '@mui/icons-material/Assessment';
 import VolunteerActivismIcon from '@mui/icons-material/VolunteerActivism';
 import StorageIcon from '@mui/icons-material/Storage';
@@ -64,7 +64,7 @@ export default function Sidebar({ isOpen, toggleSidebar }) {
       { name: 'CSSD', path: '/cssd', permission: 'CSSD', icon: <CleaningServicesIcon /> },
       { name: 'Dispensary', path: '/dispensary', permission: 'Dispensary', icon: <LocalPharmacyIcon /> },
       { name: 'Doctor', path: '/doctor', permission: 'Doctor', icon: <PersonIcon /> },
-      { name: 'Emergency', path: '/emergency', permission: 'Emergency', icon: <EmergencyIcon /> },
+      { name: 'Emergency', path: '/emergency', permission: 'Emergency', icon: <WarningIcon /> }, // Updated icon
       { name: 'Fixed Assets', path: '/fixed-assets', permission: 'Fixed Assets', icon: <InventoryIcon /> },
       { name: 'Helpdesk', path: '/helpdesk', permission: 'Helpdesk', icon: <HelpIcon /> },
       { name: 'Incentive', path: '/incentive', permission: 'Incentive', icon: <CardGiftcardIcon /> },
@@ -79,7 +79,7 @@ export default function Sidebar({ isOpen, toggleSidebar }) {
       { name: 'Pharmacy', path: '/pharmacy', permission: 'Pharmacy', icon: <LocalPharmacyIcon /> },
       { name: 'Procurement', path: '/procurement', permission: 'Procurement', icon: <ShoppingCartIcon /> },
       { name: 'Queue Management', path: '/queue-mgmt', permission: 'Queue Management', icon: <QueueIcon /> },
-      { name: 'Radiology', path: '/radiology', permission: 'Radiology', icon: <RadiologyIcon /> },
+      { name: 'Radiology', path: '/radiology', permission: 'Radiology', icon: <BiotechIcon /> },
       { name: 'Reports', path: '/reports', permission: 'Reports', icon: <AssessmentIcon /> },
       { name: 'Social Service', path: '/social-service', permission: 'Social Service', icon: <VolunteerActivismIcon /> },
       { name: 'Substore', path: '/substore', permission: 'Substore', icon: <StorageIcon /> },
