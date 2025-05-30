@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
-import './styles/globals.css';
+import './globals.css';
 import Header from './Header';
 import Sidebar from './Sidebar';
 import { useAuth } from './useAuth';
