@@ -29,7 +29,7 @@ export const ROLE_PERMISSIONS = {
   ],
   DOCTOR: [
     'Dashboard', 'Patients', 'Appointments', 'Clinical', 'Medical Records',
-    'Operation Theatre', 'Radiology', 'Laboratory', 'Profile', 'Settings'
+    'Operation Theatre', 'Radiology', 'Laboratory', 'Profile', 'Settings', 'Clinical Settings'
   ],
   HELP_DESK: [
     'Dashboard', 'Helpdesk', 'Queue Management', 'Profile', 'Settings'
@@ -51,120 +51,154 @@ export const ROLE_REDIRECTS = {
   USER: '/dashboard'
 };
 
-export const isAuthenticated = () => {
-  return false; // Not used in middleware; rely on cookies
-};
-
-export const getToken = () => {
-  return null; // Not used; tokens are handled via cookies
-};
-
 export const hasPermission = (userRole, featureName) => {
   console.log(`Checking permission for role: ${userRole}, feature: ${featureName}`);
   return ROLE_PERMISSIONS[userRole]?.includes(featureName) || false;
 };
 
 export const verifyToken = async (token) => {
-  console.log("Verifying token:", token);
+  console.log('Verifying token:', token ? '[present]' : 'none');
   try {
-    if (!token) {
-      console.log("No token provided");
-      throw new Error("No token provided");
-    }
+    if (!token) throw new Error('No token provided');
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
-    console.log("Token decoded:", decoded);
+    console.log('Token decoded:', decoded);
     if (decoded.exp * 1000 < Date.now()) {
-      console.log("Token expired");
-      throw new Error("Token expired");
+      console.log('Token expired');
+      throw new Error('Token expired');
     }
     return decoded;
   } catch (error) {
-    console.error("Token verification failed:", error.message, error.stack);
+    console.error('Token verification failed:', error.message);
     throw error;
   }
 };
 
 export const getRoleRedirect = (role) => {
-  console.log("Getting redirect for role:", role);
+  console.log('Getting redirect for role:', role);
+  if (!Object.values(ROLES).includes(role)) {
+    console.warn(`Invalid role: ${role}, defaulting to /dashboard`);
+    return '/dashboard';
+  }
   return ROLE_REDIRECTS[role] || '/dashboard';
 };
 
 export const getCurrentUser = async (token) => {
-  console.log("Starting getCurrentUser with token:", token);
+  console.log('Starting getCurrentUser with token:', token ? '[present]' : 'none');
   try {
     const decoded = await verifyToken(token);
-    console.log("Decoded token in getCurrentUser:", decoded);
+    console.log('Decoded token in getCurrentUser:', decoded);
     const user = await prisma.user.findUnique({ where: { id: decoded.userId } });
     if (!user) {
-      console.log("User not found for ID:", decoded.userId);
-      throw new Error("User not found");
+      console.log('User not found for ID:', decoded.userId);
+      throw new Error('User not found');
     }
-    console.log("User fetched:", user);
+    if (!Object.values(ROLES).includes(user.role)) {
+      console.error(`Invalid role for user ${user.id}: ${user.role}`);
+      throw new Error('Invalid user role');
+    }
+    console.log('User fetched:', { id: user.id, email: user.email, name: user.name, role: user.role });
     return { id: user.id, email: user.email, name: user.name, role: user.role };
   } catch (error) {
-    console.error("getCurrentUser error:", error.message, error.stack);
+    console.error('getCurrentUser error:', error.message);
     throw error;
   }
 };
 
 export const loginUser = async ({ email, password }) => {
-  console.log("Starting loginUser for:", email);
+  console.log('Starting loginUser for:', email);
   try {
     const user = await prisma.user.findUnique({ where: { email } });
     if (!user) {
-      console.log("User not found for email:", email);
-      throw new Error("Invalid credentials");
+      console.log('User not found for email:', email);
+      throw new Error('Invalid credentials');
     }
 
     const isPasswordValid = await bcrypt.compare(password, user.password);
     if (!isPasswordValid) {
-      console.log("Invalid password for user:", email);
-      throw new Error("Invalid credentials");
+      console.log('Invalid password for user:', email);
+      throw new Error('Invalid credentials');
+    }
+
+    if (!Object.values(ROLES).includes(user.role)) {
+      console.error(`Invalid role for user ${user.id}: ${user.role}`);
+      throw new Error('Invalid user role');
     }
 
     const token = jwt.sign(
       { userId: user.id, email: user.email, role: user.role },
       process.env.JWT_SECRET,
-      { expiresIn: "1d" }
+      { expiresIn: '1h' } // Reduced to 1 hour for faster role updates
     );
-    console.log("Login token generated:", token);
+    console.log('Login token generated:', token);
     return { user: { id: user.id, email: user.email, name: user.name, role: user.role }, token };
   } catch (error) {
-    console.error("loginUser error:", error.message, error.stack);
-    throw new Error(error.message || "Login failed");
+    console.error('loginUser error:', error.message);
+    throw new Error(error.message || 'Login failed');
   }
 };
 
 export const registerUser = async ({ email, password, name, role }) => {
-  console.log("Starting registerUser for:", email);
+  console.log('Starting registerUser for:', email);
   try {
     const existingUser = await prisma.user.findUnique({ where: { email } });
     if (existingUser) {
-      console.log("User already exists:", email);
-      throw new Error("User already exists");
+      console.log('User already exists:', email);
+      throw new Error('User already exists');
+    }
+
+    if (!Object.values(ROLES).includes(role)) {
+      console.warn(`Invalid role: ${role}, defaulting to USER`);
+      role = 'USER';
     }
 
     const hashedPassword = await bcrypt.hash(password, 10);
-    console.log("Password hashed for:", email);
+    console.log('Password hashed for:', email);
     const user = await prisma.user.create({
       data: {
         email,
         password: hashedPassword,
         name,
-        role: role || "USER",
+        role,
       },
     });
-    console.log("User created:", user);
+    console.log('User created:', user);
+
+    // Create Doctor record for DOCTOR role
+    if (role === 'DOCTOR') {
+      await prisma.doctor.create({
+        data: {
+          userId: user.id,
+          specialty: 'General',
+          department: 'General',
+          hospital: 'Default Hospital',
+          designation: 'Doctor',
+          availabilityStatus: 'AVAILABLE',
+        },
+      });
+      console.log('Doctor record created for user:', user.id);
+    }
+
+    // Optionally create Patient record for USER role
+    if (role === 'USER') {
+      await prisma.patient.create({
+        data: {
+          userId: user.id,
+          type: 'Outpatient',
+          recordId: `P${user.id}${Date.now()}`, // Unique record ID
+        },
+      });
+      console.log('Patient record created for user:', user.id);
+    }
 
     const token = jwt.sign(
       { userId: user.id, email: user.email, role: user.role },
       process.env.JWT_SECRET,
-      { expiresIn: "1d" }
+      { expiresIn: '1h' }
     );
-    console.log("Register token generated:", token);
+    console.log('Register token generated:', token);
     return { user: { id: user.id, email: user.email, name: user.name, role: user.role }, token };
   } catch (error) {
-    console.error("registerUser error:", error.message, error.stack);
-    throw new Error(error.message || "Registration failed");
+    console.error('registerUser error:', error.message);
+    throw new Error(error.message || 'Registration failed');
   }
 };
