@@ -108,7 +108,7 @@ export const useAuth = () => {
       console.log('Register token:', token);
       const userData = await prisma.user.create({
         data: {
-          id: firebaseUser.uid,
+          id: parseInt(firebaseUser.uid),
           email,
           name,
           role: role || 'USER',
@@ -117,7 +117,7 @@ export const useAuth = () => {
       if (role === 'DOCTOR') {
         await prisma.doctor.create({
           data: {
-            userId: firebaseUser.uid,
+            userId: parseInt(firebaseUser.uid),
             specialty: 'General',
             department: 'General',
             hospital: 'Default Hospital',
@@ -129,7 +129,7 @@ export const useAuth = () => {
       if (role === 'USER') {
         await prisma.patient.create({
           data: {
-            userId: firebaseUser.uid,
+            userId: parseInt(firebaseUser.uid),
             type: 'Outpatient',
             recordId: `P${firebaseUser.uid}${Date.now()}`,
           },
