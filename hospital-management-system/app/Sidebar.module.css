@@ -1,13 +1,14 @@
 .sidebar {
-  background-color: #1f2937;
-  width: 280px;
+  width: 250px;
   height: 100vh;
+  background-color: #1e3a8a;
+  color: #fff;
   position: fixed;
   top: 0;
   left: 0;
-  z-index: 1000;
   transition: transform 0.3s ease-in-out;
-  box-shadow: 2px 0 8px rgba(0, 0, 0, 0.15);
+  z-index: 1200; /* Below AppBar (zIndex: 1300) */
+  padding-top: 64px; /* Offset for fixed AppBar */
 }
 
 .open {
@@ -15,70 +16,39 @@
 }
 
 .closed {
-  transform: translateX(-100%);
-}
-
-.closeButton {
-  display: none;
-  position: absolute;
-  top: 1rem;
-  right: 1rem;
-  background: none;
-  border: none;
-  font-size: 1.5rem;
-  color: #d1d5db;
-  cursor: pointer;
+  transform: translateX(-250px);
 }
 
 .nav {
-  padding: 5rem 1rem 1rem;
   display: flex;
   flex-direction: column;
-  gap: 0.5rem;
+  padding: 0;
 }
 
 .navItem {
-  display: block;
-  padding: 0.75rem 1rem;
-  color: #d1d5db;
+  display: flex;
+  align-items: center;
+  padding: 12px 16px;
   text-decoration: none;
-  border-radius: 0.375rem;
-  transition: all 0.2s ease;
-  font-size: 0.9375rem;
+  color: #fff;
+  transition: background-color 0.2s;
 }
 
 .navItem:hover {
-  background-color: #374151;
-  color: #f9fafb;
+  background-color: rgba(255, 255, 255, 0.1);
 }
 
-@media (max-width: 1024px) {
+@media (max-width: 600px) {
   .sidebar {
-    width: 240px;
+    width: 200px;
+  }
+
+  .closed {
+    transform: translateX(-200px);
   }
 
   .navItem {
-    font-size: 0.875rem;
-    padding: 0.625rem 0.875rem;
-  }
-}
-
-@media (max-width: 640px) {
-  .sidebar {
-    width: 100%;
-    max-width: 300px;
-  }
-
-  .closeButton {
-    display: block;
-  }
-
-  .nav {
-    padding: 4rem 0.75rem 0.75rem;
-  }
-
-  .navItem {
-    font-size: 0.8125rem;
-    padding: 0.5rem 0.75rem;
+    padding: 10px 12px;
+    font-size: 0.9rem;
   }
 }
