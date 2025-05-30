@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect, useRef, useCallback } from 'react';
+import { useRouter } from 'next/navigation';
 import { getCurrentUser, getRoleRedirect } from './lib/auth';
 
 export const useAuth = () => {
@@ -8,66 +9,72 @@ export const useAuth = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [redirectPath, setRedirectPath] = useState(null);
-  const authChecked = useRef(false); // Prevent multiple checks on mount
+  const authChecked = useRef(false);
+  const router = useRouter();
 
-  // Function to get token from cookies
   const getTokenFromCookies = () => {
     if (typeof document === 'undefined') return null;
-    return document.cookie.match(/(?:^|;\s*)token=([^;]*)/)?.[1] || null;
+    const token = document.cookie.match(/(?:^|;\s*)token=([^;]*)/)?.[1] || null;
+    console.log('Token retrieved:', token ? '[present]' : 'none');
+    return token;
   };
 
-  // Function to set authentication cookie
   const setAuthCookie = (token) => {
     if (typeof document !== 'undefined') {
-      document.cookie = `token=${token}; path=/; max-age=86400; SameSite=Strict; Secure`;
+      document.cookie = `token=${token}; path=/; max-age=3600; SameSite=Strict${process.env.NODE_ENV === 'production' ? '; Secure' : ''}`;
+      console.log('Auth cookie set:', token ? '[present]' : 'none');
     }
   };
 
-  // Function to clear authentication cookie
   const clearAuthCookie = () => {
     if (typeof document !== 'undefined') {
       document.cookie = `token=; path=/; max-age=0; SameSite=Strict`;
+      console.log('Auth cookie cleared');
     }
   };
 
-  // Function to check authentication
   const checkAuth = useCallback(async () => {
     console.log('Starting checkAuth');
-
-    if (authChecked.current) return; // Prevent repeated calls
-    authChecked.current = true; // Mark authentication as checked
+    if (authChecked.current) {
+      console.log('Auth already checked, skipping');
+      return;
+    }
+    authChecked.current = true;
 
     try {
       const token = getTokenFromCookies();
-      console.log('Token retrieved:', token);
-
       if (token) {
         console.log('Calling getCurrentUser');
         const userData = await getCurrentUser(token);
         console.log('User data retrieved:', userData);
         setUser(userData);
-        setRedirectPath(getRoleRedirect(userData?.role));
+        const path = getRoleRedirect(userData?.role);
+        setRedirectPath(path);
+        if (path !== window.location.pathname) {
+          console.log('Redirecting to:', path);
+          router.push(path);
+        }
       } else {
         console.log('No token, redirecting to /auth');
         setRedirectPath('/auth');
+        router.push('/auth');
       }
     } catch (err) {
       console.error('checkAuth error:', err.message);
-      setError(err.message);
+      setError(err.message || 'Authentication failed');
       setUser(null);
       setRedirectPath('/auth');
+      router.push('/auth');
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [router]);
 
-  // Run authentication check only once when component mounts
   useEffect(() => {
     console.log('Running checkAuth on mount');
     checkAuth();
-  }, []); // No dependencies to prevent repeated execution
+  }, [checkAuth]);
 
-  // Function for login
   const login = async (email, password) => {
     console.log('Starting login for:', email);
     try {
@@ -87,28 +94,64 @@ export const useAuth = () => {
       if (response.ok) {
         setAuthCookie(data.token);
         setUser(data.user || {});
-        setRedirectPath(getRoleRedirect(data.user?.role));
-        return { success: true, redirectPath };
+        const path = getRoleRedirect(data.user?.role);
+        setRedirectPath(path);
+        router.push(path);
+        return { success: true, redirectPath: path };
       } else {
         throw new Error(data.error || 'Login failed');
       }
     } catch (error) {
       console.error('Login error:', error.message);
-      setError(error.message);
+      setError(error.message || 'An unexpected error occurred. Please try again.');
       setRedirectPath('/auth');
       throw error;
     }
   };
 
-  // Function for logout
   const logout = () => {
     console.log('Logging out');
     clearAuthCookie();
     setUser(null);
     setError(null);
     setRedirectPath('/auth');
+    router.push('/auth');
     return { success: true, redirectPath: '/auth' };
   };
 
-  return { user, loading, error, redirectPath, login, logout };
+  const register = async (email, password, name, role) => {
+    console.log('Starting register for:', email);
+    try {
+      setError(null);
+      const response = await fetch(
+        `${process.env.NEXT_PUBLIC_API_URL}/api/auth`,
+        {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ action: 'register', email, password, name, role }),
+        }
+      );
+
+      console.log('Register response status:', response.status);
+      const data = await response.json();
+
+      if (response.ok) {
+        setAuthCookie(data.token);
+        setUser(data.user || {});
+        const path = getRoleRedirect(data.user?.role);
+        setRedirectPath(path);
+        router.push(path);
+        return { success: true, redirectPath: path };
+      } else {
+        throw new Error(data.error || 'Registration failed');
+      }
+    } catch (error) {
+      console.error('Register error:', error.message);
+      setError(error.message || 'An unexpected error occurred. Please try again.');
+      setRedirectPath('/auth');
+      throw error;
+    }
+  };
+
+  return { user, loading, error, redirectPath, login, logout, register };
 };
