@@ -22,10 +22,10 @@ export default function RegisterForm() {
   const [name, setName] = useState('');
   const [role, setRole] = useState('USER');
   const [error, setError] = useState('');
-  const { register, loading, user } = useAuth();
+  const { register, loading } = useAuth();
 
-  // Restrict roles based on current user's role
-  const availableRoles = user?.role === 'ADMIN' ? Object.values(ROLES) : ['USER'];
+  // Allow all roles in the dropdown
+  const availableRoles = Object.values(ROLES);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
