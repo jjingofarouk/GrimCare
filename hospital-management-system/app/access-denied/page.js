@@ -2,7 +2,7 @@
 
 import React from 'react';
 import { Box, Typography, Button } from '@mui/material';
-import { useAuth } from '../../useAuth';
+import { useAuth } from '../useAuth';
 import { useRouter } from 'next/navigation';
 
 export default function AccessDenied() {
