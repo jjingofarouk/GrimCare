@@ -26,7 +26,6 @@ import { useAuth } from './useAuth';
 import { useRouter } from 'next/navigation';
 import { ROLE_PERMISSIONS } from './lib/auth';
 
-// Menu items for logged-in users (role-based)
 const AUTH_MENU_ITEMS = [
   { label: 'Dashboard', route: '/dashboard', permission: 'Dashboard' },
   { label: 'Patients', route: '/patient', permission: 'Patients' },
@@ -39,7 +38,6 @@ const AUTH_MENU_ITEMS = [
   { label: 'Settings', route: '/settings', permission: 'Settings' },
 ];
 
-// Default menu items for logged-out users
 const GUEST_MENU_ITEMS = [
   { label: 'Home', route: '/' },
   { label: 'About', route: '/about' },
@@ -50,11 +48,10 @@ export default function Header({ toggleSidebar }) {
   const { user, logout } = useAuth();
   const router = useRouter();
   const theme = useTheme();
-  const isMobile = useMediaQuery(theme.breakpoints.down('md')); // Mobile: < 900px
-  const [anchorEl, setAnchorEl] = useState(null); // Profile menu
-  const [mobileMenuOpen, setMobileMenuOpen] = useState(false); // Mobile drawer
+  const isMobile = useMediaQuery(theme.breakpoints.down('md'));
+  const [anchorEl, setAnchorEl] = useState(null);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
-  // Select menu items based on login status
   const menuItems = user
     ? AUTH_MENU_ITEMS.filter((item) =>
         ROLE_PERMISSIONS[user.role]?.includes(item.permission)
@@ -69,8 +66,8 @@ export default function Header({ toggleSidebar }) {
     setAnchorEl(null);
   };
 
-  const handleLogout = () => {
-    logout();
+  const handleLogout = async () => {
+    await logout();
     handleProfileMenuClose();
     router.push('/auth');
   };
@@ -84,7 +81,6 @@ export default function Header({ toggleSidebar }) {
     setMobileMenuOpen(false);
   };
 
-  // Mobile menu drawer
   const mobileMenu = (
     <Drawer
       anchor="left"
@@ -125,7 +121,6 @@ export default function Header({ toggleSidebar }) {
       }}
     >
       <Toolbar sx={{ justifyContent: 'space-between' }}>
-        {/* Left: Hamburger (mobile) and Logo */}
         <Box sx={{ display: 'flex', alignItems: 'center' }}>
           {isMobile && (
             <IconButton
@@ -154,8 +149,6 @@ export default function Header({ toggleSidebar }) {
             HMS
           </Typography>
         </Box>
-
-        {/* Center: Navigation Links (Desktop) */}
         {!isMobile && (
           <Box sx={{ display: 'flex', gap: 2 }}>
             {menuItems.map((item) => (
@@ -174,8 +167,6 @@ export default function Header({ toggleSidebar }) {
             ))}
           </Box>
         )}
-
-        {/* Right: User Profile or Login Prompt */}
         <Box sx={{ display: 'flex', alignItems: 'center' }}>
           {user ? (
             <>
