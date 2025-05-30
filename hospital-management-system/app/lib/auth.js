@@ -57,7 +57,7 @@ export const hasPermission = (userRole, featureName) => {
 export const getCurrentUser = async (uid) => {
   console.log('Starting getCurrentUser with uid:', uid);
   try {
-    const user = await prisma.user.findUnique({ where: { id: uid } });
+    const user = await prisma.user.findUnique({ where: { id: parseInt(uid) } });
     if (!user) {
       console.log('User not found for ID:', uid);
       throw new Error('User not found');
