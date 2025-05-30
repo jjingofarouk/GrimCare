@@ -13,14 +13,10 @@ export default function RootLayout({ children }) {
   };
 
   return (
-    <html lang="en">
-      <body>
-        <Header toggleSidebar={toggleSidebar} />
-        <div className="layout-container">
-          <Sidebar isOpen={isSidebarOpen} toggleSidebar={toggleSidebar} />
-          <main className="main-content">{children}</main>
-        </div>
-      </body>
-    </html>
+    <div className="layout-container">
+      <Header toggleSidebar={toggleSidebar} />
+      <Sidebar isOpen={isSidebarOpen} toggleSidebar={toggleSidebar} />
+      <main className="main-content">{children}</main>
+    </div>
   );
 }

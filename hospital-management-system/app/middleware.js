@@ -1,13 +1,20 @@
-// app/middleware.js
 import { NextResponse } from 'next/server';
 import { hasPermission } from './lib/auth';
 import jwt from 'jsonwebtoken';
 
 export async function middleware(request) {
   const { pathname } = request.nextUrl;
-  const token = request.headers.get('authorization')?.replace('Bearer ', '');
 
-  console.log(`Middleware: Path=${pathname}, Token=${token ? '[present]' : 'none'}, JWT_SECRET=${process.env.JWT_SECRET ? '[present]' : 'missing'}`);
+  // Retrieve token from header or cookies
+  const token =
+    request.headers.get('authorization')?.replace('Bearer ', '') ||
+    request.cookies.get('token')?.value;
+
+  console.log(
+    `Middleware: Path=${pathname}, Token=${
+      token ? '[present]' : 'none'
+    }, JWT_SECRET=${process.env.JWT_SECRET ? '[present]' : 'missing'}`
+  );
 
   // Validate JWT_SECRET
   if (!process.env.JWT_SECRET) {
@@ -15,25 +22,30 @@ export async function middleware(request) {
     return NextResponse.redirect(new URL('/auth', request.url));
   }
 
-  // Public routes
+  // Public routes (no authentication required)
   const publicRoutes = ['/auth', '/api/auth', '/'];
-  if (publicRoutes.some((route) => pathname === route || pathname.startsWith(route))) {
+  if (publicRoutes.some((route) => pathname.startsWith(route))) {
     return NextResponse.next();
   }
 
-  // Check token presence
+  // Authentication required for protected routes
   if (!token) {
     console.warn(`No token found, redirecting to /auth for path: ${pathname}`);
     return NextResponse.redirect(new URL('/auth', request.url));
   }
 
   try {
-    // Verify token
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
-    console.log(`Middleware: Token decoded, role=${decoded.role}`);
+
+    // Ensure token isn't expired
+    if (decoded.exp && decoded.exp * 1000 < Date.now()) {
+      console.warn('Token expired, redirecting to /auth');
+      return NextResponse.redirect(new URL('/auth', request.url));
+    }
+
     const userRole = decoded.role;
 
-    // Route to feature mapping
+    // Define route-to-feature mapping
     const routeToFeatureMap = {
       '/dashboard': 'Dashboard',
       '/patient': 'Patients',
@@ -60,7 +72,7 @@ export async function middleware(request) {
       '/operation-theatre': 'Operation Theatre',
       '/pharmacy': 'Pharmacy',
       '/procurement': 'Procurement',
-      '/queue-mgmt': 'Queue Management', // Fixed typo
+      '/queue-mgmt': 'Queue Management',
       '/radiology': 'Radiology',
       '/reports': 'Reports',
       '/social-service': 'Social Service',
@@ -71,13 +83,17 @@ export async function middleware(request) {
       '/settings': 'Settings',
     };
 
+    // Check permissions
     const featureName = Object.keys(routeToFeatureMap).find((route) =>
       pathname.startsWith(route)
     );
-
-    // Check permissions
-    if (featureName && !hasPermission(userRole, routeToFeatureMap[featureName])) {
-      console.warn(`User role ${userRole} lacks permission for ${featureName}, redirecting to /dashboard`);
+    if (
+      featureName &&
+      !hasPermission(userRole, routeToFeatureMap[featureName])
+    ) {
+      console.warn(
+        `User role ${userRole} lacks permission for ${featureName}, redirecting to /dashboard`
+      );
       return NextResponse.redirect(new URL('/dashboard', request.url));
     }
 
@@ -88,6 +104,7 @@ export async function middleware(request) {
   }
 }
 
+// Define matcher for protected routes
 export const config = {
   matcher: [
     '/dashboard/:path*',
@@ -115,7 +132,7 @@ export const config = {
     '/operation-theatre/:path*',
     '/pharmacy/:path*',
     '/procurement/:path*',
-    '/queue-mgmt/:path*', // Fixed typo
+    '/queue-mgmt/:path*',
     '/radiology/:path*',
     '/reports/:path*',
     '/social-service/:path*',
