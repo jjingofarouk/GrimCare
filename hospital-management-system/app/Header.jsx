@@ -23,6 +23,7 @@ import AccountCircle from '@mui/icons-material/AccountCircle';
 import { useAuth } from './useAuth';
 import { useRouter } from 'next/navigation';
 import { ROLE_PERMISSIONS } from './lib/auth';
+import styles from "./Header.module.css";
 
 // Define menu items with corresponding routes and required permissions
 const MENU_ITEMS = [
