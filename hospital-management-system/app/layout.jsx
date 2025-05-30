@@ -6,7 +6,7 @@ import Header from './Header';
 import Sidebar from './Sidebar';
 import { useAuth } from './useAuth';
 import { Box } from '@mui/material';
-import ErrorBoundary from './ErrorBoundary';
+import ErrorBoundary from './components/ErrorBoundary';
 
 export default function RootLayout({ children }) {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
