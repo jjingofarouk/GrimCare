@@ -53,7 +53,6 @@ enum LeaveStatus {
 model User {
   id           Int              @id @default(autoincrement())
   email        String           @unique @db.VarChar(255)
-  password     String           @db.VarChar(255)
   name         String           @db.VarChar(100)
   role         Role             @default(USER)
   createdAt    DateTime         @default(now())
@@ -90,7 +89,7 @@ model Patient {
   id                Int              @id @default(autoincrement())
   userId            Int              @unique
   user              User             @relation("PatientProfile", fields: [userId], references: [id])
-  type              String           @db.VarChar(50) // e.g., Inpatient, Outpatient
+  type              String           @db.VarChar(50)
   ward              String?          @db.VarChar(100)
   recordId          String           @unique @db.VarChar(50)
   appointments      Appointment[]
@@ -106,8 +105,8 @@ model Schedule {
   doctorId   Int
   doctor     Doctor   @relation(fields: [doctorId], references: [id])
   date       DateTime
-  time       String   @db.VarChar(50) // e.g., "08:00-11:00"
-  type       String   @db.VarChar(50) // e.g., Consultation, Surgery
+  time       String   @db.VarChar(50)
+  type       String   @db.VarChar(50)
   location   String   @db.VarChar(100)
   createdAt  DateTime @default(now())
   updatedAt  DateTime @updatedAt
@@ -132,7 +131,7 @@ model Prescription {
   doctor     Doctor   @relation(fields: [doctorId], references: [id])
   patientId  Int
   patient    Patient  @relation(fields: [patientId], references: [id])
-  drugs      String[] // Array of drug names
+  drugs      String[]
   notes      String?  @db.Text
   date       DateTime @default(now())
   createdAt  DateTime @default(now())
