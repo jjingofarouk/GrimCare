@@ -1,20 +1,21 @@
 // app/adt/AdmissionList.jsx
 import React, { useState, useEffect } from 'react';
-import { Box, Typography, Button, Alert } from '@mui/material';
+import { Box, Typography, Alert } from '@mui/material';
 import { DataGrid } from '@mui/x-data-grid';
-import AdmissionCard from './AdtCard';
 import { getAdmissions } from './adtService';
 
 export default function AdmissionList({ onSelectAdmission, refresh }) {
   const [admissions, setAdmissions] = useState([]);
   const [error, setError] = useState(null);
-  const [viewMode, setViewMode] = useState('card');
 
   useEffect(() => {
     async function fetchAdmissions() {
       try {
         const data = await getAdmissions();
-        setAdmissions(Array.isArray(data) ? data : []);
+        setAdmissions(Array.isArray(data) ? data.map(admission => ({
+          ...admission,
+          id: admission.id // Ensure id is set for DataGrid
+        })) : []);
         setError(null);
       } catch (error) {
         console.error('Error fetching admissions:', error);
@@ -42,7 +43,9 @@ export default function AdmissionList({ onSelectAdmission, refresh }) {
       field: 'admissionDate',
       headerName: 'Admission Date',
       width: 150,
-      valueGetter: (params) => (params.row?.admissionDate ? new Date(params.row.admissionDate).toLocaleDateString() : 'N/A'),
+      valueGetter: (params) => params.row?.admissionDate 
+        ? new Date(params.row.admissionDate).toLocaleDateString() 
+        : 'N/A',
     },
     {
       field: 'doctorName',
@@ -67,7 +70,11 @@ export default function AdmissionList({ onSelectAdmission, refresh }) {
       headerName: 'Actions',
       width: 150,
       renderCell: (params) => (
-        <Button variant="outlined" onClick={() => onSelectAdmission(params.row)} disabled={!params.row}>
+        <Button 
+          variant="outlined" 
+          onClick={() => onSelectAdmission(params.row)} 
+          disabled={!params.row}
+        >
           View
         </Button>
       ),
@@ -76,12 +83,9 @@ export default function AdmissionList({ onSelectAdmission, refresh }) {
 
   return (
     <Box sx={{ mt: 4 }}>
-      <Box display="flex" justifyContent="space-between" mb={2}>
-        <Typography variant="h5">Admissions</Typography>
-        <Button variant="outlined" onClick={() => setViewMode(viewMode === 'card' ? 'table' : 'card')}>
-          Switch to {viewMode === 'card' ? 'Table' : 'Card'} View
-        </Button>
-      </Box>
+      <Typography variant="h5" mb={2}>
+        Admissions
+      </Typography>
       {error && (
         <Alert severity="error" sx={{ mb: 2 }}>
           Failed to load admissions: {error}
@@ -92,22 +96,17 @@ export default function AdmissionList({ onSelectAdmission, refresh }) {
           No admissions found.
         </Alert>
       )}
-      {viewMode === 'card' ? (
-        <Box>
-          {admissions.map((admission) => (
-            <AdmissionCard key={admission.id} admission={admission} onViewDetails={onSelectAdmission} />
-          ))}
-        </Box>
-      ) : (
-        <Box sx={{ height: 400, width: '100%' }}>
-          <DataGrid
-            rows={admissions}
-            columns={columns}
-            pageSizeOptions={[5, 10, 20]}
-            disableSelectionOnClick
-          />
-        </Box>
-      )}
+      <Box sx={{ height: 600, width: '100%' }}>
+        <DataGrid
+          rows={admissions}
+          columns={columns}
+          pageSizeOptions={[5, 10, 20, 50]}
+          disableSelectionOnClick
+          initialState={{
+            pagination: { paginationModel: { pageSize: 10 } },
+          }}
+        />
+      </Box>
     </Box>
   );
 }
