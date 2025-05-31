@@ -1,89 +1,54 @@
-'use client';
+"use client" ;
 
-import React, { useState } from 'react';
-import { useAuth } from '../useAuth';
-import {
-  TextField,
-  Button,
-  Typography,
-  Box,
-  Alert,
-  CircularProgress,
-} from '@mui/material';
+import React from 'react';
+import { useState } from 'react';
+import { useRouter } from 'next/navigation';
+import styles from './LoginForm.module.css';
+import { login } from './authService';
 
 export default function LoginForm() {
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [error, setError] = useState('');
-  const { login, loading } = useAuth();
+  const [formData, setFormData] = useState({ email: '', password: '' });
+  const [error, setError] = useState(null);
+  const router = useRouter();
+
+  const handleChange = (e) => {
+    setFormData({ ...formData, [e.target.name]: e.target.value });
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setError('');
     try {
-      await login(email, password);
+      await login(formData);
+      router.push('/appointment');
     } catch (err) {
-      setError(err.message || 'Login failed');
+      setError('Invalid credentials');
     }
   };
 
   return (
-    <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
-      <Typography variant="h5" align="center" sx={{ fontWeight: 600, color: '#1e3a8a' }}>
-        Login
-      </Typography>
-      <Box component="form" onSubmit={handleSubmit} sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
-        <TextField
-          label="Email"
+    <form className={styles.form} onSubmit={handleSubmit}>
+      <div className={styles.field}>
+        <label>Email</label>
+        <input
           type="email"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
+          name="email"
+          value={formData.email}
+          onChange={handleChange}
           required
-          fullWidth
-          variant="outlined"
-          sx={{
-            '& .MuiOutlinedInput-root': {
-              borderRadius: 2,
-              '&:hover fieldset': { borderColor: '#3b82f6' },
-              '&.Mui-focused fieldset': { borderColor: '#3b82f6', boxShadow: '0 0 0 3px rgba(59, 130, 246, 0.1)' },
-            },
-          }}
         />
-        <TextField
-          label="Password"
+      </div>
+      <div className={styles.field}>
+        <label>Password</label>
+        <input
           type="password"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
+          name="password"
+          value={formData.password}
+          onChange={handleChange}
           required
-          fullWidth
-          variant="outlined"
-          sx={{
-            '& .MuiOutlinedInput-root': {
-              borderRadius: 2,
-              '&:hover fieldset': { borderColor: '#3b82f6' },
-              '&.Mui-focused fieldset': { borderColor: '#3b82f6', boxShadow: '0 0 0 3px rgba(59, 130, 246, 0.1)' },
-            },
-          }}
         />
-        {error && <Alert severity="error" sx={{ borderRadius: 2 }}>{error}</Alert>}
-        <Button
-          type="submit"
-          variant="contained"
-          disabled={loading}
-          sx={{
-            borderRadius: 2,
-            padding: '12px',
-            bgcolor: '#3b82f6',
-            '&:hover': { bgcolor: '#2563eb' },
-            '&:disabled': { bgcolor: '#93c5fd' },
-            textTransform: 'none',
-            fontSize: '1rem',
-            fontWeight: 500,
-          }}
-        >
-          {loading ? <CircularProgress size={24} color="inherit" /> : 'Login'}
-        </Button>
-      </Box>
-    </Box>
+      </div>
+      {error && <p className={styles.error}>{error}</p>}
+      <button type="submit" className={styles.button}>Login</button>
+    </form>
   );
 }
