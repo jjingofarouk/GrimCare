@@ -26,8 +26,8 @@ import {
   WrenchIcon,
   XCircleIcon,
 } from '@heroicons/react/24/outline';
-import { Drawer, List, ListItem, ListItemIcon, ListItemText, Divider } from '@mui/material';
-import useAuth from './useAuth';
+import { Drawer, List, ListItem, ListItemIcon, ListItemText } from '@mui/material';
+import useAuth from './auth/useAuth';
 import styles from './Sidebar.module.css';
 
 const roleBasedNavItems = {
@@ -127,21 +127,19 @@ export default function Sidebar({ toggleSidebar, isOpen }) {
         </div>
       </div>
       <List className={styles.nav}>
-        {navItems.map(({ name, path, icon: Icon }, index) => (
-          <React.Fragment key={path}>
-            <ListItem
-              component={Link}
-              href={path}
-              className={`${styles.navLink} ${pathname === path ? styles.active : ''}`}
-              onClick={toggleSidebar}
-            >
-              <ListItemIcon>
-                <Icon className={styles.icon} />
-              </ListItemIcon>
-              <ListItemText primary={name} />
-            </ListItem>
-            <Divider className={styles.divider} />
-          </React.Fragment>
+        {navItems.map(({ name, path, icon: Icon }) => (
+          <ListItem
+            key={path}
+            component={Link}
+            href={path}
+            className={`${styles.navLink} ${pathname === path ? styles.active : ''}`}
+            onClick={toggleSidebar}
+          >
+            <ListItemIcon>
+              <Icon className={styles.icon} />
+            </ListItemIcon>
+            <ListItemText primary={name} />
+          </ListItem>
         ))}
       </List>
     </Drawer>
