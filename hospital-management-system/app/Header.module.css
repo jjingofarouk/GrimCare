@@ -13,8 +13,8 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 0 1.5rem !important;
-  min-height: 64px !important;
+  padding: 0 2rem !important;
+  min-height: 72px !important;
   max-width: 100%;
 }
 
