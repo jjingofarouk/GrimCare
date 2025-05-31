@@ -11,3 +11,20 @@ export async function GET() {
     return NextResponse.json({ error: 'Failed to fetch wards' }, { status: 500 });
   }
 }
+
+export async function POST(request) {
+  try {
+    const data = await request.json();
+    const ward = await prisma.ward.create({
+      data: {
+        name: data.name,
+        totalBeds: data.totalBeds,
+        occupiedBeds: data.occupiedBeds || 0,
+        department: data.department || null,
+      },
+    });
+    return NextResponse.json(ward, { status: 201 });
+  } catch (error) {
+    return NextResponse.json({ error: 'Failed to create ward' }, { status: 500 });
+  }
+}
