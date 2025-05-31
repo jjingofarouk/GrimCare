@@ -1,177 +1,18 @@
 generator client {
-  provider = "prisma-client-js"
+provider = "prisma-client-js"
 }
 
 datasource db {
-  provider = "postgresql"
-  url      = env("DATABASE_URL")
-}
-
-enum Role {
-  USER
-  ADMIN
-  NURSE
-  DOCTOR
-  HELP_DESK
-  LAB_TECHNICIAN
-}
-
-enum AvailabilityStatus {
-  AVAILABLE
-  ON_LEAVE
-  ON_DUTY
-  IN_SURGERY
-  IN_CONSULTATION
-}
-
-enum AppointmentStatus {
-  CONFIRMED
-  PENDING
-  CANCELLED
-  SEEN
-  NO_SHOW
-  FOLLOW_UP
-}
-
-enum Visibility {
-  PRIVATE
-  SHARED
-}
-
-enum DiagnosticStatus {
-  PENDING
-  COMPLETED
-  CANCELLED
-}
-
-enum LeaveStatus {
-  PENDING
-  APPROVED
-  REJECTED
+provider = "postgresql"
+url      = env("DATABASE_URL")
 }
 
 model User {
-  id           Int              @id @default(autoincrement())
-  email        String           @unique @db.VarChar(255)
-  name         String           @db.VarChar(100)
-  role         Role             @default(USER)
-  createdAt    DateTime         @default(now())
-  updatedAt    DateTime         @updatedAt
-  doctor       Doctor?          @relation("DoctorProfile")
-  patient      Patient?         @relation("PatientProfile")
-}
-
-model Doctor {
-  id                Int              @id @default(autoincrement())
-  userId            Int              @unique
-  user              User             @relation("DoctorProfile", fields: [userId], references: [id])
-  photo             String?
-  specialty         String           @db.VarChar(100)
-  department        String           @db.VarChar(100)
-  ward              String?          @db.VarChar(100)
-  phone             String?          @db.VarChar(20)
-  designation       String           @db.VarChar(100)
-  qualifications    String?          @db.Text
-  experience        Int?
-  availabilityStatus AvailabilityStatus @default(AVAILABLE)
-  hospital          String           @db.VarChar(255)
-  schedules         Schedule[]
-  appointments      Appointment[]
-  prescriptions     Prescription[]
-  caseNotes         CaseNote[]
-  diagnosticOrders  DiagnosticOrder[]
-  leaveRequests     LeaveRequest[]
-  createdAt         DateTime         @default(now())
-  updatedAt         DateTime         @updatedAt
-}
-
-model Patient {
-  id                Int              @id @default(autoincrement())
-  userId            Int              @unique
-  user              User             @relation("PatientProfile", fields: [userId], references: [id])
-  type              String           @db.VarChar(50)
-  ward              String?          @db.VarChar(100)
-  recordId          String           @unique @db.VarChar(50)
-  appointments      Appointment[]
-  prescriptions     Prescription[]
-  caseNotes         CaseNote[]
-  diagnosticOrders  DiagnosticOrder[]
-  createdAt         DateTime         @default(now())
-  updatedAt         DateTime         @updatedAt
-}
-
-model Schedule {
-  id         Int      @id @default(autoincrement())
-  doctorId   Int
-  doctor     Doctor   @relation(fields: [doctorId], references: [id])
-  date       DateTime
-  time       String   @db.VarChar(50)
-  type       String   @db.VarChar(50)
-  location   String   @db.VarChar(100)
-  createdAt  DateTime @default(now())
-  updatedAt  DateTime @updatedAt
-}
-
-model Appointment {
-  id         Int              @id @default(autoincrement())
-  doctorId   Int
-  doctor     Doctor           @relation(fields: [doctorId], references: [id])
-  patientId  Int
-  patient    Patient          @relation(fields: [patientId], references: [id])
-  date       DateTime
-  time       String           @db.VarChar(50)
-  status     AppointmentStatus @default(PENDING)
-  createdAt  DateTime         @default(now())
-  updatedAt  DateTime         @updatedAt
-}
-
-model Prescription {
-  id         Int      @id @default(autoincrement())
-  doctorId   Int
-  doctor     Doctor   @relation(fields: [doctorId], references: [id])
-  patientId  Int
-  patient    Patient  @relation(fields: [patientId], references: [id])
-  drugs      String[]
-  notes      String?  @db.Text
-  date       DateTime @default(now())
-  createdAt  DateTime @default(now())
-  updatedAt  DateTime @updatedAt
-}
-
-model CaseNote {
-  id         Int       @id @default(autoincrement())
-  doctorId   Int
-  doctor     Doctor    @relation(fields: [doctorId], references: [id])
-  patientId  Int
-  patient    Patient   @relation(fields: [patientId], references: [id])
-  note       String    @db.Text
-  visibility Visibility @default(PRIVATE)
-  date       DateTime  @default(now())
-  createdAt  DateTime  @default(now())
-  updatedAt  DateTime  @updatedAt
-}
-
-model DiagnosticOrder {
-  id         Int             @id @default(autoincrement())
-  doctorId   Int
-  doctor     Doctor          @relation(fields: [doctorId], references: [id])
-  patientId  Int
-  patient    Patient         @relation(fields: [patientId], references: [id])
-  test       String          @db.VarChar(100)
-  status     DiagnosticStatus @default(PENDING)
-  date       DateTime        @default(now())
-  createdAt  DateTime        @default(now())
-  updatedAt  DateTime        @updatedAt
-}
-
-model LeaveRequest {
-  id          Int         @id @default(autoincrement())
-  doctorId    Int
-  doctor      Doctor      @relation(fields: [doctorId], references: [id])
-  startDate   DateTime
-  endDate     DateTime
-  status      LeaveStatus @default(PENDING)
-  leaveBalance Int
-  createdAt   DateTime    @default(now())
-  updatedAt   DateTime    @updatedAt
+id        Int      @id @default(autoincrement())
+email     String   @unique
+password  String
+name      String
+role      String
+createdAt DateTime @default(now())
+updatedAt DateTime @updatedAt
 }
