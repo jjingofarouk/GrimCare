@@ -1,81 +1,71 @@
+/* app/components/Header.module.css */
 .header {
-  background-color: #2563eb;
-  color: white;
-  padding: 1rem;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-  position: sticky;
+  background: #1f2937;
+  color: #fff;
+  height: 64px;
+  padding: 0 1rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  position: fixed;
   top: 0;
+  left: 0;
+  right: 0;
   z-index: 1000;
 }
 
-.container {
-  max-width: 1400px;
-  margin: 0 auto;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
-
-.left {
-  display: flex;
-  align-items: center;
-  gap: 1rem;
-}
-
-.right {
-  display: flex;
-  align-items: center;
-  gap: 1.5rem;
-}
-
-.title {
-  font-size: 1.5rem;
-  font-weight: 600;
-}
-
-.icon {
-  width: 1.5rem;
-  height: 1.5rem;
-  cursor: pointer;
-}
-
-.profile {
-  position: relative;
-}
-
-.profileButton {
+.headerLogo {
   display: flex;
   align-items: center;
   gap: 0.5rem;
-  background: none;
-  border: none;
-  color: white;
-  cursor: pointer;
 }
 
-.userName {
-  font-size: 0.9rem;
+.headerLogoImage {
+  width: 40px;
+  height: auto;
 }
 
-.dropdown {
-  position: absolute;
-  top: 100%;
-  right: 0;
-  background: white;
-  color: black;
-  border-radius: 0.25rem;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
-  min-width: 150px;
-  z-index: 1000;
+.headerTitle {
+  font-size: 1.25rem;
+  font-weight: 600;
 }
 
-.dropdownItem {
-  display: block;
-  padding: 0.5rem 1rem;
-  color: #1f2937;
+.headerNav {
+  display: flex;
+  gap: 1rem;
+}
+
+.headerNavLink {
+  color: #fff;
   text-decoration: none;
+  padding: 0.5rem;
+  border-radius: 0.25rem;
+  transition: background 0.2s;
 }
 
-.dropdownItem:hover {
-  background-color: #f3f4f6;
+.headerNavLink:hover {
+  background: #374151;
+}
+
+.headerNavLink.active {
+  background: #2563eb;
+}
+
+@media (max-width: 640px) {
+  .header {
+    padding: 0 0.5rem;
+  }
+  .headerTitle {
+    font-size: 1rem;
+  }
+  .headerLogoImage {
+    width: 32px;
+  }
+  .headerNav {
+    gap: 0.5rem;
+  }
+  .headerNavLink {
+    font-size: 0.875rem;
+    padding: 0.25rem;
+  }
 }
