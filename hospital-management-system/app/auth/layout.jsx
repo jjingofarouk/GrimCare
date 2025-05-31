@@ -3,7 +3,7 @@
 import { useRouter } from 'next/navigation';
 import { useEffect } from 'react';
 import { isAuthenticated } from './authUtils';
-import Header from '../Header';
+
 
 
 export default function AuthLayout({ children }) {
@@ -18,7 +18,6 @@ export default function AuthLayout({ children }) {
 
   return (
     <div style={{ marginTop: '64px', padding: '1rem' }}>
-      <Header />
       <main>{children}</main>
     </div>
   );
