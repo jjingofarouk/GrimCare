@@ -4,7 +4,7 @@ import { getUser, isAuthenticated } from '../../../../auth';
 
 const prisma = new PrismaClient();
 
-export const hasPermission = (role, feature) => {
+const hasPermission = (role, feature) => {
   const rolePermissions = {
     PATIENT: ['Dashboard', 'Appointments', 'Medical Records', 'Billing'],
     DOCTOR: ['Dashboard', 'Patients', 'Appointments', 'Clinical', 'Operation Theatre'],
@@ -55,7 +55,7 @@ export const hasPermission = (role, feature) => {
   return rolePermissions[role]?.includes(feature) || false;
 };
 
-export async function GET(request, { params }) {
+export async function GET(request) {
   try {
     const token = request.headers.get('authorization')?.split('Bearer ')[1];
     if (!token || !isAuthenticated()) {
@@ -67,10 +67,7 @@ export async function GET(request, { params }) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    const doctorId = parseInt(params.id);
-
     const appointments = await prisma.appointment.findMany({
-      where: { doctorId },
       include: {
         patient: {
           include: {
@@ -89,7 +86,7 @@ export async function GET(request, { params }) {
   }
 }
 
-export async function PATCH(request, { params }) {
+export async function PATCH(request) {
   try {
     const token = request.headers.get('authorization')?.split('Bearer ')[1];
     if (!token || !isAuthenticated()) {

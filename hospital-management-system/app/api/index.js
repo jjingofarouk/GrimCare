@@ -37,6 +37,7 @@ export const API_ROUTES = {
   UTILITIES: '/api/utilities',
   VACCINATION: '/api/vaccination',
   VERIFICATION: '/api/verification',
+  WARD: '/api/wards',
 };
 
 export const BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000';

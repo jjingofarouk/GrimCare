@@ -1,42 +1,64 @@
+// app/api/adt/route.js
 import { PrismaClient } from '@prisma/client';
 import { NextResponse } from 'next/server';
 
 const prisma = new PrismaClient();
 
-export async function GET(request, { params }) {
+export async function GET() {
   try {
-    const admission = await prisma.admission.findUnique({
-      where: { id: parseInt(params.id) },
+    const admissions = await prisma.admission.findMany({
+      include: {
+        patient: { include: { user: true } },
+        doctor: { include: { user: true } },
+        ward: true,
+      },
     });
-    if (!admission) {
-      return NextResponse.json({ error: 'Admission not found' }, { status: 404 });
-    }
-    return NextResponse.json(admission);
+    return NextResponse.json(admissions);
   } catch (error) {
-    return NextResponse.json({ error: 'Failed to fetch admission' }, { status: 500 });
+    console.error('GET /api/adt error:', error);
+    return NextResponse.json({ error: 'Failed to fetch admissions', details: error.message }, { status: 500 });
+  } finally {
+    await prisma.$disconnect();
   }
 }
 
-export async function PUT(request, { params }) {
+export async function POST(request) {
   try {
     const data = await request.json();
-    const admission = await prisma.admission.update({
-      where: { id: parseInt(params.id) },
-      data,
+    if (!data.patientId || !data.admissionDate || !data.status) {
+      return NextResponse.json({ error: 'Missing required fields' }, { status: 400 });
+    }
+    const admission = await prisma.admission.create({
+      data: {
+        patient: { connect: { id: data.patientId } },
+        doctor: data.doctorId ? { connect: { id: data.doctorId } } : undefined,
+        ward: data.wardId ? { connect: { id: data.wardId } } : undefined,
+        admissionDate: new Date(data.admissionDate),
+        triagePriority: data.triagePriority || null,
+        triageNotes: data.triageNotes || null,
+        status: data.status,
+        dischargeNotes: data.dischargeNotes || null,
+        dischargeDate: data.dischargeDate ? new Date(data.dischargeDate) : null,
+        scheduledDate: data.scheduledDate ? new Date(data.scheduledDate) : null,
+        preAdmissionNotes: data.preAdmissionNotes || null,
+      },
+      include: {
+        patient: { include: { user: true } },
+        doctor: { include: { user: true } },
+        ward: true,
+      },
     });
-    return NextResponse.json(admission);
+    if (data.wardId) {
+      await prisma.ward.update({
+        where: { id: data.wardId },
+        data: { occupiedBeds: { increment: 1 } },
+      });
+    }
+    return NextResponse.json(admission, { status: 201 });
   } catch (error) {
-    return NextResponse.json({ error: 'Failed to update admission' }, { status: 500 });
-  }
-}
-
-export async function DELETE(request, { params }) {
-  try {
-    await prisma.admission.delete({
-      where: { id: parseInt(params.id) },
-    });
-    return NextResponse.json({ message: 'Admission deleted' });
-  } catch (error) {
-    return NextResponse.json({ error: 'Failed to delete admission' }, { status: 500 });
+    console.error('POST /api/adt error:', error);
+    return NextResponse.json({ error: 'Failed to create admission', details: error.message }, { status: 500 });
+  } finally {
+    await prisma.$disconnect();
   }
 }

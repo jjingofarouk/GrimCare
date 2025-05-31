@@ -1,11 +1,12 @@
 import React from 'react';
+import { Box } from '@mui/material';
 
 export default function AdtLayout({ children }) {
   return (
-    <div className="flex min-h-screen">
-      <div className="flex-1">
-        <main className="p-6">{children}</main>
-      </div>
-    </div>
+    <Box sx={{ display: 'flex', minHeight: '100vh' }}>
+      <Box sx={{ flex: 1, p: 3 }}>
+        {children}
+      </Box>
+    </Box>
   );
 }

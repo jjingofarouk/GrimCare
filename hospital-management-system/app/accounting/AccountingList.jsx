@@ -1,32 +1,34 @@
 "use client";
 
-import React from 'react';
-import { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import AccountingCard from './AccountingCard';
 import styles from './AccountingList.module.css';
-import { getTransactions } from './accountingService';
+import { getTransactions, getPayrolls, getAssets } from './accountingService';
 
-export default function AccountingList() {
-  const [transactions, setTransactions] = useState([]);
+export default function AccountingList({ type }) {
+  const [items, setItems] = useState([]);
 
   useEffect(() => {
-    async function fetchTransactions() {
+    async function fetchData() {
       try {
-        const data = await getTransactions();
-        setTransactions(data);
+        let data;
+        if (type === 'transaction') data = await getTransactions();
+        if (type === 'payroll') data = await getPayrolls();
+        if (type === 'asset') data = await getAssets();
+        setItems(data);
       } catch (error) {
-        console.error('Error fetching transactions:', error);
+        console.error(`Error fetching ${type}s:`, error);
       }
     }
-    fetchTransactions();
-  }, []);
+    fetchData();
+  }, [type]);
 
   return (
     <div className={styles.container}>
-      <h2 className={styles.title}>Transaction History</h2>
+      <h2 className={styles.title}>{type.charAt(0).toUpperCase() + type.slice(1)} History</h2>
       <div className={styles.grid}>
-        {transactions.map((transaction) => (
-          <AccountingCard key={transaction.id} transaction={transaction} />
+        {items.map((item) => (
+          <AccountingCard key={item.id} item={item} type={type} />
         ))}
       </div>
     </div>

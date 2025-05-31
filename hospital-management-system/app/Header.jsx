@@ -6,7 +6,6 @@ import { usePathname } from 'next/navigation';
 import { AppBar, Toolbar, Typography, Button, Box, Avatar, Menu, MenuItem, IconButton } from '@mui/material';
 import Sidebar from './Sidebar';
 import useAuth from './useAuth';
-import MenuIcon from '@mui/icons-material/Menu';
 import AccountCircle from '@mui/icons-material/AccountCircle';
 import styles from './Header.module.css';
 

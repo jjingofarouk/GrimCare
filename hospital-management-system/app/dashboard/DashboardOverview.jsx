@@ -1,9 +1,11 @@
-'use client';
+"use client";
+
 import React, { useState, useEffect } from 'react';
-import styles from './DashboardOverview.module.css';
+import { Box, Typography, Alert } from '@mui/material';
 import DashboardWidget from './DashboardWidget';
-import DashboardChart from './DashboardChart';
+import AccountingChart from './AccountingChart';
 import { getDashboardData } from './dashboardService';
+import styles from './DashboardOverview.module.css';
 
 export default function DashboardOverview() {
   const [data, setData] = useState({});
@@ -22,18 +24,26 @@ export default function DashboardOverview() {
   }, []);
 
   return (
-    <div className={styles.container}>
-      <h2 className={styles.title}>Dashboard Overview</h2>
-      {error && <p className={styles.error}>{error}</p>}
-      <div className={styles.widgets}>
+    <Box className={styles.container}>
+      <Typography variant="h5" className={styles.title}>
+        Accounting Dashboard
+      </Typography>
+      {error && <Alert severity="error" className={styles.error}>{error}</Alert>}
+      <Box className={styles.widgets}>
         <DashboardWidget
-          title="Total Appointments"
-          value={data.appointments || 0}
+          title="Total Transactions"
+          value={data.totalTransactions || 0}
         />
-        <DashboardWidget title="Pending Bills" value={data.bills || 0} />
-        <DashboardWidget title="Active Claims" value={data.claims || 0} />
-      </div>
-      <DashboardChart data={data.chartData || []} />
-    </div>
+        <DashboardWidget
+          title="Pending Transactions"
+          value={data.pendingTransactions || 0}
+        />
+        <DashboardWidget
+          title="Total Revenue"
+          value={`$${data.totalRevenue?.toFixed(2) || '0.00'}`}
+        />
+      </Box>
+      <AccountingChart data={data.chartData || { labels: [], datasets: [] }} />
+    </Box>
   );
 }

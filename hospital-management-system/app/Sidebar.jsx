@@ -31,24 +31,24 @@ import styles from './Sidebar.module.css';
 
 const roleBasedNavItems = {
   PATIENT: [
-    { name: 'Dashboard', path: '/', icon: HomeIcon },
     { name: 'Appointments', path: '/appointment', icon: CalendarIcon },
-    { name: 'Medical Records', path: '/medical-records', icon: DocumentTextIcon },
     { name: 'Billing', path: '/billing', icon: TableCellsIcon },
+    { name: 'Dashboard', path: '/', icon: HomeIcon },
+    { name: 'Medical Records', path: '/medical-records', icon: DocumentTextIcon },
   ],
   DOCTOR: [
-    { name: 'Dashboard', path: '/', icon: HomeIcon },
-    { name: 'Patients', path: '/patient', icon: UserIcon },
     { name: 'Appointments', path: '/appointment', icon: CalendarIcon },
     { name: 'Clinical', path: '/clinical', icon: BeakerIcon },
+    { name: 'Dashboard', path: '/', icon: HomeIcon },
     { name: 'Operation Theatre', path: '/operation-theatre', icon: BeakerIcon },
+    { name: 'Patients', path: '/patient', icon: UserIcon },
   ],
   NURSE: [
-    { name: 'Dashboard', path: '/', icon: HomeIcon },
-    { name: 'Patients', path: '/patient', icon: UserIcon },
     { name: 'Appointments', path: '/appointment', icon: CalendarIcon },
-    { name: 'Nursing', path: '/nursing', icon: HeartIcon },
+    { name: 'Dashboard', path: '/', icon: HomeIcon },
     { name: 'Maternity', path: '/maternity', icon: HeartIcon },
+    { name: 'Nursing', path: '/nursing', icon: HeartIcon },
+    { name: 'Patients', path: '/patient', icon: UserIcon },
   ],
   LAB_TECHNICIAN: [
     { name: 'Dashboard', path: '/', icon: HomeIcon },
@@ -62,16 +62,15 @@ const roleBasedNavItems = {
     { name: 'Procurement', path: '/procurement', icon: ShoppingCartIcon },
   ],
   ADMIN: [
-    { name: 'Dashboard', path: '/', icon: HomeIcon },
-    { name: 'Patients', path: '/patient', icon: UserIcon },
-    { name: 'Appointments', path: '/appointment', icon: CalendarIcon },
     { name: 'Accounting', path: '/accounting', icon: CalculatorIcon },
     { name: 'ADT', path: '/adt', icon: ClipboardDocumentListIcon },
+    { name: 'Appointments', path: '/appointment', icon: CalendarIcon },
     { name: 'Billing', path: '/billing', icon: TableCellsIcon },
     { name: 'Claim Management', path: '/claim-mgmt', icon: DocumentTextIcon },
     { name: 'Clinical', path: '/clinical', icon: BeakerIcon },
     { name: 'Clinical Settings', path: '/clinical-settings', icon: WrenchIcon },
     { name: 'CSSD', path: '/cssd', icon: ShieldCheckIcon },
+    { name: 'Dashboard', path: '/', icon: HomeIcon },
     { name: 'Dispensary', path: '/dispensary', icon: InboxIcon },
     { name: 'Doctor', path: '/doctor', icon: IdentificationIcon },
     { name: 'Dynamic Report', path: '/dynamic-report', icon: TableCellsIcon },
@@ -87,6 +86,7 @@ const roleBasedNavItems = {
     { name: 'NHIF', path: '/nhif', icon: ShieldCheckIcon },
     { name: 'Nursing', path: '/nursing', icon: HeartIcon },
     { name: 'Operation Theatre', path: '/operation-theatre', icon: BeakerIcon },
+    { name: 'Patients', path: '/patient', icon: UserIcon },
     { name: 'Pharmacy', path: '/pharmacy', icon: InboxIcon },
     { name: 'Procurement', path: '/procurement', icon: ShoppingCartIcon },
     { name: 'Queue Management', path: '/queue-mgmt', icon: UsersIcon },
@@ -132,6 +132,7 @@ export default function Sidebar({ toggleSidebar, isOpen }) {
         {navItems.map(({ name, path, icon: Icon }) => (
           <ListItem
             key={path}
+            button
             component={Link}
             href={path}
             className={`${styles.navLink} ${pathname === path ? styles.active : ''}`}

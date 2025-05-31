@@ -1,26 +1,42 @@
 "use client";
-
 import React from 'react';
-import styles from './AdtCard.module.css';
+import { Card, CardContent, CardHeader, Chip, Button, Typography, Box } from '@mui/material';
+import { Person, LocalHospital, CalendarToday, MedicalServices } from '@mui/icons-material';
 
-export default function AdtCard({ admission }) {
+export default function AdmissionCard({ admission, onViewDetails }) {
+  const statusColor = admission.status === 'ADMITTED' ? 'success' : 'error';
+
   return (
-    <div className={styles.card}>
-      <div className={styles.header}>
-        <h3 className={styles.title}>{admission.patientName}</h3>
-        <span className={`${styles.status} ${admission.status === 'ADMITTED' ? styles.admitted : styles.discharged}`}>
-          {admission.status}
-        </span>
-      </div>
-      <div className={styles.body}>
-        <p><strong>Admission ID:</strong> {admission.id}</p>
-        <p><strong>Ward:</strong> {admission.ward}</p>
-        <p><strong>Admission Date:</strong> {new Date(admission.admissionDate).toLocaleDateString()}</p>
-        <p><strong>Doctor:</strong> {admission.doctor}</p>
-      </div>
-      <div className={styles.footer}>
-        <button className={styles.button}>View Details</button>
-      </div>
-    </div>
+    <Card sx={{ mb: 2, boxShadow: 3 }}>
+      <CardHeader
+        title={admission.patient.user.name}
+        subheader={`Admission ID: ${admission.id}`}
+        action={<Chip label={admission.status} color={statusColor} />}
+      />
+      <CardContent>
+        <Box display="flex" alignItems="center" mb={1}>
+          <Person sx={{ mr: 1 }} />
+          <Typography><strong>Patient:</strong> {admission.patient.user.name}</Typography>
+        </Box>
+        <Box display="flex" alignItems="center" mb={1}>
+          <LocalHospital sx={{ mr: 1 }} />
+          <Typography><strong>Ward:</strong> {admission.ward?.name || 'N/A'}</Typography>
+        </Box>
+        <Box display="flex" alignItems="center" mb={1}>
+          <CalendarToday sx={{ mr: 1 }} />
+          <Typography><strong>Admission Date:</strong> {new Date(admission.admissionDate).toLocaleDateString()}</Typography>
+        </Box>
+        <Box display="flex" alignItems="center" mb={1}>
+          <MedicalServices sx={{ mr: 1 }} />
+          <Typography><strong>Doctor:</strong> {admission.doctor?.user.name || 'N/A'}</Typography>
+        </Box>
+        <Box display="flex" alignItems="center">
+          <Typography><strong>Triage Priority:</strong> {admission.triagePriority || 'N/A'}</Typography>
+        </Box>
+        <Button variant="contained" color="primary" onClick={() => onViewDetails(admission)} sx={{ mt: 2 }}>
+          View Details
+        </Button>
+      </CardContent>
+    </Card>
   );
 }

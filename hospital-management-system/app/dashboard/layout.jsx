@@ -1,12 +1,20 @@
 import React from 'react';
+import { AppBar, Toolbar, Typography, Box } from '@mui/material';
+import styles from './DashboardLayout.module.css';
 
 export default function DashboardLayout({ children }) {
   return (
-    <div className="min-h-screen bg-gray-100">
-      <header className="bg-blue-500 text-white p-4">
-        <h1 className="text-2xl font-bold">Dashboard</h1>
-      </header>
-      <main className="p-4">{children}</main>
-    </div>
+    <Box className={styles.container}>
+      <AppBar position="static" className={styles.header}>
+        <Toolbar>
+          <Typography variant="h6" className={styles.headerTitle}>
+            HMS Dashboard
+          </Typography>
+        </Toolbar>
+      </AppBar>
+      <Box component="main" className={styles.main}>
+        {children}
+      </Box>
+    </Box>
   );
 }

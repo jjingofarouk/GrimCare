@@ -4,7 +4,7 @@ import { getUser, isAuthenticated } from '../../../../auth';
 
 const prisma = new PrismaClient();
 
-export const hasPermission = (role, feature) => {
+const hasPermission = (role, feature) => {
   const rolePermissions = {
     PATIENT: ['Dashboard', 'Appointments', 'Medical Records', 'Billing'],
     DOCTOR: ['Dashboard', 'Patients', 'Appointments', 'Clinical', 'Operation Theatre'],
