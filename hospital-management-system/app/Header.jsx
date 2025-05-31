@@ -6,7 +6,7 @@ import { usePathname } from 'next/navigation';
 import { AppBar, Toolbar, Typography, Button, IconButton } from '@mui/material';
 import { Bars3Icon as MenuIcon } from '@heroicons/react/24/outline'; // Corrected import
 import Sidebar from './Sidebar';
-import useAuth from './auth/useAuth';
+import useAuth from './useAuth';
 import styles from './Header.module.css';
 
 export default function Header() {
