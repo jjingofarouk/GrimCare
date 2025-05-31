@@ -27,7 +27,7 @@ import {
   XCircleIcon,
 } from '@heroicons/react/24/outline';
 import { Drawer, List, ListItem, ListItemIcon, ListItemText } from '@mui/material';
-import useAuth from './auth/useAuth';
+import useAuth from './useAuth';
 import styles from './Sidebar.module.css';
 
 const roleBasedNavItems = {
