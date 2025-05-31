@@ -3,40 +3,49 @@ import { NextResponse } from 'next/server';
 
 const prisma = new PrismaClient();
 
-export async function GET(request, { params }) {
+export async function GET() {
   try {
-    const admission = await prisma.admission.findUnique({
-      where: { id: parseInt(params.id) },
+    const admissions = await prisma.admission.findMany({
+      include: {
+        patient: true,
+        doctor: true,
+        ward: true,
+      },
     });
-    if (!admission) {
-      return NextResponse.json({ error: 'Admission not found' }, { status: 404 });
-    }
-    return NextResponse.json(admission);
+    return NextResponse.json(admissions);
   } catch (error) {
-    return NextResponse.json({ error: 'Failed to fetch admission' }, { status: 500 });
+    return NextResponse.json({ error: 'Failed to fetch admissions' }, { status: 500 });
   }
 }
 
-export async function PUT(request, { params }) {
+export async function POST(request) {
   try {
     const data = await request.json();
-    const admission = await prisma.admission.update({
-      where: { id: parseInt(params.id) },
-      data,
+    const admission = await prisma.admission.create({
+      data: {
+        patientId: data.patientId,
+        doctorId: data.doctorId,
+        wardId: data.wardId,
+        admissionDate: new Date(data.admissionDate),
+        triagePriority: data.triagePriority,
+        triageNotes: data.triageNotes,
+        status: data.status,
+        dischargeNotes: data.dischargeNotes,
+      },
+      include: {
+        patient: true,
+        doctor: true,
+        ward: true,
+      },
     });
-    return NextResponse.json(admission);
+    if (data.wardId) {
+      await prisma.ward.update({
+        where: { id: data.wardId },
+        data: { occupiedBeds: { increment: 1 } },
+      });
+    }
+    return NextResponse.json(admission, { status: 201 });
   } catch (error) {
-    return NextResponse.json({ error: 'Failed to update admission' }, { status: 500 });
-  }
-}
-
-export async function DELETE(request, { params }) {
-  try {
-    await prisma.admission.delete({
-      where: { id: parseInt(params.id) },
-    });
-    return NextResponse.json({ message: 'Admission deleted' });
-  } catch (error) {
-    return NextResponse.json({ error: 'Failed to delete admission' }, { status: 500 });
+    return NextResponse.json({ error: 'Failed to create admission' }, { status: 500 });
   }
 }
