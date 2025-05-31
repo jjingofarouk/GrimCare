@@ -1,3 +1,4 @@
+"use client"
 import React, { useState, useEffect } from 'react';
 import { TextField, Button, MenuItem, Grid, Paper, Typography, Box } from '@mui/material';
 import { createAdmission, updateAdmission } from './adtService';
