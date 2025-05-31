@@ -5,7 +5,7 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { AppBar, Toolbar, Typography, Button } from '@mui/material';
 import Sidebar from './Sidebar';
-import useAuth from './auth/useAuth';
+import useAuth from './useAuth';
 import styles from './Header.module.css';
 
 export default function Header() {
