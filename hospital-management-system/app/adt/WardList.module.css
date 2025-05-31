@@ -1,6 +1,7 @@
 /* app/adt/WardList.module.css */
 .container {
   max-width: 100%;
+  width:100vw;
   padding: 0 16px;
 }
 
