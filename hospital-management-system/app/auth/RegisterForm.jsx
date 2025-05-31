@@ -1,9 +1,8 @@
-"use client" ;
+'use client';
 
-import React from 'react';
-import { useState } from 'react';
+import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import styles from './RegisterForm.module.css';
+import styles from './LoginForm.module.css'; // Reusing LoginForm styles
 import { register } from './authService';
 
 export default function RegisterForm() {
@@ -31,48 +30,62 @@ export default function RegisterForm() {
   };
 
   return (
-    <form className={styles.form} onSubmit={handleSubmit}>
-      <div className={styles.field}>
-        <label>Name</label>
-        <input
-          type="text"
-          name="name"
-          value={formData.name}
-          onChange={handleChange}
-          required
-        />
-      </div>
-      <div className={styles.field}>
-        <label>Email</label>
-        <input
-          type="email"
-          name="email"
-          value={formData.email}
-          onChange={handleChange}
-          required
-        />
-      </div>
-      <div className={styles.field}>
-        <label>Password</label>
-        <input
-          type="password"
-          name="password"
-          value={formData.password}
-          onChange={handleChange}
-          required
-        />
-      </div>
-      <div className={styles.field}>
-        <label>Role</label>
-        <select name="role" value={formData.role} onChange={handleChange}>
-          <option value="PATIENT">Patient</option>
-          <option value="DOCTOR">Doctor</option>
-          <option value="NURSE">Nurse</option>
-          <option value="STAFF">Staff</option>
-        </select>
-      </div>
-      {error && <p className={styles.error}>{error}</p>}
-      <button type="submit" className={styles.button}>Register</button>
-    </form>
+    <div className={styles.container}>
+      <form className={styles.form} onSubmit={handleSubmit}>
+        <h2 className={styles.formTitle}>Register</h2>
+        <div className={styles.formField}>
+          <label className={styles.formLabel}>Name</label>
+          <input
+            type="text"
+            name="name"
+            value={formData.name}
+            onChange={handleChange}
+            className={styles.formInput}
+            required
+          />
+        </div>
+        <div className={styles.formField}>
+          <label className={styles.formLabel}>Email</label>
+          <input
+            type="email"
+            name="email"
+            value={formData.email}
+            onChange={handleChange}
+            className={styles.formInput}
+            required
+          />
+        </div>
+        <div className={styles.formField}>
+          <label className={styles.formLabel}>Password</label>
+          <input
+            type="password"
+            name="password"
+            value={formData.password}
+            onChange={handleChange}
+            className={styles.formInput}
+            required
+          />
+        </div>
+        <div className={styles.formField}>
+          <label className={styles.formLabel}>Role</label>
+          <select
+            name="role"
+            value={formData.role}
+            onChange={handleChange}
+            className={styles.formInput}
+          >
+            <option value="PATIENT">Patient</option>
+            <option value="DOCTOR">Doctor</option>
+            <option value="NURSE">Nurse</option>
+            <option value="STAFF">Staff</option>
+          </select>
+        </div>
+        {error && <p className={styles.formError}>{error}</p>}
+        <button type="submit" className={styles.formButton}>Register</button>
+        <p className={styles.registerLink}>
+          Already have an account? <Link href="/auth/login">Login</Link>
+        </p>
+      </form>
+    </div>
   );
 }
