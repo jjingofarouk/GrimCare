@@ -1,4 +1,3 @@
-// app/components/Header.jsx
 'use client';
 
 import React, { useState } from 'react';
@@ -6,18 +5,26 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { AppBar, Toolbar, Typography, Button } from '@mui/material';
 import Sidebar from './Sidebar';
+import useAuth from '../auth/useAuth';
 import styles from './Header.module.css';
-
-const navItems = [
-  { name: 'Profile', path: '/profile' },
-  { name: 'Logout', path: '/auth/logout' },
-];
 
 export default function Header() {
   const pathname = usePathname();
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const { user, logout } = useAuth();
 
   const toggleSidebar = () => setSidebarOpen(!sidebarOpen);
+
+  const handleLogout = async () => {
+    await logout();
+  };
+
+  const navItems = user
+    ? [
+        { name: 'Profile', path: '/profile' },
+        { name: 'Logout', path: '#', onClick: handleLogout },
+      ]
+    : [];
 
   return (
     <>
@@ -32,11 +39,12 @@ export default function Header() {
             </Typography>
           </div>
           <div className={styles.headerNav}>
-            {navItems.map(({ name, path }) => (
+            {navItems.map(({ name, path, onClick }) => (
               <Button
                 key={path}
-                component={Link}
-                href={path}
+                component={onClick ? 'button' : Link}
+                href={onClick ? undefined : path}
+                onClick={onClick}
                 className={`${styles.headerNavLink} ${pathname === path ? styles.active : ''}`}
               >
                 {name}
