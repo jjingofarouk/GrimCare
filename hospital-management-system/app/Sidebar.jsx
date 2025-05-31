@@ -9,6 +9,7 @@ import {
   CalendarIcon,
   CalculatorIcon,
   CogIcon,
+  DoctorIcon,
   BeakerIcon,
   BriefcaseIcon,
   ClipboardDocumentListIcon,
