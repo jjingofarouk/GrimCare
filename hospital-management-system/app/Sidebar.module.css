@@ -1,109 +1,46 @@
 .sidebar {
-  background: #1f2937;
-  color: #fff;
-  width: 320px;
-  height: 100vh;
-  display: flex;
-  flex-direction: column;
-  border-right: 1px solid #374151;
+  background-color: #1a1a1a !important;
+  color: white !important;
+  width: 250px;
 }
 
 .logo {
-  padding: 1.5rem;
   display: flex;
   justify-content: center;
+  padding: 1rem;
   cursor: pointer;
 }
 
 .logoContainer {
-  width: 90px;
-  height: 90px;
-  border-radius: 50%;
-  overflow: hidden;
-  background: #fff;
   display: flex;
-  align-items: center;
   justify-content: center;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
 }
 
 .logoImage {
-  width: 80px;
-  height: auto;
+  height: 50px;
+  width: auto;
 }
 
 .nav {
-  flex: 1;
-  overflow-y: auto;
-  padding: 0 1rem;
+  padding: 0;
 }
 
 .navLink {
-  display: flex;
-  align-items: center;
-  padding: 0.85rem 1rem;
-  color: #d1d5db;
-  text-decoration: none;
-  border-radius: 8px;
-  transition: background 0.2s, color 0.2s;
+  color: white !important;
+  padding: 0.75rem 1rem;
 }
 
 .navLink:hover {
-  background: #374151;
-  color: #fff;
+  background-color: #333333;
 }
 
-.active {
-  background: #2563eb;
-  color: #fff;
+.navLink.active {
+  background-color: #1976d2;
+  color: white !important;
 }
 
 .icon {
-  width: 22px;
-  height: 22px;
-  margin-right: 12px;
-}
-
-.divider {
-  background: #374151;
-  margin: 0.25rem 0;
-}
-
-/* Scrollbar customization */
-.nav::-webkit-scrollbar {
-  width: 8px;
-}
-
-.nav::-webkit-scrollbar-track {
-  background: #1f2937;
-}
-
-.nav::-webkit-scrollbar-thumb {
-  background: #4b5563;
-  border-radius: 4px;
-}
-
-.nav::-webkit-scrollbar-thumb:hover {
-  background: #6b7280;
-}
-
-@media (max-width: 768px) {
-  .sidebar {
-    width: 280px;
-  }
-  .logoContainer {
-    width: 70px;
-    height: 70px;
-  }
-  .logoImage {
-    width: 60px;
-  }
-  .navLink {
-    padding: 0.7rem 0.9rem;
-    font-size: 0.95rem;
-  }
-  .icon {
-    width: 20px;
-    height: 20px;
-  }
+  color: white;
+  width: 24px;
+  height: 24px;
 }
