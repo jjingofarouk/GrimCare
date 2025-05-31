@@ -1,4 +1,5 @@
-"use client" ;
+// app/auth/LoginForm.jsx
+'use client';
 
 import React from 'react';
 import { useState } from 'react';
@@ -26,29 +27,32 @@ export default function LoginForm() {
   };
 
   return (
-    <form className={styles.form} onSubmit={handleSubmit}>
-      <div className={styles.field}>
-        <label>Email</label>
-        <input
-          type="email"
-          name="email"
-          value={formData.email}
-          onChange={handleChange}
-          required
-        />
-      </div>
-      <div className={styles.field}>
-        <label>Password</label>
-        <input
-          type="password"
-          name="password"
-          value={formData.password}
-          onChange={handleChange}
-          required
-        />
-      </div>
-      {error && <p className={styles.error}>{error}</p>}
-      <button type="submit" className={styles.button}>Login</button>
-    </form>
+    <div className={styles.container}>
+      <form className={styles.form} onSubmit={handleSubmit}>
+        <h2 className={styles.title}>Login</h2>
+        <div className={styles.field}>
+          <label>Email</label>
+          <input
+            type="email"
+            name="email"
+            value={formData.email}
+            onChange={handleChange}
+            required
+          />
+        </div>
+        <div className={styles.field}>
+          <label>Password</label>
+          <input
+            type="password"
+            name="password"
+            value={formData.password}
+            onChange={handleChange}
+            required
+          />
+        </div>
+        {error && <p className={styles.error}>{error}</p>}
+        <button type="submit" className={styles.button}>Login</button>
+      </form>
+    </div>
   );
 }
