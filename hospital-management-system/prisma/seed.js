@@ -24,7 +24,7 @@ async function main() {
       { email: 'mugisha@example.com', name: 'Mugisha David', role: 'PATIENT' },
       { email: 'nabirye@example.com', name: 'Nabirye Grace', role: 'PATIENT' },
       { email: 'tumusiime@example.com', name: 'Tumusiime Joseph', role: 'PATIENT' },
-      { email: 'kato@example.com', name: 'Kato Emmanuel看', role: 'PATIENT' },
+      { email: 'kato@example.com', name: 'Kato Emmanuel', role: 'PATIENT' },
       { email: 'dr.nalubega@example.com', name: 'Dr. Nalubega Esther', role: 'DOCTOR' },
       { email: 'dr.mukasa@example.com', name: 'Dr. Mukasa Simon', role: 'DOCTOR' },
       { email: 'dr.namugga@example.com', name: 'Dr. Namugga Ruth', role: 'DOCTOR' },
@@ -66,11 +66,11 @@ async function main() {
 
     // Seed Doctors
     const doctors = [
-      { userId: createdUsers[5].id, specialty: 'Cardiology', licenseNumber: 'LIC10001' },
-      { userId: createdUsers[6].id, specialty: 'Pediatrics', licenseNumber: 'LIC10002' },
-      { userId: createdUsers[7].id, specialty: 'Orthopedics', licenseNumber: 'LIC10003' },
-      { userId: createdUsers[8].id, specialty: 'Neurology', licenseNumber: 'LIC10004' },
-      { userId: createdUsers[9].id, specialty: 'General Medicine', licenseNumber: 'LIC10005' },
+      { user: { connect: { id: createdUsers[5].id } }, specialty: 'Cardiology', licenseNumber: 'LIC10001' },
+      { user: { connect: { id: createdUsers[6].id } }, specialty: 'Pediatrics', licenseNumber: 'LIC10002' },
+      { user: { connect: { id: createdUsers[7].id } }, specialty: 'Orthopedics', licenseNumber: 'LIC10003' },
+      { user: { connect: { id: createdUsers[8].id } }, specialty: 'Neurology', licenseNumber: 'LIC10004' },
+      { user: { connect: { id: createdUsers[9].id } }, specialty: 'General Medicine', licenseNumber: 'LIC10005' },
     ];
 
     const createdDoctors = await Promise.all(
