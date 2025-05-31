@@ -9,7 +9,6 @@ import {
   CalendarIcon,
   CalculatorIcon,
   CogIcon,
-  DoctorIcon,
   BeakerIcon,
   BriefcaseIcon,
   ClipboardDocumentListIcon,
@@ -65,7 +64,7 @@ const roleBasedNavItems = {
   ADMIN: [
     { name: 'Accounting', path: '/accounting', icon: CalculatorIcon },
     { name: 'ADT', path: '/adt', icon: ClipboardDocumentListIcon },
-    { name: 'Appointments', path: '/appointment', icon: DoctorIcon },
+    { name: 'Appointments', path: '/appointment', icon: CalendarIcon },
     { name: 'Billing', path: '/billing', icon: TableCellsIcon },
     { name: 'Claim Management', path: '/claim-mgmt', icon: DocumentTextIcon },
     { name: 'Clinical', path: '/clinical', icon: BeakerIcon },
@@ -133,6 +132,7 @@ export default function Sidebar({ toggleSidebar, isOpen }) {
         {navItems.map(({ name, path, icon: Icon }) => (
           <ListItem
             key={path}
+            button
             component={Link}
             href={path}
             className={`${styles.navLink} ${pathname === path ? styles.active : ''}`}
