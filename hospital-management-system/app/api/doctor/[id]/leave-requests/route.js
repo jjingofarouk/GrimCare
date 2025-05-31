@@ -4,13 +4,13 @@ import { getUser, isAuthenticated } from '../../../../auth';
 
 const prisma = new PrismaClient();
 
-export const hasPermission = (role, feature) => {
+const hasPermission = (role, feature) => {
   const rolePermissions = {
     PATIENT: ['Dashboard', 'Appointments', 'Medical Records', 'Billing'],
     DOCTOR: ['Dashboard', 'Patients', 'Appointments', 'Clinical', 'Operation Theatre'],
     NURSE: ['Dashboard', 'Patients', 'Appointments', 'Nursing', 'Maternity'],
     LAB_TECHNICIAN: ['Dashboard', 'Laboratory', 'Radiology'],
-    STAFF: ['Dashboard', 'Helpdesk', 'Inventory', 'Proc primers'],
+    STAFF: ['Dashboard', 'Helpdesk', 'Inventory', 'Procurement'],
     ADMIN: [
       'Dashboard',
       'Patients',
@@ -57,7 +57,7 @@ export const hasPermission = (role, feature) => {
 
 export async function GET(request, { params }) {
   try {
-    const token = request.headers.get('authorization')?.split('Bearer ')[1];
+    const token = request.headers.get('authorization')?.split(' ')[1];
     if (!token || !isAuthenticated()) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
@@ -79,7 +79,7 @@ export async function GET(request, { params }) {
 
 export async function POST(request, { params }) {
   try {
-    const token = request.headers.get('authorization')?.split('Bearer ')[1];
+    const token = request.headers.get('authorization')?.split(' ')[1];
     if (!token || !isAuthenticated()) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
