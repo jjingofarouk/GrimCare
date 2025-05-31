@@ -1,27 +1,16 @@
-'use client';
-
-import React, { useState } from 'react';
-import './globals.css';
-import { Inter } from 'next/font/google';
-import Header from './Header';
+// app/layout.jsx
 import Sidebar from './Sidebar';
-
-const inter = Inter({ subsets: ['latin'] });
+import Header from './Header';
+import './globals.css';
 
 export default function RootLayout({ children }) {
-  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
-
-  const toggleSidebar = () => {
-    setIsSidebarOpen(!isSidebarOpen);
-  };
-
   return (
     <html lang="en">
-      <body className={inter.className}>
-        <Header toggleSidebar={toggleSidebar} />
-        <div className="layout-container">
-          <Sidebar isOpen={isSidebarOpen} toggleSidebar={toggleSidebar} />
-          <main className="main-content">{children}</main>
+      <body>
+        <Sidebar />
+        <div style={{ marginTop: '64px', padding: '1rem' }}>
+          <Header />
+          <main>{children}</main>
         </div>
       </body>
     </html>
