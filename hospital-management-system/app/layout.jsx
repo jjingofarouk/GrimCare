@@ -1,16 +1,28 @@
-// app/layout.js or app/layout.tsx
-import './globals.css';
+'use client';
 
-export const metadata = {
-  title: 'Hospital Management System',
-  description: 'Manage hospital operations efficiently',
-};
+import React, { useState } from 'react';
+import './globals.css';
+import { Inter } from 'next/font/google';
+import Header from './Header';
+import Sidebar from './Sidebar';
+
+const inter = Inter({ subsets: ['latin'] });
 
 export default function RootLayout({ children }) {
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+
+  const toggleSidebar = () => {
+    setIsSidebarOpen(!isSidebarOpen);
+  };
+
   return (
     <html lang="en">
-      <body>
-        {children}
+      <body className={inter.className}>
+        <Header toggleSidebar={toggleSidebar} />
+        <div className="layout-container">
+          <Sidebar isOpen={isSidebarOpen} toggleSidebar={toggleSidebar} />
+          <main className="main-content">{children}</main>
+        </div>
       </body>
     </html>
   );
