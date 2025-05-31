@@ -2,8 +2,8 @@
 
 import React, { useState, useEffect } from 'react';
 import { Container, Box, Typography, Button } from '@mui/material';
-import AdmissionForm from './AdmissionForm';
-import AdmissionList from './AdmissionList';
+import AdmissionForm from './AdtForm';
+import AdmissionList from './AdtList';
 import { getPatients, getDoctors, getWards } from './adtService';
 
 export default function AdtPage() {
