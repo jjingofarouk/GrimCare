@@ -15,28 +15,32 @@ export default function AdtPage() {
   const [doctors, setDoctors] = useState([]);
   const [wards, setWards] = useState([]);
   const [refresh, setRefresh] = useState(false);
-  const [error, setError] = useState(null);
-  const [tabValue, setTabValue] = useState(0);
+  const [errors, setErrors] = useState([]);
 
   useEffect(() => {
     async function fetchData() {
+      setErrors([]);
       try {
         const [patientData, doctorData, wardData] = await Promise.all([
-          getPatients(),
-          getDoctors(),
-          getWards(),
+          getPatients().catch((err) => {
+            setErrors((prev) => [...prev, `Patients: ${err.response?.data?.details || err.message}`]);
+            return [];
+          }),
+          getDoctors().catch((err) => {
+            setErrors((prev) => [...prev, `Doctors: ${err.response?.data?.details || err.message}`]);
+            return [];
+          }),
+          getWards().catch((err) => {
+            setErrors((prev) => [...prev, `Wards: ${err.response?.data?.details || err.message}`]);
+            return [];
+          }),
         ]);
         setPatients(patientData);
         setDoctors(doctorData);
         setWards(wardData);
-        if (patientData.length === 0 || doctorData.length === 0 || wardData.length === 0) {
-          setError('No patients, doctors, or wards found. Please add data using the respective tabs.');
-        } else {
-          setError(null);
-        }
       } catch (error) {
         console.error('Error fetching data:', error);
-        setError('Failed to fetch data. Please try again later.');
+        setErrors((prev) => [...prev, `General: Failed to fetch data. Please try again later.`]);
       }
     }
     fetchData();
@@ -55,6 +59,8 @@ export default function AdtPage() {
     setTabValue(newValue);
   };
 
+  const [tabValue, setTabValue] = useState(0);
+
   return (
     <Container maxWidth="lg" sx={{ py: 4 }}>
       <Box display="flex" justifyContent="space-between" alignItems="center" mb={2}>
@@ -67,10 +73,17 @@ export default function AdtPage() {
           </Button>
         )}
       </Box>
-      {error && (
-        <Alert severity="warning" sx={{ mb: 2 }}>
-          {error}
-        </Alert>
+      {errors.length > 0 && (
+        <Box sx={{ mb: 2 }}>
+          {errors.map((error, index) => (
+            <Alert key={index} severity="error" sx={{ mb: 1 }}>
+              {error}
+            </Alert>
+          ))}
+          <Alert severity="warning">
+            No patients, doctors, or wards found. Please add data using the respective tabs.
+          </Alert>
+        </Box>
       )}
       <Tabs value={tabValue} onChange={handleTabChange} centered sx={{ mb: 2 }}>
         <Tab label="Admissions" />
