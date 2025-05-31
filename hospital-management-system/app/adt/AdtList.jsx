@@ -3,6 +3,7 @@ import React, { useState, useEffect } from 'react';
 import { Box, Typography, Alert, Button } from '@mui/material';
 import { DataGrid } from '@mui/x-data-grid';
 import { getAdmissions } from './adtService';
+import styles from './AdmissionList.module.css';
 
 export default function AdmissionList({ onSelectAdmission, refresh }) {
   const [admissions, setAdmissions] = useState([]);
@@ -23,7 +24,7 @@ export default function AdmissionList({ onSelectAdmission, refresh }) {
               doctorName: admission.doctor?.user?.name || 'N/A',
               triagePriority: admission.triagePriority || 'N/A',
               status: admission.status || 'N/A',
-              rawData: admission // Store raw data for actions
+              rawData: admission
             }))
           : [];
         setAdmissions(formattedAdmissions);
@@ -36,14 +37,42 @@ export default function AdmissionList({ onSelectAdmission, refresh }) {
     fetchAdmissions();
   }, [refresh]);
 
+  const getPriorityCellClassName = (params) => {
+    switch (params.value) {
+      case 'HIGH': return styles.priorityHigh;
+      case 'MEDIUM': return styles.priorityMedium;
+      case 'LOW': return styles.priorityLow;
+      default: return '';
+    }
+  };
+
+  const getStatusCellClassName = (params) => {
+    switch (params.value) {
+      case 'ADMITTED': return styles.statusAdmitted;
+      case 'DISCHARGED': return styles.statusDischarged;
+      case 'PENDING': return styles.statusPending;
+      default: return '';
+    }
+  };
+
   const columns = [
     { field: 'id', headerName: 'ID', width: 90 },
     { field: 'patientName', headerName: 'Patient', width: 150 },
     { field: 'wardName', headerName: 'Ward', width: 150 },
     { field: 'admissionDate', headerName: 'Admission Date', width: 150 },
     { field: 'doctorName', headerName: 'Doctor', width: 150 },
-    { field: 'triagePriority', headerName: 'Triage Priority', width: 120 },
-    { field: 'status', headerName: 'Status', width: 120 },
+    {
+      field: 'triagePriority',
+      headerName: 'Triage Priority',
+      width: 120,
+      cellClassName: getPriorityCellClassName,
+    },
+    {
+      field: 'status',
+      headerName: 'Status',
+      width: 120,
+      cellClassName: getStatusCellClassName,
+    },
     {
       field: 'actions',
       headerName: 'Actions',
@@ -53,6 +82,7 @@ export default function AdmissionList({ onSelectAdmission, refresh }) {
           variant="outlined"
           onClick={() => onSelectAdmission(params.row.rawData)}
           disabled={!params.row.rawData}
+          className={styles.actionButton}
         >
           View
         </Button>
@@ -61,21 +91,21 @@ export default function AdmissionList({ onSelectAdmission, refresh }) {
   ];
 
   return (
-    <Box sx={{ mt: 4 }}>
-      <Typography variant="h5" mb={2}>
+    <Box className={styles.container}>
+      <Typography variant="h5" className={styles.title}>
         Admissions
       </Typography>
       {error && (
-        <Alert severity="error" sx={{ mb: 2 }}>
+        <Alert severity="error" className={styles.alert}>
           Failed to load admissions: {error}
         </Alert>
       )}
       {admissions.length === 0 && !error && (
-        <Alert severity="info" sx={{ mb: 2 }}>
+        <Alert severity="info" className={styles.alert}>
           No admissions found.
         </Alert>
       )}
-      <Box sx={{ height: 600, width: '100%' }}>
+      <Box className={styles.tableWrapper}>
         <DataGrid
           rows={admissions}
           columns={columns}
@@ -84,6 +114,7 @@ export default function AdmissionList({ onSelectAdmission, refresh }) {
           initialState={{
             pagination: { paginationModel: { pageSize: 10 } },
           }}
+          className={styles.dataGrid}
         />
       </Box>
     </Box>
