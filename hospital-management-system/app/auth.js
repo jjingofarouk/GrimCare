@@ -1,48 +1,29 @@
-export const ROLES = {
-  ADMIN: 'ADMIN',
-  USER: 'USER',
-  NURSE: 'NURSE',
-  DOCTOR: 'DOCTOR',
-  HELP_DESK: 'HELP_DESK',
-  LAB_TECHNICIAN: 'LAB_TECHNICIAN',
-};
-
-export const ROLE_PERMISSIONS = {
-  ADMIN: [
-    'Dashboard', 'Patients', 'Appointments', 'Accounting', 'ADT', 'Billing',
-    'Claim Management', 'Clinical', 'CSSD', 'Dispensary', 'Doctor', 'Emergency',
-    'Fixed Assets', 'Helpdesk', 'Incentive', 'Inventory', 'Laboratory', 'Maternity',
-    'Medical Records', 'Marketing Referral', 'NHIF', 'Nursing', 'Operation Theatre',
-    'Pharmacy', 'Procurement', 'Queue Management', 'Radiology', 'Reports',
-    'Social Service', 'Substore', 'System Admin', 'Utilities', 'Vaccination', 'Settings'
-  ],
-  NURSE: [
-    'Dashboard', 'Patients', 'Appointments', 'Clinical', 'Maternity', 'Nursing',
-    'Operation Theatre', 'Queue Management'
-  ],
-  DOCTOR: [
-    'Dashboard', 'Patients', 'Appointments', 'Clinical', 'Medical Records',
-    'Operation Theatre', 'Radiology', 'Laboratory'
-  ],
-  HELP_DESK: [
-    'Dashboard', 'Helpdesk', 'Queue Management'
-  ],
-  LAB_TECHNICIAN: [
-    'Dashboard', 'Laboratory', 'Radiology'
-  ],
-  USER: [
-    'Dashboard', 'Patients', 'Appointments'
-  ]
-};
+import React from 'react';
+import { useRouter } from 'next/navigation';
 
 export const isAuthenticated = () => {
   return !!localStorage.getItem('token');
 };
 
-export const getToken = () => {
-  return localStorage.getItem('token');
+export const getUser = () => {
+  const user = localStorage.getItem('user');
+  return user ? JSON.parse(user) : null;
 };
 
-export const hasPermission = (userRole, featureName) => {
-  return ROLE_PERMISSIONS[userRole]?.includes(featureName) || false;
+export const requireAuth = (WrappedComponent) => {
+  const AuthenticatedComponent = (props) => {
+    const router = useRouter();
+    
+    if (!isAuthenticated()) {
+      router.push('/auth');
+      return null;
+    }
+    
+    return <WrappedComponent {...props} />;
+  };
+
+  // Set a display name for the anonymous component
+  AuthenticatedComponent.displayName = `RequireAuth(${WrappedComponent.displayName || WrappedComponent.name || 'Component'})`;
+
+  return AuthenticatedComponent;
 };
