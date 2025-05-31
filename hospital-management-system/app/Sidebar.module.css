@@ -3,8 +3,7 @@
   background: #1f2937;
   color: #fff;
   width: 260px;
-  min-height: 100vh;
-  padding: 1rem 0;
+  height: 100vh;
   display: flex;
   flex-direction: column;
   border-right: 1px solid #374151;
@@ -12,11 +11,23 @@
 
 .logo {
   padding: 1rem;
-  text-align: center;
+  display: flex;
+  justify-content: center;
+}
+
+.logoContainer {
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  overflow: hidden;
+  background: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .logoImage {
-  width: 120px;
+  width: 70px;
   height: auto;
 }
 
@@ -52,6 +63,17 @@
   margin-right: 12px;
 }
 
+.hamburger {
+  position: fixed;
+  top: 12px;
+  left: 12px;
+  z-index: 1300;
+  color: #fff;
+  background: #2563eb;
+  border-radius: 4px;
+  padding: 4px;
+}
+
 /* Scrollbar customization */
 .nav::-webkit-scrollbar {
   width: 6px;
@@ -72,10 +94,14 @@
 
 @media (max-width: 768px) {
   .sidebar {
-    width: 200px;
+    width: 220px;
+  }
+  .logoContainer {
+    width: 60px;
+    height: 60px;
   }
   .logoImage {
-    width: 100px;
+    width: 50px;
   }
   .navLink {
     padding: 0.6rem 0.8rem;
@@ -84,5 +110,9 @@
   .icon {
     width: 18px;
     height: 18px;
+  }
+  .hamburger {
+    top: 8px;
+    left: 8px;
   }
 }
