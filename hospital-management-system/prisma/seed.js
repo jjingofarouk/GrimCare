@@ -6,7 +6,6 @@ const prisma = new PrismaClient();
 
 async function resetDatabase() {
   try {
-    // Delete all data in the correct order to avoid foreign key constraints
     await prisma.admission.deleteMany();
     await prisma.transaction.deleteMany();
     await prisma.payroll.deleteMany();
@@ -25,7 +24,6 @@ async function resetDatabase() {
 
 async function seedDatabase() {
   try {
-    // Seed Users
     const hashedPassword = await bcrypt.hash('password123', 10);
 
     const doctorNames = [
