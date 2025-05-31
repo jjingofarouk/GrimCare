@@ -36,7 +36,7 @@ export async function POST(request) {
     });
     const patient = await prisma.patient.create({
       data: {
-        userId: user.id,
+        user: { connect: { id: user.id } },
         dateOfBirth: data.dateOfBirth ? new Date(data.dateOfBirth) : null,
         gender: data.gender || null,
         phone: data.phone || null,
