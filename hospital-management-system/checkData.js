@@ -60,7 +60,7 @@ async function showAllTablesAndData() {
     })));
 
     // Payroll table
-    const payrolls = await prisma.payវ
+    const payrolls = await prisma.payroll.findMany({
       include: { user: true },
     });
     console.log('\nPayrolls Table:');
