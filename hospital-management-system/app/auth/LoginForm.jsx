@@ -1,8 +1,7 @@
 // app/auth/LoginForm.jsx
 'use client';
 
-import React from 'react';
-import { useState } from 'react';
+import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import styles from './LoginForm.module.css';
 import { login } from './authService';
@@ -29,29 +28,33 @@ export default function LoginForm() {
   return (
     <div className={styles.container}>
       <form className={styles.form} onSubmit={handleSubmit}>
-        <h2 className={styles.title}>Login</h2>
-        <div className={styles.field}>
-          <label>Email</label>
+        <h2 className={styles.formTitle}>Login</h2>
+        <div className={styles.formField}>
+          <label className={styles.formLabel}>Email</label>
           <input
             type="email"
             name="email"
             value={formData.email}
             onChange={handleChange}
+            className={styles.formInput}
             required
           />
         </div>
-        <div className={styles.field}>
-          <label>Password</label>
+        <div className={styles.formField}>
+          <label className={styles.formLabel}>Password</label>
           <input
             type="password"
             name="password"
             value={formData.password}
             onChange={handleChange}
+            className={styles.formInput}
             required
           />
         </div>
-        {error && <p className={styles.error}>{error}</p>}
-        <button type="submit" className={styles.button}>Login</button>
+        {error && <p className={styles.formError}>{error}</p>}
+        <button type="submit" className={styles.formButton}>
+          Login
+        </button>
       </form>
     </div>
   );
