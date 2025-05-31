@@ -1,10 +1,10 @@
-'use client';
+"use client";
 
 import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import styles from './LoginForm.module.css'; // Reusing LoginForm styles
+import Link from 'next/link';
+import styles from './LoginForm.module.css';
 import { register } from './authService';
-import Link from 'next/link'; // Add this impor
 
 export default function RegisterForm() {
   const [formData, setFormData] = useState({
@@ -78,7 +78,9 @@ export default function RegisterForm() {
             <option value="PATIENT">Patient</option>
             <option value="DOCTOR">Doctor</option>
             <option value="NURSE">Nurse</option>
+            <option value="LAB_TECHNICIAN">Lab Technician</option>
             <option value="STAFF">Staff</option>
+            <option value="ADMIN">Admin</option>
           </select>
         </div>
         {error && <p className={styles.formError}>{error}</p>}
