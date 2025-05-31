@@ -10,7 +10,7 @@ import ErrorBoundary from './components/ErrorBoundary';
 
 export default function RootClientLayout({ children }) {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
-  const { user, loading: loadingAuth } = useAuth();
+  const { user, loading: loadingAuth } = useAuth(); // eslint-disable-line no-unused-vars
 
   const toggleSidebar = () => {
     setIsSidebarOpen(!isSidebarOpen);
