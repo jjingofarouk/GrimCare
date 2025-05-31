@@ -11,8 +11,19 @@
   gap: 0.75rem;
 }
 
-.headerLogoImage {
+.headerLogoContainer {
   width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  overflow: hidden;
+  background: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.headerLogoImage {
+  width: 32px;
   height: auto;
 }
 
@@ -50,8 +61,12 @@
   .header {
     height: 56px;
   }
-  .headerLogoImage {
+  .headerLogoContainer {
     width: 30px;
+    height: 30px;
+  }
+  .headerLogoImage {
+    width: 26px;
   }
   .headerTitle {
     font-size: 1rem;
