@@ -1,33 +1,24 @@
-import { API_ROUTES, BASE_URL } from '../api';
+"use client";
 
-export async function login({ email, password }) {
-  const response = await fetch(`${BASE_URL}${API_ROUTES.AUTH}`, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify({ email, password }),
-  });
-  if (!response.ok) throw new Error('Login failed');
-  const data = await response.json();
-  localStorage.setItem('token', data.token);
-  localStorage.setItem('user', JSON.stringify(data.user));
-  return data;
-}
+import { useRouter } from 'next/navigation';
+import { useEffect } from 'react';
+import { isAuthenticated } from './authUtils'; // Adjust path as needed
 
-export async function register({ email, password, name, role }) {
-  const response = await fetch(`${BASE_URL}${API_ROUTES.AUTH}/register`, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify({ email, password, name, role }),
-  });
-  if (!response.ok) throw new Error('Registration failed');
-  return response.json();
-}
 
-export function logout() {
-  localStorage.removeItem('token');
-  localStorage.removeItem('user');
+export default function AuthLayout({ children }) {
+  const router = useRouter();
+
+  useEffect(() => {
+    const token = localStorage.getItem('token'); // Or use cookies if needed
+    if (!isAuthenticated(token)) {
+      router.push('/auth');
+    }
+  }, [router]);
+
+  return (
+    <div style={{ marginTop: '64px', padding: '1rem' }}>
+      <Header />
+      <main>{children}</main>
+    </div>
+  );
 }
