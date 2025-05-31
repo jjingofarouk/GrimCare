@@ -1,3 +1,4 @@
+// app/api/doctor/route.js
 import { PrismaClient } from '@prisma/client';
 import { NextResponse } from 'next/server';
 import bcrypt from 'bcryptjs';
@@ -35,7 +36,7 @@ export async function POST(request) {
     });
     const doctor = await prisma.doctor.create({
       data: {
-        userId: user.id,
+        user: { connect: { id: user.id } },
         specialty: data.specialty,
         licenseNumber: data.licenseNumber,
       },
