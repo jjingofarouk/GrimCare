@@ -27,8 +27,8 @@ export default function Header() {
       ]
     : [
         { name: 'Home', path: '/' },
-        { name: 'Login', path: '/auth/login' },
-        { name: 'Register', path: '/auth/register' },
+        { name: 'Login', path: '/auth' },
+        { name: 'Register', path: '/auth' },
       ];
 
   return (
