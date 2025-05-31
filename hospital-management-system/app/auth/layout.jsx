@@ -4,7 +4,7 @@ import { useRouter } from 'next/navigation';
 import { useEffect } from 'react';
 import { isAuthenticated } from './authUtils';
 import Header from '../Header';
-import './globals.css';
+
 
 export default function AuthLayout({ children }) {
   const router = useRouter();
