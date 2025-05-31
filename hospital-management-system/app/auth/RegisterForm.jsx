@@ -4,6 +4,7 @@ import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import styles from './LoginForm.module.css'; // Reusing LoginForm styles
 import { register } from './authService';
+import Link from 'next/link'; // Add this impor
 
 export default function RegisterForm() {
   const [formData, setFormData] = useState({
