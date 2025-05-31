@@ -1,5 +1,4 @@
-
-"use client"
+"use client";
 import React from 'react';
 import { Card, CardContent, CardHeader, Chip, Button, Typography, Box } from '@mui/material';
 import { Person, LocalHospital, CalendarToday, MedicalServices } from '@mui/icons-material';
@@ -15,6 +14,10 @@ export default function AdmissionCard({ admission, onViewDetails }) {
         action={<Chip label={admission.status} color={statusColor} />}
       />
       <CardContent>
+        <Box display="flex" alignItems="center" mb={1}>
+          <Person sx={{ mr: 1 }} />
+          <Typography><strong>Patient:</strong> {admission.patient.user.name}</Typography>
+        </Box>
         <Box display="flex" alignItems="center" mb={1}>
           <LocalHospital sx={{ mr: 1 }} />
           <Typography><strong>Ward:</strong> {admission.ward?.name || 'N/A'}</Typography>
