@@ -17,7 +17,7 @@ export default function AuthLayout({ children }) {
 
   return (
     <div style={{ marginTop: '64px', padding: '1rem' }}>
-      <Header />
+
       <main>{children}</main>
     </div>
   );
