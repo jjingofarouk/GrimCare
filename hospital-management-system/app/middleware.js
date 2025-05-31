@@ -9,24 +9,16 @@ export async function middleware(request) {
     request.headers.get('authorization')?.replace('Bearer ', '') ||
     request.cookies.get('token')?.value;
 
-  console.log(
-    `Middleware: Path=${pathname}, Token=${
-      token ? '[present]' : 'none'
-    }, JWT_SECRET=${process.env.JWT_SECRET ? '[present]' : 'missing'}`
-  );
-
-  if (!process.env.JWT_SECRET) {
-    console.error('JWT_SECRET environment variable is missing');
-    return NextResponse.redirect(new URL('/auth', request.url));
-  }
-
   const publicRoutes = ['/auth', '/api/auth', '/', '/access-denied'];
   if (publicRoutes.some((route) => pathname.startsWith(route))) {
     return NextResponse.next();
   }
 
   if (!token) {
-    console.warn(`No token found, redirecting to /auth for path: ${pathname}`);
+    return NextResponse.redirect(new URL('/auth', request.url));
+  }
+
+  if (!process.env.JWT_SECRET) {
     return NextResponse.redirect(new URL('/auth', request.url));
   }
 
@@ -34,7 +26,6 @@ export async function middleware(request) {
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
 
     if (decoded.exp && decoded.exp * 1000 < Date.now()) {
-      console.warn('Token expired, redirecting to /auth');
       return NextResponse.redirect(new URL('/auth', request.url));
     }
 
@@ -85,27 +76,11 @@ export async function middleware(request) {
       featureName &&
       !hasPermission(userRole, routeToFeatureMap[featureName])
     ) {
-      console.warn(
-        `User role ${userRole} lacks permission for ${featureName}, redirecting to /access-denied`
-      );
       return NextResponse.redirect(new URL('/access-denied', request.url));
-    }
-
-    // Check for Doctor record for DOCTOR role
-    if (userRole === 'DOCTOR' && featureName && routeToFeatureMap[featureName] === 'Clinical') {
-      const user = await prisma.user.findUnique({
-        where: { id: decoded.userId },
-        include: { doctor: true },
-      });
-      if (!user?.doctor) {
-        console.warn(`No Doctor record for user ${decoded.userId}, redirecting to /doctor/setup`);
-        return NextResponse.redirect(new URL('/doctor/setup', request.url));
-      }
     }
 
     return NextResponse.next();
   } catch (error) {
-    console.error(`Middleware error: ${error.message}, redirecting to /auth`);
     return NextResponse.redirect(new URL('/auth', request.url));
   }
 }
