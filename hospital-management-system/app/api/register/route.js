@@ -3,7 +3,7 @@ import { PrismaClient } from '@prisma/client';
 const prisma = new PrismaClient();
 
 export async function POST(req) {
-  const { email, name, role, uid } = await req.json();
+  const { email, name, role } = await req.json();
   const userId = await prisma.user.count() + 1;
 
   const user = await prisma.user.create({
