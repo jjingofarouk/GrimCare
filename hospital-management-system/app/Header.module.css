@@ -1,88 +1,63 @@
-/* app/components/Sidebar.module.css */
-.sidebar {
-  background: #1f2937;
-  color: #fff;
-  width: 260px;
-  min-height: 100vh;
-  padding: 1rem 0;
+/* app/components/Header.module.css */
+.header {
+  background: #1f2937 !important;
+  height: 64px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.headerLogo {
   display: flex;
-  flex-direction: column;
-  border-right: 1px solid #374151;
+  align-items: center;
+  gap: 0.75rem;
 }
 
-.logo {
-  padding: 1rem;
-  text-align: center;
-}
-
-.logoImage {
-  width: 120px;
+.headerLogoImage {
+  width: 36px;
   height: auto;
 }
 
-.nav {
-  flex: 1;
-  overflow-y: auto;
-  padding: 0 0.5rem;
-}
-
-.navLink {
-  display: flex;
-  align-items: center;
-  padding: 0.75rem 1rem;
-  color: #d1d5db;
-  text-decoration: none;
-  border-radius: 8px;
-  transition: background 0.2s, color 0.2s;
-}
-
-.navLink:hover {
-  background: #374151;
+.headerTitle {
   color: #fff;
+  font-weight: 600;
+  font-size: 1.25rem;
+}
+
+.headerNav {
+  display: flex;
+  gap: 0.5rem;
+  margin-left: auto;
+}
+
+.headerNavLink {
+  color: #d1d5db !important;
+  text-transform: none !important;
+  padding: 0.5rem 1rem !important;
+  border-radius: 8px !important;
+  transition: background 0.2s, color 0.2s !important;
+}
+
+.headerNavLink:hover {
+  background: #374151 !important;
+  color: #fff !important;
 }
 
 .active {
-  background: #2563eb;
-  color: #fff;
+  background: #2563eb !important;
+  color: #fff !important;
 }
 
-.icon {
-  width: 20px;
-  height: 20px;
-  margin-right: 12px;
-}
-
-/* Scrollbar customization */
-.nav::-webkit-scrollbar {
-  width: 6px;
-}
-
-.nav::-webkit-scrollbar-track {
-  background: #1f2937;
-}
-
-.nav::-webkit-scrollbar-thumb {
-  background: #4b5563;
-  border-radius: 3px;
-}
-
-.nav::-webkit-scrollbar-thumb:hover {
-  background: #6b7280;
-}
-
-@media (max-width: 768px) {
-  .sidebar {
-    width: 200px;
+@media (max-width: 640px) {
+  .header {
+    height: 56px;
   }
-  .logoImage {
-    width: 100px;
+  .headerLogoImage {
+    width: 30px;
   }
-  .navLink {
-    padding: 0.6rem 0.8rem;
-    font-size: 0.9rem;
+  .headerTitle {
+    font-size: 1rem;
   }
-  .icon {
-    width: 18px;
-    height: 18px;
+  .headerNavLink {
+    padding: 0.4rem 0.8rem !important;
+    font-size: 0.85rem !important;
   }
 }
