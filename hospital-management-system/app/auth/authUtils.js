@@ -1,7 +1,7 @@
 "use client";
 
 import { useRouter } from 'next/navigation';
-import { jwtDecode } from 'jwt-decode'; // Named import
+import { jwtDecode } from 'jwt-decode';
 
 export const isAuthenticated = () => {
   const token = localStorage.getItem('token');
