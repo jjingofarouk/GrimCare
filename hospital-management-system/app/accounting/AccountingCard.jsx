@@ -11,26 +11,26 @@ export default function AccountingCard({ item, type }) {
         return (
           <>
             <Typography variant="h6" className={styles.title}>
-              {item.description}
+              {item.description || 'No Description'}
             </Typography>
             <Chip
-              label={item.status}
+              label={item.status || 'UNKNOWN'}
               className={`${styles.status} ${
                 item.status === 'PAID' ? styles.paid : item.status === 'OVERDUE' ? styles.overdue : styles.pending
               }`}
             />
             <Typography variant="body2">
-              <strong>Amount:</strong> ${item.amount}
+              <strong>Amount:</strong> ${item.amount?.toFixed(2) || '0.00'}
             </Typography>
             <Typography variant="body2">
-              <strong>Date:</strong> {new Date(item.date).toLocaleDateString()}
+              <strong>Date:</strong> {item.date ? new Date(item.date).toLocaleDateString() : 'N/A'}
             </Typography>
             <Typography variant="body2">
-              <strong>Category:</strong> {item.category}
+              <strong>Category:</strong> {item.category || 'N/A'}
             </Typography>
             {item.costCenter && (
               <Typography variant="body2">
-                <strong>Cost Center:</strong> {item.costCenter.name}
+                <strong>Cost Center:</strong> {item.costCenter.name || 'N/A'}
               </Typography>
             )}
           </>
@@ -39,22 +39,22 @@ export default function AccountingCard({ item, type }) {
         return (
           <>
             <Typography variant="h6" className={styles.title}>
-              {item.user.name} - {item.period}
+              {(item.user && item.user.name ? item.user.name : 'Unknown User') + ' - ' + (item.period || 'No Period')}
             </Typography>
             <Chip
-              label={item.status}
+              label={item.status || 'UNKNOWN'}
               className={`${styles.status} ${
                 item.status === 'PAID' ? styles.paid : item.status === 'OVERDUE' ? styles.overdue : styles.pending
               }`}
             />
             <Typography variant="body2">
-              <strong>Salary:</strong> ${item.salary}
+              <strong>Salary:</strong> ${item.salary?.toFixed(2) || '0.00'}
             </Typography>
             <Typography variant="body2">
-              <strong>Taxes:</strong> ${item.taxes}
+              <strong>Taxes:</strong> ${item.taxes?.toFixed(2) || '0.00'}
             </Typography>
             <Typography variant="body2">
-              <strong>Benefits:</strong> ${item.benefits}
+              <strong>Benefits:</strong> ${item.benefits?.toFixed(2) || '0.00'}
             </Typography>
           </>
         );
@@ -62,22 +62,22 @@ export default function AccountingCard({ item, type }) {
         return (
           <>
             <Typography variant="h6" className={styles.title}>
-              {item.name}
+              {item.name || 'No Name'}
             </Typography>
             <Chip
-              label={item.status}
+              label={item.status || 'UNKNOWN'}
               className={`${styles.status} ${
                 item.status === 'ACTIVE' ? styles.paid : item.status === 'OVERDUE' ? styles.overdue : styles.pending
               }`}
             />
             <Typography variant="body2">
-              <strong>Purchase Cost:</strong> ${item.purchaseCost}
+              <strong>Purchase Cost:</strong> ${item.purchaseCost?.toFixed(2) || '0.00'}
             </Typography>
             <Typography variant="body2">
-              <strong>Current Value:</strong> ${item.currentValue}
+              <strong>Current Value:</strong> ${item.currentValue?.toFixed(2) || '0.00'}
             </Typography>
             <Typography variant="body2">
-              <strong>Purchase Date:</strong> {new Date(item.purchaseDate).toLocaleDateString()}
+              <strong>Purchase Date:</strong> {item.purchaseDate ? new Date(item.purchaseDate).toLocaleDateString() : 'N/A'}
             </Typography>
           </>
         );
