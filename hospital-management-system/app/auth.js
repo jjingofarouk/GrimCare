@@ -17,7 +17,7 @@ export const requireAuth = (WrappedComponent) => {
     const router = useRouter();
     
     if (!isAuthenticated()) {
-      router.push('/auth');
+      router.push('/auth/login');
       return null;
     }
     
