@@ -26,8 +26,8 @@ import {
   WrenchIcon,
   XCircleIcon,
 } from '@heroicons/react/24/outline';
-import { Drawer, List, ListItem, ListItemIcon, ListItemText } from '@mui/material';
-import useAuth from './auth/useAuth';
+import { Drawer, List, ListItem, ListItemIcon, ListItemText, Typography, Box } from '@mui/material';
+import useAuth from './useAuth';
 import styles from './Sidebar.module.css';
 
 const roleBasedNavItems = {
@@ -121,11 +121,14 @@ export default function Sidebar({ toggleSidebar, isOpen }) {
       classes={{ paper: styles.sidebar }}
       ModalProps={{ keepMounted: true }}
     >
-      <div className={styles.logo} onClick={toggleSidebar}>
-        <div className={styles.logoContainer}>
-          <img src="/logo.png" alt="HMS Logo" className={styles.logoImage} />
-        </div>
-      </div>
+      <Box className={styles.logo} onClick={toggleSidebar}>
+        <Box className={styles.logoContainer}>
+          <img src="/logo.png" alt="GrimCare Logo" className={styles.logoImage} />
+          <Typography variant="h6" className={styles.logoTitle}>
+            GrimCare
+          </Typography>
+        </Box>
+      </Box>
       <List className={styles.nav}>
         {navItems.map(({ name, path, icon: Icon }) => (
           <ListItem
