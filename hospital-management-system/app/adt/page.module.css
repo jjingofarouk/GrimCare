@@ -10,7 +10,7 @@
 }
 
 .contentBox {
-  padding: 2rem 1.5rem;
+  padding: 0.5 rem;
   max-width: 1440px;
   margin: 0 auto;
   min-height: calc(100vh - 4rem);
