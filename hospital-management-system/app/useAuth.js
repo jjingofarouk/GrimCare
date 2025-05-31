@@ -17,7 +17,7 @@ const useAuth = () => {
 
   const login = async (credentials) => {
     try {
-      const { user } = await import('/auth/authService').then((m) => m.login(credentials));
+      const { user } = await import('./auth/authService').then((m) => m.login(credentials));
       setUser(user);
       router.push('/appointment');
     } catch (error) {
@@ -26,7 +26,7 @@ const useAuth = () => {
   };
 
   const logout = async () => {
-    await import('./authService').then((m) => m.logout());
+    await import('./auth/authService').then((m) => m.logout());
     setUser(null);
     router.push('/auth/login');
   };
