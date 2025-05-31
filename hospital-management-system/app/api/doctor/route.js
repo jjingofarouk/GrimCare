@@ -11,13 +11,19 @@ export async function GET() {
     });
     return NextResponse.json(doctors);
   } catch (error) {
-    return NextResponse.json({ error: 'Failed to fetch doctors' }, { status: 500 });
+    console.error('GET /api/doctor error:', error);
+    return NextResponse.json({ error: 'Failed to fetch doctors', details: error.message }, { status: 500 });
+  } finally {
+    await prisma.$disconnect();
   }
 }
 
 export async function POST(request) {
   try {
     const data = await request.json();
+    if (!data.email || !data.name || !data.password || !data.specialty || !data.licenseNumber) {
+      return NextResponse.json({ error: 'Missing required fields' }, { status: 400 });
+    }
     const hashedPassword = await bcrypt.hash(data.password, 10);
     const user = await prisma.user.create({
       data: {
@@ -37,6 +43,9 @@ export async function POST(request) {
     });
     return NextResponse.json(doctor, { status: 201 });
   } catch (error) {
-    return NextResponse.json({ error: 'Failed to create doctor' }, { status: 500 });
+    console.error('POST /api/doctor error:', error);
+    return NextResponse.json({ error: 'Failed to create doctor', details: error.message }, { status: 500 });
+  } finally {
+    await prisma.$disconnect();
   }
 }
