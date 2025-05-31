@@ -4,7 +4,7 @@ import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import styles from './LoginForm.module.css';
-import { register } from './authService';
+import { register, login } from './authService';
 
 export default function RegisterForm() {
   const [formData, setFormData] = useState({
@@ -24,9 +24,11 @@ export default function RegisterForm() {
     e.preventDefault();
     try {
       await register(formData);
-      router.push('/auth/login');
+      // Automatically log in after registration
+      await login({ email: formData.email, password: formData.password });
+      router.push('/');
     } catch (err) {
-      setError('Failed to register');
+      setError('Failed to register or login');
     }
   };
 
