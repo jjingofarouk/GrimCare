@@ -83,3 +83,25 @@ export async function getWards() {
     throw error;
   }
 }
+
+export async function getTransactions() {
+  try {
+    const response = await axios.get(`${BASE_URL}${API_ROUTES.TRANSACTION}`);
+    return response.data;
+  } catch (error) {
+    console.error('Error fetching transactions:', error);
+    throw error;
+  }
+}
+
+export async function getPayrolls() {
+  try {
+    const response = await axios.get(`${BASE_URL}${API_ROUTES.PAYROLL}`);
+    return response.data;
+  } catch (error) {
+    console.error('Error fetching payrolls:', error);
+    throw error;
+  }
+}
+
+
