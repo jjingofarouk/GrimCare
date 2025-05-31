@@ -2,11 +2,16 @@
 "use client";
 import React, { useState, useEffect } from 'react';
 import { Container, Box, Typography, Button, Alert, Tabs, Tab } from '@mui/material';
-import AdmissionForm from './AdtForm';
-import AdmissionList from './AdtList';
+import AdmissionForm from './AdmissionForm';
+import AdmissionList from './AdmissionList';
 import DoctorForm from './DoctorForm';
 import PatientForm from './PatientForm';
 import WardForm from './WardForm';
+import DoctorList from './DoctorList';
+import PatientList from './PatientList';
+import WardList from './WardList';
+import TriageDashboard from './TriageDashboard';
+import FinancialSummary from './FinancialSummary';
 import { getPatients, getDoctors, getWards } from './adtService';
 import styles from './page.module.css';
 
@@ -86,11 +91,13 @@ export default function AdtPage() {
             No patients, doctors, or wards found. Please add data using the respective tabs.
           </Alert>
         )}
-        <Tabs value={tabValue} onChange={handleTabChange} sx={{ mb: 2 }}>
+        <Tabs value={tabValue} onChange={handleTabChange} sx={{ mb: 2 }} variant="scrollable" scrollButtons="auto">
           <Tab label="Admissions" />
           <Tab label="Patients" />
           <Tab label="Doctors" />
           <Tab label="Wards" />
+          <Tab label="Triage Dashboard" />
+          <Tab label="Financial Summary" />
         </Tabs>
         {tabValue === 0 && (
           <Box>
@@ -105,13 +112,28 @@ export default function AdtPage() {
           </Box>
         )}
         {tabValue === 1 && (
-          <PatientForm onSubmit={handleFormSubmit} />
+          <Box>
+            <PatientForm onSubmit={handleFormSubmit} />
+            <PatientList />
+          </Box>
         )}
         {tabValue === 2 && (
-          <DoctorForm onSubmit={handleFormSubmit} />
+          <Box>
+            <DoctorForm onSubmit={handleFormSubmit} />
+            <DoctorList />
+          </Box>
         )}
         {tabValue === 3 && (
-          <WardForm onSubmit={handleFormSubmit} />
+          <Box>
+            <WardForm onSubmit={handleFormSubmit} />
+            <WardList />
+          </Box>
+        )}
+        {tabValue === 4 && (
+          <TriageDashboard />
+        )}
+        {tabValue === 5 && (
+          <FinancialSummary />
         )}
       </Box>
     </Container>
