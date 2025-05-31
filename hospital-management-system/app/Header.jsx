@@ -19,7 +19,9 @@ export default function Header() {
     <AppBar position="fixed" className={styles.header}>
       <Toolbar>
         <div className={styles.headerLogo}>
-          <img src="/logo.png" alt="HMS Logo" className={styles.headerLogoImage} />
+          <div className={styles.headerLogoContainer}>
+            <img src="/logo.png" alt="HMS Logo" className={styles.headerLogoImage} />
+          </div>
           <Typography variant="h6" className={styles.headerTitle}>
             GrimCare
           </Typography>
