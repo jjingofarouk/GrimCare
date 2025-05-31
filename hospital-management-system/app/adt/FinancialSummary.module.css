@@ -1,4 +1,4 @@
-/* app/adt/TriageDashboard.module.css */
+/* app/adt/FinancialSummary.module.css */
 .container {
   display: flex;
   flex-direction: column;
@@ -32,11 +32,6 @@
   width: 100%;
   background-color: #fef2f2;
   color: #7f1d1d;
-}
-
-.alert.info {
-  background-color: #eff6ff;
-  color: #1e3a8a;
 }
 
 .chartContainer {
