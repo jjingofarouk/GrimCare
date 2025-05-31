@@ -2,38 +2,35 @@
 
 import React from 'react';
 import { Box, Typography } from '@mui/material';
-import { Line } from 'react-chartjs-2';
+import { Pie } from 'react-chartjs-2';
 import {
   Chart as ChartJS,
-  LineElement,
+  ArcElement,
   CategoryScale,
   LinearScale,
-  PointElement,
-  Title,
   Tooltip,
   Legend,
 } from 'chart.js';
 import styles from './AccountingChart.module.css';
 
-// Register required Chart.js components
-ChartJS.register(
-  LineElement,
-  CategoryScale,
-  LinearScale,
-  PointElement,
-  Title,
-  Tooltip,
-  Legend
-);
+// Register required Chart.js components for pie chart
+ChartJS.register(ArcElement, CategoryScale, LinearScale, Tooltip, Legend);
 
 export default function AccountingChart({ data }) {
-  // Chart.js data configuration
+  // Chart.js data configuration for pie chart
   const chartData = {
     labels: data?.labels || [],
-    datasets: data?.datasets || [],
+    datasets: [
+      {
+        data: data?.datasets?.[0]?.data || [],
+        backgroundColor: ['#2196F3', '#4CAF50', '#FFC107', '#F44336', '#AB47BC'],
+        borderColor: ['#1976D2', '#388E3C', '#FFA000', '#D32F2F', '#8E24AA'],
+        borderWidth: 1,
+      },
+    ],
   };
 
-  // Chart.js options configuration
+  // Chart.js options configuration for pie chart
   const chartOptions = {
     responsive: true,
     maintainAspectRatio: false,
@@ -45,18 +42,10 @@ export default function AccountingChart({ data }) {
           font: { size: 14 },
         },
       },
-    },
-    scales: {
-      x: {
-        ticks: { color: '#4a5568' },
-        grid: { display: false },
-      },
-      y: {
-        ticks: {
-          color: '#4a5568',
-          callback: (value) => `$${value}`,
+      tooltip: {
+        callbacks: {
+          label: (context) => `$${context.parsed}`,
         },
-        grid: { color: '#e2e8f0' },
       },
     },
   };
@@ -67,7 +56,7 @@ export default function AccountingChart({ data }) {
         Revenue Overview
       </Typography>
       <Box className={styles.chartContainer}>
-        <Line data={chartData} options={chartOptions} />
+        <Pie data={chartData} options={chartOptions} />
       </Box>
     </Box>
   );
