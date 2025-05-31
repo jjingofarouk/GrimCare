@@ -1,6 +1,8 @@
-import { initializeApp } from "firebase/app";
+// app/lib/firebase.js or app/firebase.js
+import { initializeApp, getApps, getApp } from "firebase/app";
 import { getAuth } from "firebase/auth";
 
+// Only initialize if it hasn't been initialized yet
 const firebaseConfig = {
   apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
   authDomain: process.env.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN,
@@ -10,5 +12,8 @@ const firebaseConfig = {
   appId: process.env.NEXT_PUBLIC_FIREBASE_APP_ID,
 };
 
-const app = initializeApp(firebaseConfig);
-export const auth = getAuth(app);
+// Avoid re-initializing if already initialized
+const app = getApps().length ? getApp() : initializeApp(firebaseConfig);
+
+// Export auth client
+export const auth = typeof window !== "undefined" ? getAuth(app) : null;
