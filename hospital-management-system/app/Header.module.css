@@ -1,79 +1,49 @@
 .header {
-  background: #1f2937 !important;
-  height: 64px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  background-color: #1976d2;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
 }
 
 .headerLogo {
   display: flex;
   align-items: center;
-  gap: 0.75rem;
+  flex-grow: 1;
   cursor: pointer;
 }
 
 .headerLogoContainer {
-  width: 40px;
-  height: 40px;
-  border-radius: 50%;
-  overflow: hidden;
-  background: #fff;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.15);
+  margin-right: 1rem;
 }
 
 .headerLogoImage {
-  width: 36px;
-  height: auto;
+  height: 40px;
+  width: auto;
 }
 
 .headerTitle {
-  color: #fff;
+  color: white;
   font-weight: 600;
-  font-size: 1.25rem;
 }
 
 .headerNav {
   display: flex;
-  gap: 0.5rem;
-  margin-left: auto;
+  gap: 1.5rem;
 }
 
 .headerNavLink {
-  color: #d1d5db !important;
-  text-transform: none !important;
-  padding: 0.5rem 1rem !important;
-  border-radius: 8px !important;
-  transition: background 0.2s, color 0.2s !important;
+  color: white !important;
+  text-transform: none;
+  font-size: 1rem;
+  padding: 0.5rem 1rem;
 }
 
-.headerNavLink:hover {
-  background: #374151 !important;
-  color: #fff !important;
+.headerNavLink.active {
+  font-weight: bold;
+  background-color: rgba(255, 255, 255, 0.1);
+  border-radius: 4px;
 }
 
-.active {
-  background: #2563eb !important;
-  color: #fff !important;
-}
-
-@media (max-width: 640px) {
-  .header {
-    height: 56px;
-  }
-  .headerLogoContainer {
-    width: 32px;
-    height: 32px;
-  }
-  .headerLogoImage {
-    width: 28px;
-  }
-  .headerTitle {
-    font-size: 1rem;
-  }
-  .headerNavLink {
-    padding: 0.4rem 0.8rem !important;
-    font-size: 0.85rem !important;
-  }
+.userInfo {
+  display: flex;
+  align-items: center;
+  margin-left: 1.5rem;
 }
