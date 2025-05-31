@@ -1,11 +1,25 @@
-/* app/auth/LoginForm.module.css */
+.authContainer {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  background: linear-gradient(135deg, #e0f2fe, #bfdbfe);
+  padding: 1rem;
+}
+
+.authTitle {
+  font-size: 2.5rem;
+  font-weight: 700;
+  color: #1e40af;
+  margin-bottom: 1.5rem;
+}
+
 .container {
   display: flex;
   justify-content: center;
   align-items: center;
-  min-height: 100vh;
-  background: linear-gradient(135deg, #e0f2fe, #bfdbfe);
-  padding: 1rem;
+  width: 100%;
 }
 
 .form {
@@ -85,16 +99,53 @@
   cursor: not-allowed;
 }
 
+.registerLink {
+  text-align: center;
+  color: #1f2937;
+  font-size: 0.875rem;
+}
+
+.registerLink a {
+  color: #1d4ed8;
+  text-decoration: none;
+  font-weight: 500;
+}
+
+.registerLink a:hover {
+  text-decoration: underline;
+}
+
+.toggleLink {
+  text-align: center;
+  color: #1f2937;
+  font-size: 0.875rem;
+  margin-top: 1rem;
+}
+
+.toggleButton {
+  background: none;
+  border: none;
+  color: #1d4ed8;
+  font-weight: 500;
+  cursor: pointer;
+  padding: 0;
+}
+
+.toggleButton:hover {
+  text-decoration: underline;
+}
+
 @media (max-width: 640px) {
   .form {
     padding: 1.5rem;
     max-width: 95%;
   }
-
+  .authTitle {
+    font-size: 2rem;
+  }
   .formTitle {
     font-size: 1.75rem;
   }
-
   .formInput,
   .formButton {
     font-size: 0.95rem;
