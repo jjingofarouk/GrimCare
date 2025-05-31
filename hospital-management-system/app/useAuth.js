@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { getUser } from './authUtils';
+import { getUser } from './auth/authUtils';
 
 const useAuth = () => {
   const [user, setUser] = useState(null);
