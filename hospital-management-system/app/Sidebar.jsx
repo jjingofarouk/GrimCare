@@ -27,7 +27,7 @@ import {
   XCircleIcon,
 } from '@heroicons/react/24/outline';
 import { Drawer, List, ListItem, ListItemIcon, ListItemText, Divider } from '@mui/material';
-import useAuth from './useAuth';
+import useAuth from './auth/useAuth';
 import styles from './Sidebar.module.css';
 
 const roleBasedNavItems = {
@@ -90,7 +90,7 @@ const roleBasedNavItems = {
     { name: 'Operation Theatre', path: '/operation-theatre', icon: BeakerIcon },
     { name: 'Pharmacy', path: '/pharmacy', icon: InboxIcon },
     { name: 'Procurement', path: '/procurement', icon: ShoppingCartIcon },
-    { name: 'Queue Management', path: '/queue-mngmt', icon: UsersIcon },
+    { name: 'Queue Management', path: '/queue-mgmt', icon: UsersIcon },
     { name: 'Radiology', path: '/radiology', icon: BeakerIcon },
     { name: 'Reports', path: '/reports', icon: TableCellsIcon },
     { name: 'Settings', path: '/settings', icon: CogIcon },
