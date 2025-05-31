@@ -1,8 +1,7 @@
-/* app/components/Sidebar.module.css */
 .sidebar {
   background: #1f2937;
   color: #fff;
-  width: 300px;
+  width: 320px;
   height: 100vh;
   display: flex;
   flex-direction: column;
@@ -90,7 +89,7 @@
 
 @media (max-width: 768px) {
   .sidebar {
-    width: 260px;
+    width: 280px;
   }
   .logoContainer {
     width: 70px;
