@@ -38,6 +38,8 @@ export const API_ROUTES = {
   VACCINATION: '/api/vaccination',
   VERIFICATION: '/api/verification',
   WARD: '/api/wards',
+  TRANSACTION: '/api/transaction',
+  PAYROLL: '/api/payroll',
 };
 
 export const BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000';

@@ -1,128 +1,132 @@
+// prisma/schema.prisma
 generator client {
-    provider = "prisma-client-js"
-    }
-    
-    datasource db {
-    provider = "postgresql"
-    url      = env("DIRECT_URL")
-    }
-    
-    model User {
-    id        Int      @id @default(autoincrement())
-    email     String   @unique
-    name      String?
-    password  String
-    role      String   @default("PATIENT") // PATIENT, DOCTOR, ADMIN, NURSE
-    createdAt DateTime @default(now())
-    updatedAt DateTime @updatedAt
-    doctor    Doctor?  @relation(fields: [doctorId], references: [id])
-    doctorId  Int?     @unique
-    payrolls  Payroll[]
-    patients  Patient[]
-    }
-    
-    model Doctor {
-    id            Int        @id @default(autoincrement())
-    user          User?      @relation
-    specialty     String?
-    licenseNumber String?    @unique
-    createdAt     DateTime   @default(now())
-    updatedAt     DateTime   @updatedAt
-    admissions    Admission[] @relation("DoctorAdmissions")
-    }
-    
-    model Patient {
-    id                Int       @id @default(autoincrement())
-    userId            Int
-    user              User      @relation(fields: [userId], references: [id])
-    dateOfBirth       DateTime?
-    gender            String?
-    phone             String?
-    address           String?
-    emergencyContact  String?
-    insuranceProvider String?   // For patient registration
-    insurancePolicy   String?   // For patient registration
-    createdAt         DateTime  @default(now())
-    updatedAt         DateTime  @updatedAt
-    admissions        Admission[]
-    }
-    
-    model Admission {
-    id                Int       @id @default(autoincrement())
-    patientId         Int
-    patient           Patient   @relation(fields: [patientId], references: [id])
-    doctorId          Int?
-    doctor            Doctor?   @relation("DoctorAdmissions", fields: [doctorId], references: [id])
-    wardId            Int?
-    ward              Ward?     @relation(fields: [wardId], references: [id])
-    admissionDate     DateTime  @default(now())
-    scheduledDate     DateTime? // For admission scheduling
-    preAdmissionNotes String?   // For pre-admission processing
-    triagePriority    String?   // e.g., LOW, MEDIUM, HIGH for triage assessment
-    triageNotes       String?   // For triage assessment
-    status            String    @default("PENDING") // PENDING, ADMITTED, DISCHARGED
-    dischargeDate     DateTime? // For discharge planning
-    dischargeNotes    String?   // For discharge documentation
-    createdAt         DateTime  @default(now())
-    updatedAt         DateTime  @updatedAt
-    }
-    
-    model Ward {
-    id            Int         @id @default(autoincrement())
-    name          String
-    totalBeds     Int
-    occupiedBeds  Int         @default(0) // For bed management
-    department    String?
-    admissions    Admission[]
-    createdAt     DateTime    @default(now())
-    updatedAt     DateTime    @updatedAt
-    }
-    
-    model Transaction {
-    id            Int          @id @default(autoincrement())
-    description   String
-    amount        Float
-    category      String
-    status        String
-    date          DateTime     @default(now())
-    type          String
-    costCenterId  Int?
-    costCenter    CostCenter?  @relation(fields: [costCenterId], references: [id])
-    patientId     Int?
-    createdAt     DateTime     @default(now())
-    updatedAt     DateTime     @updatedAt
-    }
-    
-    model Payroll {
-    id        Int      @id @default(autoincrement())
-    userId    Int
-    user      User     @relation(fields: [userId], references: [id])
-    salary    Float
-    taxes     Float
-    benefits  Float
-    period    String
-    status    String
-    createdAt DateTime @default(now())
-    updatedAt DateTime @updatedAt
-    }
-    
-    model CostCenter {
-    id            Int          @id @default(autoincrement())
-    name          String
-    department    String
-    transactions  Transaction[]
-    createdAt     DateTime     @default(now())
-    updatedAt     DateTime     @updatedAt
-    }
-    
-    model FixedAsset {
-    id            Int      @id @default(autoincrement())
-    name          String
-    purchaseDate  DateTime
-    purchaseCost  Float
-    depreciation  Float
-    currentValue  Float
-    status        String
-    createdAt     DateTime @default(now())
-    updatedAt     DateTime @updatedAt
-    }
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DIRECT_URL")
+}
+
+model User {
+  id        Int       @id @default(autoincrement())
+  email     String    @unique
+  name      String?
+  password  String
+  role      String    @default("PATIENT") // PATIENT, DOCTOR, ADMIN, NURSE
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  doctor    Doctor?   @relation(fields: [doctorId], references: [id])
+  doctorId  Int?      @unique
+  payrolls  Payroll[]
+  patients  Patient[]
+}
+
+model Doctor {
+  id            Int         @id @default(autoincrement())
+  user          User?       @relation
+  specialty     String?
+  licenseNumber String?     @unique
+  createdAt     DateTime    @default(now())
+  updatedAt     DateTime    @updatedAt
+  admissions    Admission[] @relation("DoctorAdmissions")
+}
+
+model Patient {
+  id                Int           @id @default(autoincrement())
+  userId            Int           @unique
+  user              User          @relation(fields: [userId], references: [id])
+  patientId         String        @unique
+  dateOfBirth       DateTime?
+  gender            String?
+  phone             String?
+  address           String?
+  emergencyContact  String?
+  insuranceProvider String?
+  insurancePolicy   String?
+  admissions        Admission[]
+  transactions      Transaction[] @relation("PatientTransactions")
+  createdAt         DateTime      @default(now())
+  updatedAt         DateTime      @updatedAt
+}
+
+model Admission {
+  id                Int       @id @default(autoincrement())
+  patientId         Int
+  patient           Patient   @relation(fields: [patientId], references: [id])
+  doctorId          Int?
+  doctor            Doctor?   @relation("DoctorAdmissions", fields: [doctorId], references: [id])
+  wardId            Int?
+  ward              Ward?     @relation(fields: [wardId], references: [id])
+  admissionDate     DateTime  @default(now())
+  scheduledDate     DateTime? // For admission scheduling
+  preAdmissionNotes String?   // For pre-admission processing
+  triagePriority    String?   // e.g., LOW, MEDIUM, HIGH for triage assessment
+  triageNotes       String?   // For triage assessment
+  status            String    @default("PENDING") // PENDING, ADMITTED, DISCHARGED
+  dischargeDate     DateTime? // For discharge planning
+  dischargeNotes    String?   // For discharge documentation
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @updatedAt
+}
+
+model Ward {
+  id            Int         @id @default(autoincrement())
+  name          String
+  totalBeds     Int
+  occupiedBeds  Int         @default(0) // For bed management
+  department    String?
+  admissions    Admission[]
+  createdAt     DateTime    @default(now())
+  updatedAt     DateTime    @updatedAt
+}
+
+model Transaction {
+  id            Int          @id @default(autoincrement())
+  description   String
+  amount        Float
+  category      String
+  status        String
+  date          DateTime     @default(now())
+  type          String
+  costCenterId  Int?
+  costCenter    CostCenter?  @relation(fields: [costCenterId], references: [id])
+  patientId     Int?
+  patient       Patient?     @relation("PatientTransactions", fields: [patientId], references: [id])
+  createdAt     DateTime     @default(now())
+  updatedAt     DateTime     @updatedAt
+}
+
+model Payroll {
+  id        Int       @id @default(autoincrement())
+  userId    Int
+  user      User      @relation(fields: [userId], references: [id])
+  salary    Float
+  taxes     Float
+  benefits  Float
+  period    String
+  status    String
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+}
+
+model CostCenter {
+  id            Int           @id @default(autoincrement())
+  name          String
+  department    String
+  transactions  Transaction[]
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
+}
+
+model FixedAsset {
+  id            Int       @id @default(autoincrement())
+  name          String
+  purchaseDate  DateTime
+  purchaseCost  Float
+  depreciation  Float
+  currentValue  Float
+  status        String
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+}

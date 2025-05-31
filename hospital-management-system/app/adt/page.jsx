@@ -7,6 +7,11 @@ import AdmissionList from './AdtList';
 import DoctorForm from './DoctorForm';
 import PatientForm from './PatientForm';
 import WardForm from './WardForm';
+import DoctorList from './DoctorList';
+import PatientList from './PatientList';
+import WardList from './WardList';
+import TriageDashboard from './TriageDashboard';
+import FinancialSummary from './FinancialSummary';
 import { getPatients, getDoctors, getWards } from './adtService';
 import styles from './page.module.css';
 
@@ -62,58 +67,101 @@ export default function AdtPage() {
   };
 
   return (
-    <Container>
-      <Box sx={{ my: 4 }}>
-        <Typography variant="h4" component="h1" gutterBottom>
+    <Box className={styles.container}>
+      <Container className={styles.contentBox}>
+        <Typography variant="h4" className={styles.mainTitle}>
           Admissions, Discharge, and Triage (ADT)
         </Typography>
         {selectedAdmission && (
-          <Button variant="contained" onClick={handleClearSelection} sx={{ mb: 2 }}>
+          <Button
+            variant="contained"
+            onClick={handleClearSelection}
+            className={styles.clearButton}
+          >
             Clear Selection
           </Button>
         )}
         {errors.length > 0 && (
-          <Box sx={{ mb: 2 }}>
+          <Box className={styles.errorContainer}>
             {errors.map((error, index) => (
-              <Alert key={index} severity="error" sx={{ mb: 1 }}>
+              <Alert key={index} severity="error" className={styles.errorAlert}>
                 {error}
               </Alert>
             ))}
           </Box>
         )}
         {(patients.length === 0 && doctors.length === 0 && wards.length === 0 && errors.length === 0) && (
-          <Alert severity="info" sx={{ mb: 2 }}>
+          <Alert severity="info" className={styles.infoAlert}>
             No patients, doctors, or wards found. Please add data using the respective tabs.
           </Alert>
         )}
-        <Tabs value={tabValue} onChange={handleTabChange} sx={{ mb: 2 }}>
-          <Tab label="Admissions" />
-          <Tab label="Patients" />
-          <Tab label="Doctors" />
-          <Tab label="Wards" />
-        </Tabs>
-        {tabValue === 0 && (
-          <Box>
-            <AdmissionForm
-              selectedAdmission={selectedAdmission}
-              onSubmit={handleFormSubmit}
-              patients={patients}
-              doctors={doctors}
-              wards={wards}
-            />
-            <AdmissionList onSelectAdmission={setSelectedAdmission} refresh={refresh} />
+        <Box className={styles.tabsContainer}>
+          <Tabs
+            value={tabValue}
+            onChange={handleTabChange}
+            className={styles.tabs}
+            variant="scrollable"
+            scrollButtons="auto"
+          >
+            <Tab label="Admissions" className={styles.tab} classes={{ selected: styles.tabSelected }} />
+            <Tab label="Patients" className={styles.tab} classes={{ selected: styles.tabSelected }} />
+            <Tab label="Doctors" className={styles.tab} classes={{ selected: styles.tabSelected }} />
+            <Tab label="Wards" className={styles.tab} classes={{ selected: styles.tabSelected }} />
+            <Tab label="Triage Dashboard" className={styles.tab} classes={{ selected: styles.tabSelected }} />
+            <Tab label="Financial Summary" className={styles.tab} classes={{ selected: styles.tabSelected }} />
+          </Tabs>
+          <Box className={`${styles.tabContent} ${styles.fadeIn}`}>
+            {tabValue === 0 && (
+              <Box className={styles.sectionContainer}>
+                <Box className={styles.formSection}>
+                  <AdmissionForm
+                    selectedAdmission={selectedAdmission}
+                    onSubmit={handleFormSubmit}
+                    patients={patients}
+                    doctors={doctors}
+                    wards={wards}
+                  />
+                </Box>
+                <AdmissionList onSelectAdmission={setSelectedAdmission} refresh={refresh} />
+              </Box>
+            )}
+            {tabValue === 1 && (
+              <Box className={styles.sectionContainer}>
+                <Box className={styles.formSection}>
+                  <PatientForm onSubmit={handleFormSubmit} />
+                </Box>
+                <PatientList />
+              </Box>
+            )}
+            {tabValue === 2 && (
+              <Box className={styles.sectionContainer}>
+                <Box className={styles.formSection}>
+                  <DoctorForm onSubmit={handleFormSubmit} />
+                </Box>
+                <DoctorList />
+              </Box>
+            )}
+            {tabValue === 3 && (
+              <Box className={styles.sectionContainer}>
+                <Box className={styles.formSection}>
+                  <WardForm onSubmit={handleFormSubmit} />
+                </Box>
+                <WardList />
+              </Box>
+            )}
+            {tabValue === 4 && (
+              <Box className={styles.sectionContainer}>
+                <TriageDashboard />
+              </Box>
+            )}
+            {tabValue === 5 && (
+              <Box className={styles.sectionContainer}>
+                <FinancialSummary />
+              </Box>
+            )}
           </Box>
-        )}
-        {tabValue === 1 && (
-          <PatientForm onSubmit={handleFormSubmit} />
-        )}
-        {tabValue === 2 && (
-          <DoctorForm onSubmit={handleFormSubmit} />
-        )}
-        {tabValue === 3 && (
-          <WardForm onSubmit={handleFormSubmit} />
-        )}
-      </Box>
-    </Container>
+        </Box>
+      </Container>
+    </Box>
   );
 }

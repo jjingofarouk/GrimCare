@@ -7,7 +7,7 @@ export default function RootLayout({ children }) {
     <html lang="en">
       <body>
         <Header />
-        <div style={{ marginTop: '64px', padding: '1rem' }}>
+        <div style={{ marginTop: '64px' }}>
           <main>{children}</main>
         </div>
       </body>
