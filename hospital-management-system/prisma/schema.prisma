@@ -12,7 +12,7 @@ id        Int      @id @default(autoincrement())
 email     String   @unique
 name      String?
 password  String
-role      String   @default("PATIENT")
+role      String   @default("PATIENT") // PATIENT, DOCTOR, ADMIN, NURSE
 createdAt DateTime @default(now())
 updatedAt DateTime @updatedAt
 doctor    Doctor?  @relation(fields: [doctorId], references: [id])
@@ -22,13 +22,13 @@ patients  Patient[]
 }
 
 model Doctor {
-id           Int      @id @default(autoincrement())
-user         User?    @relation
-specialty    String?
-licenseNumber String?  @unique
-createdAt    DateTime @default(now())
-updatedAt    DateTime @updatedAt
-admissions   Admission[] @relation("DoctorAdmissions")
+id            Int        @id @default(autoincrement())
+user          User?      @relation
+specialty     String?
+licenseNumber String?    @unique
+createdAt     DateTime   @default(now())
+updatedAt     DateTime   @updatedAt
+admissions    Admission[] @relation("DoctorAdmissions")
 }
 
 model Patient {
@@ -40,6 +40,8 @@ gender            String?
 phone             String?
 address           String?
 emergencyContact  String?
+insuranceProvider String?   // For patient registration
+insurancePolicy   String?   // For patient registration
 createdAt         DateTime  @default(now())
 updatedAt         DateTime  @updatedAt
 admissions        Admission[]
@@ -54,11 +56,13 @@ doctor            Doctor?   @relation("DoctorAdmissions", fields: [doctorId], re
 wardId            Int?
 ward              Ward?     @relation(fields: [wardId], references: [id])
 admissionDate     DateTime  @default(now())
-dischargeDate     DateTime?
-triagePriority    String?   // e.g., LOW, MEDIUM, HIGH
-triageNotes       String?
-status            String    @default("ADMITTED") // ADMITTED, DISCHARGED, PENDING
-dischargeNotes    String?
+scheduledDate     DateTime? // For admission scheduling
+preAdmissionNotes String?   // For pre-admission processing
+triagePriority    String?   // e.g., LOW, MEDIUM, HIGH for triage assessment
+triageNotes       String?   // For triage assessment
+status            String    @default("PENDING") // PENDING, ADMITTED, DISCHARGED
+dischargeDate     DateTime? // For discharge planning
+dischargeNotes    String?   // For discharge documentation
 createdAt         DateTime  @default(now())
 updatedAt         DateTime  @updatedAt
 }
@@ -67,11 +71,11 @@ model Ward {
 id            Int         @id @default(autoincrement())
 name          String
 totalBeds     Int
-occupiedBeds  Int       @default(0)
+occupiedBeds  Int         @default(0) // For bed management
 department    String?
 admissions    Admission[]
-createdAt     DateTime  @default(now())
-updatedAt     DateTime  @updatedAt
+createdAt     DateTime    @default(now())
+updatedAt     DateTime    @updatedAt
 }
 
 model Transaction {
