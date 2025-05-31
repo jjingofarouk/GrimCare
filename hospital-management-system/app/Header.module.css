@@ -1,49 +1,109 @@
+/* Header.module.css */
 .header {
-  background-color: #1976d2;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  background: #121212; /* Classy solid black */
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  padding: 0 24px;
 }
 
-.headerLogo {
+.toolbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  min-height: 64px;
+}
+
+.logoContainer {
   display: flex;
   align-items: center;
-  flex-grow: 1;
   cursor: pointer;
+  transition: transform 0.3s ease;
 }
 
-.headerLogoContainer {
-  margin-right: 1rem;
+.logoContainer:hover {
+  transform: scale(1.05);
 }
 
-.headerLogoImage {
+.logoImage {
+  width: 40px;
   height: 40px;
-  width: auto;
+  margin-right: 12px;
 }
 
 .headerTitle {
-  color: white;
+  color: #ffffff;
+  font-size: 1.5rem;
   font-weight: 600;
+  letter-spacing: 0.5px;
+  font-family: 'Inter', sans-serif;
 }
 
 .headerNav {
   display: flex;
-  gap: 1.5rem;
+  gap: 20px;
 }
 
 .headerNavLink {
-  color: white !important;
-  text-transform: none;
+  color: #ffffff !important;
+  font-weight: 500;
   font-size: 1rem;
-  padding: 0.5rem 1rem;
+  text-transform: none;
+  padding: 8px 16px;
+  border-radius: 8px;
+  transition: background 0.3s ease, color 0.3s ease;
 }
 
-.headerNavLink.active {
-  font-weight: bold;
-  background-color: rgba(255, 255, 255, 0.1);
-  border-radius: 4px;
+.headerNavLink:hover {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.active {
+  background: rgba(255, 255, 255, 0.15);
 }
 
 .userInfo {
   display: flex;
   align-items: center;
-  margin-left: 1.5rem;
+  gap: 12px;
+}
+
+.userAvatar {
+  width: 36px !important;
+  height: 36px !important;
+  background: #2a2a2a !important;
+  color: #ffffff !important;
+  font-size: 16px !important;
+  transition: transform 0.3s ease;
+}
+
+.userAvatar:hover {
+  transform: scale(1.1);
+}
+
+.userName {
+  color: #ffffff;
+  font-size: 0.875rem;
+  font-weight: 400;
+  font-family: 'Inter', sans-serif;
+}
+
+.menuIcon {
+  color: #ffffff !important;
+}
+
+.menu {
+  background: #1e1e1e !important;
+  border-radius: 8px !important;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5) !important;
+}
+
+.menuItem {
+  color: #ffffff !important;
+  font-size: 0.875rem !important;
+  padding: 10px 16px !important;
+  transition: background 0.3s ease !important;
+}
+
+.menuItem:hover {
+  background: rgba(255, 255, 255, 0.1) !important;
 }
