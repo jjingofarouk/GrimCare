@@ -1,25 +1,27 @@
-"use client";
 import React, { useState, useEffect } from 'react';
-import { Box, Typography, Button } from '@mui/material';
+import { Box, Typography, Button, Alert } from '@mui/material';
 import { DataGrid } from '@mui/x-data-grid';
-import { getAdmissions } from './adtService';
 import AdmissionCard from './AdtCard';
+import { getAdmissions } from './adtService';
 
-export default function AdmissionList({ onSelectAdmission }) {
+export default function AdmissionList({ onSelectAdmission, refresh }) {
   const [admissions, setAdmissions] = useState([]);
-  const [viewMode, setViewMode] = useState('card'); // card or table
+  const [error, setError] = useState(null);
+  const [viewMode, setViewMode] = useState('card');
 
   useEffect(() => {
     async function fetchAdmissions() {
       try {
         const data = await getAdmissions();
         setAdmissions(data);
+        setError(null);
       } catch (error) {
         console.error('Error fetching admissions:', error);
+        setError(error.response?.data?.details || error.message);
       }
     }
     fetchAdmissions();
-  }, []);
+  }, [refresh]);
 
   const columns = [
     { field: 'id', headerName: 'ID', width: 90 },
@@ -54,6 +56,11 @@ export default function AdmissionList({ onSelectAdmission }) {
           Switch to {viewMode === 'card' ? 'Table' : 'Card'} View
         </Button>
       </Box>
+      {error && (
+        <Alert severity="error" sx={{ mb: 2 }}>
+          Failed to load admissions: {error}
+        </Alert>
+      )}
       {viewMode === 'card' ? (
         <Box>
           {admissions.map((admission) => (
