@@ -1,7 +1,7 @@
 // app/components/Sidebar.jsx
 'use client';
 
-import React from 'react';
+import React, { useState } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import {
@@ -27,7 +27,8 @@ import {
   WrenchIcon,
   XCircleIcon,
 } from '@heroicons/react/24/outline';
-import { Drawer, List, ListItem, ListItemIcon, ListItemText } from '@mui/material';
+import { Drawer, List, ListItem, ListItemIcon, ListItemText, IconButton } from '@mui/material';
+import MenuIcon from '@mui/icons-material/Menu';
 import styles from './Sidebar.module.css';
 
 const navItems = [
@@ -72,30 +73,44 @@ const navItems = [
 
 export default function Sidebar() {
   const pathname = usePathname();
+  const [open, setOpen] = useState(false);
+
+  const toggleSidebar = () => setOpen(!open);
 
   return (
-    <Drawer
-      variant="permanent"
-      classes={{ paper: styles.sidebar }}
-    >
-      <div className={styles.logo}>
-        <img src="/logo.png" alt="HMS Logo" className={styles.logoImage} />
-      </div>
-      <List className={styles.nav}>
-        {navItems.map(({ name, path, icon: Icon }) => (
-          <ListItem
-            key={path}
-            component={Link}
-            href={path}
-            className={`${styles.navLink} ${pathname === path ? styles.active : ''}`}
-          >
-            <ListItemIcon>
-              <Icon className={styles.icon} />
-            </ListItemIcon>
-            <ListItemText primary={name} />
-          </ListItem>
-        ))}
-      </List>
-    </Drawer>
+    <>
+      <IconButton onClick={toggleSidebar} className={styles.hamburger}>
+        <MenuIcon />
+      </IconButton>
+      <Drawer
+        variant="temporary"
+        open={open}
+        onClose={toggleSidebar}
+        classes={{ paper: styles.sidebar }}
+        ModalProps={{ keepMounted: true }}
+      >
+        <div className={styles.logo}>
+          <div className={styles.logoContainer}>
+            <img src="/logo.png" alt="HMS Logo" className={styles.logoImage} />
+          </div>
+        </div>
+        <List className={styles.nav}>
+          {navItems.map(({ name, path, icon: Icon }) => (
+            <ListItem
+              key={path}
+              component={Link}
+              href={path}
+              className={`${styles.navLink} ${pathname === path ? styles.active : ''}`}
+              onClick={toggleSidebar}
+            >
+              <ListItemIcon>
+                <Icon className={styles.icon} />
+              </ListItemIcon>
+              <ListItemText primary={name} />
+            </ListItem>
+          ))}
+        </List>
+      </Drawer>
+    </>
   );
 }
