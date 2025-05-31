@@ -3,10 +3,9 @@
 import React, { useState } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { AppBar, Toolbar, Typography, Button, IconButton } from '@mui/material';
-import { Bars3Icon as MenuIcon } from '@heroicons/react/24/outline'; // Corrected import
+import { AppBar, Toolbar, Typography, Button } from '@mui/material';
 import Sidebar from './Sidebar';
-import useAuth from './useAuth';
+import useAuth from './auth/useAuth';
 import styles from './Header.module.css';
 
 export default function Header() {
@@ -35,16 +34,13 @@ export default function Header() {
     <>
       <AppBar position="fixed" className={styles.header}>
         <Toolbar>
-          <IconButton
-            edge="start"
-            color="inherit"
-            aria-label="menu"
+          <div
+            className={styles.headerLogo}
             onClick={toggleSidebar}
-            className={styles.menuButton}
+            style={{ cursor: 'pointer' }}
+            role="button"
+            aria-label="Toggle sidebar"
           >
-            <MenuIcon className={styles.menuIcon} />
-          </IconButton>
-          <div className={styles.headerLogo}>
             <div className={styles.headerLogoContainer}>
               <img src="/logo.png" alt="HMS Logo" className={styles.headerLogoImage} />
             </div>
