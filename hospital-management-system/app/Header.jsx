@@ -3,7 +3,7 @@
 import React, { useState } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { AppBar, Toolbar, Typography, Button } from '@mui/material';
+import { AppBar, Toolbar, Typography, Button, Box, Avatar } from '@mui/material';
 import Sidebar from './Sidebar';
 import useAuth from './useAuth';
 import styles from './Header.module.css';
@@ -34,21 +34,21 @@ export default function Header() {
     <>
       <AppBar position="fixed" className={styles.header}>
         <Toolbar>
-          <div
+          <Box
             className={styles.headerLogo}
             onClick={toggleSidebar}
-            style={{ cursor: 'pointer' }}
+            sx={{ cursor: 'pointer', display: 'flex', alignItems: 'center' }}
             role="button"
             aria-label="Toggle sidebar"
           >
-            <div className={styles.headerLogoContainer}>
+            <Box className={styles.headerLogoContainer}>
               <img src="/logo.png" alt="HMS Logo" className={styles.headerLogoImage} />
-            </div>
+            </Box>
             <Typography variant="h6" className={styles.headerTitle}>
               GrimCare
             </Typography>
-          </div>
-          <div className={styles.headerNav}>
+          </Box>
+          <Box className={styles.headerNav}>
             {navItems.map(({ name, path, onClick }) => (
               <Button
                 key={path}
@@ -60,7 +60,15 @@ export default function Header() {
                 {name}
               </Button>
             ))}
-          </div>
+          </Box>
+          {user && (
+            <Box className={styles.userInfo}>
+              <Avatar>{user.name ? user.name[0] : 'U'}</Avatar>
+              <Typography variant="body2" sx={{ ml: 1, color: 'white' }}>
+                {user.name || user.email}
+              </Typography>
+            </Box>
+          )}
         </Toolbar>
       </AppBar>
       <Sidebar isOpen={sidebarOpen} toggleSidebar={toggleSidebar} />
