@@ -1,40 +1,42 @@
+// app/components/Header.jsx
 'use client';
 
-import React, { useState } from 'react';
-import { UserCircleIcon, BellIcon, Bars3Icon } from '@heroicons/react/24/outline';
-import styles from './Header.module.css';
+import React from 'react';
 import Link from 'next/link';
+import { usePathname } from 'next/navigation';
+import { AppBar, Toolbar, Typography, Button } from '@mui/material';
+import styles from './Header.module.css';
+
+const navItems = [
+  { name: 'Profile', path: '/profile' },
+  { name: 'Logout', path: '/auth/logout' },
+];
 
 export default function Header() {
-  const [isProfileOpen, setIsProfileOpen] = useState(false);
+  const pathname = usePathname();
 
   return (
-    <header className={styles.header}>
-      <div className={styles.container}>
-        <div className={styles.left}>
-          <Bars3Icon className={styles.icon} />
-          <h1 className={styles.title}>Hospital Management System</h1>
+    <AppBar position="fixed" className={styles.header}>
+      <Toolbar>
+        <div className={styles.headerLogo}>
+          <img src="/logo.png" alt="HMS Logo" className={styles.headerLogoImage} />
+          <Typography variant="h6" className={styles.headerTitle}>
+            GrimCare
+          </Typography>
         </div>
-        <div className={styles.right}>
-          <BellIcon className={styles.icon} />
-          <div className={styles.profile}>
-            <button 
-              onClick={() => setIsProfileOpen(!isProfileOpen)}
-              className={styles.profileButton}
+        <div className={styles.headerNav}>
+          {navItems.map(({ name, path }) => (
+            <Button
+              key={path}
+              component={Link}
+              href={path}
+              className={`${styles.headerNavLink} ${pathname === path ? styles.active : ''}`}
             >
-              <UserCircleIcon className={styles.icon} />
-              <span className={styles.userName}>Admin</span>
-            </button>
-            {isProfileOpen && (
-              <div className={styles.dropdown}>
-                <Link href="/profile" className={styles.dropdownItem}>Profile</Link>
-                <Link href="/settings" className={styles.dropdownItem}>Settings</Link>
-                <Link href="/auth/logout" className={styles.dropdownItem}>Logout</Link>
-              </div>
-            )}
-          </div>
+              {name}
+            </Button>
+          ))}
         </div>
-      </div>
-    </header>
+      </Toolbar>
+    </AppBar>
   );
 }
