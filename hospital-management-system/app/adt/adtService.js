@@ -26,3 +26,18 @@ export async function deleteAdmission(id) {
   const response = await axios.delete(`${API_URL}/api/adt/${id}`);
   return response.data;
 }
+
+export async function getPatients() {
+  const response = await axios.get(`${API_URL}/api/patient`);
+  return response.data;
+}
+
+export async function getDoctors() {
+  const response = await axios.get(`${API_URL}/api/doctor`);
+  return response.data;
+}
+
+export async function getWards() {
+  const response = await axios.get(`${API_URL}/api/wards`);
+  return response.data;
+}
