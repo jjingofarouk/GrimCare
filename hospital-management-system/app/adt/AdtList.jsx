@@ -1,3 +1,4 @@
+// app/adt/AdmissionList.jsx
 import React, { useState, useEffect } from 'react';
 import { Box, Typography, Button, Alert } from '@mui/material';
 import { DataGrid } from '@mui/x-data-grid';
@@ -13,7 +14,7 @@ export default function AdmissionList({ onSelectAdmission, refresh }) {
     async function fetchAdmissions() {
       try {
         const data = await getAdmissions();
-        setAdmissions(data);
+        setAdmissions(Array.isArray(data) ? data : []);
         setError(null);
       } catch (error) {
         console.error('Error fetching admissions:', error);
@@ -25,23 +26,48 @@ export default function AdmissionList({ onSelectAdmission, refresh }) {
 
   const columns = [
     { field: 'id', headerName: 'ID', width: 90 },
-    { field: 'patientName', headerName: 'Patient', width: 150, valueGetter: (params) => params.row.patient.user.name },
-    { field: 'wardName', headerName: 'Ward', width: 150, valueGetter: (params) => params.row.ward?.name || 'N/A' },
+    {
+      field: 'patientName',
+      headerName: 'Patient',
+      width: 150,
+      valueGetter: (params) => params.row?.patient?.user?.name || 'N/A',
+    },
+    {
+      field: 'wardName',
+      headerName: 'Ward',
+      width: 150,
+      valueGetter: (params) => params.row?.ward?.name || 'N/A',
+    },
     {
       field: 'admissionDate',
       headerName: 'Admission Date',
       width: 150,
-      valueGetter: (params) => new Date(params.row.admissionDate).toLocaleDateString(),
+      valueGetter: (params) => params.row?.admissionDate ? new Date(params.row.admissionDate).toLocaleDateString() : 'N/A',
     },
-    { field: 'doctorName', headerName: 'Doctor', width: 150, valueGetter: (params) => params.row.doctor?.user.name || 'N/A' },
-    { field: 'triagePriority', headerName: 'Triage Priority', width: 120 },
-    { field: 'status', headerName: 'Status', width: 120 },
+    {
+      field: 'doctorName',
+      headerName: 'Doctor',
+      width: 150,
+      valueGetter: (params) => params.row?.doctor?.user?.name || 'N/A',
+    },
+    {
+      field: 'triagePriority',
+      headerName: 'Triage Priority',
+      width: 120,
+      valueGetter: (params) => params.row?.triagePriority || 'N/A',
+    },
+    {
+      field: 'status',
+      headerName: 'Status',
+      width: 120,
+      valueGetter: (params) => params.row?.status || 'N/A',
+    },
     {
       field: 'actions',
       headerName: 'Actions',
       width: 150,
       renderCell: (params) => (
-        <Button variant="outlined" onClick={() => onSelectAdmission(params.row)}>
+        <Button variant="outlined" onClick={() => onSelectAdmission(params.row)} disabled={!params.row}>
           View
         </Button>
       ),
@@ -59,6 +85,11 @@ export default function AdmissionList({ onSelectAdmission, refresh }) {
       {error && (
         <Alert severity="error" sx={{ mb: 2 }}>
           Failed to load admissions: {error}
+        </Alert>
+      )}
+      {admissions.length === 0 && !error && (
+        <Alert severity="info" sx={{ mb: 2 }}>
+          No admissions found.
         </Alert>
       )}
       {viewMode === 'card' ? (
