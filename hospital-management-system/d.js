@@ -1,32 +1,128 @@
-hospital-management-system git:(main) ✗ node prisma/seed.js
-Error seeding database: PrismaClientValidationError: 
-Invalid `prisma.doctor.create()` invocation in
-/project/workspace/hospital-management-system/prisma/seed.js:78:23
-
-  75 
-  76 const createdDoctors = await Promise.all(
-  77   doctors.map(doctor =>
-→ 78     prisma.doctor.create({
-           data: {
-             userId: 17,
-             ~~~~~~
-             specialty: "Cardiology",
-             licenseNumber: "LIC10001",
-         ?   createdAt?: DateTime,
-         ?   updatedAt?: DateTime,
-         ?   user?: UserCreateNestedOneWithoutDoctorInput,
-         ?   admissions?: AdmissionCreateNestedManyWithoutDoctorInput
-           }
-         })
-
-Unknown argument `userId`. Did you mean `user`? Available options are marked with ?.
-    at wn (/project/workspace/hospital-management-system/node_modules/@prisma/client/runtime/library.js:29:1363)
-    at $n.handleRequestError (/project/workspace/hospital-management-system/node_modules/@prisma/client/runtime/library.js:121:6958)
-    at $n.handleAndLogRequestError (/project/workspace/hospital-management-system/node_modules/@prisma/client/runtime/library.js:121:6623)
-    at $n.request (/project/workspace/hospital-management-system/node_modules/@prisma/client/runtime/library.js:121:6307)
-    at async l (/project/workspace/hospital-management-system/node_modules/@prisma/client/runtime/library.js:130:9633)
-    at async Promise.all (index 0)
-    at async main (/project/workspace/hospital-management-system/prisma/seed.js:76:28) {
-  clientVersion: '5.22.0'
-}
-➜  hospital-management-system git:(main) ✗ 
+generator client {
+    provider = "prisma-client-js"
+    }
+    
+    datasource db {
+    provider = "postgresql"
+    url      = env("DIRECT_URL")
+    }
+    
+    model User {
+    id        Int      @id @default(autoincrement())
+    email     String   @unique
+    name      String?
+    password  String
+    role      String   @default("PATIENT") // PATIENT, DOCTOR, ADMIN, NURSE
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
+    doctor    Doctor?  @relation(fields: [doctorId], references: [id])
+    doctorId  Int?     @unique
+    payrolls  Payroll[]
+    patients  Patient[]
+    }
+    
+    model Doctor {
+    id            Int        @id @default(autoincrement())
+    user          User?      @relation
+    specialty     String?
+    licenseNumber String?    @unique
+    createdAt     DateTime   @default(now())
+    updatedAt     DateTime   @updatedAt
+    admissions    Admission[] @relation("DoctorAdmissions")
+    }
+    
+    model Patient {
+    id                Int       @id @default(autoincrement())
+    userId            Int
+    user              User      @relation(fields: [userId], references: [id])
+    dateOfBirth       DateTime?
+    gender            String?
+    phone             String?
+    address           String?
+    emergencyContact  String?
+    insuranceProvider String?   // For patient registration
+    insurancePolicy   String?   // For patient registration
+    createdAt         DateTime  @default(now())
+    updatedAt         DateTime  @updatedAt
+    admissions        Admission[]
+    }
+    
+    model Admission {
+    id                Int       @id @default(autoincrement())
+    patientId         Int
+    patient           Patient   @relation(fields: [patientId], references: [id])
+    doctorId          Int?
+    doctor            Doctor?   @relation("DoctorAdmissions", fields: [doctorId], references: [id])
+    wardId            Int?
+    ward              Ward?     @relation(fields: [wardId], references: [id])
+    admissionDate     DateTime  @default(now())
+    scheduledDate     DateTime? // For admission scheduling
+    preAdmissionNotes String?   // For pre-admission processing
+    triagePriority    String?   // e.g., LOW, MEDIUM, HIGH for triage assessment
+    triageNotes       String?   // For triage assessment
+    status            String    @default("PENDING") // PENDING, ADMITTED, DISCHARGED
+    dischargeDate     DateTime? // For discharge planning
+    dischargeNotes    String?   // For discharge documentation
+    createdAt         DateTime  @default(now())
+    updatedAt         DateTime  @updatedAt
+    }
+    
+    model Ward {
+    id            Int         @id @default(autoincrement())
+    name          String
+    totalBeds     Int
+    occupiedBeds  Int         @default(0) // For bed management
+    department    String?
+    admissions    Admission[]
+    createdAt     DateTime    @default(now())
+    updatedAt     DateTime    @updatedAt
+    }
+    
+    model Transaction {
+    id            Int          @id @default(autoincrement())
+    description   String
+    amount        Float
+    category      String
+    status        String
+    date          DateTime     @default(now())
+    type          String
+    costCenterId  Int?
+    costCenter    CostCenter?  @relation(fields: [costCenterId], references: [id])
+    patientId     Int?
+    createdAt     DateTime     @default(now())
+    updatedAt     DateTime     @updatedAt
+    }
+    
+    model Payroll {
+    id        Int      @id @default(autoincrement())
+    userId    Int
+    user      User     @relation(fields: [userId], references: [id])
+    salary    Float
+    taxes     Float
+    benefits  Float
+    period    String
+    status    String
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
+    }
+    
+    model CostCenter {
+    id            Int          @id @default(autoincrement())
+    name          String
+    department    String
+    transactions  Transaction[]
+    createdAt     DateTime     @default(now())
+    updatedAt     DateTime     @updatedAt
+    }
+    
+    model FixedAsset {
+    id            Int      @id @default(autoincrement())
+    name          String
+    purchaseDate  DateTime
+    purchaseCost  Float
+    depreciation  Float
+    currentValue  Float
+    status        String
+    createdAt     DateTime @default(now())
+    updatedAt     DateTime @updatedAt
+    }
