@@ -1,3 +1,4 @@
+// app/api/wards/route.js
 import { PrismaClient } from '@prisma/client';
 import { NextResponse } from 'next/server';
 
