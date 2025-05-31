@@ -27,8 +27,7 @@ import {
   WrenchIcon,
   XCircleIcon,
 } from '@heroicons/react/24/outline';
-import { Drawer, List, ListItem, ListItemIcon, ListItemText, IconButton } from '@mui/material';
-import MenuIcon from '@mui/icons-material/Menu';
+import { Drawer, List, ListItem, ListItemIcon, ListItemText, Divider } from '@mui/material';
 import styles from './Sidebar.module.css';
 
 const navItems = [
@@ -71,33 +70,26 @@ const navItems = [
   { name: 'Verification', path: '/verification', icon: ShieldCheckIcon },
 ];
 
-export default function Sidebar() {
+export default function Sidebar({ toggleSidebar, isOpen }) {
   const pathname = usePathname();
-  const [open, setOpen] = useState(false);
-
-  const toggleSidebar = () => setOpen(!open);
 
   return (
-    <>
-      <IconButton onClick={toggleSidebar} className={styles.hamburger}>
-        <MenuIcon />
-      </IconButton>
-      <Drawer
-        variant="temporary"
-        open={open}
-        onClose={toggleSidebar}
-        classes={{ paper: styles.sidebar }}
-        ModalProps={{ keepMounted: true }}
-      >
-        <div className={styles.logo}>
-          <div className={styles.logoContainer}>
-            <img src="/logo.png" alt="HMS Logo" className={styles.logoImage} />
-          </div>
+    <Drawer
+      variant="temporary"
+      open={isOpen}
+      onClose={toggleSidebar}
+      classes={{ paper: styles.sidebar }}
+      ModalProps={{ keepMounted: true }}
+    >
+      <div className={styles.logo} onClick={toggleSidebar}>
+        <div className={styles.logoContainer}>
+          <img src="/logo.png" alt="HMS Logo" className={styles.logoImage} />
         </div>
-        <List className={styles.nav}>
-          {navItems.map(({ name, path, icon: Icon }) => (
+      </div>
+      <List className={styles.nav}>
+        {navItems.map(({ name, path, icon: Icon }, index) => (
+          <React.Fragment key={path}>
             <ListItem
-              key={path}
               component={Link}
               href={path}
               className={`${styles.navLink} ${pathname === path ? styles.active : ''}`}
@@ -108,9 +100,10 @@ export default function Sidebar() {
               </ListItemIcon>
               <ListItemText primary={name} />
             </ListItem>
-          ))}
-        </List>
-      </Drawer>
-    </>
+            <Divider className={styles.divider} />
+          </React.Fragment>
+        ))}
+      </List>
+    </Drawer>
   );
 }
