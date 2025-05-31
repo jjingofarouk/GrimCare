@@ -1,10 +1,9 @@
-"use client";
+'use client';
 
-import React from "react";
-import { useState } from "react";
-import { Tabs, Tab, Box, Paper } from "@mui/material";
-import LoginForm from "./LoginForm";
-import RegisterForm from "./RegisterForm";
+import React, { useState } from 'react';
+import { Tabs, Tab, Box, Paper } from '@mui/material';
+import LoginForm from './LoginForm';
+import RegisterForm from './RegisterForm';
 
 export default function AuthPage() {
   const [isLogin, setIsLogin] = useState(true);
@@ -16,11 +15,11 @@ export default function AuthPage() {
   return (
     <Box
       sx={{
-        minHeight: "100vh",
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "center",
-        background: "linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%)",
+        minHeight: '100vh',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        background: 'linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%)',
         padding: 2,
       }}
     >
@@ -29,10 +28,10 @@ export default function AuthPage() {
         sx={{
           borderRadius: 4,
           maxWidth: 480,
-          width: "100%",
-          overflow: "hidden",
-          background: "rgba(255, 255, 255, 0.95)",
-          backdropFilter: "blur(12px)",
+          width: '100%',
+          overflow: 'hidden',
+          background: 'rgba(255, 255, 255, 0.95)',
+          backdropFilter: 'blur(12px)',
         }}
       >
         <Tabs
@@ -40,22 +39,20 @@ export default function AuthPage() {
           onChange={handleChange}
           centered
           sx={{
-            bgcolor: "rgba(255, 255, 255, 0.1)",
-            "& .MuiTab-root": {
-              color: "#ffffff",
+            bgcolor: 'rgba(255, 255, 255, 0.1)',
+            '& .MuiTab-root': {
+              color: '#ffffff',
               fontWeight: 500,
-              textTransform: "none",
-              fontSize: "1rem",
-              padding: "12px 24px",
+              textTransform: 'none',
+              fontSize: '1rem',
+              padding: '12px 24px',
             },
-            "& .Mui-selected": {
-              color: "#1e3a8a",
-              bgcolor: "#ffffff",
+            '& .Mui-selected': {
+              color: '#1e3a8a',
+              bgcolor: '#ffffff',
               borderRadius: 16,
             },
-            "& .MuiTabs-indicator": {
-              display: "none",
-            },
+            '& .MuiTabs-indicator': { display: 'none' },
           }}
         >
           <Tab label="Login" />
