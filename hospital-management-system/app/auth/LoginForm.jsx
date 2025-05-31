@@ -2,7 +2,7 @@
 
 import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import Link from 'next/link'; // Add this import
+import Link from 'next/link';
 import styles from './LoginForm.module.css';
 import { login } from './authService';
 
