@@ -8,8 +8,8 @@ export async function GET(request, { params }) {
     const admission = await prisma.admission.findUnique({
       where: { id: parseInt(params.id) },
       include: {
-        patient: true,
-        doctor: true,
+        patient: { include: { user: true } },
+        doctor: { include: { user: true } },
         ward: true,
       },
     });
@@ -18,7 +18,10 @@ export async function GET(request, { params }) {
     }
     return NextResponse.json(admission);
   } catch (error) {
-    return NextResponse.json({ error: 'Failed to fetch admission' }, { status: 500 });
+    console.error('GET /api/adt/[id] error:', error);
+    return NextResponse.json({ error: 'Failed to fetch admission', details: error.message }, { status: 500 });
+  } finally {
+    await prisma.$disconnect();
   }
 }
 
@@ -29,22 +32,27 @@ export async function PUT(request, { params }) {
       where: { id: parseInt(params.id) },
       include: { ward: true },
     });
+    if (!previousAdmission) {
+      return NextResponse.json({ error: 'Admission not found' }, { status: 404 });
+    }
     const admission = await prisma.admission.update({
       where: { id: parseInt(params.id) },
       data: {
         patientId: data.patientId,
-        doctorId: data.doctorId,
-        wardId: data.wardId,
+        doctorId: data.doctorId || null,
+        wardId: data.wardId || null,
         admissionDate: data.admissionDate ? new Date(data.admissionDate) : undefined,
-        triagePriority: data.triagePriority,
-        triageNotes: data.triageNotes,
+        triagePriority: data.triagePriority || null,
+        triageNotes: data.triageNotes || null,
         status: data.status,
-        dischargeNotes: data.dischargeNotes,
-        dischargeDate: data.dischargeDate ? new Date(data.dischargeDate) : undefined,
+        dischargeNotes: data.dischargeNotes || null,
+        dischargeDate: data.dischargeDate ? new Date(data.dischargeDate) : null,
+        scheduledDate: data.scheduledDate ? new Date(data.scheduledDate) : null,
+        preAdmissionNotes: data.preAdmissionNotes || null,
       },
       include: {
-        patient: true,
-        doctor: true,
+        patient: { include: { user: true } },
+        doctor: { include: { user: true } },
         ward: true,
       },
     });
@@ -68,7 +76,10 @@ export async function PUT(request, { params }) {
     }
     return NextResponse.json(admission);
   } catch (error) {
-    return NextResponse.json({ error: 'Failed to update admission' }, { status: 500 });
+    console.error('PUT /api/adt/[id] error:', error);
+    return NextResponse.json({ error: 'Failed to update admission', details: error.message }, { status: 500 });
+  } finally {
+    await prisma.$disconnect();
   }
 }
 
@@ -78,6 +89,9 @@ export async function DELETE(request, { params }) {
       where: { id: parseInt(params.id) },
       include: { ward: true },
     });
+    if (!admission) {
+      return NextResponse.json({ error: 'Admission not found' }, { status: 404 });
+    }
     if (admission.wardId) {
       await prisma.ward.update({
         where: { id: admission.wardId },
@@ -89,6 +103,9 @@ export async function DELETE(request, { params }) {
     });
     return NextResponse.json({ message: 'Admission deleted' });
   } catch (error) {
-    return NextResponse.json({ error: 'Failed to delete admission' }, { status: 500 });
+    console.error('DELETE /api/adt/[id] error:', error);
+    return NextResponse.json({ error: 'Failed to delete admission', details: error.message }, { status: 500 });
+  } finally {
+    await prisma.$disconnect();
   }
 }
