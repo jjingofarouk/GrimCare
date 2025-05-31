@@ -1,6 +1,6 @@
 import { PrismaClient } from '@prisma/client';
 import { NextResponse } from 'next/server';
-import { getUser, isAuthenticated } from '@/app/auth'; // Updated import path
+import { getUser, isAuthenticated } from '../../../../auth'; // Updated import path
 
 const prisma = new PrismaClient();
 
