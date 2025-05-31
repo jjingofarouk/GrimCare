@@ -1,3 +1,4 @@
+// app/api/adt/[id]/route.js
 import { PrismaClient } from '@prisma/client';
 import { NextResponse } from 'next/server';
 
@@ -38,9 +39,9 @@ export async function PUT(request, { params }) {
     const admission = await prisma.admission.update({
       where: { id: parseInt(params.id) },
       data: {
-        patientId: data.patientId,
-        doctorId: data.doctorId || null,
-        wardId: data.wardId || null,
+        patient: data.patientId ? { connect: { id: parseInt(data.patientId) } } : undefined,
+        doctor: data.doctorId ? { connect: { id: parseInt(data.doctorId) } } : undefined,
+        ward: data.wardId ? { connect: { id: parseInt(data.wardId) } } : undefined,
         admissionDate: data.admissionDate ? new Date(data.admissionDate) : undefined,
         triagePriority: data.triagePriority || null,
         triageNotes: data.triageNotes || null,
