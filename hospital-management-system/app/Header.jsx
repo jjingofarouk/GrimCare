@@ -3,20 +3,25 @@
 import React, { useState } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { AppBar, Toolbar, Typography, Button, Box, Avatar } from '@mui/material';
+import { AppBar, Toolbar, Typography, Button, Box, Avatar, Menu, MenuItem, IconButton } from '@mui/material';
 import Sidebar from './Sidebar';
 import useAuth from './useAuth';
+import MenuIcon from '@mui/icons-material/Menu';
+import AccountCircle from '@mui/icons-material/AccountCircle';
 import styles from './Header.module.css';
 
 export default function Header() {
   const pathname = usePathname();
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [anchorEl, setAnchorEl] = useState(null);
   const { user, logout } = useAuth();
 
   const toggleSidebar = () => setSidebarOpen(!sidebarOpen);
-
+  const handleMenuOpen = (event) => setAnchorEl(event.currentTarget);
+  const handleMenuClose = () => setAnchorEl(null);
   const handleLogout = async () => {
     await logout();
+    handleMenuClose();
   };
 
   const navItems = user
@@ -33,20 +38,15 @@ export default function Header() {
   return (
     <>
       <AppBar position="fixed" className={styles.header}>
-        <Toolbar>
+        <Toolbar className={styles.toolbar}>
           <Box
-            className={styles.headerLogo}
+            className={styles.logoContainer}
             onClick={toggleSidebar}
-            sx={{ cursor: 'pointer', display: 'flex', alignItems: 'center' }}
             role="button"
             aria-label="Toggle sidebar"
           >
-            <Box className={styles.headerLogoContainer}>
-              <img src="/logo.png" alt="HMS Logo" className={styles.headerLogoImage} />
-            </Box>
-            <Typography variant="h6" className={styles.headerTitle}>
-              GrimCare
-            </Typography>
+            <img src="/logo.png" alt="GrimCare Logo" className={styles.logoImage} />
+            <Typography className={styles.headerTitle}>GrimCare</Typography>
           </Box>
           <Box className={styles.headerNav}>
             {navItems.map(({ name, path, onClick }) => (
@@ -61,14 +61,40 @@ export default function Header() {
               </Button>
             ))}
           </Box>
-          {user && (
-            <Box className={styles.userInfo}>
-              <Avatar>{user.name ? user.name[0] : 'U'}</Avatar>
-              <Typography variant="body2" sx={{ ml: 1, color: 'white' }}>
+          <Box className={styles.userInfo}>
+            {user && (
+              <Typography className={styles.userName}>
                 {user.name || user.email}
               </Typography>
-            </Box>
-          )}
+            )}
+            <IconButton onClick={handleMenuOpen} className={styles.menuIcon}>
+              {user ? (
+                <Avatar className={styles.userAvatar}>
+                  {user.name ? user.name[0] : 'U'}
+                </Avatar>
+              ) : (
+                <AccountCircle />
+              )}
+            </IconButton>
+            <Menu
+              anchorEl={anchorEl}
+              open={Boolean(anchorEl)}
+              onClose={handleMenuClose}
+              classes={{ paper: styles.menu }}
+            >
+              {navItems.map(({ name, path, onClick }) => (
+                <MenuItem
+                  key={path}
+                  onClick={onClick || handleMenuClose}
+                  component={onClick ? 'div' : Link}
+                  href={onClick ? undefined : path}
+                  className={styles.menuItem}
+                >
+                  {name}
+                </MenuItem>
+              ))}
+            </Menu>
+          </Box>
         </Toolbar>
       </AppBar>
       <Sidebar isOpen={sidebarOpen} toggleSidebar={toggleSidebar} />
