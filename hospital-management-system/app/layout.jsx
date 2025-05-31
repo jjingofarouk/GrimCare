@@ -1,8 +1,8 @@
-// app/layout.jsx
+import { requireAuth } from './auth/authUtils';
 import Header from './Header';
 import './globals.css';
 
-export default function RootLayout({ children }) {
+function RootLayout({ children }) {
   return (
     <html lang="en">
       <body>
@@ -14,3 +14,5 @@ export default function RootLayout({ children }) {
     </html>
   );
 }
+
+export default requireAuth(RootLayout);
