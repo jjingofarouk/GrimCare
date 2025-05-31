@@ -1,4 +1,3 @@
-
 import { API_ROUTES, BASE_URL } from '../api';
 
 export async function login({ email, password }) {
@@ -17,7 +16,7 @@ export async function login({ email, password }) {
 }
 
 export async function register({ email, password, name, role }) {
-  const response = await fetch(`${BASE_URL}${API_ROUTES.AUTH}/register`, {
+  const response = await fetch(`${BASE_URL}${API_ROUTES.AUTH}`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
