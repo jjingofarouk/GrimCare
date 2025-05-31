@@ -1,4 +1,4 @@
-// Define all your API routes
+// app/config/api.js
 export const API_ROUTES = {
   ACCOUNTING: '/api/accounting',
   ADT: '/api/adt',
@@ -38,13 +38,11 @@ export const API_ROUTES = {
   UTILITIES: '/api/utilities',
   VACCINATION: '/api/vaccination',
   VERIFICATION: '/api/verification',
-    WARD: '/api/wards',
+  WARD: '/api/wards',
 };
 
-// Set base URL from env or fallback
 export const BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000';
 
-// Export both in a default object for convenience
 const api = {
   API_ROUTES,
   BASE_URL,
