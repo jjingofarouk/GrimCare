@@ -1,11 +1,12 @@
 // app/adt/adtService.js
 import axios from 'axios';
+import api from '../api'; // Adjust path as needed
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000';
+const { BASE_URL, API_ROUTES } = api;
 
 export async function getAdmissions() {
   try {
-    const response = await axios.get(`${API_URL}/api/adt`);
+    const response = await axios.get(`${BASE_URL}${API_ROUTES.ADT}`);
     return response.data;
   } catch (error) {
     console.error('Error fetching admissions:', error);
@@ -15,7 +16,7 @@ export async function getAdmissions() {
 
 export async function createAdmission(data) {
   try {
-    const response = await axios.post(`${API_URL}/api/adt`, data);
+    const response = await axios.post(`${BASE_URL}${API_ROUTES.ADT}`, data);
     return response.data;
   } catch (error) {
     console.error('Error creating admission:', error);
@@ -25,7 +26,7 @@ export async function createAdmission(data) {
 
 export async function getAdmission(id) {
   try {
-    const response = await axios.get(`${API_URL}/api/adt/${id}`);
+    const response = await axios.get(`${BASE_URL}${API_ROUTES.ADT}/${id}`);
     return response.data;
   } catch (error) {
     console.error('Error fetching admission:', error);
@@ -35,7 +36,7 @@ export async function getAdmission(id) {
 
 export async function updateAdmission(id, data) {
   try {
-    const response = await axios.put(`${API_URL}/api/adt/${id}`, data);
+    const response = await axios.put(`${BASE_URL}${API_ROUTES.ADT}/${id}`, data);
     return response.data;
   } catch (error) {
     console.error('Error updating admission:', error);
@@ -45,7 +46,7 @@ export async function updateAdmission(id, data) {
 
 export async function deleteAdmission(id) {
   try {
-    const response = await axios.delete(`${API_URL}/api/adt/${id}`);
+    const response = await axios.delete(`${BASE_URL}${API_ROUTES.ADT}/${id}`);
     return response.data;
   } catch (error) {
     console.error('Error deleting admission:', error);
@@ -55,7 +56,7 @@ export async function deleteAdmission(id) {
 
 export async function getPatients() {
   try {
-    const response = await axios.get(`${API_URL}/api/patient`);
+    const response = await axios.get(`${BASE_URL}${API_ROUTES.PATIENT}`);
     return response.data;
   } catch (error) {
     console.error('Error fetching patients:', error);
@@ -65,7 +66,7 @@ export async function getPatients() {
 
 export async function getDoctors() {
   try {
-    const response = await axios.get(`${API_URL}/api/doctor`);
+    const response = await axios.get(`${BASE_URL}${API_ROUTES.DOCTOR}`);
     return response.data;
   } catch (error) {
     console.error('Error fetching doctors:', error);
@@ -75,7 +76,7 @@ export async function getDoctors() {
 
 export async function getWards() {
   try {
-    const response = await axios.get(`${API_URL}/api/wards`);
+    const response = await axios.get(`${BASE_URL}${API_ROUTES.WARD}`);
     return response.data;
   } catch (error) {
     console.error('Error fetching wards:', error);
