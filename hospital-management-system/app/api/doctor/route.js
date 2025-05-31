@@ -5,7 +5,7 @@ import bcrypt from 'bcryptjs';
 
 const prisma = new PrismaClient();
 
-export const hasPermission = (role, feature) => {
+const hasPermission = (role, feature) => {
   const rolePermissions = {
     PATIENT: ['Dashboard', 'Appointments', 'Medical Records', 'Billing'],
     DOCTOR: ['Dashboard', 'Patients', 'Appointments', 'Clinical', 'Operation Theatre'],
@@ -58,7 +58,7 @@ export const hasPermission = (role, feature) => {
 
 export async function GET(request) {
   try {
-    const token = request.headers.get('authorization')?.split('Bearer ')[1];
+    const token = request.headers.get('authorization')?.split(' ')[1];
     if (!token || !isAuthenticated()) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
@@ -80,7 +80,7 @@ export async function GET(request) {
 
 export async function POST(request) {
   try {
-    const token = request.headers.get('authorization')?.split('Bearer ')[1];
+    const token = request.headers.get('authorization')?.split(' ')[1];
     if (!token || !isAuthenticated()) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
