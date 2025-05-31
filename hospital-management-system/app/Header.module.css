@@ -9,21 +9,23 @@
   display: flex;
   align-items: center;
   gap: 0.75rem;
+  cursor: pointer;
 }
 
 .headerLogoContainer {
-  width: 36px;
-  height: 36px;
+  width: 40px;
+  height: 40px;
   border-radius: 50%;
   overflow: hidden;
   background: #fff;
   display: flex;
   align-items: center;
   justify-content: center;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.15);
 }
 
 .headerLogoImage {
-  width: 32px;
+  width: 36px;
   height: auto;
 }
 
@@ -62,11 +64,11 @@
     height: 56px;
   }
   .headerLogoContainer {
-    width: 30px;
-    height: 30px;
+    width: 32px;
+    height: 32px;
   }
   .headerLogoImage {
-    width: 26px;
+    width: 28px;
   }
   .headerTitle {
     font-size: 1rem;
