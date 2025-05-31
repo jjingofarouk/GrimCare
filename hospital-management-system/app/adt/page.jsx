@@ -8,6 +8,7 @@ import DoctorForm from './DoctorForm';
 import PatientForm from './PatientForm';
 import WardForm from './WardForm';
 import { getPatients, getDoctors, getWards } from './adtService';
+import styles from './page.module.css';
 
 export default function AdtPage() {
   const [selectedAdmission, setSelectedAdmission] = useState(null);
