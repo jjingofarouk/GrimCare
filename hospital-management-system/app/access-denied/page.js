@@ -1,13 +1,29 @@
 'use client';
 
 import React from 'react';
-import { Box, Typography, Button } from '@mui/material';
+import { Box, Typography, Button, CircularProgress } from '@mui/material';
 import { useAuth } from '../useAuth';
 import { useRouter } from 'next/navigation';
 
 export default function AccessDenied() {
-  const { user } = useAuth();
+  const { user, loading } = useAuth();
   const router = useRouter();
+
+  if (loading) {
+    return (
+      <Box
+        sx={{
+          minHeight: '100vh',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          background: 'linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%)',
+        }}
+      >
+        <CircularProgress sx={{ color: '#ffffff' }} />
+      </Box>
+    );
+  }
 
   return (
     <Box
@@ -40,7 +56,7 @@ export default function AccessDenied() {
         </Typography>
         <Button
           variant='contained'
-          onClick={() => router.push(user ? '/dashboard' : '/auth')}
+          onClick={() => router.push(user ? '/dashboard' : '/auth/login')}
           sx={{
             borderRadius: 2,
             bgcolor: '#3b82f6',
