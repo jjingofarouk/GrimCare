@@ -30,44 +30,44 @@ export default function AdmissionList({ onSelectAdmission, refresh }) {
       field: 'patientName',
       headerName: 'Patient',
       width: 150,
-      valueGetter: ({ row }) => row?.patient?.user?.name || 'N/A',
+      valueGetter: (params) => params.row?.patient?.user?.name || 'N/A',
     },
     {
       field: 'wardName',
       headerName: 'Ward',
       width: 150,
-      valueGetter: ({ row }) => row?.ward?.name || 'N/A',
+      valueGetter: (params) => params.row?.ward?.name || 'N/A',
     },
     {
       field: 'admissionDate',
       headerName: 'Admission Date',
       width: 150,
-      valueGetter: ({ row }) => (row?.admissionDate ? new Date(row.admissionDate).toLocaleDateString() : 'N/A'),
+      valueGetter: (params) => (params.row?.admissionDate ? new Date(params.row.admissionDate).toLocaleDateString() : 'N/A'),
     },
     {
       field: 'doctorName',
       headerName: 'Doctor',
       width: 150,
-      valueGetter: ({ row }) => row?.doctor?.user?.name || 'N/A',
+      valueGetter: (params) => params.row?.doctor?.user?.name || 'N/A',
     },
     {
       field: 'triagePriority',
       headerName: 'Triage Priority',
       width: 120,
-      valueGetter: ({ row }) => row?.triagePriority || 'N/A',
+      valueGetter: (params) => params.row?.triagePriority || 'N/A',
     },
     {
       field: 'status',
       headerName: 'Status',
       width: 120,
-      valueGetter: ({ row }) => row?.status || 'N/A',
+      valueGetter: (params) => params.row?.status || 'N/A',
     },
     {
       field: 'actions',
       headerName: 'Actions',
       width: 150,
-      renderCell: ({ row }) => (
-        <Button variant="outlined" onClick={() => onSelectAdmission(row)} disabled={!row}>
+      renderCell: (params) => (
+        <Button variant="outlined" onClick={() => onSelectAdmission(params.row)} disabled={!params.row}>
           View
         </Button>
       ),
