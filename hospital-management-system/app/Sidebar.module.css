@@ -1,7 +1,7 @@
 /* Sidebar.module.css */
 
 .sidebar {
-  width: 280px !important;
+  width: 320px !important;
   background: #ffffff !important;
   border-right: 1px solid #e5e7eb !important;
   box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06) !important;
@@ -136,8 +136,8 @@
 /* Responsive Design */
 @media (max-width: 768px) {
   .sidebar {
-    width: 100% !important;
-    max-width: 320px !important;
+    width: 280px !important;
+    max-width: 85vw !important;
   }
   
   .logo {
@@ -165,8 +165,8 @@
 
 @media (max-width: 480px) {
   .sidebar {
-    width: 100% !important;
-    max-width: 100% !important;
+    width: 260px !important;
+    max-width: 80vw !important;
   }
   
   .logo {
