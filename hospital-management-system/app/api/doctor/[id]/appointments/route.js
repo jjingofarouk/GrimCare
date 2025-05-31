@@ -1,6 +1,6 @@
 import { PrismaClient } from '@prisma/client';
 import { NextResponse } from 'next/server';
-import { getUser, isAuthenticated } from '../../../../auth'; // Updated import path
+import { getUser, isAuthenticated } from '../../../../auth';
 
 const prisma = new PrismaClient();
 
@@ -55,7 +55,7 @@ export const hasPermission = (role, feature) => {
   return rolePermissions[role]?.includes(feature) || false;
 };
 
-export async function GET(request, context) {
+export async function GET(request, { params }) {
   try {
     const token = request.headers.get('authorization')?.split('Bearer ')[1];
     if (!token || !isAuthenticated()) {
@@ -67,7 +67,7 @@ export async function GET(request, context) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    const doctorId = parseInt(context.params.id);
+    const doctorId = parseInt(params.id);
 
     const appointments = await prisma.appointment.findMany({
       where: { doctorId },
@@ -89,7 +89,7 @@ export async function GET(request, context) {
   }
 }
 
-export async function PATCH(request, context) {
+export async function PATCH(request, { params }) {
   try {
     const token = request.headers.get('authorization')?.split('Bearer ')[1];
     if (!token || !isAuthenticated()) {
