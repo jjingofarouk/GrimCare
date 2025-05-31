@@ -38,6 +38,7 @@ export const API_ROUTES = {
   UTILITIES: '/api/utilities',
   VACCINATION: '/api/vaccination',
   VERIFICATION: '/api/verification',
+    WARD: '/api/ward',
 };
 
 // Set base URL from env or fallback
