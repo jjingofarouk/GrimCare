@@ -1,29 +1,52 @@
-// app/adt/PatientList.module.css
-/* Reuse styles from DoctorList.module.css with minor tweaks */
+/* app/adt/PatientList.module.css */
 .container {
-  max-width: 100%;
-  padding: 0 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  padding: 1.5rem;
+  background: linear-gradient(135deg, #ffffff, #f8fafc);
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  width: 100%;
+  margin: 2rem auto;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.container:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.15);
 }
 
 .title {
   font-size: 1.25rem;
   font-weight: 600;
-  margin-bottom: 1rem;
   color: #1a3c34;
+  text-align: center;
+  letter-spacing: 0.5px;
 }
 
 .alert {
-  margin-bottom: 1rem;
   border-radius: 8px;
+  font-size: 0.9rem;
+  padding: 1rem;
+  margin: 0 auto;
+  width: 100%;
+  background-color: #fef2f2;
+  color: #7f1d1d;
+}
+
+.alert.info {
+  background-color: #eff6ff;
+  color: #1e3a8a;
 }
 
 .tableWrapper {
-  height: 400px;
   width: 100%;
+  height: 400px;
   overflow-x: auto;
-  border-radius: 8px;
-  box-shadow: 0 2px 25px rgba(0, 0, 0, 0.1);
-  background: #fff;
+  border-radius: 10px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+  background: #ffffff;
 }
 
 .dataGrid {
@@ -34,28 +57,47 @@
   border: none;
 }
 
-.dataGrid :global(.MuiDataGrid-columnHeaderNames) {
+.dataGrid :global(.MuiDataGrid-columnHeaders) {
   background-color: #f5f7fa;
   font-weight: 600;
   color: #1a3c34;
 }
 
+.dataGrid :global(.MuiDataGrid-columnHeaderTitle) {
+  font-size: 0.875rem;
+  font-weight: 600;
+}
+
 .dataGrid :global(.MuiDataGrid-cell) {
   padding: 8px;
   font-size: 0.875rem;
+  color: #1a3c34;
 }
 
 .dataGrid :global(.MuiDataGrid-row) {
-  transition: background-color 0.2s;
+  transition: background-color 0.2s ease;
 }
 
 .dataGrid :global(.MuiDataGrid-row:hover) {
   background-color: #f9fafb;
 }
 
+.dataGrid :global(.MuiDataGrid-footerContainer) {
+  background-color: #f5f7fa;
+  color: #1a3c34;
+}
+
+.dataGrid :global(.MuiTablePagination-root) {
+  color: #1a3c34;
+}
+
+.dataGrid :global(.MuiDataGrid-columnSeparator) {
+  color: #1a3c34;
+}
+
 @media (max-width: 600px) {
   .container {
-    padding: 0 8px;
+    padding: 1rem;
   }
 
   .title {
@@ -63,6 +105,7 @@
   }
 
   .tableWrapper {
+    width: 100%;
     height: 350px;
   }
 
@@ -71,7 +114,12 @@
     padding: 6px;
   }
 
-  .dataGrid :global(.MuiDataGrid-columnHeaderNameTitle) {
+  .dataGrid :global(.MuiDataGrid-columnHeaderTitle) {
+    font-size: 0.75rem;
+  }
+
+  .dataGrid :global(.MuiTablePagination-selectLabel),
+  .dataGrid :global(.MuiTablePagination-displayedRows) {
     font-size: 0.75rem;
   }
 }
