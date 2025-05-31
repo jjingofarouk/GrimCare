@@ -7,34 +7,43 @@ export async function GET() {
   try {
     const admissions = await prisma.admission.findMany({
       include: {
-        patient: true,
-        doctor: true,
+        patient: { include: { user: true } },
+        doctor: { include: { user: true } },
         ward: true,
       },
     });
     return NextResponse.json(admissions);
   } catch (error) {
-    return NextResponse.json({ error: 'Failed to fetch admissions' }, { status: 500 });
+    console.error('GET /api/adt error:', error);
+    return NextResponse.json({ error: 'Failed to fetch admissions', details: error.message }, { status: 500 });
+  } finally {
+    await prisma.$disconnect();
   }
 }
 
 export async function POST(request) {
   try {
     const data = await request.json();
+    if (!data.patientId || !data.admissionDate || !data.status) {
+      return NextResponse.json({ error: 'Missing required fields' }, { status: 400 });
+    }
     const admission = await prisma.admission.create({
       data: {
         patientId: data.patientId,
-        doctorId: data.doctorId,
-        wardId: data.wardId,
+        doctorId: data.doctorId || null,
+        wardId: data.wardId || null,
         admissionDate: new Date(data.admissionDate),
-        triagePriority: data.triagePriority,
-        triageNotes: data.triageNotes,
+        triagePriority: data.triagePriority || null,
+        triageNotes: data.triageNotes || null,
         status: data.status,
-        dischargeNotes: data.dischargeNotes,
+        dischargeNotes: data.dischargeNotes || null,
+        dischargeDate: data.dischargeDate ? new Date(data.dischargeDate) : null,
+        scheduledDate: data.scheduledDate ? new Date(data.scheduledDate) : null,
+        preAdmissionNotes: data.preAdmissionNotes || null,
       },
       include: {
-        patient: true,
-        doctor: true,
+        patient: { include: { user: true } },
+        doctor: { include: { user: true } },
         ward: true,
       },
     });
@@ -46,6 +55,9 @@ export async function POST(request) {
     }
     return NextResponse.json(admission, { status: 201 });
   } catch (error) {
-    return NextResponse.json({ error: 'Failed to create admission' }, { status: 500 });
+    console.error('POST /api/adt error:', error);
+    return NextResponse.json({ error: 'Failed to create admission', details: error.message }, { status: 500 });
+  } finally {
+    await prisma.$disconnect();
   }
 }
