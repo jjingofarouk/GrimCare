@@ -1,3 +1,4 @@
+// app/api/adt/route.js
 import { PrismaClient } from '@prisma/client';
 import { NextResponse } from 'next/server';
 
@@ -29,9 +30,9 @@ export async function POST(request) {
     }
     const admission = await prisma.admission.create({
       data: {
-        patientId: data.patientId,
-        doctorId: data.doctorId || null,
-        wardId: data.wardId || null,
+        patient: { connect: { id: data.patientId } },
+        doctor: data.doctorId ? { connect: { id: data.doctorId } } : undefined,
+        ward: data.wardId ? { connect: { id: data.wardId } } : undefined,
         admissionDate: new Date(data.admissionDate),
         triagePriority: data.triagePriority || null,
         triageNotes: data.triageNotes || null,
