@@ -1,4 +1,3 @@
-// prisma/schema.prisma
 generator client {
   provider = "prisma-client-js"
 }
@@ -20,6 +19,7 @@ model User {
   doctorId  Int?      @unique
   payrolls  Payroll[]
   patients  Patient[]
+  cssdLogs  CSSDLog[] @relation("LoggedBy")
 }
 
 model Doctor {
@@ -129,4 +129,68 @@ model FixedAsset {
   status        String
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
+}
+
+model CSSDInstrument {
+  id                 Int       @id @default(autoincrement())
+  name               String
+  serialNumber       String    @unique
+  type               String?   // e.g., SCALPEL, FORCEPS
+  status             String    @default("AVAILABLE") // AVAILABLE, IN_USE, STERILIZING, MAINTENANCE
+  lastSterilized     DateTime?
+  location           String?   // e.g., CSSD, OR1, STORAGE
+  stockQuantity      Int       @default(1)
+  minStockThreshold  Int       @default(1)
+  createdAt          DateTime  @default(now())
+  updatedAt          DateTime  @updatedAt
+  cssdRecords        CSSDRecord[]
+  requisitions       CSSDRequisition[] @relation("RequisitionInstrument")
+  logs               CSSDLog[]         @relation("InstrumentLogs")
+}
+
+model CSSDRecord {
+  id                 Int       @id @default(autoincrement())
+  instrumentId       Int
+  instrument         CSSDInstrument @relation(fields: [instrumentId], references: [id])
+  sterilizationDate   DateTime?
+  sterilizationMethod String?   // e.g., STEAM, ETO
+  cycleNumber        String?   // Unique cycle identifier
+  status             String    @default("PENDING") // PENDING, STERILIZED, USED, FAILED
+  qualityCheck       String?   // PASS, FAIL
+  notes              String?
+  createdAt          DateTime  @default(now())
+  updatedAt          DateTime  @updatedAt
+  logs               CSSDLog[] @relation("RecordLogs")
+}
+
+model CSSDRequisition {
+  id              Int       @id @default(autoincrement())
+  instrumentId    Int
+  instrument      CSSDInstrument @relation("RequisitionInstrument", fields: [instrumentId], references: [id])
+  department      String
+  requestedBy     Int
+  user            User      @relation(fields: [requestedBy], references: [id])
+  quantity        Int
+  requestDate     DateTime  @default(now())
+  dispatchDate    DateTime?
+  status          String    @default("PENDING") // PENDING, APPROVED, DISPATCHED, REJECTED
+  notes           String?
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+  logs            CSSDLog[] @relation("RequisitionLogs")
+}
+
+model CSSDLog {
+  id              Int            @id @default(autoincrement())
+  instrumentId    Int?
+  instrument      CSSDInstrument? @relation("InstrumentLogs", fields: [instrumentId], references: [id])
+  recordId        Int?
+  record          CSSDRecord?    @relation("RecordLogs", fields: [recordId], references: [id])
+  requisitionId   Int?
+  requisition     CSSDRequisition? @relation("RequisitionLogs", fields: [requisitionId], references: [id])
+  action          String         // e.g., CREATED, UPDATED, STERILIZED, DISPATCHED
+  details         String?
+  performedBy     Int
+  user            User           @relation("LoggedBy", fields: [performedBy], references: [id])
+  timestamp       DateTime       @default(now())
 }
