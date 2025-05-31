@@ -1,5 +1,6 @@
 /* Header.module.css */
 
+/* Unchanged header styles */
 .header {
   background: #ffffff !important;
   color: #1f2937 !important;
@@ -34,17 +35,19 @@
   transform: scale(1.02);
 }
 
+/* Updated logoImage to be larger and circular */
 .logoImage {
-  width: 32px;
-  height: 32px;
-  border-radius: 6px;
+  width: 48px; /* Increased from 32px for better visibility */
+  height: 48px; /* Increased from 32px */
+  border-radius: 50%; /* Changed to 50% for circular shape */
   object-fit: contain;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
   flex-shrink: 0;
 }
 
+/* Updated headerTitle for larger, consistent size */
 .headerTitle {
-  font-size: 1.375rem !important;
+  font-size: 1.5rem !important; /* Increased from 1.375rem for better visibility */
   font-weight: 700 !important;
   color: #1e40af !important;
   letter-spacing: -0.025em;
@@ -115,8 +118,9 @@
   min-width: 0;
 }
 
+/* Updated userName for larger size */
 .userName {
-  font-size: 0.9375rem !important;
+  font-size: 1rem !important; /* Increased from 0.9375rem */
   font-weight: 500 !important;
   color: #374151 !important;
   white-space: nowrap;
@@ -139,14 +143,19 @@
   transform: scale(1.05);
 }
 
+/* Updated userAvatar to be larger and circular */
 .userAvatar {
-  width: 36px !important;
-  height: 36px !important;
-  background: linear-to-br from-blue-500 to-blue-600 !important;
+  width: 48px !important; /* Increased from 36px */
+  height: 48px !important; /* Increased from 36px */
+  border-radius: 50% !important; /* Ensure circular shape */
+  background: linear-gradient(to bottom right, #3b82f6, #2563eb) !important; /* Fixed invalid syntax */
   color: #ffffff !important;
-  font-size: 0.9375rem !important;
+  font-size: 1rem !important; /* Increased from 0.9375rem */
   font-weight: 600 !important;
   box-shadow: 0 2px 4px rgba(59, 130, 246, 0.2);
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .menu {
@@ -193,12 +202,13 @@
   }
   
   .logoImage {
-    width: 32px;
-    height: 32px;
+    width: 40px; /* Slightly smaller than desktop but larger than original 32px */
+    height: 40px;
+    border-radius: 50%; /* Ensure circular */
   }
   
   .headerTitle {
-    font-size: 1.125rem !important;
+    font-size: 1.25rem !important; /* Adjusted from 1.125rem for better visibility */
     max-width: 140px;
   }
   
@@ -219,9 +229,10 @@
   }
   
   .userAvatar {
-    width: 32px !important;
-    height: 32px !important;
-    font-size: 0.8125rem !important;
+    width: 40px !important; /* Adjusted from 32px */
+    height: 40px !important;
+    border-radius: 50% !important; /* Ensure circular */
+    font-size: 0.875rem !important; /* Adjusted from 0.8125rem */
   }
 }
 
@@ -237,19 +248,21 @@
   }
   
   .logoImage {
-    width: 24px;
-    height: 24px;
+    width: 32px; /* Increased from 24px for better visibility */
+    height: 32px;
+    border-radius: 50%; /* Ensure circular */
   }
   
   .headerTitle {
-    font-size: 0.875rem !important;
+    font-size: 1rem !important; /* Increased from 0.875rem */
     max-width: 100px;
   }
   
   .userAvatar {
-    width: 24px !important;
-    height: 24px !important;
-    font-size: 0.625rem !important;
+    width: 32px !important; /* Increased from 24px */
+    height: 32px !important;
+    border-radius: 50% !important; /* Ensure circular */
+    font-size: 0.75rem !important; /* Increased from 0.625rem */
   }
   
   .menuIcon {
@@ -269,7 +282,21 @@
   }
   
   .userName {
+    font-size: 0.9375rem !important; /* Slightly smaller but consistent */
     max-width: 120px;
+  }
+  
+  .logoImage {
+    width: 44px; /* Adjusted for tablet */
+    height: 44px;
+    border-radius: 50%; /* Ensure circular */
+  }
+  
+  .userAvatar {
+    width: 44px !important; /* Adjusted for tablet */
+    height: 44px !important;
+    border-radius: 50% !important; /* Ensure circular */
+    font-size: 0.9375rem !important;
   }
 }
 
@@ -284,7 +311,21 @@
   }
   
   .userName {
+    font-size: 1.125rem !important; /* Increased for larger screens */
     max-width: 200px;
+  }
+  
+  .logoImage {
+    width: 52px; /* Slightly larger for large screens */
+    height: 52px;
+    border-radius: 50%; /* Ensure circular */
+  }
+  
+  .userAvatar {
+    width: 52px !important; /* Slightly larger */
+    height: 52px !important;
+    border-radius: 50% !important; /* Ensure circular */
+    font-size: 1.125rem !important;
   }
 }
 
@@ -390,6 +431,15 @@
   .menuItem:last-child:hover {
     background: #450a0a !important;
     color: #fca5a5 !important;
+  }
+  
+  .logoImage {
+    box-shadow: 0 2px 4px rgba(255, 255, 255, 0.1); /* Adjusted for dark mode */
+  }
+  
+  .userAvatar {
+    background: linear-gradient(to bottom right, #60a5fa, #3b82f6) !important; /* Adjusted for dark mode */
+    box-shadow: 0 2px 4px rgba(96, 165, 250, 0.2);
   }
 }
 
