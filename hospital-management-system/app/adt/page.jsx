@@ -2,8 +2,8 @@
 "use client";
 import React, { useState, useEffect } from 'react';
 import { Container, Box, Typography, Button, Alert, Tabs, Tab } from '@mui/material';
-import AdmissionForm from './AdmissionForm';
-import AdmissionList from './AdmissionList';
+import AdmissionForm from './AdtForm';
+import AdmissionList from './AdtList';
 import DoctorForm from './DoctorForm';
 import PatientForm from './PatientForm';
 import WardForm from './WardForm';
