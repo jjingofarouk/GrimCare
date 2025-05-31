@@ -1,10 +1,11 @@
 // app/components/Header.jsx
 'use client';
 
-import React from 'react';
+import React, { useState } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { AppBar, Toolbar, Typography, Button } from '@mui/material';
+import Sidebar from './Sidebar';
 import styles from './Header.module.css';
 
 const navItems = [
@@ -14,31 +15,37 @@ const navItems = [
 
 export default function Header() {
   const pathname = usePathname();
+  const [sidebarOpen, setSidebarOpen] = useState(false);
+
+  const toggleSidebar = () => setSidebarOpen(!sidebarOpen);
 
   return (
-    <AppBar position="fixed" className={styles.header}>
-      <Toolbar>
-        <div className={styles.headerLogo}>
-          <div className={styles.headerLogoContainer}>
-            <img src="/logo.png" alt="HMS Logo" className={styles.headerLogoImage} />
+    <>
+      <AppBar position="fixed" className={styles.header}>
+        <Toolbar>
+          <div className={styles.headerLogo} onClick={toggleSidebar}>
+            <div className={styles.headerLogoContainer}>
+              <img src="/logo.png" alt="HMS Logo" className={styles.headerLogoImage} />
+            </div>
+            <Typography variant="h6" className={styles.headerTitle}>
+              GrimCare
+            </Typography>
           </div>
-          <Typography variant="h6" className={styles.headerTitle}>
-            GrimCare
-          </Typography>
-        </div>
-        <div className={styles.headerNav}>
-          {navItems.map(({ name, path }) => (
-            <Button
-              key={path}
-              component={Link}
-              href={path}
-              className={`${styles.headerNavLink} ${pathname === path ? styles.active : ''}`}
-            >
-              {name}
-            </Button>
-          ))}
-        </div>
-      </Toolbar>
-    </AppBar>
+          <div className={styles.headerNav}>
+            {navItems.map(({ name, path }) => (
+              <Button
+                key={path}
+                component={Link}
+                href={path}
+                className={`${styles.headerNavLink} ${pathname === path ? styles.active : ''}`}
+              >
+                {name}
+              </Button>
+            ))}
+          </div>
+        </Toolbar>
+      </AppBar>
+      <Sidebar isOpen={sidebarOpen} toggleSidebar={toggleSidebar} />
+    </>
   );
 }
