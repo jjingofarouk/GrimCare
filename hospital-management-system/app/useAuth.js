@@ -38,44 +38,38 @@ export const useAuth = () => {
     }
   };
 
-  const checkAuth = useCallback(async () => {
-    if (authChecked.current) return;
+  const checkAuth = useCallback(() => {
+    if (authChecked.current || typeof window === 'undefined' || !auth) return;
     authChecked.current = true;
 
-    try {
-      const unsubscribe = onAuthStateChanged(auth, async firebaseUser => {
-        if (firebaseUser) {
-          const token = await firebaseUser.getIdToken();
-          setAuthCookie(token);
+    const unsubscribe = onAuthStateChanged(auth, async firebaseUser => {
+      if (firebaseUser) {
+        const token = await firebaseUser.getIdToken();
+        setAuthCookie(token);
 
-          try {
-            const userData = await getCurrentUser(firebaseUser.uid);
-            setUser(userData);
-            const path = getRoleRedirect(userData?.role);
-            setRedirectPath(path);
-            if (path !== window.location.pathname) {
-              router.push(path);
-            }
-          } catch (err) {
-            setError('User data not found. Please register.');
-            setRedirectPath('/auth');
-            router.push('/auth');
+        try {
+          const userData = await getCurrentUser(firebaseUser.uid);
+          setUser(userData);
+
+          const path = getRoleRedirect(userData?.role);
+          setRedirectPath(path);
+          if (window.location.pathname !== path) {
+            router.push(path);
           }
-        } else {
+        } catch (err) {
+          setError('User data not found. Please register.');
           setRedirectPath('/auth');
           router.push('/auth');
         }
-        setLoading(false);
-      });
+      } else {
+        setRedirectPath('/auth');
+        router.push('/auth');
+      }
 
-      return () => unsubscribe();
-    } catch (err) {
-      setError(err.message || 'Authentication failed');
-      setUser(null);
-      setRedirectPath('/auth');
-      router.push('/auth');
       setLoading(false);
-    }
+    });
+
+    return () => unsubscribe();
   }, [router]);
 
   useEffect(() => {
@@ -83,6 +77,7 @@ export const useAuth = () => {
   }, [checkAuth]);
 
   const login = async (email, password) => {
+    if (!auth) throw new Error('Firebase not initialized');
     try {
       setError(null);
       const { user: firebaseUser } = await signInWithEmailAndPassword(auth, email, password);
@@ -91,6 +86,7 @@ export const useAuth = () => {
 
       const userData = await getCurrentUser(firebaseUser.uid);
       setUser(userData);
+
       const path = getRoleRedirect(userData?.role);
       setRedirectPath(path);
       router.push(path);
@@ -104,12 +100,12 @@ export const useAuth = () => {
   };
 
   const register = async (email, password, name, role = 'USER') => {
+    if (!auth) throw new Error('Firebase not initialized');
     try {
       setError(null);
       const { user: firebaseUser } = await createUserWithEmailAndPassword(auth, email, password);
       const token = await firebaseUser.getIdToken();
 
-      // Send data to backend API route to create user in DB
       const res = await fetch('/api/register', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -122,10 +118,11 @@ export const useAuth = () => {
       });
 
       if (!res.ok) throw new Error('User registration failed');
-      const { user: userData } = await res.json();
 
+      const { user: userData } = await res.json();
       setAuthCookie(token);
       setUser(userData);
+
       const path = getRoleRedirect(userData?.role);
       setRedirectPath(path);
       router.push(path);
@@ -139,6 +136,7 @@ export const useAuth = () => {
   };
 
   const logout = async () => {
+    if (!auth) return;
     await signOut(auth);
     clearAuthCookie();
     setUser(null);
