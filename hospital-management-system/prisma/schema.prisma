@@ -33,15 +33,15 @@ model Transaction {
   id            Int       @id @default(autoincrement())
   description   String
   amount        Float
-  category      String // e.g., INCOME, EXPENSE, RECEIVABLE
-  status        String // e.g., PENDING, PAID, OVERDUE
+  category      String
+  status        String
   date          DateTime  @default(now())
-  type          String // e.g., GENERAL_LEDGER, RECEIVABLE, EXPENSE
+  type          String
   costCenterId  Int?
   costCenter    CostCenter? @relation(fields: [costCenterId], references: [id])
   patientId     Int?
   createdAt     DateTime  @default(now())
-  updatedAt     DateTime  @updatedAt
+  updatedAt     DateTime @updatedAt
 }
 
 model Payroll {
@@ -51,15 +51,15 @@ model Payroll {
   salary    Float
   taxes     Float
   benefits  Float
-  period    String // e.g., "2025-05"
-  status    String // e.g., PENDING, PAID
+  period    String
+  status    String
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }
 
 model CostCenter {
   id            Int          @id @default(autoincrement())
-  name          String // e.g., Radiology, Pharmacy
+  name          String
   department    String
   transactions  Transaction[]
   createdAt     DateTime     @default(now())
@@ -73,7 +73,7 @@ model FixedAsset {
   purchaseCost  Float
   depreciation  Float
   currentValue  Float
-  status        String // e.g., ACTIVE, DISPOSED
+  status        String
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt
 }
