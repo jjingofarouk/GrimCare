@@ -3,7 +3,7 @@ import React, { useState, useEffect } from 'react';
 import { Box, Typography, Button } from '@mui/material';
 import { DataGrid } from '@mui/x-data-grid';
 import { getAdmissions } from './adtService';
-import AdmissionCard from './AdmissionCard';
+import AdmissionCard from './AtCard';
 
 export default function AdmissionList({ onSelectAdmission }) {
   const [admissions, setAdmissions] = useState([]);
