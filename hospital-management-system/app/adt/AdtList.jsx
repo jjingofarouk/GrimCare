@@ -1,6 +1,6 @@
 // app/adt/AdmissionList.jsx
 import React, { useState, useEffect } from 'react';
-import { Box, Typography, Alert } from '@mui/material';
+import { Box, Typography, Alert, Button } from '@mui/material';
 import { DataGrid } from '@mui/x-data-grid';
 import { getAdmissions } from './adtService';
 
@@ -12,10 +12,21 @@ export default function AdmissionList({ onSelectAdmission, refresh }) {
     async function fetchAdmissions() {
       try {
         const data = await getAdmissions();
-        setAdmissions(Array.isArray(data) ? data.map(admission => ({
-          ...admission,
-          id: admission.id // Ensure id is set for DataGrid
-        })) : []);
+        const formattedAdmissions = Array.isArray(data)
+          ? data.map(admission => ({
+              id: admission.id,
+              patientName: admission.patient?.user?.name || 'N/A',
+              wardName: admission.ward?.name || 'N/A',
+              admissionDate: admission.admissionDate 
+                ? new Date(admission.admissionDate).toLocaleDateString() 
+                : 'N/A',
+              doctorName: admission.doctor?.user?.name || 'N/A',
+              triagePriority: admission.triagePriority || 'N/A',
+              status: admission.status || 'N/A',
+              rawData: admission // Store raw data for actions
+            }))
+          : [];
+        setAdmissions(formattedAdmissions);
         setError(null);
       } catch (error) {
         console.error('Error fetching admissions:', error);
@@ -27,53 +38,21 @@ export default function AdmissionList({ onSelectAdmission, refresh }) {
 
   const columns = [
     { field: 'id', headerName: 'ID', width: 90 },
-    {
-      field: 'patientName',
-      headerName: 'Patient',
-      width: 150,
-      valueGetter: (params) => params.row?.patient?.user?.name || 'N/A',
-    },
-    {
-      field: 'wardName',
-      headerName: 'Ward',
-      width: 150,
-      valueGetter: (params) => params.row?.ward?.name || 'N/A',
-    },
-    {
-      field: 'admissionDate',
-      headerName: 'Admission Date',
-      width: 150,
-      valueGetter: (params) => params.row?.admissionDate 
-        ? new Date(params.row.admissionDate).toLocaleDateString() 
-        : 'N/A',
-    },
-    {
-      field: 'doctorName',
-      headerName: 'Doctor',
-      width: 150,
-      valueGetter: (params) => params.row?.doctor?.user?.name || 'N/A',
-    },
-    {
-      field: 'triagePriority',
-      headerName: 'Triage Priority',
-      width: 120,
-      valueGetter: (params) => params.row?.triagePriority || 'N/A',
-    },
-    {
-      field: 'status',
-      headerName: 'Status',
-      width: 120,
-      valueGetter: (params) => params.row?.status || 'N/A',
-    },
+    { field: 'patientName', headerName: 'Patient', width: 150 },
+    { field: 'wardName', headerName: 'Ward', width: 150 },
+    { field: 'admissionDate', headerName: 'Admission Date', width: 150 },
+    { field: 'doctorName', headerName: 'Doctor', width: 150 },
+    { field: 'triagePriority', headerName: 'Triage Priority', width: 120 },
+    { field: 'status', headerName: 'Status', width: 120 },
     {
       field: 'actions',
       headerName: 'Actions',
       width: 150,
       renderCell: (params) => (
-        <Button 
-          variant="outlined" 
-          onClick={() => onSelectAdmission(params.row)} 
-          disabled={!params.row}
+        <Button
+          variant="outlined"
+          onClick={() => onSelectAdmission(params.row.rawData)}
+          disabled={!params.row.rawData}
         >
           View
         </Button>
@@ -101,7 +80,7 @@ export default function AdmissionList({ onSelectAdmission, refresh }) {
           rows={admissions}
           columns={columns}
           pageSizeOptions={[5, 10, 20, 50]}
-          disableSelectionOnClick
+          disableRowSelectionOnClick
           initialState={{
             pagination: { paginationModel: { pageSize: 10 } },
           }}
