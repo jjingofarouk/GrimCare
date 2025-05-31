@@ -3,7 +3,7 @@ import React, { useState, useEffect } from 'react';
 import { Box, Typography, Alert, Button } from '@mui/material';
 import { DataGrid } from '@mui/x-data-grid';
 import { getAdmissions } from './adtService';
-import styles from './AdmissionList.module.css';
+import styles from './AdtList.module.css';
 
 export default function AdmissionList({ onSelectAdmission, refresh }) {
   const [admissions, setAdmissions] = useState([]);
