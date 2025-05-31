@@ -1,5 +1,34 @@
-// app/auth/authService.js (if you need to keep it for other functions)
-import { loginUser, registerUser, getCurrentUser } from "../../lib/auth";
 
-// Export only if needed for specific API routes
-export { loginUser, registerUser, getCurrentUser };
+import { API_ROUTES, BASE_URL } from '../api';
+
+export async function login({ email, password }) {
+  const response = await fetch(`${BASE_URL}${API_ROUTES.AUTH}`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({ email, password }),
+  });
+  if (!response.ok) throw new Error('Login failed');
+  const data = await response.json();
+  localStorage.setItem('token', data.token);
+  localStorage.setItem('user', JSON.stringify(data.user));
+  return data;
+}
+
+export async function register({ email, password, name, role }) {
+  const response = await fetch(`${BASE_URL}${API_ROUTES.AUTH}/register`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({ email, password, name, role }),
+  });
+  if (!response.ok) throw new Error('Registration failed');
+  return response.json();
+}
+
+export function logout() {
+  localStorage.removeItem('token');
+  localStorage.removeItem('user');
+}
