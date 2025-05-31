@@ -21,7 +21,6 @@ import {
   ShoppingCartIcon,
   Squares2X2Icon,
   TableCellsIcon,
-  TruckIcon,
   UsersIcon,
   WrenchIcon,
   XCircleIcon,
