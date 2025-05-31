@@ -1,8 +1,8 @@
-// useAuth.js
 'use client';
+
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { getSession, signIn, signOut } from 'next-auth/react';
+import { getUser } from './authUtils';
 
 const useAuth = () => {
   const [user, setUser] = useState(null);
@@ -10,27 +10,23 @@ const useAuth = () => {
   const router = useRouter();
 
   useEffect(() => {
-    const fetchSession = async () => {
-      const session = await getSession();
-      setUser(session?.user || null);
-      setLoading(false);
-    };
-    fetchSession();
+    const userData = getUser();
+    setUser(userData);
+    setLoading(false);
   }, []);
 
   const login = async (credentials) => {
     try {
-      await signIn('credentials', { ...credentials, redirect: false });
-      const session = await getSession();
-      setUser(session?.user || null);
-      router.push('/app');
+      const { user } = await import('./authService').then((m) => m.login(credentials));
+      setUser(user);
+      router.push('/appointment');
     } catch (error) {
       throw new Error('Login failed');
     }
   };
 
   const logout = async () => {
-    await signOut({ redirect: false });
+    await import('./authService').then((m) => m.logout());
     setUser(null);
     router.push('/auth/login');
   };
