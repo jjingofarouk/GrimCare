@@ -1,4 +1,3 @@
-// app/auth/LoginForm.jsx
 'use client';
 
 import React, { useState } from 'react';
@@ -52,9 +51,10 @@ export default function LoginForm() {
           />
         </div>
         {error && <p className={styles.formError}>{error}</p>}
-        <button type="submit" className={styles.formButton}>
-          Login
-        </button>
+        <button type="submit" className={styles.formButton}>Login</button>
+        <p className={styles.registerLink}>
+          Don’t have an account? <Link href="/auth/register">Register</Link>
+        </p>
       </form>
     </div>
   );
