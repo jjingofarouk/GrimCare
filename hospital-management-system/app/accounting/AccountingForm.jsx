@@ -3,6 +3,16 @@
 import React, { useState } from 'react';
 import { createTransaction } from './accountingService';
 import styles from './AccountingForm.module.css';
+import {
+  TextField,
+  Select,
+  MenuItem,
+  Button,
+  FormControl,
+  InputLabel,
+  Box,
+  Typography,
+} from '@mui/material';
 
 export default function AccountingForm({ onSubmit }) {
   const [formData, setFormData] = useState({
@@ -58,112 +68,141 @@ export default function AccountingForm({ onSubmit }) {
   };
 
   return (
-    <form onSubmit={handleSubmit} className={styles.form}>
-      <div className={styles.field}>
-        <label htmlFor="description" className={styles.label}>Description</label>
-        <input
-          type="text"
+    <Box component="form" onSubmit={handleSubmit} className={styles.form}>
+      <Typography variant="h6" className={styles.title}>
+        Add New Transaction
+      </Typography>
+      <FormControl className={styles.field}>
+        <TextField
           id="description"
           name="description"
+          label="Description"
           value={formData.description}
           onChange={handleChange}
-          className={styles.input}
           required
+          fullWidth
+          variant="outlined"
+          className={styles.input}
         />
-      </div>
-      <div className={styles.field}>
-        <label htmlFor="amount" className={styles.label}>Amount</label>
-        <input
-          type="number"
+      </FormControl>
+      <FormControl className={styles.field}>
+        <TextField
           id="amount"
           name="amount"
+          label="Amount"
+          type="number"
           value={formData.amount}
           onChange={handleChange}
-          className={styles.input}
-          step="0.01"
           required
+          fullWidth
+          variant="outlined"
+          inputProps={{ step: '0.01' }}
+          className={styles.input}
         />
-      </div>
-      <div className={styles.field}>
-        <label htmlFor="category" className={styles.label}>Category</label>
-        <select
+      </FormControl>
+      <FormControl className={styles.field}>
+        <InputLabel id="category-label">Category</InputLabel>
+        <Select
+          labelId="category-label"
           id="category"
           name="category"
           value={formData.category}
           onChange={handleChange}
-          className={styles.input}
           required
+          fullWidth
+          label="Category"
+          className={styles.input}
         >
-          <option value="">Select Category</option>
-          <option value="INCOME">Income</option>
-          <option value="EXPENSE">Expense</option>
-          <option value="RECEIVABLE">Receivable</option>
-        </select>
-      </div>
-      <div className={styles.field}>
-        <label htmlFor="status" className={styles.label}>Status</label>
-        <select
+          <MenuItem value="">Select Category</MenuItem>
+          <MenuItem value="INCOME">Income</MenuItem>
+          <MenuItem value="EXPENSE">Expense</MenuItem>
+          <MenuItem value="RECEIVABLE">Receivable</MenuItem>
+        </Select>
+      </FormControl>
+      <FormControl className={styles.field}>
+        <InputLabel id="status-label">Status</InputLabel>
+        <Select
+          labelId="status-label"
           id="status"
           name="status"
           value={formData.status}
           onChange={handleChange}
-          className={styles.input}
           required
+          fullWidth
+          label="Status"
+          className={styles.input}
         >
-          <option value="PENDING">Pending</option>
-          <option value="PAID">Paid</option>
-          <option value="OVERDUE">Overdue</option>
-        </select>
-      </div>
-      <div className={styles.field}>
-        <label htmlFor="type" className={styles.label}>Type</label>
-        <select
+          <MenuItem value="PENDING">Pending</MenuItem>
+          <MenuItem value="PAID">Paid</MenuItem>
+          <MenuItem value="OVERDUE">Overdue</MenuItem>
+        </Select>
+      </FormControl>
+      <FormControl className={styles.field}>
+        <InputLabel id="type-label">Type</InputLabel>
+        <Select
+          labelId="type-label"
           id="type"
           name="type"
           value={formData.type}
           onChange={handleChange}
-          className={styles.input}
           required
+          fullWidth
+          label="Type"
+          className={styles.input}
         >
-          <option value="GENERAL_LEDGER">General Ledger</option>
-          <option value="RECEIVABLE">Receivable</option>
-          <option value="EXPENSE">Expense</option>
-        </select>
-      </div>
-      <div className={styles.field}>
-        <label htmlFor="date" className={styles.label}>Date</label>
-        <input
-          type="date"
+          <MenuItem value="GENERAL_LEDGER">General Ledger</MenuItem>
+          <MenuItem value="RECEIVABLE">Receivable</MenuItem>
+          <MenuItem value="EXPENSE">Expense</MenuItem>
+        </Select>
+      </FormControl>
+      <FormControl className={styles.field}>
+        <TextField
           id="date"
           name="date"
+          label="Date"
+          type="date"
           value={formData.date}
           onChange={handleChange}
+          fullWidth
+          variant="outlined"
+          InputLabelProps={{ shrink: true }}
           className={styles.input}
         />
-      </div>
-      <div className={styles.field}>
-        <label htmlFor="costCenterId" className={styles.label}>Cost Center ID (Optional)</label>
-        <input
-          type="number"
+      </FormControl>
+      <FormControl className={styles.field}>
+        <TextField
           id="costCenterId"
           name="costCenterId"
+          label="Cost Center ID (Optional)"
+          type="number"
           value={formData.costCenterId}
           onChange={handleChange}
+          fullWidth
+          variant="outlined"
           className={styles.input}
         />
-      </div>
-      <div className={styles.field}>
-        <label htmlFor="patientId" className={styles.label}>Patient ID (Optional)</label>
-        <input
-          type="number"
+      </FormControl>
+      <FormControl className={styles.field}>
+        <TextField
           id="patientId"
           name="patientId"
+          label="Patient ID (Optional)"
+          type="number"
           value={formData.patientId}
           onChange={handleChange}
+          fullWidth
+          variant="outlined"
           className={styles.input}
         />
-      </div>
-      <button type="submit" className={styles.submit}>Add Transaction</button>
-    </form>
+      </FormControl>
+      <Button
+        type="submit"
+        variant="contained"
+        className={styles.submit}
+        fullWidth
+      >
+        Add Transaction
+      </Button>
+    </Box>
   );
 }
