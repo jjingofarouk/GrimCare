@@ -1,9 +1,10 @@
-'use client';
+"use client";
 
 import React, { useState } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { AppBar, Toolbar, Typography, Button } from '@mui/material';
+import { AppBar, Toolbar, Typography, Button, IconButton } from '@mui/material';
+import { MenuIcon } from '@heroicons/react/24/outline';
 import Sidebar from './Sidebar';
 import useAuth from './useAuth';
 import styles from './Header.module.css';
@@ -24,13 +25,26 @@ export default function Header() {
         { name: 'Profile', path: '/profile' },
         { name: 'Logout', path: '#', onClick: handleLogout },
       ]
-    : [];
+    : [
+        { name: 'Home', path: '/' },
+        { name: 'Login', path: '/auth/login' },
+        { name: 'Register', path: '/auth/register' },
+      ];
 
   return (
     <>
       <AppBar position="fixed" className={styles.header}>
         <Toolbar>
-          <div className={styles.headerLogo} onClick={toggleSidebar}>
+          <IconButton
+            edge="start"
+            color="inherit"
+            aria-label="menu"
+            onClick={toggleSidebar}
+            className={styles.menuButton}
+          >
+            <MenuIcon className={styles.menuIcon} />
+          </IconButton>
+          <div className={styles.headerLogo}>
             <div className={styles.headerLogoContainer}>
               <img src="/logo.png" alt="HMS Logo" className={styles.headerLogoImage} />
             </div>
