@@ -1,29 +1,50 @@
-import React from 'react';
-import { useRouter } from 'next/navigation';
-
-export const isAuthenticated = () => {
-  return !!localStorage.getItem('token');
-};
-
-export const getUser = () => {
-  const user = localStorage.getItem('user');
-  return user ? JSON.parse(user) : null;
-};
-
-export const requireAuth = (WrappedComponent) => {
-  const AuthenticatedComponent = (props) => {
-    const router = useRouter();
-    
-    if (!isAuthenticated()) {
-      router.push('/auth');
-      return null;
-    }
-    
-    return <WrappedComponent {...props} />;
+export const hasPermission = (role, feature) => {
+  const rolePermissions = {
+    PATIENT: ['Dashboard', 'Appointments', 'Medical Records', 'Billing'],
+    DOCTOR: ['Dashboard', 'Patients', 'Appointments', 'Clinical', 'Operation Theatre'],
+    NURSE: ['Dashboard', 'Patients', 'Appointments', 'Nursing', 'Maternity'],
+    LAB_TECHNICIAN: ['Dashboard', 'Laboratory', 'Radiology'],
+    STAFF: ['Dashboard', 'Helpdesk', 'Inventory', 'Procurement'],
+    ADMIN: [
+      'Dashboard',
+      'Patients',
+      'Appointments',
+      'Accounting',
+      'ADT',
+      'Billing',
+      'Claim Management',
+      'Clinical',
+      'Clinical Settings',
+      'CSSD',
+      'Dispensary',
+      'Doctor',
+      'Dynamic Report',
+      'Emergency',
+      'Fixed Assets',
+      'Helpdesk',
+      'Incentive',
+      'Inventory',
+      'Laboratory',
+      'Maternity',
+      'Medical Records',
+      'Marketing Referral',
+      'NHIF',
+      'Nursing',
+      'Operation Theatre',
+      'Pharmacy',
+      'Procurement',
+      'Queue Management',
+      'Radiology',
+      'Reports',
+      'Settings',
+      'Social Service',
+      'Substore',
+      'System Admin',
+      'Utilities',
+      'Vaccination',
+      'Verification',
+    ],
   };
 
-  // Set a display name for the anonymous component
-  AuthenticatedComponent.displayName = `RequireAuth(${WrappedComponent.displayName || WrappedComponent.name || 'Component'})`;
-
-  return AuthenticatedComponent;
+  return rolePermissions[role]?.includes(feature) || false;
 };
