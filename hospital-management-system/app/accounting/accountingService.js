@@ -1,5 +1,4 @@
 import axios from 'axios';
-
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000';
 
 export async function getTransactions() {
@@ -12,17 +11,22 @@ export async function createTransaction(data) {
   return response.data;
 }
 
-export async function getTransaction(id) {
-  const response = await axios.get(`${API_URL}/api/accounting/${id}`);
+export async function getPayrolls() {
+  const response = await axios.get(`${API_URL}/api/accounting?type=payroll`);
   return response.data;
 }
 
-export async function updateTransaction(id, data) {
-  const response = await axios.put(`${API_URL}/api/accounting/${id}`, data);
+export async function createPayroll(data) {
+  const response = await axios.post(`${API_URL}/api/accounting?type=payroll`, data);
   return response.data;
 }
 
-export async function deleteTransaction(id) {
-  const response = await axios.delete(`${API_URL}/api/accounting/${id}`);
+export async function getAssets() {
+  const response = await axios.get(`${API_URL}/api/accounting?type=asset`);
+  return response.data;
+}
+
+export async function createAsset(data) {
+  const response = await axios.post(`${API_URL}/api/accounting?type=asset`, data);
   return response.data;
 }
