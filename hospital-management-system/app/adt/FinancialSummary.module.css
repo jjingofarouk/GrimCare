@@ -1,0 +1,36 @@
+/* app/adt/FinancialSummary.module.css */
+.container {
+  max-width: 100%;
+  padding: 0 16px;
+}
+
+.title {
+  font-size: 1.25rem;
+  font-weight: 600;
+  margin-bottom: 1rem;
+  color: #1a3c34;
+}
+
+.alert {
+  margin-bottom: 1rem;
+  border-radius: 8px;
+}
+
+.chartWrapper {
+  max-width: 600px;
+  margin: 0 auto;
+}
+
+@media (max-width: 600px) {
+  .container {
+    padding: 0 8px;
+  }
+
+  .title {
+    font-size: 1rem;
+  }
+
+  .chartWrapper {
+    max-width: 400px;
+  }
+}
