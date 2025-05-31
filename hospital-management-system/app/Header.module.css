@@ -21,9 +21,9 @@
 .logoContainer {
   display: flex;
   align-items: center;
-  gap: 0.75rem;
+  gap: 1rem;
   cursor: pointer;
-  padding: 0.5rem 0.75rem;
+  padding: 0.75rem 1rem;
   border-radius: 8px;
   transition: all 0.2s ease;
   min-width: 0;
@@ -35,16 +35,16 @@
 }
 
 .logoImage {
-  width: 32px;
-  height: 32px;
-  border-radius: 6px;
+  width: 40px;
+  height: 40px;
+  border-radius: 8px;
   object-fit: contain;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
   flex-shrink: 0;
 }
 
 .headerTitle {
-  font-size: 1.125rem !important;
+  font-size: 1.375rem !important;
   font-weight: 700 !important;
   color: #1e40af !important;
   letter-spacing: -0.025em;
@@ -57,17 +57,17 @@
 .headerNav {
   display: flex;
   align-items: center;
-  gap: 0.5rem;
+  gap: 0.75rem;
   margin-left: auto;
-  margin-right: 1rem;
+  margin-right: 1.5rem;
 }
 
 .headerNavLink {
   color: #64748b !important;
   font-weight: 500 !important;
-  font-size: 0.875rem !important;
-  padding: 0.5rem 1rem !important;
-  border-radius: 6px !important;
+  font-size: 0.9375rem !important;
+  padding: 0.625rem 1.25rem !important;
+  border-radius: 8px !important;
   text-transform: none !important;
   transition: all 0.2s ease !important;
   white-space: nowrap;
@@ -116,13 +116,13 @@
 }
 
 .userName {
-  font-size: 0.875rem !important;
+  font-size: 0.9375rem !important;
   font-weight: 500 !important;
   color: #374151 !important;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  max-width: 150px;
+  max-width: 180px;
   margin: 0 !important;
 }
 
@@ -140,11 +140,11 @@
 }
 
 .userAvatar {
-  width: 32px !important;
-  height: 32px !important;
+  width: 36px !important;
+  height: 36px !important;
   background: linear-to-br from-blue-500 to-blue-600 !important;
   color: #ffffff !important;
-  font-size: 0.875rem !important;
+  font-size: 0.9375rem !important;
   font-weight: 600 !important;
   box-shadow: 0 2px 4px rgba(59, 130, 246, 0.2);
 }
