@@ -30,44 +30,44 @@ export default function AdmissionList({ onSelectAdmission, refresh }) {
       field: 'patientName',
       headerName: 'Patient',
       width: 150,
-      valueGetter: (params) => params.row?.patient?.user?.name || 'N/A',
+      valueGetter: ({ row }) => row?.patient?.user?.name || 'N/A',
     },
     {
       field: 'wardName',
       headerName: 'Ward',
       width: 150,
-      valueGetter: (params) => params.row?.ward?.name || 'N/A',
+      valueGetter: ({ row }) => row?.ward?.name || 'N/A',
     },
     {
       field: 'admissionDate',
       headerName: 'Admission Date',
       width: 150,
-      valueGetter: (params) => params.row?.admissionDate ? new Date(params.row.admissionDate).toLocaleDateString() : 'N/A',
+      valueGetter: ({ row }) => (row?.admissionDate ? new Date(row.admissionDate).toLocaleDateString() : 'N/A'),
     },
     {
       field: 'doctorName',
       headerName: 'Doctor',
       width: 150,
-      valueGetter: (params) => params.row?.doctor?.user?.name || 'N/A',
+      valueGetter: ({ row }) => row?.doctor?.user?.name || 'N/A',
     },
     {
       field: 'triagePriority',
       headerName: 'Triage Priority',
       width: 120,
-      valueGetter: (params) => params.row?.triagePriority || 'N/A',
+      valueGetter: ({ row }) => row?.triagePriority || 'N/A',
     },
     {
       field: 'status',
       headerName: 'Status',
       width: 120,
-      valueGetter: (params) => params.row?.status || 'N/A',
+      valueGetter: ({ row }) => row?.status || 'N/A',
     },
     {
       field: 'actions',
       headerName: 'Actions',
       width: 150,
-      renderCell: (params) => (
-        <Button variant="outlined" onClick={() => onSelectAdmission(params.row)} disabled={!params.row}>
+      renderCell: ({ row }) => (
+        <Button variant="outlined" onClick={() => onSelectAdmission(row)} disabled={!row}>
           View
         </Button>
       ),
@@ -103,8 +103,7 @@ export default function AdmissionList({ onSelectAdmission, refresh }) {
           <DataGrid
             rows={admissions}
             columns={columns}
-            pageSize={5}
-            rowsPerPageOptions={[5, 10, 20]}
+            pageSizeOptions={[5, 10, 20]}
             disableSelectionOnClick
           />
         </Box>
