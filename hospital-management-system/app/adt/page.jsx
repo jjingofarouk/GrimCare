@@ -2,8 +2,8 @@
 
 import React, { useState, useEffect } from 'react';
 import { Container, Box, Typography, Button } from '@mui/material';
-import AdmissionForm from './AdtForm';
-import AdmissionList from './AdtList';
+import AdmissionForm from './AdmissionForm';
+import AdmissionList from './AdmissionList';
 import { getPatients, getDoctors, getWards } from './adtService';
 
 export default function AdtPage() {
@@ -36,11 +36,22 @@ export default function AdtPage() {
     setSelectedAdmission(null);
   };
 
+  const handleClearSelection = () => {
+    setSelectedAdmission(null);
+  };
+
   return (
     <Container maxWidth="lg" sx={{ py: 4 }}>
-      <Typography variant="h4" gutterBottom>
-        Admissions, Discharge, and Triage (ADT)
-      </Typography>
+      <Box display="flex" justifyContent="space-between" alignItems="center" mb={2}>
+        <Typography variant="h4">
+          Admissions, Discharge, and Triage (ADT)
+        </Typography>
+        {selectedAdmission && (
+          <Button variant="outlined" color="secondary" onClick={handleClearSelection}>
+            Clear Selection
+          </Button>
+        )}
+      </Box>
       <AdmissionForm
         admission={selectedAdmission}
         onSubmit={handleFormSubmit}
