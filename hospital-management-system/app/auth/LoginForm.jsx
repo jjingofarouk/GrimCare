@@ -1,7 +1,8 @@
-'use client';
+"use client";
 
 import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
+import Link from 'next/link'; // Add this import
 import styles from './LoginForm.module.css';
 import { login } from './authService';
 
