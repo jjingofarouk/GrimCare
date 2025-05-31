@@ -1,116 +1,99 @@
-// app/adt/FinancialSummary.jsx
+// app/adt/TriageDashboard.jsx
+"use client";
+
 import React, { useState, useEffect } from 'react';
 import { Box, Typography, Alert } from '@mui/material';
-import { getAdmissions } from './adtService'; // Note: We'll need to add transaction and payroll endpoints
-import styles from './FinancialSummary.module.css';
+import { Pie } from 'react-chartjs-2';
+import { Chart as ChartJS, ArcElement, Tooltip, Legend } from 'chart.js';
+import { getAdmissions } from './adtService';
+import styles from './TriageDashboard.module.css';
 
-export default function FinancialSummary() {
-  const [financialData, setFinancialData] = useState({
-    transactions: { REVENUE: 0, EXPENSE: 0, REFUND: 0 },
-    payrolls: { PAID: 0, PENDING: 0 },
-  });
+// Register Chart.js components for pie chart
+ChartJS.register(ArcElement, Tooltip, Legend);
+
+export default function TriageDashboard() {
+  const [triageData, setTriageData] = useState({ LOW: 0, MEDIUM: 0, HIGH: 0 });
   const [error, setError] = useState(null);
 
   useEffect(() => {
-    async function fetchFinancialData() {
+    async function fetchAdmissions() {
       try {
-        // Placeholder: You'll need to implement actual API endpoints
-        const admissions = await getAdmissions(); // Replace with actual transaction/payroll endpoints
-        // Mock data processing (replace with real API data)
-        const mockTransactions = {
-          REVENUE: admissions.length * 100000, // Example calculation
-          EXPENSE: admissions.length * 50000,
-          REFUND: admissions.length * 10000,
-        };
-        const mockPayrolls = {
-          PAID: admissions.length * 200000,
-          PENDING: admissions.length * 50000,
-        };
-        setFinancialData({
-          transactions: mockTransactions,
-          payrolls: mockPayrolls,
-        });
+        const data = await getAdmissions();
+        const triageCounts = data.reduce((acc, admission) => {
+          const priority = admission.triagePriority || 'N/A';
+          if (['LOW', 'MEDIUM', 'HIGH'].includes(priority)) {
+            acc[priority] = (acc[priority] || 0) + 1;
+          }
+          return acc;
+        }, { LOW: 0, MEDIUM: 0, HIGH: 0 });
+        setTriageData(triageCounts);
         setError(null);
       } catch (error) {
-        console.error('Error fetching financial data:', error);
+        console.error('Error fetching triage data:', error);
         setError(error.response?.data?.details || error.message);
       }
     }
-    fetchFinancialData();
+    fetchAdmissions();
   }, []);
 
   const chartData = {
-    labels: ['Revenue', 'Expense', 'Refund'],
-    datasets: [{
-      label: 'Transaction Amounts (UGX)',
-      data: [
-        financialData.transactions.REVENUE,
-        financialData.transactions.EXPENSE,
-        financialData.transactions.REFUND,
-      ],
-      backgroundColor: ['#059669', '#dc2626', '#d97706'],
-    }],
+    labels: ['Low', 'Medium', 'High'],
+    datasets: [
+      {
+        label: 'Triage Priority Distribution',
+        data: [triageData.LOW, triageData.MEDIUM, triageData.HIGH],
+        backgroundColor: ['#059669', '#d97706', '#dc2626'],
+        borderColor: ['#047857', '#b45309', '#b91c1c'],
+        borderWidth: 1,
+      },
+    ],
   };
+
+  const chartOptions = {
+    responsive: true,
+    maintainAspectRatio: false,
+    plugins: {
+      legend: {
+        position: 'top',
+        labels: {
+          color: '#1a3c34',
+          font: { size: 14 },
+        },
+      },
+      tooltip: {
+        callbacks: {
+          label: (context) => `${context.label}: ${context.parsed}`,
+        },
+      },
+      title: {
+        display: true,
+        text: 'Triage Priority Distribution',
+        color: '#1a3c34',
+        font: { size: 16, weight: 'bold' },
+      },
+    },
+  };
+
+  const total = triageData.LOW + triageData.MEDIUM + triageData.HIGH;
 
   return (
     <Box className={styles.container}>
       <Typography variant="h6" className={styles.title}>
-        Financial Summary
+        Triage Dashboard
       </Typography>
       {error && (
         <Alert severity="error" className={styles.alert}>
-          Failed to load financial data: {error}
+          Failed to load triage data: {error}
         </Alert>
       )}
-      <Box className={styles.chartWrapper}>
-        ```chartjs
-        {
-          type: 'bar',
-          data: {
-            labels: ['Revenue', 'Expense', 'Refund'],
-            datasets: [{
-              label: 'Transaction Amounts (UGX)',
-              data: [
-                ${financialData.transactions.REVENUE},
-                ${financialData.transactions.EXPENSE},
-                ${financialData.transactions.REFUND}
-              ],
-              backgroundColor: ['#059669', '#dc2626', '#d97706'],
-              borderColor: ['#047857', '#b91c1c', '#b45309'],
-              borderWidth: 1
-            }]
-          },
-          options: {
-            responsive: true,
-            plugins: {
-              legend: {
-                position: 'top',
-                labels: {
-                  color: '#1a3c34'
-                }
-              },
-              title: {
-                display: true,
-                text: 'Transaction Summary',
-                color: '#1a3c34'
-              }
-            },
-            scales: {
-              y: {
-                beginAtZero: true,
-                ticks: {
-                  color: '#1a3c34'
-                }
-              },
-              x: {
-                ticks: {
-                  color: '#1a3c34'
-                }
-              }
-            }
-          }
-        }
-        ); }
-        
-        
-        
+      {total === 0 && !error && (
+        <Alert severity="info" className={styles.alert}>
+          No triage data available.
+        </Alert>
+      )}
+      <Box className={styles.chartContainer}>
+        <Pie data={chartData} options={chartOptions} />
+      </Box>
+    </Box>
+  );
+}
