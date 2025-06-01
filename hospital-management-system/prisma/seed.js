@@ -12,8 +12,8 @@ async function resetDatabase() {
     await prisma.fixedAsset.deleteMany();
     await prisma.payroll.deleteMany();
     await prisma.transaction.deleteMany();
-    await prisma.admission.deleteMany();
     await prisma.discharge.deleteMany();
+    await prisma.admission.deleteMany();
     await prisma.patient.deleteMany();
     await prisma.doctor.deleteMany();
     await prisma.ward.deleteMany();
@@ -30,20 +30,81 @@ async function seedDatabase() {
   try {
     const hashedPassword = await bcrypt.hash('password123', 10);
 
+    const doctorNames = [
+      'Abaho Abbott', 'Abamukama Robinah', 'Abaasa Michael', 'Aber Elizabeth',
+      'Aceng Princess Priscilla', 'Agona Ambrose', 'Ahimbisibwe Gideon',
+      'Ainembabazi Rachael', 'Ainomugisha Barbra', 'Akampa Joanita',
+      'Arinaitwe Edward', 'Ayieko Allan Mwesigwa', 'Babirye Sheba Balisanyuka',
+      'Bukomeko Charles', 'Daniel Mugabe', 'Fred Dratia', 'Ishimwe Mark',
+      'Jjingo Farouk', 'Jjuuko Ismail Nakibinge', 'Joshua Opio Ekwamu',
+      'Kabagenyi Oliyer Abwooli', 'Kakande Regan', 'Kakembo Jovan',
+      'Kalyango Joshua', 'Kamusime Crescent', 'Kasagga Ashraf', 'Katamba Godfrey',
+      'Kayondo Brian Simon', 'Kayondo Rabah', 'Kemigabo Mellon',
+      'Kiggundu Joseph', 'Kirega Ivan', 'Kirya Joseph', 'Kisitu Joseph',
+      'Kitimbo Sawuya', 'Kiweewa Raymond', 'Kiwudhu Jonathan', 'Kuteesakwe David',
+      'Labalpiny Joseph', 'Lajja Jesse', 'Letaru Cynthia', 'Lubega Frank',
+      'Lubega Jorums Jacob', 'Lulangwa Marvin Mark', 'Lusiba Andrew Kelvin',
+      'Lutaaya Elvis', 'Makumbi Musa', 'Maraka Mark Marvin',
+      'Masudio Caroline Corine', 'Mayega Esau', 'Mugabe Luke', 'Mugaga Abubakar',
+      'Mukonyezi Julius', 'Murungi Daniel', 'Murungi John',
+      'Muwaya Emmanuel Joshua', 'Muwugumya Sifuloza', 'Mwebe Timothy',
+      'Nagaba Collins', 'Nalwoga Esther', 'Namale Blessed Shadia',
+      'Nambasa Betty', 'Namugerwa Mariam', 'Nanyanzi Matildah Rebecca',
+      'Nassuna Kevin', 'Ndagano Isaac', 'Ngobi Treva', 'Niwagaba Danson',
+      'Niyigena Landry Ildefonse', 'Nomugisha Penelope', 'Ntaate Jonathan Cyrus',
+      'Nuwemwiine Isaac', 'Nyinobugaiga Habibah', 'Nzayisenga Vincent',
+      'Obedgiu Benjamin Luga', 'Odem Vincent', 'Okello John Emmanuel',
+      'Okia Charles Simon', 'Okongel Ruth Peace', 'Oriono Felix', 'Oyala Nathan',
+      'Singba Grace Zindo', 'Ssenyonga Edgar Regan', 'Sseruwano Fredrick',
+      'Sserwanja Noah', 'Syodo Collins', 'Tugaine Anslem', 'Turyagyenda Joel',
+      'Twekwatsemukama Hillary', 'Wafula Hudson', 'Wandukwa Joshua',
+      'Wanzunula Gerald', 'Yoramu Shedrack Kissa',
+      'Nalubega Esther', 'Mukasa Simon', 'Namugga Ruth',
+      'Kyeyune Peter', 'Asiimwe Monica'
+    ];
+
+    const patientNames = [
+      'Akello Grace', 'Mugisha Brian', 'Auma Sharon', 'Okello Peter',
+      'Kato Michael', 'Babirye Joan', 'Nandala Paul', 'Nabirye Faith',
+      'Wamala Simon', 'Adoch Patricia', 'Tumwine Daniel', 'Nansubuga Rebecca',
+      'Ayebare Kevin', 'Opio Samuel', 'Namutebi Stella', 'Mwesigwa Ronald',
+      'Apio Judith', 'Mukama David', 'Namanya Esther', 'Baluku Martin',
+      'Atim Carol', 'Kakande James', 'Achieng Sarah', 'Kaggwa Joshua',
+      'Kirabo Hope', 'Komakech Joseph', 'Namukasa Lilian', 'Oketcho Allan',
+      'Nanyonga Juliet', 'Isabirye Edgar', 'Acio Brenda', 'Kiiza Emmanuel',
+      'Nakato Irene', 'Obua Denis', 'Nabukeera Angela', 'Tumuhairwe Clare',
+      'Otim Isaac', 'Namirembe Rose', 'Musoke Alex', 'Aciro Mary',
+      'Kiggundu Ben', 'Namwanje Ruth', 'Okumu Vincent', 'Kabanda Fred',
+      'Nabatanzi Doreen', 'Mwebesa Joshua', 'Anyango Linda', 'Lubega Ronald',
+      'Nyangoma Agnes', 'Kibuuka Stephen', 'Laker Susan', 'Kagimu Mark',
+      'Abalo Monica', 'Nakyambadde Joan', 'Odong Samuel', 'Nantume Allen',
+      'Byaruhanga Collins', 'Ajok Milly', 'Ssali Patrick', 'Atuhaire Sharon',
+      'Ocen Robert', 'Namuddu Prossy', 'Baguma Timothy', 'Ajwang Grace',
+      'Kakooza Ivan', 'Nakibinge Sarah', 'Olara Benjamin', 'Kanzira Fiona',
+      'Okiring Julius', 'Nambalirwa Carol', 'Waiswa Henry', 'Birungi Patience',
+      'Oyella Martha', 'Namwanje Shakira', 'Ndibwami Rogers', 'Akech Winnie',
+      'Lubwama Martin', 'Namazzi Susan', 'Ojara Jimmy', 'Nabaggala Brenda',
+      'Kamba Charles', 'Anyait Lydia', 'Mugalasi Peter', 'Alupo Diana',
+      'Nambogo Immaculate', 'Ogwang Patrick', 'Mbabazi Carol', 'Nankya Agnes',
+      'Ejang Nelson', 'Kamoga Yusuf', 'Namuli Edith', 'Ochola Benard',
+      'Nakiboneka Hadijah', 'Ouma Joseph', 'Nassozi Brenda', 'Mukasa Collins',
+      'Akello Brenda', 'Sekabira Isaac', 'Namyalo Peace', 'Ojok Emmanuel'
+    ];
+
     // Users
     const users = [
-      ...Array.from({ length: 100 }, (_, i) => ({
-        email: `patient${i + 1}@example.com`,
-        name: `Patient ${i + 1}`,
+      ...patientNames.map((name, index) => ({
+        email: `patient${index + 1}@example.com`,
+        name,
         role: 'PATIENT',
       })),
-      ...Array.from({ length: 50 }, (_, i) => ({
-        email: `doctor${i + 1}@example.com`,
-        name: `Dr. ${i + 1}`,
+      ...doctorNames.map((name, index) => ({
+        email: `doctor${index + 1}@example.com`,
+        name,
         role: 'DOCTOR',
       })),
-      { email: 'nurse1@example.com', name: 'Nurse Jane', role: 'NURSE' },
-      { email: 'admin1@example.com', name: 'Admin James', role: 'ADMIN' },
+      { email: 'nurse1@example.com', name: 'Nansamba Jane', role: 'NURSE' },
+      { email: 'admin1@example.com', name: 'Okello James', role: 'ADMIN' },
     ];
 
     const createdUsers = await prisma.$transaction(
@@ -110,11 +171,11 @@ async function seedDatabase() {
 
     // Wards
     const wards = [
-      { name: 'Medical Ward', wardNumber: 'W1001', totalBeds: 30, department: 'General Medicine', location: 'Building A', nurseInCharge: 'Nurse Jane' },
-      { name: 'Surgical Ward', wardNumber: 'W1002', totalBeds: 25, department: 'Surgery', location: 'Building B', nurseInCharge: 'Nurse Jane' },
-      { name: 'Pediatric Ward', wardNumber: 'W1003', totalBeds: 20, department: 'Pediatrics', location: 'Building C', nurseInCharge: 'Nurse Jane' },
-      { name: 'Maternity Ward', wardNumber: 'W1004', totalBeds: 15, department: 'Obstetrics', location: 'Building D', nurseInCharge: 'Nurse Jane' },
-      { name: 'ICU', wardNumber: 'W1005', totalBeds: 10, department: 'Critical Care', location: 'Building E', nurseInCharge: 'Nurse Jane' },
+      { name: 'Medical Ward', wardNumber: 'W1001', totalBeds: 30, department: 'General Medicine', location: 'Building A', nurseInCharge: 'Nansamba Jane' },
+      { name: 'Surgical Ward', wardNumber: 'W1002', totalBeds: 25, department: 'Surgery', location: 'Building B', nurseInCharge: 'Nansamba Jane' },
+      { name: 'Pediatric Ward', wardNumber: 'W1003', totalBeds: 20, department: 'Pediatrics', location: 'Building C', nurseInCharge: 'Nansamba Jane' },
+      { name: 'Maternity Ward', wardNumber: 'W1004', totalBeds: 15, department: 'Obstetrics', location: 'Building D', nurseInCharge: 'Nansamba Jane' },
+      { name: 'ICU', wardNumber: 'W1005', totalBeds: 10, department: 'Critical Care', location: 'Building E', nurseInCharge: 'Nansamba Jane' },
     ];
 
     const createdWards = await prisma.$transaction(
