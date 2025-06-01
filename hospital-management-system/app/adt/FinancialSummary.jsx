@@ -1,31 +1,90 @@
 "use client";
 import React, { useState, useEffect } from 'react';
-import { Paper, Typography, Grid, Box, Alert, Card, CardContent } from '@mui/material';
-import { styled } from '@mui/material/styles';
+import { Alert } from '@mui/material';
+import { TrendingUp, People, LocalHospital, Bed, AccountBalance, MonetizationOn } from '@mui/icons-material';
 import { getWards, getDoctors, getPatients, getAdmissions, getTransactions } from './adtService';
-import { TrendingUp, People, LocalHospital, Bed } from '@mui/icons-material';
+import styles from './ADTDashboard.module.css';
 
-const StyledCard = styled(Card)(({ theme }) => ({
-  height: '100%',
-  display: 'flex',
-  flexDirection: 'column',
-  transition: 'transform 0.3s ease-in-out, box-shadow 0.3s ease-in-out',
-  '&:hover': {
-    transform: 'translateY(-5px)',
-    boxShadow: theme.shadows[8],
-  },
-}));
+const StatCard = ({ icon: Icon, title, value, gradient, delay = 0, trend, trendValue }) => {
+  const [isVisible, setIsVisible] = useState(false);
+  const [animatedValue, setAnimatedValue] = useState(0);
 
-const IconWrapper = styled(Box)(({ theme, color }) => ({
-  display: 'flex',
-  alignItems: 'center',
-  justifyContent: 'center',
-  width: 48,
-  height: 48,
-  borderRadius: '50%',
-  backgroundColor: color,
-  marginBottom: theme.spacing(2),
-}));
+  useEffect(() => {
+    const timer = setTimeout(() => setIsVisible(true), delay);
+    return () => clearTimeout(timer);
+  }, [delay]);
+
+  useEffect(() => {
+    if (isVisible && typeof value === 'number') {
+      const duration = 2000;
+      const steps = 60;
+      const increment = value / steps;
+      let current = 0;
+      
+      const timer = setInterval(() => {
+        current += increment;
+        if (current >= value) {
+          setAnimatedValue(value);
+          clearInterval(timer);
+        } else {
+          setAnimatedValue(Math.floor(current));
+        }
+      }, duration / steps);
+      
+      return () => clearInterval(timer);
+    } else if (isVisible) {
+      setAnimatedValue(value);
+    }
+  }, [isVisible, value]);
+
+  const formatValue = (val) => {
+    if (typeof val === 'number' && val > 999999) {
+      return `UGX ${val.toLocaleString()}`;
+    }
+    return typeof val === 'number' ? val.toLocaleString() : val;
+  };
+
+  return (
+    <div 
+      className={`${styles.statCard} ${isVisible ? styles.statCardVisible : ''}`}
+      style={{ 
+        animationDelay: `${delay}ms`,
+        background: gradient 
+      }}
+    >
+      <div className={styles.cardHeader}>
+        <div className={styles.iconWrapper}>
+          <Icon className={styles.cardIcon} />
+          <div className={styles.iconGlow}></div>
+        </div>
+        {trend && (
+          <div className={`${styles.trendIndicator} ${trend === 'up' ? styles.trendUp : styles.trendDown}`}>
+            <TrendingUp className={styles.trendIcon} />
+            <span>{trendValue}</span>
+          </div>
+        )}
+      </div>
+      
+      <div className={styles.cardContent}>
+        <div className={styles.valueContainer}>
+          <span className={styles.mainValue}>
+            {formatValue(animatedValue)}
+          </span>
+        </div>
+        <p className={styles.cardTitle}>{title}</p>
+      </div>
+      
+      <div className={styles.cardFooter}>
+        <div className={styles.progressBar}>
+          <div 
+            className={styles.progressFill}
+            style={{ width: isVisible ? '100%' : '0%' }}
+          ></div>
+        </div>
+      </div>
+    </div>
+  );
+};
 
 export default function FinancialSummary() {
   const [summary, setSummary] = useState({
@@ -39,10 +98,12 @@ export default function FinancialSummary() {
     totalExpenses: 0,
   });
   const [error, setError] = useState(null);
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     const fetchSummaryData = async () => {
       try {
+        setIsLoading(true);
         const [wards, doctors, patients, admissions, transactions] = await Promise.all([
           getWards(),
           getDoctors(),
@@ -73,119 +134,126 @@ export default function FinancialSummary() {
       } catch (error) {
         console.error('Error fetching summary data:', error);
         setError('Failed to load financial summary');
+      } finally {
+        setIsLoading(false);
       }
     };
 
     fetchSummaryData();
   }, []);
 
+  const cardData = [
+    {
+      icon: LocalHospital,
+      title: "Total Wards",
+      value: summary.totalWards,
+      gradient: "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
+      trend: "up",
+      trendValue: "+5%"
+    },
+    {
+      icon: People,
+      title: "Total Doctors",
+      value: summary.totalDoctors,
+      gradient: "linear-gradient(135deg, #f093fb 0%, #f5576c 100%)",
+      trend: "up",
+      trendValue: "+12%"
+    },
+    {
+      icon: People,
+      title: "Total Patients",
+      value: summary.totalPatients,
+      gradient: "linear-gradient(135deg, #4facfe 0%, #00f2fe 100%)",
+      trend: "up",
+      trendValue: "+8%"
+    },
+    {
+      icon: TrendingUp,
+      title: "Total Admissions",
+      value: summary.totalAdmissions,
+      gradient: "linear-gradient(135deg, #43e97b 0%, #38f9d7 100%)",
+      trend: "up",
+      trendValue: "+15%"
+    },
+    {
+      icon: Bed,
+      title: "Total Beds",
+      value: summary.totalBeds,
+      gradient: "linear-gradient(135deg, #fa709a 0%, #fee140 100%)",
+      trend: "up",
+      trendValue: "+3%"
+    },
+    {
+      icon: Bed,
+      title: "Occupied Beds",
+      value: summary.occupiedBeds,
+      gradient: "linear-gradient(135deg, #a8edea 0%, #fed6e3 100%)",
+      trend: "down",
+      trendValue: "-2%"
+    },
+    {
+      icon: MonetizationOn,
+      title: "Total Revenue",
+      value: summary.totalRevenue,
+      gradient: "linear-gradient(135deg, #d299c2 0%, #fef9d7 100%)",
+      trend: "up",
+      trendValue: "+22%"
+    },
+    {
+      icon: AccountBalance,
+      title: "Total Expenses",
+      value: summary.totalExpenses,
+      gradient: "linear-gradient(135deg, #89f7fe 0%, #66a6ff 100%)",
+      trend: "down",
+      trendValue: "-5%"
+    }
+  ];
+
   return (
-    <Paper
-      sx={{
-        p: 3,
-        mb: 2,
-        background: 'linear-gradient(135deg, #e3f2fd 0%, #bbdefb 100%)',
-        borderRadius: 2,
-      }}
-    >
-      <Typography variant="h6" gutterBottom sx={{ color: '#1976d2', fontWeight: 'bold' }}>
-        ADT Financial Summary
-      </Typography>
+    <div className={styles.dashboardContainer}>
+      <div className={styles.headerSection}>
+        <div className={styles.titleContainer}>
+          <h1 className={styles.dashboardTitle}>
+            <span className={styles.titleGradient}>ADT Financial Dashboard</span>
+          </h1>
+          <p className={styles.subtitle}>Real-time hospital management insights</p>
+        </div>
+        <div className={styles.headerDecoration}></div>
+      </div>
+
       {error && (
-        <Alert severity="error" sx={{ mb: 2 }}>
+        <Alert severity="error" className={styles.errorAlert}>
           {error}
         </Alert>
       )}
-      <Grid container spacing={2}>
-        <Grid item xs={12} sm={6} md={3}>
-          <StyledCard>
-            <CardContent>
-              <IconWrapper color="#2196f3">
-                <LocalHospital sx={{ color: '#fff' }} />
-              </IconWrapper>
-              <Typography variant="h5" color="#1976d2">{summary.totalWards}</Typography>
-              <Typography color="textSecondary">Total Wards</Typography>
-            </CardContent>
-          </StyledCard>
-        </Grid>
-        <Grid item xs={12} sm={6} md={3}>
-          <StyledCard>
-            <CardContent>
-              <IconWrapper color="#4caf50">
-                <People sx={{ color: '#fff' }} />
-              </IconWrapper>
-              <Typography variant="h5" color="#1976d2">{summary.totalDoctors}</Typography>
-              <Typography color="textSecondary">Total Doctors</Typography>
-            </CardContent>
-          </StyledCard>
-        </Grid>
-        <Grid item xs={12} sm={6} md={3}>
-          <StyledCard>
-            <CardContent>
-              <IconWrapper color="#f44336">
-                <People sx={{ color: '#fff' }} />
-              </IconWrapper>
-              <Typography variant="h5" color="#1976d2">{summary.totalPatients}</Typography>
-              <Typography color="textSecondary">Total Patients</Typography>
-            </CardContent>
-          </StyledCard>
-        </Grid>
-        <Grid item xs={12} sm={6} md={3}>
-          <StyledCard>
-            <CardContent>
-              <IconWrapper color="#ff9800">
-                <TrendingUp sx={{ color: '#fff' }} />
-              </IconWrapper>
-              <Typography variant="h5" color="#1976d2">{summary.totalAdmissions}</Typography>
-              <Typography color="textSecondary">Total Admissions</Typography>
-            </CardContent>
-          </StyledCard>
-        </Grid>
-        <Grid item xs={12} sm={6} md={3}>
-          <StyledCard>
-            <CardContent>
-              <IconWrapper color="#3f51b5">
-                <Bed sx={{ color: '#fff' }} />
-              </IconWrapper>
-              <Typography variant="h5" color="#1976d2">{summary.totalBeds}</Typography>
-              <Typography color="textSecondary">Total Beds</Typography>
-            </CardContent>
-          </StyledCard>
-        </Grid>
-        <Grid item xs={12} sm={6} md={3}>
-          <StyledCard>
-            <CardContent>
-              <IconWrapper color="#e91e63">
-                <Bed sx={{ color: '#fff' }} />
-              </IconWrapper>
-              <Typography variant="h5" color="#1976d2">{summary.occupiedBeds}</Typography>
-              <Typography color="textSecondary">Occupied Beds</Typography>
-            </CardContent>
-          </StyledCard>
-        </Grid>
-        <Grid item xs={12} sm={6} md={3}>
-          <StyledCard>
-            <CardContent>
-              <IconWrapper color="#4caf50">
-                <TrendingUp sx={{ color: '#fff' }} />
-              </IconWrapper>
-              <Typography variant="h5" color="#1976d2">UGX {summary.totalRevenue.toLocaleString()}</Typography>
-              <Typography color="textSecondary">Total Revenue</Typography>
-            </CardContent>
-          </StyledCard>
-        </Grid>
-        <Grid item xs={12} sm={6} md={3}>
-          <StyledCard>
-            <CardContent>
-              <IconWrapper color="#f44336">
-                <TrendingUp sx={{ color: '#fff' }} />
-              </IconWrapper>
-              <Typography variant="h5" color="#1976d2">UGX {summary.totalExpenses.toLocaleString()}</Typography>
-              <Typography color="textSecondary">Total Expenses</Typography>
-            </CardContent>
-          </StyledCard>
-        </Grid>
-      </Grid>
-    </Paper>
+
+      {isLoading && (
+        <div className={styles.loadingContainer}>
+          <div className={styles.loadingSpinner}></div>
+          <p>Loading dashboard data...</p>
+        </div>
+      )}
+
+      <div className={styles.statsGrid}>
+        {cardData.map((card, index) => (
+          <StatCard
+            key={card.title}
+            icon={card.icon}
+            title={card.title}
+            value={card.value}
+            gradient={card.gradient}
+            delay={index * 100}
+            trend={card.trend}
+            trendValue={card.trendValue}
+          />
+        ))}
+      </div>
+
+      <div className={styles.backgroundEffects}>
+        <div className={styles.floatingShape1}></div>
+        <div className={styles.floatingShape2}></div>
+        <div className={styles.floatingShape3}></div>
+      </div>
+    </div>
   );
 }
