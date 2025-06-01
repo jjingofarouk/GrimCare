@@ -123,7 +123,6 @@ async function seedDatabase() {
     // Patients
     const patientUsers = createdUsers.filter(user => user.role === 'PATIENT');
     const patients = patientUsers.map((user, index) => ({
-      userId: user.id,
       patientId: `P${100000 + index}`,
       dateOfBirth: new Date(1960 + Math.floor(Math.random() * 50), Math.random() * 12, Math.random() * 28),
       gender: Math.random() > 0.5 ? 'Male' : 'Female',
@@ -136,6 +135,7 @@ async function seedDatabase() {
       bloodType: ['A+', 'B+', 'O+', 'AB+'][Math.floor(Math.random() * 4)],
       allergies: Math.random() > 0.7 ? 'Peanuts' : null,
       medicalHistory: Math.random() > 0.7 ? 'Hypertension' : null,
+      user: { connect: { id: user.id } },
     }));
 
     const createdPatients = await prisma.$transaction(
@@ -153,12 +153,12 @@ async function seedDatabase() {
     ];
     const doctorUsers = createdUsers.filter(user => user.role === 'DOCTOR');
     const doctors = doctorUsers.map((user, index) => ({
-      userId: user.id,
       doctorId: `D${100000 + index}`,
       specialty: specialties[Math.floor(Math.random() * specialties.length)],
       licenseNumber: `LIC${10000 + index}`,
       phone: `+2567${Math.floor(10000000 + Math.random() * 90000000)}`,
       office: `Room ${index + 101}`,
+      user: { connect: { id: user.id } },
     }));
 
     const createdDoctors = await prisma.$transaction(
