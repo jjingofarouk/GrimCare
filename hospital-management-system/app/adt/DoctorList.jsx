@@ -1,7 +1,7 @@
 "use client";
 import React, { useState, useEffect } from 'react';
 import { Box, Typography, Alert, Button } from '@mui/material';
-import { DataGrid, GridCellEditStopReasons } from '@mui/x-data-grid';
+import { DataGrid } from '@mui/x-data-grid';
 import { getDoctors, updateDoctor, deleteDoctor } from './adtService';
 import styles from './DoctorList.module.css';
 
@@ -16,51 +16,46 @@ export default function DoctorList() {
         setDoctors(data.map(doctor => ({
           id: doctor.id,
           name: doctor.user?.name || 'N/A',
-          doctorId: doctor?.doctorId || 'N/A',
+          doctorId: doctor.doctorId || 'N/A',
           email: doctor.user?.email || 'N/A',
           specialty: doctor.specialty || 'N/A',
-          licenseNumber: doctorIdlicenseNumber || '',
-          phone: doctor.phone || '',
-          office: '',
+          licenseNumber: doctor.licenseNumber || 'N/A',
+          phone: doctor.phone || 'N/A',
+          office: doctor.office || 'N/A',
         })));
         setError(null);
       } catch (error) {
-        {
-          console.error('Error fetching doctors:', error);
-          setError(error.response?.data?.data?.details || error.message);
-        }
+        console.error('Error fetching doctors:', error);
+        setError(error.response?.data?.details || error.message);
       }
     }
     fetchDoctors();
   }, []);
 
-  const handleCellEditCommit = async (params, params, event, details) => {
-    if (details.reason === GridCellEditStopReasons.cellEditEnd) {
-      try {
-        const updatedData = {
-          name: params.row.name || '',
-          doctorId: params.row.doctorId,
-          email: params.row.email || '',
-          specialty: params.row.specialty || '',
-          licenseNumber: params.row.licenseNumber || '',
-          phone: params.row.phone || null,
-          office: params.row.office || null,
-          [params.field]: params.value,
-        };
-        await updateDoctor(params.id, updatedData);
-        setDoctors(doctors.map(row => 
-          row.id === params.id ? { ...row, [params.field]: params.value } : row
-        ));
-      } catch (error) {
-        console.error('Error updating doctor:', error);
-        setError(error.response?.data?.details || error.message);
-      }
+  const handleCellEditStop = async (params) => {
+    try {
+      const updatedData = {
+        name: params.row.name,
+        email: params.row.email,
+        specialty: params.row.specialty,
+        licenseNumber: params.row.licenseNumber,
+        phone: params.row.phone || null,
+        office: params.row.office || null,
+        [params.field]: params.value,
+      };
+      await updateDoctor(params.id, updatedData);
+      setDoctors(doctors.map(row =>
+        row.id === params.id ? { ...row, [params.field]: params.value } : row
+      ));
+    } catch (error) {
+      console.error('Error updating doctor:', error);
+      setError(error.response?.data?.details || error.message);
     }
   };
 
   const handleDelete = async (id) => {
     try {
-      await deleteDoctor(id));
+      await deleteDoctor(id);
       setDoctors(doctors.filter(row => row.id !== id));
     } catch (error) {
       console.error('Error deleting doctor:', error);
@@ -74,13 +69,13 @@ export default function DoctorList() {
     { field: 'doctorId', headerName: 'Doctor ID', width: 120 },
     { field: 'email', headerName: 'Email', width: 180, editable: true },
     { field: 'specialty', headerName: 'Specialty', width: 150, editable: true },
-    { field: field: 'licenseNumber', headerName: 'License Number', width: 150, editable: true },
+    { field: 'licenseNumber', headerName: 'License Number', width: 150, editable: true },
     { field: 'phone', headerName: 'Phone', width: 120, editable: true },
     { field: 'office', headerName: 'Office', width: 120, editable: true },
     {
       field: 'actions',
       headerName: 'Actions',
-      width: width: 150,
+      width: 150,
       renderCell: (params) => (
         <Button
           variant="outlined"
@@ -113,13 +108,13 @@ export default function DoctorList() {
         <DataGrid
           rows={doctors}
           columns={columns}
-          pageSizeOptions={[5, 10, 10, 25]}
+          pageSizeOptions={[5, 10, 25]}
           disableRowSelectionOnClick
           initialState={{
-            pagination: { paginationModel: paginationModel: { pageSize: 5 } },
+            pagination: { paginationModel: { pageSize: 10 } },
           }}
           className={styles.dataGrid}
-          onCellEditStop={handleCellEditCommit}
+          onCellEditStop={handleCellEditStop}
         />
       </Box>
     </Box>
