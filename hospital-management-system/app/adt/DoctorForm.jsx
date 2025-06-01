@@ -1,47 +1,55 @@
-// app/adt/DoctorForm.jsx
 "use client";
-import { v4 as uuidv4 } from 'uuid';
 import React, { useState } from 'react';
-import { TextField, Button, Grid, Paper, Typography } from '@mui/material';
+import { TextField, Button, Grid, Paper, Typography, Alert } from '@mui/material';
 import axios from 'axios';
 
 export default function DoctorForm({ onSubmit }) {
   const [formData, setFormData] = useState({
     email: '',
     name: '',
+    password: '',
     specialty: '',
     licenseNumber: '',
     phone: '',
     office: '',
   });
+  const [error, setError] = useState(null);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData({ ...formData, [name]: value });
+    setError(null);
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      const doctorId = `D${Math.floor(1000000 + Math.random() * 9000000)}`;
-      await axios.post('/api/doctor', { ...formData, doctorId });
+      await axios.post('/api/doctor', formData);
       onSubmit();
       setFormData({
         email: '',
         name: '',
+        password: '',
         specialty: '',
         licenseNumber: '',
         phone: '',
         office: '',
       });
+      setError(null);
     } catch (error) {
       console.error('Error creating doctor:', error);
+      setError(error.response?.data?.error || 'Failed to create doctor');
     }
   };
 
   return (
     <Paper sx={{ p: 3, mb: 2 }}>
       <Typography variant="h6" gutterBottom>Add New Doctor</Typography>
+      {error && (
+        <Alert severity="error" sx={{ mb: 2 }}>
+          {error}
+        </Alert>
+      )}
       <form onSubmit={handleSubmit}>
         <Grid container spacing={2}>
           <Grid item xs={12} sm={6}>
@@ -59,6 +67,17 @@ export default function DoctorForm({ onSubmit }) {
               label="Name"
               name="name"
               value={formData.name}
+              onChange={handleChange}
+              fullWidth
+              required
+            />
+          </Grid>
+          <Grid item xs={12} sm={6}>
+            <TextField
+              type="password"
+              label="Password"
+              name="password"
+              value={formData.password}
               onChange={handleChange}
               fullWidth
               required
