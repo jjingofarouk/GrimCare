@@ -1,4 +1,6 @@
+// app/adt/WardForm.jsx
 "use client";
+import { v4 as uuidv4 } from 'uuid';
 import React, { useState } from 'react';
 import { TextField, Button, Grid, Paper, Typography } from '@mui/material';
 import axios from 'axios';
@@ -6,8 +8,11 @@ import axios from 'axios';
 export default function WardForm({ onSubmit }) {
   const [formData, setFormData] = useState({
     name: '',
+    wardNumber: '',
     totalBeds: '',
     department: '',
+    location: '',
+    nurseInCharge: '',
   });
 
   const handleChange = (e) => {
@@ -18,9 +23,17 @@ export default function WardForm({ onSubmit }) {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      await axios.post('/api/wards', { ...formData, occupiedBeds: 0 });
+      const wardNumber = `W${Math.floor(1000000 + Math.random() * 9000000)}`;
+      await axios.post('/api/wards', { ...formData, wardNumber, occupiedBeds: 0 });
       onSubmit();
-      setFormData({ name: '', totalBeds: '', department: '' });
+      setFormData({
+        name: '',
+        wardNumber: '',
+        totalBeds: '',
+        department: '',
+        location: '',
+        nurseInCharge: '',
+      });
     } catch (error) {
       console.error('Error creating ward:', error);
     }
@@ -52,11 +65,29 @@ export default function WardForm({ onSubmit }) {
               required
             />
           </Grid>
-          <Grid item xs={12}>
+          <Grid item xs={12} sm={6}>
             <TextField
               label="Department"
               name="department"
               value={formData.department}
+              onChange={handleChange}
+              fullWidth
+            />
+          </Grid>
+          <Grid item xs={12} sm={6}>
+            <TextField
+              label="Location"
+              name="location"
+              value={formData.location}
+              onChange={handleChange}
+              fullWidth
+            />
+          </Grid>
+          <Grid item xs={12}>
+            <TextField
+              label="Nurse in Charge"
+              name="nurseInCharge"
+              value={formData.nurseInCharge}
               onChange={handleChange}
               fullWidth
             />
