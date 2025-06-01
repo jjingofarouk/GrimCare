@@ -33,8 +33,12 @@ export async function PUT(request, { params }) {
         phone: data.phone || null,
         address: data.address || null,
         emergencyContact: data.emergencyContact || null,
+        emergencyContactPhone: data.emergencyContactPhone || null,
         insuranceProvider: data.insuranceProvider || null,
         insurancePolicy: data.insurancePolicy || null,
+        bloodType: data.bloodType || null,
+        allergies: data.allergies || null,
+        medicalHistory: data.medicalHistory || null,
         user: data.name || data.email ? {
           update: {
             name: data.name || undefined,
