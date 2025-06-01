@@ -40,6 +40,7 @@ export const API_ROUTES = {
   WARD: '/api/wards',
   TRANSACTION: '/api/transaction',
   PAYROLL: '/api/payroll',
+  DISCHARGE: '/api/discharge',
 };
 
 export const BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000';
