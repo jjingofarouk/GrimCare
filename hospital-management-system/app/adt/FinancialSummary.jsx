@@ -1,7 +1,7 @@
 "use client";
 import React, { useState, useEffect } from 'react';
 import { Paper, Typography, Grid, Box, Alert } from '@mui/material';
-import { getWards, getDoctors, getPatients, getAdmissions, getTransactions } from '../adtService';
+import { getWards, getDoctors, getPatients, getAdmissions, getTransactions } from './adtService';
 
 export default function FinancialSummary() {
   const [summary, setSummary] = useState({
