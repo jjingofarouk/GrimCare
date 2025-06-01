@@ -1,4 +1,3 @@
-// app/config/api.js
 export const API_ROUTES = {
   ACCOUNTING: '/api/accounting',
   ADT: '/api/adt',
