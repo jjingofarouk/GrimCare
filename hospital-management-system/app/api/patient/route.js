@@ -1,7 +1,6 @@
 // app/api/patient/route.js
 import { PrismaClient } from '@prisma/client';
 import { NextResponse } from 'next/server';
-import bcrypt from 'bcryptjs';
 
 const prisma = new PrismaClient();
 
@@ -22,28 +21,31 @@ export async function GET() {
 export async function POST(request) {
   try {
     const data = await request.json();
-    if (!data.email || !data.name || !data.password) {
+    if (!data.email || !data.name || !data.patientId) {
       return NextResponse.json({ error: 'Missing required fields' }, { status: 400 });
     }
-    const hashedPassword = await bcrypt.hash(data.password, 10);
     const user = await prisma.user.create({
       data: {
         email: data.email,
         name: data.name,
-        password: hashedPassword,
         role: 'PATIENT',
       },
     });
     const patient = await prisma.patient.create({
       data: {
         user: { connect: { id: user.id } },
+        patientId: data.patientId,
         dateOfBirth: data.dateOfBirth ? new Date(data.dateOfBirth) : null,
         gender: data.gender || null,
         phone: data.phone || null,
         address: data.address || null,
         emergencyContact: data.emergencyContact || null,
+        emergencyContactPhone: data.emergencyContactPhone || null,
         insuranceProvider: data.insuranceProvider || null,
         insurancePolicy: data.insurancePolicy || null,
+        bloodType: data.bloodType || null,
+        allergies: data.allergies || null,
+        medicalHistory: data.medicalHistory || null,
       },
       include: { user: true },
     });
