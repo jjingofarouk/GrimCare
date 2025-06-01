@@ -5,7 +5,7 @@ import { DataGrid, GridCellEditStopReasons } from '@mui/x-data-grid';
 import { getPatients, updatePatient, deletePatient } from './adtService';
 import styles from './PatientList.module.css';
 
-export default PatientList() {
+export default function PatientList() {
   const [patients, setPatients] = useState([]);
   const [error, setError] = useState(null);
 
@@ -32,7 +32,7 @@ export default PatientList() {
     fetchPatients();
   }, []);
 
-  const handleCellEditCommit = async (params, event, event, details) => {
+  const handleCellEditCommit = async (params, event, details) => {
     if (details.reason === GridCellEditStopReasons.cellEditEnd) {
       try {
         const updatedData = {
@@ -47,7 +47,7 @@ export default PatientList() {
         };
         await updatePatient(params.id, updatedData);
         setPatients(patients.map(row => 
-          row.id === params.id ? { ...row, [params.field]: params.value } : row)
+          row.id === params.id ? { ...row, [params.field]: params.value } : row
         ));
       } catch (error) {
         console.error('Error updating patient:', error);
@@ -70,7 +70,7 @@ export default PatientList() {
     { field: 'id', headerName: 'ID', width: 90 },
     { field: 'patientId', headerName: 'Patient ID', width: 120 },
     { field: 'name', headerName: 'Name', width: 150, editable: true },
-    { field: email, headerName: 'Email', width: 180, editable: true },
+    { field: 'email', headerName: 'Email', width: 180, editable: true }, // Fixed: Changed 'email' to string
     { field: 'phone', headerName: 'Phone', width: 150, editable: true },
     { field: 'gender', headerName: 'Gender', width: 100, editable: true },
     { field: 'dateOfBirth', headerName: 'Date of Birth', width: 150 },
@@ -89,7 +89,6 @@ export default PatientList() {
           Delete
         </Button>
       ),
-    },
     },
   ];
 
