@@ -3,51 +3,43 @@ import { NextResponse } from 'next/server';
 
 const prisma = new PrismaClient();
 
-export async function GET() {
+export async function GET(request) {
   try {
-    const stats = {
-      totalTransactions: await prisma.transaction.count(),
-      pendingTransactions: await prisma.transaction.count({
-        where: { status: 'PENDING' },
-      }),
-      totalRevenue: await prisma.transaction.aggregate({
-        _sum: { amount: true },
-        where: { category: 'INCOME' },
-      }),
-      chartData: await prisma.transaction.groupBy({
-        by: ['date'],
-        _sum: { amount: true },
-        where: { category: 'INCOME' },
-        orderBy: { date: 'asc' },
-        take: 30, // Last 30 days
-      }),
-    };
-
-    // Format chart data for Chart.js
-    const formattedChartData = {
-      labels: stats.chartData.map(item =>
-        new Date(item.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
-      ),
-      datasets: [
-        {
-          label: 'Revenue',
-          data: stats.chartData.map(item => item._sum.amount || 0),
-          borderColor: '#4c51bf',
-          backgroundColor: 'rgba(76, 81, 191, 0.2)',
-          fill: true,
-        },
-      ],
-    };
-
-    return NextResponse.json({
-      totalTransactions: stats.totalTransactions,
-      pendingTransactions: stats.pendingTransactions,
-      totalRevenue: stats.totalRevenue._sum.amount || 0,
-      chartData: formattedChartData,
+    const transactions = await prisma.transaction.findMany({
+      include: { costCenter: true },
     });
+
+    const totalTransactions = transactions.length;
+    const pendingTransactions = transactions.filter(t => t.status === 'PENDING').length;
+    const totalRevenue = transactions
+      .filter(t => t.type === 'Revenue')
+      .reduce((sum, t) => sum + t.amount, 0);
+    const totalExpenses = transactions
+      .filter(t => t.type === 'Expense')
+      .reduce((sum, t) => sum + t.amount, 0);
+    const other = transactions
+      .filter(t => t.type === 'Other')
+      .reduce((sum, t) => sum + t.amount, 0);
+
+    const dashboardData = {
+      totalTransactions,
+      pendingTransactions,
+      totalRevenue,
+      totalExpenses,
+      chartData: {
+        revenue: totalRevenue,
+        expenses: totalExpenses,
+        pending: transactions
+          .filter(t => t.status === 'PENDING')
+          .reduce((sum, t) => sum + t.amount, 0),
+        other,
+      },
+    };
+
+    return NextResponse.json(dashboardData);
   } catch (error) {
-    console.error('Error fetching dashboard stats:', error.message);
-    return NextResponse.json({ error: 'Failed to fetch dashboard stats' }, { status: 500 });
+    console.error('Error fetching dashboard data:', error.message);
+    return NextResponse.json({ error: 'Failed to fetch dashboard data' }, { status: 500 });
   } finally {
     await prisma.$disconnect();
   }
