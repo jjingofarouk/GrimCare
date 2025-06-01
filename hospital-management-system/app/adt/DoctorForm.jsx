@@ -1,4 +1,6 @@
+// app/adt/DoctorForm.jsx
 "use client";
+import { v4 as uuidv4 } from 'uuid';
 import React, { useState } from 'react';
 import { TextField, Button, Grid, Paper, Typography } from '@mui/material';
 import axios from 'axios';
@@ -7,9 +9,10 @@ export default function DoctorForm({ onSubmit }) {
   const [formData, setFormData] = useState({
     email: '',
     name: '',
-    password: '',
     specialty: '',
     licenseNumber: '',
+    phone: '',
+    office: '',
   });
 
   const handleChange = (e) => {
@@ -20,9 +23,17 @@ export default function DoctorForm({ onSubmit }) {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      await axios.post('/api/doctor', formData);
+      const doctorId = `D${Math.floor(1000000 + Math.random() * 9000000)}`;
+      await axios.post('/api/doctor', { ...formData, doctorId });
       onSubmit();
-      setFormData({ email: '', name: '', password: '', specialty: '', licenseNumber: '' });
+      setFormData({
+        email: '',
+        name: '',
+        specialty: '',
+        licenseNumber: '',
+        phone: '',
+        office: '',
+      });
     } catch (error) {
       console.error('Error creating doctor:', error);
     }
@@ -55,17 +66,6 @@ export default function DoctorForm({ onSubmit }) {
           </Grid>
           <Grid item xs={12} sm={6}>
             <TextField
-              type="password"
-              label="Password"
-              name="password"
-              value={formData.password}
-              onChange={handleChange}
-              fullWidth
-              required
-            />
-          </Grid>
-          <Grid item xs={12} sm={6}>
-            <TextField
               label="Specialty"
               name="specialty"
               value={formData.specialty}
@@ -74,7 +74,7 @@ export default function DoctorForm({ onSubmit }) {
               required
             />
           </Grid>
-          <Grid item xs={12}>
+          <Grid item xs={12} sm={6}>
             <TextField
               label="License Number"
               name="licenseNumber"
@@ -82,6 +82,24 @@ export default function DoctorForm({ onSubmit }) {
               onChange={handleChange}
               fullWidth
               required
+            />
+          </Grid>
+          <Grid item xs={12} sm={6}>
+            <TextField
+              label="Phone"
+              name="phone"
+              value={formData.phone}
+              onChange={handleChange}
+              fullWidth
+            />
+          </Grid>
+          <Grid item xs={12} sm={6}>
+            <TextField
+              label="Office"
+              name="office"
+              value={formData.office}
+              onChange={handleChange}
+              fullWidth
             />
           </Grid>
           <Grid item xs={12}>
