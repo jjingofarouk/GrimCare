@@ -12,19 +12,27 @@ export default function CssdInstrumentForm({ onSuccess }) {
     status: 'AVAILABLE',
     lastSterilized: '',
     location: '',
-    stockQuantity: 1,
-    minStockThreshold: 1,
+    stockQuantity: '1',
+    minStockThreshold: '1',
   });
   const [error, setError] = useState(null);
 
   const handleChange = (e) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
+    const { name, value } = e.target;
+    setFormData({ ...formData, [name]: value });
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setError(null);
     try {
-      await createInstrument(formData);
+      const dataToSend = {
+        ...formData,
+        stockQuantity: parseInt(formData.stockQuantity),
+        minStockThreshold: parseInt(formData.minStockThreshold),
+        lastSterilized: formData.lastSterilized || null,
+      };
+      await createInstrument(dataToSend);
       setFormData({
         name: '',
         serialNumber: '',
@@ -32,13 +40,12 @@ export default function CssdInstrumentForm({ onSuccess }) {
         status: 'AVAILABLE',
         lastSterilized: '',
         location: '',
-        stockQuantity: 1,
-        minStockThreshold: 1,
+        stockQuantity: '1',
+        minStockThreshold: '1',
       });
-      setError(null);
       onSuccess();
     } catch (err) {
-      setError('Failed to create instrument');
+      setError(err.message || 'Failed to create instrument');
     }
   };
 
@@ -113,6 +120,7 @@ export default function CssdInstrumentForm({ onSuccess }) {
         fullWidth
         required
         margin="normal"
+        inputProps={{ min: 1 }}
       />
       <TextField
         label="Minimum Stock Threshold"
@@ -123,6 +131,7 @@ export default function CssdInstrumentForm({ onSuccess }) {
         fullWidth
         required
         margin="normal"
+        inputProps={{ min: 1 }}
       />
       <Button type="submit" variant="contained" color="primary" className={styles.button}>
         Create Instrument
