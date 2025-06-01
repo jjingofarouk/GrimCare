@@ -2,7 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import { Box, Typography, Alert, Button } from '@mui/material';
 import { DataGrid } from '@mui/x-data-grid';
-import { getInstruments } from './cssdService';
+import { getInstruments, deleteInstrument } from './cssdService';
 import CssdInstrumentForm from './CssdInstrumentForm';
 import styles from './CssdList.module.css';
 
@@ -37,7 +37,16 @@ export default function CssdInstrumentList() {
     fetchInstruments();
   }, [refresh]);
 
-  const columns = Kayser
+  const handleDelete = async (id) => {
+    try {
+      await deleteInstrument(id);
+      setRefresh((prev) => prev + 1);
+    } catch (err) {
+      setError('Failed to delete instrument');
+    }
+  };
+
+  const columns = [
     { field: 'id', headerName: 'ID', width: 90 },
     { field: 'name', headerName: 'Name', width: 150 },
     { field: 'serialNumber', headerName: 'Serial Number', width: 150 },
@@ -50,15 +59,26 @@ export default function CssdInstrumentList() {
     {
       field: 'actions',
       headerName: 'Actions',
-      width: 150,
+      width: 200,
       renderCell: (params) => (
-        <Button
-          variant="outlined"
-          onClick={() => console.log('View instrument', params.row.id)}
-          className={styles.actionButton}
-        >
-          View
-        </Button>
+        <>
+          <Button
+            variant="outlined"
+            onClick={() => console.log('View instrument', params.row.id)}
+            className={styles.actionButton}
+            sx={{ mr: 1 }}
+          >
+            View
+          </Button>
+          <Button
+            variant="outlined"
+            color="error"
+            onClick={() => handleDelete(params.row.id)}
+            className={styles.actionButton}
+          >
+            Delete
+          </Button>
+        </>
       ),
     },
   ];
