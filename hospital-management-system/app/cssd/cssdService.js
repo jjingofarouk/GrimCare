@@ -1,4 +1,4 @@
-import { API_ROUTES, BASE_URL } from '../api';
+import { API_ROUTES, BASE_URL } from '../config/api';
 
 export async function getCssdRecords() {
   const response = await fetch(`${BASE_URL}${API_ROUTES.CSSD}`, {
@@ -6,7 +6,10 @@ export async function getCssdRecords() {
       Authorization: `Bearer ${localStorage.getItem('token')}`,
     },
   });
-  if (!response.ok) throw new Error('Failed to fetch CSSD records');
+  if (!response.ok) {
+    const error = await response.json();
+    throw new Error(error.message || 'Failed to fetch CSSD records');
+  }
   return response.json();
 }
 
@@ -19,7 +22,10 @@ export async function createCssdRecord(data) {
     },
     body: JSON.stringify({ ...data, userId: 1 }), // Replace with actual user ID
   });
-  if (!response.ok) throw new Error('Failed to create CSSD record');
+  if (!response.ok) {
+    const error = await response.json();
+    throw new Error(error.message || 'Failed to create CSSD record');
+  }
   return response.json();
 }
 
@@ -32,7 +38,10 @@ export async function updateCssdRecord(id, data) {
     },
     body: JSON.stringify({ ...data, userId: 1 }), // Replace with actual user ID
   });
-  if (!response.ok) throw new Error('Failed to update CSSD record');
+  if (!response.ok) {
+    const error = await response.json();
+    throw new Error(error.message || 'Failed to update CSSD record');
+  }
   return response.json();
 }
 
@@ -43,7 +52,10 @@ export async function deleteCssdRecord(id) {
       Authorization: `Bearer ${localStorage.getItem('token')}`,
     },
   });
-  if (!response.ok) throw new Error('Failed to delete CSSD record');
+  if (!response.ok) {
+    const error = await response.json();
+    throw new Error(error.message || 'Failed to delete CSSD record');
+  }
   return response.json();
 }
 
@@ -53,20 +65,44 @@ export async function getInstruments() {
       Authorization: `Bearer ${localStorage.getItem('token')}`,
     },
   });
-  if (!response.ok) throw new Error('Failed to fetch instruments');
+  if (!response.ok) {
+    const error = await response.json();
+    throw new Error(error.message || 'Failed to fetch instruments');
+  }
   return response.json();
 }
 
 export async function createInstrument(data) {
+  const sanitizedData = {
+    name: data.name?.trim(),
+    serialNumber: data.serialNumber?.trim(),
+    type: data.type?.trim() || null,
+    status: data.status || 'AVAILABLE',
+    lastSterilized: data.lastSterilized ? new Date(data.lastSterilized).toISOString() : null,
+    location: data.location?.trim() || null,
+    stockQuantity: parseInt(data.stockQuantity) || 1,
+    minStockThreshold: parseInt(data.minStockThreshold) || 1,
+    userId: 1, // Replace with actual user ID from auth
+  };
+
+  if (!sanitizedData.name || !sanitizedData.serialNumber) {
+    throw new Error('Name and serial number are required');
+  }
+
   const response = await fetch(`${BASE_URL}${API_ROUTES.CSSD}/instruments`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
       Authorization: `Bearer ${localStorage.getItem('token')}`,
     },
-    body: JSON.stringify({ ...data, userId: 1 }), // Replace with actual user ID
+    body: JSON.stringify(sanitizedData),
   });
-  if (!response.ok) throw new Error('Failed to create instrument');
+
+  if (!response.ok) {
+    const error = await response.json();
+    throw new Error(error.message || 'Failed to create instrument');
+  }
+
   return response.json();
 }
 
@@ -77,7 +113,10 @@ export async function deleteInstrument(id) {
       Authorization: `Bearer ${localStorage.getItem('token')}`,
     },
   });
-  if (!response.ok) throw new Error('Failed to delete instrument');
+  if (!response.ok) {
+    const error = await response.json();
+    throw new Error(error.message || 'Failed to delete instrument');
+  }
   return response.json();
 }
 
@@ -87,7 +126,10 @@ export async function getRequisitions() {
       Authorization: `Bearer ${localStorage.getItem('token')}`,
     },
   });
-  if (!response.ok) throw new Error('Failed to fetch requisitions');
+  if (!response.ok) {
+    const error = await response.json();
+    throw new Error(error.message || 'Failed to fetch requisitions');
+  }
   return response.json();
 }
 
@@ -100,7 +142,10 @@ export async function createRequisition(data) {
     },
     body: JSON.stringify({ ...data, userId: 1 }), // Replace with actual user ID
   });
-  if (!response.ok) throw new Error('Failed to create requisition');
+  if (!response.ok) {
+    const error = await response.json();
+    throw new Error(error.message || 'Failed to create requisition');
+  }
   return response.json();
 }
 
@@ -113,7 +158,10 @@ export async function updateRequisition(id, data) {
     },
     body: JSON.stringify({ ...data, userId: 1 }), // Replace with actual user ID
   });
-  if (!response.ok) throw new Error('Failed to update requisition');
+  if (!response.ok) {
+    const error = await response.json();
+    throw new Error(error.message || 'Failed to update requisition');
+  }
   return response.json();
 }
 
@@ -124,7 +172,10 @@ export async function deleteRequisition(id) {
       Authorization: `Bearer ${localStorage.getItem('token')}`,
     },
   });
-  if (!response.ok) throw new Error('Failed to delete requisition');
+  if (!response.ok) {
+    const error = await response.json();
+    throw new Error(error.message || 'Failed to delete requisition');
+  }
   return response.json();
 }
 
@@ -134,6 +185,9 @@ export async function getCssdLogs() {
       Authorization: `Bearer ${localStorage.getItem('token')}`,
     },
   });
-  if (!response.ok) throw new Error('Failed to fetch logs');
+  if (!response.ok) {
+    const error = await response.json();
+    throw new Error(error.message || 'Failed to fetch logs');
+  }
   return response.json();
 }
