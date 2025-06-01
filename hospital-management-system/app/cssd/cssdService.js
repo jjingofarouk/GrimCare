@@ -1,4 +1,4 @@
-import { API_ROUTES, BASE_URL } from '../config/api';
+import { API_ROUTES, BASE_URL } from '../api';
 
 export async function getCssdRecords() {
   const response = await fetch(`${BASE_URL}${API_ROUTES.CSSD}`, {
