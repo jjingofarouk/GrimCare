@@ -7,6 +7,8 @@ import AdmissionList from './AdtList';
 import DoctorForm from './DoctorForm';
 import PatientForm from './PatientForm';
 import WardForm from './WardForm';
+import DischargeForm from './DischargeForm';
+import DischargeList from './DischargeList';
 import DoctorList from './DoctorList';
 import PatientList from './PatientList';
 import WardList from './WardList';
@@ -17,6 +19,7 @@ import styles from './page.module.css';
 
 export default function AdtPage() {
   const [selectedAdmission, setSelectedAdmission] = useState(null);
+  const [selectedDischarge, setSelectedDischarge] = useState(null);
   const [patients, setPatients] = useState([]);
   const [doctors, setDoctors] = useState([]);
   const [wards, setWards] = useState([]);
@@ -56,10 +59,12 @@ export default function AdtPage() {
   const handleFormSubmit = () => {
     setRefresh(!refresh);
     setSelectedAdmission(null);
+    setSelectedDischarge(null);
   };
 
   const handleClearSelection = () => {
     setSelectedAdmission(null);
+    setSelectedDischarge(null);
   };
 
   const handleTabChange = (event, newValue) => {
@@ -72,7 +77,7 @@ export default function AdtPage() {
         <Typography variant="h4" className={styles.mainTitle}>
           Admissions, Discharge, and Triage (ADT)
         </Typography>
-        {selectedAdmission && (
+        {(selectedAdmission || selectedDischarge) && (
           <Button
             variant="contained"
             onClick={handleClearSelection}
@@ -104,6 +109,7 @@ export default function AdtPage() {
             scrollButtons="auto"
           >
             <Tab label="Admissions" className={styles.tab} classes={{ selected: styles.tabSelected }} />
+            <Tab label="Discharges" className={styles.tab} classes={{ selected: styles.tabSelected }} />
             <Tab label="Patients" className={styles.tab} classes={{ selected: styles.tabSelected }} />
             <Tab label="Doctors" className={styles.tab} classes={{ selected: styles.tabSelected }} />
             <Tab label="Wards" className={styles.tab} classes={{ selected: styles.tabSelected }} />
@@ -115,7 +121,7 @@ export default function AdtPage() {
               <Box className={styles.sectionContainer}>
                 <Box className={styles.formSection}>
                   <AdmissionForm
-                    selectedAdmission={selectedAdmission}
+                    admission={selectedAdmission}
                     onSubmit={handleFormSubmit}
                     patients={patients}
                     doctors={doctors}
@@ -128,12 +134,24 @@ export default function AdtPage() {
             {tabValue === 1 && (
               <Box className={styles.sectionContainer}>
                 <Box className={styles.formSection}>
+                  <DischargeForm
+                    discharge={selectedDischarge}
+                    onSubmit={handleFormSubmit}
+                    doctors={doctors}
+                  />
+                </Box>
+                <DischargeList onSelectDischarge={setSelectedDischarge} refresh={refresh} />
+              </Box>
+            )}
+            {tabValue === 2 && (
+              <Box className={styles.sectionContainer}>
+                <Box className={styles.formSection}>
                   <PatientForm onSubmit={handleFormSubmit} />
                 </Box>
                 <PatientList />
               </Box>
             )}
-            {tabValue === 2 && (
+            {tabValue === 3 && (
               <Box className={styles.sectionContainer}>
                 <Box className={styles.formSection}>
                   <DoctorForm onSubmit={handleFormSubmit} />
@@ -141,7 +159,7 @@ export default function AdtPage() {
                 <DoctorList />
               </Box>
             )}
-            {tabValue === 3 && (
+            {tabValue === 4 && (
               <Box className={styles.sectionContainer}>
                 <Box className={styles.formSection}>
                   <WardForm onSubmit={handleFormSubmit} />
@@ -149,12 +167,12 @@ export default function AdtPage() {
                 <WardList />
               </Box>
             )}
-            {tabValue === 4 && (
+            {tabValue === 5 && (
               <Box className={styles.sectionContainer}>
                 <TriageDashboard />
               </Box>
             )}
-            {tabValue === 5 && (
+            {tabValue === 6 && (
               <Box className={styles.sectionContainer}>
                 <FinancialSummary />
               </Box>
