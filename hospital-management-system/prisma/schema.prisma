@@ -8,18 +8,19 @@ datasource db {
 }
 
 model User {
-  id        Int       @id @default(autoincrement())
-  email     String    @unique
-  name      String?
-  password  String
-  role      String    @default("PATIENT") // PATIENT, DOCTOR, ADMIN, NURSE
-  createdAt DateTime  @default(now())
-  updatedAt DateTime  @updatedAt
-  doctor    Doctor?   @relation(fields: [doctorId], references: [id])
-  doctorId  Int?      @unique
-  payrolls  Payroll[]
-  patients  Patient[]
-  cssdLogs  CSSDLog[] @relation("LoggedBy")
+  id            Int              @id @default(autoincrement())
+  email         String           @unique
+  name          String?
+  password      String
+  role          String           @default("PATIENT") // PATIENT, DOCTOR, ADMIN, NURSE
+  createdAt     DateTime         @default(now())
+  updatedAt     DateTime         @updatedAt
+  doctor        Doctor?          @relation(fields: [doctorId], references: [id])
+  doctorId      Int?             @unique
+  payrolls      Payroll[]
+  patients      Patient[]
+  cssdLogs      CSSDLog[]        @relation("LoggedBy")
+  cssdRequisitions CSSDRequisition[] @relation("RequisitionRequestedBy")
 }
 
 model Doctor {
@@ -169,7 +170,7 @@ model CSSDRequisition {
   instrument      CSSDInstrument @relation("RequisitionInstrument", fields: [instrumentId], references: [id])
   department      String
   requestedBy     Int
-  user            User      @relation(fields: [requestedBy], references: [id])
+  user            User      @relation("RequisitionRequestedBy", fields: [requestedBy], references: [id])
   quantity        Int
   requestDate     DateTime  @default(now())
   dispatchDate    DateTime?
