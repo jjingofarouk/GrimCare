@@ -27,16 +27,16 @@ export async function PUT(request, { params }) {
     const doctor = await prisma.doctor.update({
       where: { id: parseInt(params.id) },
       data: {
-        specialty: data.specialty || undefined,
-        licenseNumber: data.licenseNumber || undefined,
+        specialty: data.specialty || null,
+        licenseNumber: data.licenseNumber || null,
         phone: data.phone || null,
         office: data.office || null,
         user: data.name || data.email ? {
           update: {
-            name: data.name || undefined,
-            email: data.email || undefined,
+            name: data.name || null,
+            email: data.email || null,
           },
-        } : undefined,
+        } : null,
       },
       include: { user: true },
     });
@@ -60,7 +60,7 @@ export async function DELETE(request, { params }) {
     }
     await prisma.$transaction([
       prisma.doctor.delete({ where: { id: parseInt(params.id) } }),
-      prisma.user.delete({ where: { id: doctor.userId } }),
+      prisma.user.delete({ where: { id: doctor.user.id } }),
     ]);
     return NextResponse.json({ message: 'Doctor deleted' });
   } catch (error) {
