@@ -1,11 +1,8 @@
 'use client';
 import React, { useState, useEffect } from 'react';
 import { Container, Box, Typography, Alert, Tabs, Tab } from '@mui/material';
-import CssdInstrumentForm from './CssdInstrumentForm';
 import CssdInstrumentList from './CssdInstrumentList';
-import CssdForm from './CssdForm';
 import CssdRecordList from './CssdRecordList';
-import CssdRequisitionForm from './CssdRequisitionForm';
 import CssdRequisitionList from './CssdRequisitionList';
 import CssdLogList from './CssdLogList';
 import { getInstruments } from './cssdService';
@@ -15,7 +12,6 @@ export default function CssdPage() {
   const [tabValue, setTabValue] = useState(0);
   const [instruments, setInstruments] = useState([]);
   const [errors, setErrors] = useState([]);
-  const [refresh, setRefresh] = useState(false);
 
   useEffect(() => {
     async function fetchData() {
@@ -32,11 +28,7 @@ export default function CssdPage() {
       }
     }
     fetchData();
-  }, [refresh]);
-
-  const handleFormSubmit = () => {
-    setRefresh(!refresh);
-  };
+  }, []);
 
   const handleTabChange = (event, newValue) => {
     setTabValue(newValue);
@@ -78,25 +70,16 @@ export default function CssdPage() {
           <Box className={`${styles.tabContent} ${styles.fadeIn}`}>
             {tabValue === 0 && (
               <Box className={styles.sectionContainer}>
-                <Box className={styles.formSection}>
-                  <CssdInstrumentForm onSuccess={handleFormSubmit} />
-                </Box>
                 <CssdInstrumentList />
               </Box>
             )}
             {tabValue === 1 && (
               <Box className={styles.sectionContainer}>
-                <Box className={styles.formSection}>
-                  <CssdForm onSuccess={handleFormSubmit} />
-                </Box>
                 <CssdRecordList />
               </Box>
             )}
             {tabValue === 2 && (
               <Box className={styles.sectionContainer}>
-                <Box className={styles.formSection}>
-                  <CssdRequisitionForm onSuccess={handleFormSubmit} />
-                </Box>
                 <CssdRequisitionList />
               </Box>
             )}
