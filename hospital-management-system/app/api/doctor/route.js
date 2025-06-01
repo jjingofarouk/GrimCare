@@ -22,14 +22,18 @@ export async function GET() {
 export async function POST(request) {
   try {
     const data = await request.json();
-    if (!data.email || !data.name || !data.specialty || !data.licenseNumber) {
-      return NextResponse.json({ error: 'Missing required fields: email, name, specialty, licenseNumber' }, { status: 400 });
+    if (!data.email || !data.name || !data.specialty || !data.licenseNumber || !data.password) {
+      return NextResponse.json({ error: 'Missing required fields: email, name, specialty, licenseNumber, password' }, { status: 400 });
     }
 
-    const hashedPassword = data.password ? await bcrypt.hash(data.password, 10) : null;
-    if (!hashedPassword) {
-      return NextResponse.json({ error: 'Password is required' }, { status: 400 });
+    const existingUser = await prisma.user.findUnique({
+      where: { email: data.email },
+    });
+    if (existingUser) {
+      return NextResponse.json({ error: 'Email already exists' }, { status: 400 });
     }
+
+    const hashedPassword = await bcrypt.hash(data.password, 10);
 
     const doctor = await prisma.$transaction(async (prisma) => {
       const user = await prisma.user.create({
