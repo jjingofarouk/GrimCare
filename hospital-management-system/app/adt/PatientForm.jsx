@@ -1,6 +1,6 @@
 "use client";
 import React, { useState } from 'react';
-import { TextField, MenuItem, Button, Grid, Paper, Typography } from '@mui/material';
+import { TextField, MenuItem, Button, Grid, Paper, Typography, Alert } from '@mui/material';
 import axios from 'axios';
 
 export default function PatientForm({ onSubmit }) {
@@ -13,13 +13,16 @@ export default function PatientForm({ onSubmit }) {
     phone: '',
     address: '',
     emergencyContact: '',
+    emergencyContactPhone: '',
     insuranceProvider: '',
     insurancePolicy: '',
   });
+  const [error, setError] = useState(null);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData({ ...formData, [name]: value });
+    setError(null);
   };
 
   const handleSubmit = async (e) => {
@@ -36,17 +39,25 @@ export default function PatientForm({ onSubmit }) {
         phone: '',
         address: '',
         emergencyContact: '',
+        emergencyContactPhone: '',
         insuranceProvider: '',
         insurancePolicy: '',
       });
+      setError(null);
     } catch (error) {
       console.error('Error creating patient:', error);
+      setError(error.response?.data?.error || 'Failed to create patient');
     }
   };
 
   return (
     <Paper sx={{ p: 3, mb: 2 }}>
       <Typography variant="h6" gutterBottom>Add New Patient</Typography>
+      {error && (
+        <Alert severity="error" sx={{ mb: 2 }}>
+          {error}
+        </Alert>
+      )}
       <form onSubmit={handleSubmit}>
         <Grid container spacing={2}>
           <Grid item xs={12} sm={6}>
@@ -123,11 +134,20 @@ export default function PatientForm({ onSubmit }) {
               fullWidth
             />
           </Grid>
-          <Grid item xs={12}>
+          <Grid item xs={12} sm={6}>
             <TextField
               label="Emergency Contact"
               name="emergencyContact"
               value={formData.emergencyContact}
+              onChange={handleChange}
+              fullWidth
+            />
+          </Grid>
+          <Grid item xs={12} sm={6}>
+            <TextField
+              label="Emergency Contact Phone"
+              name="emergencyContactPhone"
+              value={formData.emergencyContactPhone}
               onChange={handleChange}
               fullWidth
             />
