@@ -1,5 +1,7 @@
 import { PrismaClient } from '@prisma/client';
 import { NextResponse } from 'next/server';
+import bcrypt from 'bcryptjs';
+import { v4 as uuidv4 } from 'uuid';
 
 const prisma = new PrismaClient();
 
@@ -20,8 +22,13 @@ export async function GET() {
 export async function POST(request) {
   try {
     const data = await request.json();
-    if (!data.email || !data.name || !data.specialty || !data.licenseNumber || !data.doctorId) {
-      return NextResponse.json({ error: 'Missing required fields: email, name, specialty, licenseNumber, doctorId' }, { status: 400 });
+    if (!data.email || !data.name || !data.specialty || !data.licenseNumber) {
+      return NextResponse.json({ error: 'Missing required fields: email, name, specialty, licenseNumber' }, { status: 400 });
+    }
+
+    const hashedPassword = data.password ? await bcrypt.hash(data.password, 10) : null;
+    if (!hashedPassword) {
+      return NextResponse.json({ error: 'Password is required' }, { status: 400 });
     }
 
     const doctor = await prisma.$transaction(async (prisma) => {
@@ -30,17 +37,18 @@ export async function POST(request) {
           email: data.email,
           name: data.name,
           role: 'DOCTOR',
+          password: hashedPassword,
         },
       });
 
       return await prisma.doctor.create({
         data: {
-          userId: user.id,
-          doctorId: data.doctorId,
+          doctorId: data.doctorId || `D-${uuidv4().slice(0, 8)}`,
           specialty: data.specialty,
           licenseNumber: data.licenseNumber,
           phone: data.phone || null,
           office: data.office || null,
+          user: { connect: { id: user.id } },
         },
         include: { user: true },
       });
