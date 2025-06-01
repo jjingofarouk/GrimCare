@@ -1,30 +1,113 @@
 'use client';
-import React, { useState } from 'react';
-import { Box, Tabs, Tab } from '@mui/material';
+import React, { useState, useEffect } from 'react';
+import { Container, Box, Typography, Alert, Tabs, Tab } from '@mui/material';
+import CssdInstrumentForm from './CssdInstrumentForm';
 import CssdInstrumentList from './CssdInstrumentList';
+import CssdForm from './CssdForm';
 import CssdRecordList from './CssdRecordList';
+import CssdRequisitionForm from './CssdRequisitionForm';
 import CssdRequisitionList from './CssdRequisitionList';
 import CssdLogList from './CssdLogList';
+import { getInstruments } from './cssdService';
+import styles from './page.module.css';
 
 export default function CssdPage() {
-  const [tab, setTab] = useState(0);
+  const [tabValue, setTabValue] = useState(0);
+  const [instruments, setInstruments] = useState([]);
+  const [errors, setErrors] = useState([]);
+  const [refresh, setRefresh] = useState(false);
+
+  useEffect(() => {
+    async function fetchData() {
+      setErrors([]);
+      try {
+        const instrumentData = await getInstruments().catch((err) => {
+          setErrors((prev) => [...prev, `Instruments: ${err.response?.data?.details || err.message}`]);
+          return [];
+        });
+        setInstruments(instrumentData);
+      } catch (error) {
+        console.error('Error fetching data:', error);
+        setErrors((prev) => [...prev, 'General: Failed to fetch data. Please try again later.']);
+      }
+    }
+    fetchData();
+  }, [refresh]);
+
+  const handleFormSubmit = () => {
+    setRefresh(!refresh);
+  };
 
   const handleTabChange = (event, newValue) => {
-    setTab(newValue);
+    setTabValue(newValue);
   };
 
   return (
-    <Box sx={{ width: '100%', maxWidth: '100%' }}>
-      <Tabs value={tab} onChange={handleTabChange} centered sx={{ mb: 4 }}>
-        <Tab label="Instruments" />
-        <Tab label="Sterilization Records" />
-        <Tab label="Requisitions" />
-        <Tab label="Audit Logs" />
-      </Tabs>
-      {tab === 0 && <CssdInstrumentList />}
-      {tab === 1 && <CssdRecordList />}
-      {tab === 2 && <CssdRequisitionList />}
-      {tab === 3 && <CssdLogList />}
+    <Box className={styles.container}>
+      <Container className={styles.contentBox}>
+        <Typography variant="h4" className={styles.mainTitle}>
+          Central Sterile Services Department (CSSD)
+        </Typography>
+        {errors.length > 0 && (
+          <Box className={styles.errorContainer}>
+            {errors.map((error, index) => (
+              <Alert key={index} severity="error" className={styles.errorAlert}>
+                {error}
+              </Alert>
+            ))}
+          </Box>
+        )}
+        {instruments.length === 0 && errors.length === 0 && (
+          <Alert severity="info" className={styles.infoAlert}>
+            No instruments found. Please add instruments using the Instruments tab.
+          </Alert>
+        )}
+        <Box className={styles.tabsContainer}>
+          <Tabs
+            value={tabValue}
+            onChange={handleTabChange}
+            className={styles.tabs}
+            variant="scrollable"
+            scrollButtons="auto"
+          >
+            <Tab label="Instruments" className={styles.tab} classes={{ selected: styles.tabSelected }} />
+            <Tab label="Sterilization Records" className={styles.tab} classes={{ selected: styles.tabSelected }} />
+            <Tab label="Requisitions" className={styles.tab} classes={{ selected: styles.tabSelected }} />
+            <Tab label="Audit Logs" className={styles.tab} classes={{ selected: styles.tabSelected }} />
+          </Tabs>
+          <Box className={`${styles.tabContent} ${styles.fadeIn}`}>
+            {tabValue === 0 && (
+              <Box className={styles.sectionContainer}>
+                <Box className={styles.formSection}>
+                  <CssdInstrumentForm onSuccess={handleFormSubmit} />
+                </Box>
+                <CssdInstrumentList />
+              </Box>
+            )}
+            {tabValue === 1 && (
+              <Box className={styles.sectionContainer}>
+                <Box className={styles.formSection}>
+                  <CssdForm onSuccess={handleFormSubmit} />
+                </Box>
+                <CssdRecordList />
+              </Box>
+            )}
+            {tabValue === 2 && (
+              <Box className={styles.sectionContainer}>
+                <Box className={styles.formSection}>
+                  <CssdRequisitionForm onSuccess={handleFormSubmit} />
+                </Box>
+                <CssdRequisitionList />
+              </Box>
+            )}
+            {tabValue === 3 && (
+              <Box className={styles.sectionContainer}>
+                <CssdLogList />
+              </Box>
+            )}
+          </Box>
+        </Box>
+      </Container>
     </Box>
   );
 }
