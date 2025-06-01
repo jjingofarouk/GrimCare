@@ -70,6 +70,17 @@ export async function createInstrument(data) {
   return response.json();
 }
 
+export async function deleteInstrument(id) {
+  const response = await fetch(`${BASE_URL}${API_ROUTES.CSSD}/instruments/${id}`, {
+    method: 'DELETE',
+    headers: {
+      Authorization: `Bearer ${localStorage.getItem('token')}`,
+    },
+  });
+  if (!response.ok) throw new Error('Failed to delete instrument');
+  return response.json();
+}
+
 export async function getRequisitions() {
   const response = await fetch(`${BASE_URL}${API_ROUTES.CSSD}/requisitions`, {
     headers: {
