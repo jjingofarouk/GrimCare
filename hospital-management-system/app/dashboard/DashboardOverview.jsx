@@ -3,7 +3,7 @@ import React, { useState, useEffect } from 'react';
 import { Box, Typography, Alert, Grid, Card, CardContent } from '@mui/material';
 import { styled } from '@mui/material/styles';
 import AccountingChart from './AccountingChart';
-import FinancialSummary from '../adtFinancialSummary';
+import FinancialSummary from '../adt/FinancialSummary';
 import { getDashboardData } from './dashboardService';
 import styles from './DashboardOverview.module.css';
 
