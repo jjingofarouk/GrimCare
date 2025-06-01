@@ -1,4 +1,3 @@
-// app/api/doctor/route.js
 import { PrismaClient } from '@prisma/client';
 import { NextResponse } from 'next/server';
 
@@ -22,26 +21,31 @@ export async function POST(request) {
   try {
     const data = await request.json();
     if (!data.email || !data.name || !data.specialty || !data.licenseNumber || !data.doctorId) {
-      return NextResponse.json({ error: 'Missing required fields' }, { status: 400 });
+      return NextResponse.json({ error: 'Missing required fields: email, name, specialty, licenseNumber, doctorId' }, { status: 400 });
     }
-    const user = await prisma.user.create({
-      data: {
-        email: data.email,
-        name: data.name,
-        role: 'DOCTOR',
-      },
+
+    const doctor = await prisma.$transaction(async (prisma) => {
+      const user = await prisma.user.create({
+        data: {
+          email: data.email,
+          name: data.name,
+          role: 'DOCTOR',
+        },
+      });
+
+      return await prisma.doctor.create({
+        data: {
+          userId: user.id,
+          doctorId: data.doctorId,
+          specialty: data.specialty,
+          licenseNumber: data.licenseNumber,
+          phone: data.phone || null,
+          office: data.office || null,
+        },
+        include: { user: true },
+      });
     });
-    const doctor = await prisma.doctor.create({
-      data: {
-        user: { connect: { id: user.id } },
-        doctorId: data.doctorId,
-        specialty: data.specialty,
-        licenseNumber: data.licenseNumber,
-        phone: data.phone || null,
-        office: data.office || null,
-      },
-      include: { user: true },
-    });
+
     return NextResponse.json(doctor, { status: 201 });
   } catch (error) {
     console.error('POST /api/doctor error:', error);
