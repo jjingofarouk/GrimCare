@@ -1,5 +1,4 @@
 "use client";
-
 import React from 'react';
 import { Box, Typography } from '@mui/material';
 import { Pie } from 'react-chartjs-2';
@@ -13,24 +12,26 @@ import {
 } from 'chart.js';
 import styles from './AccountingChart.module.css';
 
-// Register required Chart.js components for pie chart
 ChartJS.register(ArcElement, CategoryScale, LinearScale, Tooltip, Legend);
 
 export default function AccountingChart({ data }) {
-  // Chart.js data configuration for pie chart
   const chartData = {
-    labels: data?.labels || [],
+    labels: data?.labels || ['Revenue', 'Expenses', 'Pending', 'Other'],
     datasets: [
       {
-        data: data?.datasets?.[0]?.data || [],
-        backgroundColor: ['#2196F3', '#4CAF50', '#FFC107', '#F44336', '#AB47BC'],
-        borderColor: ['#1976D2', '#388E3C', '#FFA000', '#D32F2F', '#8E24AA'],
+        data: [
+          data?.revenue || 0,
+          data?.expenses || 0,
+          data?.pending || 0,
+          data?.other || 0,
+        ],
+        backgroundColor: ['#2196F3', '#F44336', '#FFC107', '#4CAF50'],
+        borderColor: ['#1976D2', '#D32F2F', '#FFA000', '#388E3C'],
         borderWidth: 1,
       },
     ],
   };
 
-  // Chart.js options configuration for pie chart
   const chartOptions = {
     responsive: true,
     maintainAspectRatio: false,
@@ -44,18 +45,18 @@ export default function AccountingChart({ data }) {
       },
       tooltip: {
         callbacks: {
-          label: (context) => `$${context.parsed}`,
+          label: (context) => `UGX ${context.parsed.toLocaleString()}`,
         },
       },
     },
   };
 
   return (
-    <Box className={styles.chart}>
-      <Typography variant="h6" className={styles.title}>
-        Revenue Overview
+    <Box className={styles.chart} sx={{ p: 2, background: '#fff', borderRadius: 2 }}>
+      <Typography variant="h6" className={styles.title} sx={{ mb: 2, color: '#1976d2' }}>
+        Financial Overview
       </Typography>
-      <Box className={styles.chartContainer}>
+      <Box className={styles.chartContainer} sx={{ height: 300 }}>
         <Pie data={chartData} options={chartOptions} />
       </Box>
     </Box>
