@@ -1,4 +1,3 @@
-// app/api/patient/[id]/route.js
 import { PrismaClient } from '@prisma/client';
 import { NextResponse } from 'next/server';
 
@@ -28,7 +27,7 @@ export async function PUT(request, { params }) {
     const patient = await prisma.patient.update({
       where: { id: parseInt(params.id) },
       data: {
-        dateOfBirth: data.dateOfBirth ? new Date(data.dateOfBirth) : undefined,
+        dateOfBirth: data.dateOfBirth ? new Date(data.dateOfBirth) : null,
         gender: data.gender || null,
         phone: data.phone || null,
         address: data.address || null,
@@ -43,7 +42,7 @@ export async function PUT(request, { params }) {
           update: {
             name: data.name || undefined,
             email: data.email || undefined,
-          }
+          },
         } : undefined,
       },
       include: { user: true },
@@ -68,7 +67,7 @@ export async function DELETE(request, { params }) {
     }
     await prisma.$transaction([
       prisma.patient.delete({ where: { id: parseInt(params.id) } }),
-      prisma.user.delete({ where: { id: patient.userId } }),
+      prisma.user.delete({ where: { id: patient.user.id } }),
     ]);
     return NextResponse.json({ message: 'Patient deleted' });
   } catch (error) {
