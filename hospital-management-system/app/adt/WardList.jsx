@@ -1,7 +1,7 @@
 "use client";
 import React, { useState, useEffect } from 'react';
-import { Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, Button, Typography, Dialog, DialogTitle, DialogContent, TextField, DialogActions, Alert } from '@mui/material';
-import { getWards, updateWard, deleteWard } from './adtService';
+import { Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, Button, Typography, Dialog, DialogTitle, DialogContent, TextField, DialogActions, Alert, Grid } from '@mui/material';
+import { getWards, updateWard, deleteWard } from '../../lib/adtService';
 
 export default function WardList() {
   const [wards, setWards] = useState([]);
