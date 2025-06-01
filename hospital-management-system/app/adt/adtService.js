@@ -1,6 +1,6 @@
 // app/adt/adtService.js
 import axios from 'axios';
-import api from '../api'; // Adjust path as needed
+import api from '../api';
 
 const { BASE_URL, API_ROUTES } = api;
 
@@ -54,6 +54,56 @@ export async function deleteAdmission(id) {
   }
 }
 
+export async function getDischarges() {
+  try {
+    const response = await axios.get(`${BASE_URL}${API_ROUTES.DISCHARGE}`);
+    return response.data;
+  } catch (error) {
+    console.error('Error fetching discharges:', error);
+    throw error;
+  }
+}
+
+export async function createDischarge(data) {
+  try {
+    const response = await axios.post(`${BASE_URL}${API_ROUTES.DISCHARGE}`, data);
+    return response.data;
+  } catch (error) {
+    console.error('Error creating discharge:', error);
+    throw error;
+  }
+}
+
+export async function getDischarge(id) {
+  try {
+    const response = await axios.get(`${BASE_URL}${API_ROUTES.DISCHARGE}/${id}`);
+    return response.data;
+  } catch (error) {
+    console.error('Error fetching discharge:', error);
+    throw error;
+  }
+}
+
+export async function updateDischarge(id, data) {
+  try {
+    const response = await axios.put(`${BASE_URL}${API_ROUTES.DISCHARGE}/${id}`, data);
+    return response.data;
+  } catch (error) {
+    console.error('Error updating discharge:', error);
+    throw error;
+  }
+}
+
+export async function deleteDischarge(id) {
+  try {
+    const response = await axios.delete(`${BASE_URL}${API_ROUTES.DISCHARGE}/${id}`);
+    return response.data;
+  } catch (error) {
+    console.error('Error deleting discharge:', error);
+    throw error;
+  }
+}
+
 export async function getPatients() {
   try {
     const response = await axios.get(`${BASE_URL}${API_ROUTES.PATIENT}`);
@@ -84,6 +134,26 @@ export async function getWards() {
   }
 }
 
+export async function updateWard(id, data) {
+  try {
+    const response = await axios.put(`${BASE_URL}${API_ROUTES.WARD}/${id}`, data);
+    return response.data;
+  } catch (error) {
+    console.error('Error updating ward:', error);
+    throw error;
+  }
+}
+
+export async function deleteWard(id) {
+  try {
+    const response = await axios.delete(`${BASE_URL}${API_ROUTES.WARD}/${id}`);
+    return response.data;
+  } catch (error) {
+    console.error('Error deleting ward:', error);
+    throw error;
+  }
+}
+
 export async function getTransactions() {
   try {
     const response = await axios.get(`${BASE_URL}${API_ROUTES.TRANSACTION}`);
@@ -103,5 +173,3 @@ export async function getPayrolls() {
     throw error;
   }
 }
-
-
