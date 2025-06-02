@@ -17,7 +17,7 @@ export default function AuthLayout({ children }) {
   }, [router]);
 
   return (
-    <div style={{ marginTop: '64px', padding: '1rem' }}>
+    <div style={{ marginTop: '64px', padding: '0' }}>
       <main>{children}</main>
     </div>
   );
