@@ -1,9 +1,7 @@
 import { PrismaClient } from '@prisma/client';
 import nodemailer from 'nodemailer';
-import twilio from 'twilio';
 
 const prisma = new PrismaClient();
-const twilioClient = twilio(process.env.TWILIO_SID, process.env.TWILIO_AUTH_TOKEN);
 const transporter = nodemailer.createTransport({
   service: 'gmail',
   auth: {
@@ -37,14 +35,6 @@ async function sendReminders() {
       };
 
       await transporter.sendMail(email);
-
-      if (appt.patient.phone) {
-        await twilioClient.messages.create({
-          body: `Reminder: Your appointment with ${appt.doctor.user.name} is on ${new Date(appt.date).toLocaleString()}. Reason: ${appt.reason}`,
-          from: process.env.TWILIO_PHONE,
-          to: appt.patient.phone,
-        });
-      }
 
       await prisma.appointment.update({
         where: { id: appt.id },
