@@ -20,7 +20,9 @@ export async function createAppointment(data) {
   try {
     const response = await axios.post(`${BASE_URL}${API_ROUTES.APPOINTMENT}`, data, {
       headers: { Authorization: `Bearer ${localStorage.getItem('token')}` },
+      params: { include: 'patient.user,doctor.user,queue' },
     });
+    console.log('Created appointment:', response.data); // Debug
     return response.data;
   } catch (error) {
     console.error('Error creating appointment:', error);
@@ -32,7 +34,9 @@ export async function updateAppointment(id, data) {
   try {
     const response = await axios.put(`${BASE_URL}${API_ROUTES.APPOINTMENT}/${id}`, data, {
       headers: { Authorization: `Bearer ${localStorage.getItem('token')}` },
+      params: { include: 'patient.user,doctor.user,queue' },
     });
+    console.log('Updated appointment:', response.data); // Debug
     return response.data;
   } catch (error) {
     console.error('Error updating appointment:', error);
@@ -106,6 +110,7 @@ export async function getDoctors() {
   try {
     const response = await axios.get(`${BASE_URL}${API_ROUTES.DOCTOR}`, {
       headers: { Authorization: `Bearer ${localStorage.getItem('token')}` },
+      params: { include: 'user' },
     });
     return response.data;
   } catch (error) {
@@ -118,6 +123,7 @@ export async function getPatients() {
   try {
     const response = await axios.get(`${BASE_URL}${API_ROUTES.PATIENT}`, {
       headers: { Authorization: `Bearer ${localStorage.getItem('token')}` },
+      params: { include: 'user' },
     });
     return response.data;
   } catch (error) {
