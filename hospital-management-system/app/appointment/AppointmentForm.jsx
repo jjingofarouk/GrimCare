@@ -1,10 +1,10 @@
-// AppointmentForm.jsx
 "use client";
 
 import React, { useState, useEffect } from 'react';
-import { Box, TextField, Button, MenuItem, Select, InputLabel, FormControl, Typography, Dialog, DialogTitle, DialogContent, DialogActions, Autocomplete } from '@mui/material';
+import { Box, TextField, Button, MenuItem, Select, InputLabel, FormControl, Typography, Dialog, DialogTitle, DialogContent, DialogActions } from '@mui/material';
+import SearchableSelect from './SearchableSelect';
 import { createAppointment, updateAppointment } from './appointmentService';
-import { format } from 'date-fns';
+import { formatDate } from '../utils/date';
 import styles from './form.module.css';
 
 export default function AppointmentForm({ patients, doctors, departments, onSuccess, appointment, userId }) {
@@ -22,9 +22,6 @@ export default function AppointmentForm({ patients, doctors, departments, onSucc
   const [openConfirm, setOpenConfirm] = useState(false);
 
   useEffect(() => {
-    console.log('Patients prop:', patients);
-    console.log('Doctors prop:', doctors);
-    console.log('Appointment prop:', appointment);
     if (appointment) {
       const date = appointment.date ? new Date(appointment.date) : null;
       setFormData({
@@ -74,19 +71,17 @@ export default function AppointmentForm({ patients, doctors, departments, onSucc
         date: new Date(formData.date),
         bookedById: userId,
       };
-      console.log('Submitting appointment data:', data);
       let response;
       if (appointment) {
         response = await updateAppointment(appointment.id, data);
       } else {
         response = await createAppointment(data);
       }
-      console.log('Appointment response:', response);
       onSuccess();
       setFormData({ patientId: '', doctorId: '', departmentId: '', date: '', type: 'REGULAR', reason: '', notes: '' });
       setOpenConfirm(false);
     } catch (err) {
-      setError('Failed to process appointment');
+      setError('Failed to process appointment: ' + (err.message || 'Unknown error'));
       console.error('Submission error:', err);
     } finally {
       setLoading(false);
@@ -98,24 +93,24 @@ export default function AppointmentForm({ patients, doctors, departments, onSucc
   return (
     <Box component="form" onSubmit={handleSubmit} sx={{ maxWidth: 600, mx: 'auto', p: 2 }}>
       <Typography variant="h6" gutterBottom>Create Appointment</Typography>
-      <FormControl fullWidth margin="normal">
-        <Autocomplete
-          options={patients}
-          getOptionLabel={(option) => option.user?.name || 'Unknown'}
-          onChange={(e, value) => setFormData({ ...formData, patientId: value?.id || '' })}
-          value={patients.find(p => p.id === parseInt(formData.patientId)) || null}
-          renderInput={(params) => <TextField {...params} label="Patient" required />}
-        />
-      </FormControl>
-      <FormControl fullWidth margin="normal">
-        <Autocomplete
-          options={doctors}
-          getOptionLabel={(option) => `${option.user?.name || 'Unknown'} (${option.specialty})`}
-          onChange={(e, value) => setFormData({ ...formData, doctorId: value?.id || '' })}
-          value={doctors.find(d => d.id === parseInt(formData.doctorId)) || null}
-          renderInput={(params) => <TextField {...params} label="Doctor" required />}
-        />
-      </FormControl>
+      <SearchableSelect
+        label="Patient"
+        options={patients}
+        value={formData.patientId}
+        onChange={(value) => setFormData({ ...formData, patientId: value })}
+        getOptionLabel={(patient) => patient.user?.name || patient.patientId || 'Unknown'}
+        getOptionValue={(patient) => patient.id}
+        required
+      />
+      <SearchableSelect
+        label="Doctor"
+        options={doctors}
+        value={formData.doctorId}
+        onChange={(value) => setFormData({ ...formData, doctorId: value })}
+        getOptionLabel={(doctor) => `${doctor.user?.name || doctor.doctorId || 'Unknown'} (${doctor.specialty || 'N/A'})`}
+        getOptionValue={(doctor) => doctor.id}
+        required
+      />
       <FormControl fullWidth margin="normal">
         <InputLabel>Department</InputLabel>
         <Select name="departmentId" value={formData.departmentId} onChange={handleChange}>
@@ -176,10 +171,10 @@ export default function AppointmentForm({ patients, doctors, departments, onSucc
       <Dialog open={openConfirm} onClose={() => setOpenConfirm(false)}>
         <DialogTitle>Confirm Appointment</DialogTitle>
         <DialogContent>
-          <Typography><strong>Patient:</strong> {patients.find((p) => p.id === parseInt(formData.patientId))?.user?.name || 'Unknown'}</Typography>
-          <Typography><strong>Doctor:</strong> {doctors.find((d) => d.id === parseInt(formData.doctorId))?.user?.name || 'Unknown'}</Typography>
+          <Typography><strong>Patient:</strong> {patients.find((p) => p.id === parseInt(formData.patientId))?.user?.name || formData.patientId || 'Unknown'}</Typography>
+          <Typography><strong>Doctor:</strong> {doctors.find((d) => d.id === parseInt(formData.doctorId))?.user?.name || formData.doctorId || 'Unknown'}</Typography>
           <Typography><strong>Department:</strong> {departments.find((d) => d.id === parseInt(formData.departmentId))?.name || 'N/A'}</Typography>
-          <Typography><strong>Date:</strong> {formData.date && !isNaN(new Date(formData.date)) ? format(new Date(formData.date), 'PPp') : 'Invalid Date'}</Typography>
+          <Typography><strong>Date:</strong> {formatDate(formData.date)}</Typography>
           <Typography><strong>Type:</strong> {formData.type}</Typography>
           <Typography><strong>Reason:</strong> {formData.reason}</Typography>
           <Typography><strong>Notes:</strong> {formData.notes || 'N/A'}</Typography>
