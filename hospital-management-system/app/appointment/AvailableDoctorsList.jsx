@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Box, Typography, Alert, TextField, Button } from '@mui/material';
+import { Box, Typography, Alert, TextField, Button, styled } from '@mui/material';
 import { DataGrid } from '@mui/x-data-grid';
 import { getDoctors, getAvailability } from './appointmentService';
 import { format, parseISO } from 'date-fns';
@@ -115,13 +115,56 @@ export default function AvailableDoctorsList() {
     },
   ];
 
+  // Styled components for modernized TextField and Button
+  const ModernTextField = styled(TextField)(({ theme }) => ({
+    '& .MuiOutlinedInput-root': {
+      borderRadius: '12px',
+      background: 'rgba(255, 255, 255, 0.1)',
+      backdropFilter: 'blur(10px)',
+      border: '1px solid rgba(255, 255, 255, 0.2)',
+      transition: 'all 0.3s ease',
+      '&:hover': {
+        background: 'rgba(255, 255, 255, 0.15)',
+      },
+      '&.Mui-focused': {
+        background: 'rgba(255, 255, 255, 0.2)',
+        boxShadow: '0 0 15px rgba(0, 123, 255, 0.3)',
+      },
+      '& input': {
+        color: '#fff',
+      },
+    },
+    '& .MuiInputLabel-root': {
+      color: 'rgba(255, 255, 255, 0.7)',
+      '&.Mui-focused': {
+        color: '#00b0ff',
+      },
+    },
+  }));
+
+  const ModernButton = styled(Button)(({ theme }) => ({
+    borderRadius: '12px',
+    padding: '10px 24px',
+    background: 'linear-gradient(45deg, #00b0ff, #0052cc)',
+    color: '#fff',
+    fontWeight: 600,
+    textTransform: 'none',
+    boxShadow: '0 4px 15px rgba(0, 123, 255, 0.4)',
+    transition: 'all 0.3s ease',
+    '&:hover': {
+      background: 'linear-gradient(45deg, #00d4ff, #0073e6)',
+      boxShadow: '0 6px 20px rgba(0, 123, 255, 0.6)',
+      transform: 'translateY(-2px)',
+    },
+  }));
+
   return (
     <Box className={styles.container}>
       <Typography variant="h5" className={styles.title}>
         Available Doctors
       </Typography>
       <Box className={styles.filterContainer}>
-        <TextField
+        <ModernTextField
           label="Start Date"
           type="date"
           name="startDate"
@@ -130,7 +173,7 @@ export default function AvailableDoctorsList() {
           InputLabelProps={{ shrink: true }}
           className={styles.textField}
         />
-        <TextField
+        <ModernTextField
           label="End Date"
           type="date"
           name="endDate"
@@ -139,13 +182,7 @@ export default function AvailableDoctorsList() {
           InputLabelProps={{ shrink: true }}
           className={styles.textField}
         />
-        <Button
-          variant="contained"
-          onClick={handleFilter}
-          className={styles.filterButton}
-        >
-          Filter
-        </Button>
+        <ModernButton onClick={handleFilter}>Filter</ModernButton>
       </Box>
       {error && (
         <Alert severity="error" className={styles.alert}>
