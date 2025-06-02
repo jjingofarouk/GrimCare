@@ -1,29 +1,32 @@
 .container {
   width: 100vw;
   max-width: 100%;
-  padding: 16px;
+  padding: 8px;
   box-sizing: border-box;
   overflow-x: hidden;
+  background: linear-gradient(135deg, #f5f7fa 0%, #e4e9f0 100%);
 }
 
 .title {
   font-size: 24px;
   font-weight: 600;
-  margin-bottom: 16px;
-  color: #333;
+  margin-bottom: 12px;
+  color: #2c3e50;
 }
 
 .filterContainer {
-  margin-bottom: 16px;
+  margin-bottom: 12px;
   width: 100%;
   padding: 8px;
-  background-color: #f5f5f5;
-  border-radius: 4px;
+  background-color: #fff;
+  border-radius: 6px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
 }
 
 .errorAlert {
-  margin-bottom: 16px;
+  margin-bottom: 12px;
   width: 100%;
+  border-radius: 6px;
 }
 
 .loadingContainer {
@@ -37,15 +40,15 @@
 
 .dataGridContainer {
   width: 100%;
-  height: calc(100vh - 200px);
+  height: calc(100vh - 180px);
   min-height: 400px;
 }
 
 .dataGrid {
   width: 100%;
   background-color: #fff;
-  border-radius: 4px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  border-radius: 6px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
 }
 
 .dataGrid :global(.MuiDataGrid-root) {
@@ -55,19 +58,22 @@
 .dataGrid :global(.MuiDataGrid-columnHeaders) {
   background-color: #f5f5f5;
   border-bottom: 1px solid #e0e0e0;
+  font-weight: 600;
+  color: #2c3e50;
 }
 
 .dataGrid :global(.MuiDataGrid-cell) {
   padding: 8px;
+  color: #34495e;
 }
 
 .dataGrid :global(.MuiDataGrid-row:hover) {
-  background-color: #fafafa;
+  background-color: #f8fafc;
 }
 
 .actionButtons {
   display: flex;
-  gap: 8px;
+  gap: 6px;
 }
 
 .actionButtons button {
@@ -75,11 +81,24 @@
   font-size: 12px;
   padding: 4px 8px;
   border-radius: 4px;
+  border-color: #1976d2;
+  color: #1976d2;
+  transition: background-color 0.3s ease, transform 0.2s ease;
+}
+
+.actionButtons button:hover {
+  background-color: #e3f2fd;
+  transform: translateY(-1px);
+}
+
+.actionButtons button:disabled {
+  border-color: #90caf9;
+  color: #90caf9;
 }
 
 @media (max-width: 600px) {
   .container {
-    padding: 8px;
+    padding: 4px;
   }
 
   .title {
@@ -87,7 +106,7 @@
   }
 
   .dataGridContainer {
-    height: calc(100vh - 150px);
+    height: calc(100vh - 140px);
   }
 
   .actionButtons {
@@ -97,5 +116,6 @@
 
   .actionButtons button {
     width: 100%;
+    font-size: 11px;
   }
 }
