@@ -16,9 +16,10 @@ export default function AppointmentList({ onEdit }) {
     const fetchAppointments = async () => {
       try {
         const data = await getAppointments();
-        setAppointments(Array.isArray(data) ? data : []);
+        setAppointments(Array.isArray(data) ? data.filter(item => item && item.id) : []);
       } catch (err) {
         setError('Failed to fetch appointments');
+        console.error('Fetch appointments error:', err);
       }
     };
     fetchAppointments();
@@ -73,13 +74,13 @@ export default function AppointmentList({ onEdit }) {
       field: 'patientName', 
       headerName: 'Patient', 
       width: 150, 
-      valueGetter: (params) => params.row?.patient?.user?.name || 'N/A' 
+      valueGetter: (params) => params?.row?.patient?.user?.name ?? 'N/A' 
     },
     { 
       field: 'doctorName', 
       headerName: 'Doctor', 
       width: 150, 
-      valueGetter: (params) => params.row?.doctor?.user?.name || 'N/A' 
+      valueGetter: (params) => params?.row?.doctor?.user?.name ?? 'N/A' 
     },
     { 
       field: 'date', 
@@ -87,7 +88,7 @@ export default function AppointmentList({ onEdit }) {
       width: 200, 
       valueGetter: (params) => {
         try {
-          return params.row?.date ? format(new Date(params.row.date), 'PPp') : 'N/A';
+          return params?.row?.date ? format(new Date(params.row.date), 'PPp') : 'N/A';
         } catch {
           return 'N/A';
         }
@@ -100,7 +101,7 @@ export default function AppointmentList({ onEdit }) {
       field: 'queueNumber', 
       headerName: 'Queue', 
       width: 100, 
-      valueGetter: (params) => params.row?.queue?.queueNumber || 'N/A' 
+      valueGetter: (params) => params?.row?.queue?.queueNumber ?? 'N/A' 
     },
     {
       field: 'actions',
@@ -112,7 +113,7 @@ export default function AppointmentList({ onEdit }) {
             variant="outlined" 
             size="small" 
             onClick={() => onEdit(params.row)}
-            disabled={params.row?.status === 'CANCELLED' || params.row?.status === 'CHECKED_OUT'}
+            disabled={params?.row?.status === 'CANCELLED' || params?.row?.status === 'CHECKED_OUT'}
           >
             Edit
           </Button>
@@ -120,7 +121,7 @@ export default function AppointmentList({ onEdit }) {
             variant="outlined" 
             size="small" 
             onClick={() => handleCancel(params.row.id)}
-            disabled={params.row?.status === 'CANCELLED' || params.row?.status === 'CHECKED_OUT'}
+            disabled={params?.row?.status === 'CANCELLED' || params?.row?.status === 'CHECKED_OUT'}
           >
             Cancel
           </Button>
@@ -128,7 +129,7 @@ export default function AppointmentList({ onEdit }) {
             variant="outlined" 
             size="small" 
             onClick={() => handleCheckIn(params.row.id)}
-            disabled={params.row?.status !== 'SCHEDULED'}
+            disabled={params?.row?.status !== 'SCHEDULED'}
           >
             Check In
           </Button>
@@ -136,7 +137,7 @@ export default function AppointmentList({ onEdit }) {
             variant="outlined" 
             size="small" 
             onClick={() => handleCheckOut(params.row.id)}
-            disabled={params.row?.status !== 'CHECKED_IN'}
+            disabled={params?.row?.status !== 'CHECKED_IN'}
           >
             Check Out
           </Button>
