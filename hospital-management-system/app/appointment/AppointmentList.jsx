@@ -32,7 +32,17 @@ export default function AppointmentList({ onEdit }) {
         console.log('Fetched doctors:', JSON.stringify(doctorsData, null, 2));
 
         const validAppointments = Array.isArray(appointmentsData)
-          ? appointmentsData.filter((item) => item && typeof item === 'object' && item.id)
+          ? appointmentsData.filter((item) => {
+              if (!item || typeof item !== 'object' || !item.id) {
+                console.warn('Invalid appointment:', item);
+                return false;
+              }
+              if (!item.patient?.user || !item.doctor?.user) {
+                console.warn('Appointment missing patient.user or doctor.user:', item);
+                return true; // Keep for now to debug
+              }
+              return true;
+            })
           : [];
         const validPatients = Array.isArray(patientsData)
           ? patientsData.filter((item) => item && typeof item === 'object' && item.id && item.user)
@@ -101,7 +111,7 @@ export default function AppointmentList({ onEdit }) {
     }
     const matchesStatus = filter.status === "ALL" || appt.status === filter.status;
     const matchesDateFrom = !filter.dateFrom || new Date(appt.date) >= new Date(filter.dateFrom);
-    const matchesDateTo = !filter.dateTo || new Date(appt.date) <= new Date(filter.dateTo);
+    const matchesDateTo = !filter.dateTo || new Date(appt.date) <= new Date();
     const matchesDoctor = !filter.doctorId || appt.doctorId === parseInt(filter.doctorId);
     const matchesPatient = !filter.patientId || appt.patientId === parseInt(filter.patientId);
     const matchesType = filter.type === "ALL" || appt.type === filter.type;
@@ -109,32 +119,34 @@ export default function AppointmentList({ onEdit }) {
   });
 
   const columns = [
-    { field: "id", headerName: "ID", width: 90 },
+    { field: "id", headerName: "ID", width: 90" },
     {
       field: "patientName",
       headerName: "Patient",
-      width: 150,
+      width: 200,
       valueGetter: (params) => {
         if (!params?.row) {
           console.error('params.row is undefined:', params);
           return "N/A";
         }
-        const name = params.row.patient?.user?.name ?? "N/A";
-        if (name === "N/A") console.log('Patient name missing for appointment:', params.row);
+        const patient = params.row.patient;
+        const name = patient?.user?.name ?? (patient?.name || "N/A");
+        if (name === "N/A") console.error('Patient name missing for appointment:', JSON.stringify(params.row, null, 2));
         return name;
       },
     },
     {
       field: "doctorName",
       headerName: "Doctor",
-      width: 150,
+      width: 200,
       valueGetter: (params) => {
         if (!params?.row) {
           console.error('params.row is undefined:', params);
           return "N/A";
         }
-        const name = params.row.doctor?.user?.name ?? "N/A";
-        if (name === "N/A") console.log('Doctor name missing for appointment:', params.row);
+        const doctor = params.row.doctor;
+        const name = doctor?.user?.name ?? (doctor?.name || "N/A");
+        if (name === "N/A") console.error('Doctor name missing for appointment:', JSON.stringify(params.row, null, 2));
         return name;
       },
     },
@@ -149,9 +161,10 @@ export default function AppointmentList({ onEdit }) {
         }
         try {
           const date = params.row.date ? format(new Date(params.row.date), "PPp") : "N/A";
-          if (date === "N/A") console.log('Date missing for appointment:', params.row);
+          if (date === "N/A") console.error('Date missing for appointment:', JSON.stringify(params.row, null, 2));
           return date;
-        } catch {
+        } catch (err) {
+          console.error('Date parsing error:', err);
           return "N/A";
         }
       },
@@ -169,7 +182,7 @@ export default function AppointmentList({ onEdit }) {
           return "N/A";
         }
         const queue = params.row.queue?.queueNumber ?? "N/A";
-        if (queue === "N/A") console.log('Queue number missing for appointment:', params.row);
+        if (queue === "N/A") console.error('Queue number missing for appointment:', JSON.stringify(params.row, null, 2));
         return queue;
       },
     },
