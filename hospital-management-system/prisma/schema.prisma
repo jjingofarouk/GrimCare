@@ -12,7 +12,7 @@ model User {
   email         String           @unique
   name          String
   password      String
-  role          String           @default("PATIENT")
+  role          String           @default("PATIENT") // PATIENT, DOCTOR, ADMIN, NURSE
   createdAt     DateTime         @default(now())
   updatedAt     DateTime         @updatedAt
   doctor        Doctor?          @relation(fields: [doctorId], references: [id])
@@ -22,6 +22,7 @@ model User {
   payrolls      Payroll[]
   cssdLogs      CSSDLog[]        @relation("LoggedBy")
   cssdRequisitions CSSDRequisition[] @relation("RequisitionRequestedBy")
+  appointments  Appointment[]    @relation("BookedBy")
 }
 
 model Doctor {
@@ -29,10 +30,11 @@ model Doctor {
   user          User?       @relation
   doctorId      String      @unique
   specialty     String
-  department    String?
   licenseNumber String      @unique
   phone         String?
   office        String?
+  departmentId  Int?
+  department    Department? @relation(fields: [departmentId], references: [id])
   createdAt     DateTime    @default(now())
   updatedAt     DateTime    @updatedAt
   admissions    Admission[] @relation("DoctorAdmissions")
@@ -53,7 +55,7 @@ model Patient {
   emergencyContactPhone String?
   insuranceProvider String?
   insurancePolicy   String?
-  bloodType         Stringolis?
+  bloodType         String?
   allergies         String?
   medicalHistory    String?
   admissions        Admission[]
@@ -64,36 +66,58 @@ model Patient {
   updatedAt         DateTime      @updatedAt
 }
 
+model Department {
+  id            Int         @id @default(autoincrement())
+  name          String      @unique
+  description   String?
+  createdAt     DateTime    @default(now())
+  updatedAt     DateTime    @updatedAt
+  doctors       Doctor[]
+  appointments  Appointment[]
+}
+
 model Appointment {
-  id                Int              @id @default(autoincrement())
-  patientId         Int
-  patient           Patient          @relation("PatientAppointments", fields: [patientId], references: [id])
-  doctorId          Int
-  doctor            Doctor           @relation("DoctorAppointments", fields: [doctorId], references: [id])
-  department        String?
-  appointmentDate   DateTime
-  status            String           @default("SCHEDULED")
-  type              String           @default("REGULAR") // REGULAR, WALK_IN, EMERGENCY
-  reason            String
-  notes             String?
-  checkInTime       DateTime?
-  checkOutTime      DateTime?
-  queueNumber       Int?
-  reminderSent      Boolean          @default(false)
-  createdAt         DateTime         @default(now())
-  updatedAt         DateTime         @updatedAt
+  id            Int         @id @default(autoincrement())
+  patientId     Int
+  patient       Patient     @relation("PatientAppointments", fields: [patientId], references: [id])
+  doctorId      Int
+  doctor        Doctor      @relation("DoctorAppointments", fields: [doctorId], references: [id])
+  departmentId  Int?
+  department    Department? @relation(fields: [departmentId], references: [id])
+  bookedById    Int?
+  bookedBy      User?       @relation("BookedBy", fields: [bookedById], references: [id])
+  date          DateTime
+  status        String      @default("SCHEDULED") // SCHEDULED, CHECKED_IN, CHECKED_OUT, COMPLETED, CANCELLED, NO_SHOW
+  type          String      @default("REGULAR") // REGULAR, WALK_IN, EMERGENCY
+  reason        String
+  notes         String?
+  checkInTime   DateTime?
+  checkOutTime  DateTime?
+  reminderSent  Boolean     @default(false)
+  createdAt     DateTime    @default(now())
+  updatedAt     DateTime    @updatedAt
+  queue         Queue?
 }
 
 model DoctorAvailability {
-  id            Int       @id @default(autoincrement())
+  id            Int         @id @default(autoincrement())
   doctorId      Int
-  doctor        Doctor    @relation(fields: [doctorId], references: [id])
-  dayOfWeek     String
-  startTime     String
-  endTime       String
-  isAvailable   Boolean   @default(true)
-  createdAt     DateTime  @default(now())
-  updatedAt     DateTime  @updatedAt
+  doctor        Doctor      @relation(fields: [doctorId], references: [id])
+  startTime     DateTime
+  endTime       DateTime
+  status        String      @default("AVAILABLE") // AVAILABLE, UNAVAILABLE
+  createdAt     DateTime    @default(now())
+  updatedAt     DateTime    @updatedAt
+}
+
+model Queue {
+  id            Int         @id @default(autoincrement())
+  appointmentId Int         @unique
+  appointment   Appointment @relation(fields: [appointmentId], references: [id])
+  queueNumber   Int
+  status        String      @default("WAITING") // WAITING, IN_PROGRESS, COMPLETED
+  createdAt     DateTime    @default(now())
+  updatedAt     DateTime    @updatedAt
 }
 
 model Admission {
@@ -111,7 +135,7 @@ model Admission {
   relayedInfo       String?
   triagePriority    String?
   triageNotes       String?
-  status            String    @default("PENDING")
+  status            String    @default("PENDING") // PENDING, ADMITTED, DISCHARGED
   dischargeDate     DateTime?
   dischargeNotes    String?
   createdAt         DateTime  @default(now())
@@ -247,4 +271,15 @@ model CSSDRequisition {
 
 model CSSDLog {
   id              Int            @id @default(autoincrement())
-  instrumentId
+  instrumentId    Int?
+  instrument      CSSDInstrument? @relation("InstrumentLogs", fields: [instrumentId], references: [id])
+  recordId        Int?
+  record          CSSDRecord?    @relation("RecordLogs", fields: [recordId], references: [id])
+  requisitionId   Int?
+  requisition     CSSDRequisition? @relation("RequisitionLogs", fields: [requisitionId], references: [id])
+  userId          Int
+  user            User           @relation("LoggedBy", fields: [userId], references: [id])
+  action          String
+  details         String?
+  createdAt       DateTime       @default(now())
+}
