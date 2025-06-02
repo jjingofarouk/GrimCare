@@ -1,6 +1,6 @@
 import React from 'react';
 import { Box, Typography, Alert, Button } from '@mui/material';
-import CustomDataGrid from './CustomDataGrid';
+import CustomDataGrid from '../components/CustomDataGrid';
 import { useApiData } from '../utils/api';
 import { getQueue, updateQueue } from './appointmentService';
 import styles from './Queue.module.css';
