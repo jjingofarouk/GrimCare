@@ -2,7 +2,7 @@
 
 import React, { useState } from 'react';
 import { Box, Typography, Alert, Button, TextField } from '@mui/material';
-import CustomDataGrid from './CustomDataGrid';
+import CustomDataGrid from '../components/CustomDataGrid';
 import { useApiData } from '../utils/api';
 import { createDepartment, getDepartments } from './departmentService';
 
