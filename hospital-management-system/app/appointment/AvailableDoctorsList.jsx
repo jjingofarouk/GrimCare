@@ -1,11 +1,9 @@
-"use client";
-
 import React, { useState, useEffect } from 'react';
 import { Box, Typography, Alert, TextField, Button } from '@mui/material';
 import { DataGrid } from '@mui/x-data-grid';
 import { getDoctors, getAvailability } from './appointmentService';
 import { format, parseISO } from 'date-fns';
-import styles from 'Availability.module.css';
+import styles from './Availability.module.css';
 
 export default function AvailableDoctorsList() {
   const [doctors, setDoctors] = useState([]);
@@ -19,22 +17,31 @@ export default function AvailableDoctorsList() {
     const fetchDoctorsAndAvailability = async () => {
       try {
         const doctorsData = await getDoctors();
-        const validDoctors = Array.isArray(doctorsData) ? doctorsData.filter(item => item && item.id) : [];
-        
-        const doctorsWithAvailability = await Promise.all(validDoctors.map(async (doctor) => {
-          try {
-            const data = await getAvailability({ doctorId: doctor.id });
-            const validAvailability = Array.isArray(data)
-              ? data.filter(
-                  item => item && item.startTime && item.endTime && !isNaN(new Date(item.startTime)) && item.status === 'AVAILABLE'
-                )
-              : [];
-            return { ...doctor, availability: validAvailability };
-          } catch (err) {
-            return { ...doctor, availability: [] };
-          }
-        }));
-        
+        const validDoctors = Array.isArray(doctorsData)
+          ? doctorsData.filter((item) => item && item.id)
+          : [];
+
+        const doctorsWithAvailability = await Promise.all(
+          validDoctors.map(async (doctor) => {
+            try {
+              const data = await getAvailability({ doctorId: doctor.id });
+              const validAvailability = Array.isArray(data)
+                ? data.filter(
+                    (item) =>
+                      item &&
+                      item.startTime &&
+                      item.endTime &&
+                      !isNaN(new Date(item.startTime)) &&
+                      item.status === 'AVAILABLE'
+                  )
+                : [];
+              return { ...doctor, availability: validAvailability };
+            } catch (err) {
+              return { ...doctor, availability: [] };
+            }
+          })
+        );
+
         setDoctors(doctorsWithAvailability);
       } catch (err) {
         setError('Failed to fetch doctors or availability');
@@ -56,15 +63,15 @@ export default function AvailableDoctorsList() {
     setError(null);
   };
 
-  const filteredDoctors = doctors.map(doctor => ({
+  const filteredDoctors = doctors.map((doctor) => ({
     ...doctor,
     availability: dateFilter.startDate && dateFilter.endDate
       ? doctor.availability.filter(
-          slot => 
+          (slot) =>
             parseISO(slot.startTime) >= parseISO(dateFilter.startDate) &&
             parseISO(slot.endTime) <= parseISO(dateFilter.endDate)
         )
-      : doctor.availability
+      : doctor.availability,
   }));
 
   const columns = [
@@ -84,7 +91,8 @@ export default function AvailableDoctorsList() {
       field: 'availabilityStatus',
       headerName: 'Availability',
       width: 150,
-      valueGetter: (params) => params?.row?.availability?.length > 0 ? 'Available' : 'Not Available',
+      valueGetter: (params) =>
+        params?.row?.availability?.length > 0 ? 'Available' : 'Not Available',
     },
     {
       field: 'availableSlots',
@@ -96,7 +104,10 @@ export default function AvailableDoctorsList() {
           ? slots
               .map(
                 (slot) =>
-                  `${format(parseISO(slot.startTime), 'PPp')} - ${format(parseISO(slot.endTime), 'PPp')}`
+                  `${format(parseISO(slot.startTime), 'PPp')} - ${format(
+                    parseISO(slot.endTime),
+                    'PPp'
+                  )}`
               )
               .join(', ')
           : 'No available slots';
@@ -105,9 +116,11 @@ export default function AvailableDoctorsList() {
   ];
 
   return (
-    <Box sx={{ p: 2, maxWidth: 800, mx: 'auto' }}>
-      <Typography variant="h5" gutterBottom>Available Doctors</Typography>
-      <Box sx={{ display: 'flex', gap: 2, mb: 2 }}>
+    <Box className={styles.container}>
+      <Typography variant="h5" className={styles.title}>
+        Available Doctors
+      </Typography>
+      <Box className={styles.filterContainer}>
         <TextField
           label="Start Date"
           type="date"
@@ -115,6 +128,7 @@ export default function AvailableDoctorsList() {
           value={dateFilter.startDate}
           onChange={handleDateChange}
           InputLabelProps={{ shrink: true }}
+          className={styles.textField}
         />
         <TextField
           label="End Date"
@@ -123,19 +137,29 @@ export default function AvailableDoctorsList() {
           value={dateFilter.endDate}
           onChange={handleDateChange}
           InputLabelProps={{ shrink: true }}
+          className={styles.textField}
         />
-        <Button variant="contained" onClick={handleFilter}>
+        <Button
+          variant="contained"
+          onClick={handleFilter}
+          className={styles.filterButton}
+        >
           Filter
         </Button>
       </Box>
-      {error && <Alert severity="error">{error}</Alert>}
-      <Box sx={{ height: 400, width: '100%' }}>
+      {error && (
+        <Alert severity="error" className={styles.alert}>
+          {error}
+        </Alert>
+      )}
+      <Box className={styles.gridContainer}>
         <DataGrid
           rows={filteredDoctors}
           columns={columns}
           getRowId={(row) => row.id}
           pageSizeOptions={[5, 10, 20]}
-          disableRowSelectionOnClick
+          disableRowSelectionOnClick
+          className={styles.grid}
         />
       </Box>
     </Box>
