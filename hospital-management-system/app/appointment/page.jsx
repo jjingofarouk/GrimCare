@@ -1,8 +1,7 @@
-// AppointmentPage.jsx
 "use client";
 
-import React, { useState, useEffect } from 'react';
-import { Container, Paper, Tabs, Tab, Box } from '@mui/material';
+import React, { useState } from 'react';
+import { Container, Tabs, Tab, Box, Alert } from '@mui/material';
 import AppointmentForm from './AppointmentForm';
 import AppointmentList from './AppointmentList';
 import AppointmentHistory from './AppointmentHistory';
@@ -12,55 +11,18 @@ import DoctorAvailability from './DoctorAvailability';
 import AvailableDoctorsList from './AvailableDoctorsList';
 import DepartmentForm from './DepartmentForm';
 import Dashboard from './Dashboard';
-import SearchBar from './SearchBar';
+import { useApiData } from '../utils/api';
 import { getDepartments, getDoctors, getPatients } from './appointmentService';
 import styles from './page.module.css';
 
 export default function AppointmentPage({ userId }) {
-  const [patients, setPatients] = useState([]);
-  const [doctors, setDoctors] = useState([]);
-  const [departments, setDepartments] = useState([]);
-  const [filteredPatients, setFilteredPatients] = useState([]);
-  const [filteredDoctors, setFilteredDoctors] = useState([]);
   const [selectedAppointment, setSelectedAppointment] = useState(null);
   const [activeTab, setActiveTab] = useState('dashboard');
   const [refreshKey, setRefreshKey] = useState(0);
 
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const token = localStorage.getItem('token');
-        if (!token) throw new Error('No authentication token found');
-
-        const [patientsData, doctorsData, departmentsData] = await Promise.all([
-          getPatients(),
-          getDoctors(),
-          getDepartments(),
-        ]);
-        console.log('Fetched patients:', JSON.stringify(patientsData, null, 2));
-        console.log('Fetched doctors:', JSON.stringify(doctorsData, null, 2));
-        console.log('Fetched departments:', JSON.stringify(departmentsData, null, 2));
-        setPatients(Array.isArray(patientsData) ? patientsData.filter(p => p && p.user) : []);
-        setDoctors(Array.isArray(doctorsData) ? doctorsData.filter(d => d && d.user) : []);
-        setDepartments(Array.isArray(departmentsData) ? departmentsData : []);
-        setFilteredPatients(Array.isArray(patientsData) ? patientsData.filter(p => p && p.user) : []);
-        setFilteredDoctors(Array.isArray(doctorsData) ? doctorsData.filter(d => d && d.user) : []);
-      } catch (err) {
-        console.error('Failed to fetch data:', err);
-      }
-    };
-    fetchData();
-  }, []);
-
-  const handleSearch = (query) => {
-    const lowerQuery = query.toLowerCase();
-    setFilteredPatients(
-      patients.filter(p => p.user?.name?.toLowerCase().includes(lowerQuery))
-    );
-    setFilteredDoctors(
-      doctors.filter(d => d.user?.name?.toLowerCase().includes(lowerQuery))
-    );
-  };
+  const { data: patients, error: patientsError, loading: patientsLoading } = useApiData(getPatients);
+  const { data: doctors, error: doctorsError, loading: doctorsLoading } = useApiData(getDoctors);
+  const { data: departments, error: departmentsError, loading: departmentsLoading } = useApiData(getDepartments);
 
   const handleSuccess = () => {
     setSelectedAppointment(null);
@@ -80,7 +42,11 @@ export default function AppointmentPage({ userId }) {
   return (
     <Container maxWidth="xl" sx={{ py: 4 }}>
       <Box sx={{ p: 0, m: 0 }}>
-        <SearchBar onSearch={handleSearch} />
+        {(patientsError || doctorsError || departmentsError) && (
+          <Alert severity="error">
+            {patientsError || doctorsError || departmentsError}
+          </Alert>
+        )}
         <Tabs
           value={activeTab}
           onChange={handleTabChange}
@@ -102,8 +68,8 @@ export default function AppointmentPage({ userId }) {
           {activeTab === 'dashboard' && <Dashboard />}
           {activeTab === 'form' && (
             <AppointmentForm
-              patients={filteredPatients}
-              doctors={filteredDoctors}
+              patients={patients}
+              doctors={doctors}
               departments={departments}
               onSuccess={handleSuccess}
               appointment={selectedAppointment}
@@ -117,21 +83,23 @@ export default function AppointmentPage({ userId }) {
             />
           )}
           {activeTab === 'history' && (
-            <AppointmentHistory patients={filteredPatients} />
+            <AppointmentHistory patients={patients} />
           )}
           {activeTab === 'schedule' && (
-            <DoctorSchedule doctors={filteredDoctors} />
+            <DoctorSchedule doctors={doctors} />
           )}
           {activeTab === 'queue' && (
-            <QueueManagement doctors={filteredDoctors} />
+            <QueueManagement doctors={doctors} doctorId={userId} />
           )}
           {activeTab === 'availability' && (
-            <DoctorAvailability doctors={filteredDoctors} />
+            <DoctorAvailability doctors={doctors} />
           )}
           {activeTab === 'availableDoctors' && (
             <AvailableDoctorsList />
           )}
-          {activeTab === 'departments' && <DepartmentForm />}
+          {activeTab === 'departments' && <Department
+
+Form />}
         </Box>
       </Box>
     </Container>
