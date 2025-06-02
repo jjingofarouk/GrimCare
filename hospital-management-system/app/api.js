@@ -9,6 +9,7 @@ export const API_ROUTES = {
   CLINICAL_SETTINGS: '/api/clinical-settings',
   CSSD: '/api/cssd',
   DASHBOARD: '/api/dashboard',
+  DEPARTMENT: '/api/department',
   DISPENSARY: '/api/dispensary',
   DOCTOR: '/api/doctor',
   DYNAMIC_REPORT: '/api/dynamic-report',
@@ -41,6 +42,8 @@ export const API_ROUTES = {
   TRANSACTION: '/api/transaction',
   PAYROLL: '/api/payroll',
   DISCHARGE: '/api/discharge',
+  AVAILABILITY: '/api/availability',
+  QUEUE: '/api/queue',
 };
 
 export const BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000';
