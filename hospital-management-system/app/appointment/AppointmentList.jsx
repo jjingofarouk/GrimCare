@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { Box, Typography, Alert, Button } from "@mui/material";
+import { Box, Typography, Alert, Button, CircularProgress } from "@mui/material";
 import { DataGrid } from "@mui/x-data-grid";
 import AppointmentFilter from "./AppointmentFilter";
 import { getAppointments, updateAppointment, getPatients, getDoctors } from "./appointmentService";
@@ -12,11 +12,13 @@ export default function AppointmentList({ onEdit }) {
   const [patients, setPatients] = useState([]);
   const [doctors, setDoctors] = useState([]);
   const [error, setError] = useState(null);
+  const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState({ status: "ALL", dateFrom: "", dateTo: "", doctorId: "", patientId: "", type: "ALL" });
 
   useEffect(() => {
     const fetchData = async () => {
       try {
+        setLoading(true);
         const token = localStorage.getItem('token');
         if (!token) throw new Error('No authentication token found');
 
@@ -28,12 +30,29 @@ export default function AppointmentList({ onEdit }) {
         console.log('Fetched appointments:', JSON.stringify(appointmentsData, null, 2));
         console.log('Fetched patients:', JSON.stringify(patientsData, null, 2));
         console.log('Fetched doctors:', JSON.stringify(doctorsData, null, 2));
-        setAppointments(Array.isArray(appointmentsData) ? appointmentsData.filter((item) => item && item.id) : []);
-        setPatients(Array.isArray(patientsData) ? patientsData.filter((item) => item && item.id && item.user) : []);
-        setDoctors(Array.isArray(doctorsData) ? doctorsData.filter((item) => item && item.id && item.user) : []);
+
+        const validAppointments = Array.isArray(appointmentsData)
+          ? appointmentsData.filter((item) => item && typeof item === 'object' && item.id)
+          : [];
+        const validPatients = Array.isArray(patientsData)
+          ? patientsData.filter((item) => item && typeof item === 'object' && item.id && item.user)
+          : [];
+        const validDoctors = Array.isArray(doctorsData)
+          ? doctorsData.filter((item) => item && typeof item === 'object' && item.id && item.user)
+          : [];
+
+        if (validAppointments.length !== appointmentsData.length) {
+          console.warn('Invalid appointments filtered out:', appointmentsData.length - validAppointments.length);
+        }
+
+        setAppointments(validAppointments);
+        setPatients(validPatients);
+        setDoctors(validDoctors);
       } catch (err) {
         setError("Failed to fetch data: " + err.message);
         console.error("Fetch error:", err);
+      } finally {
+        setLoading(false);
       }
     };
     fetchData();
@@ -76,6 +95,10 @@ export default function AppointmentList({ onEdit }) {
   };
 
   const filteredAppointments = appointments.filter((appt) => {
+    if (!appt || !appt.id) {
+      console.warn('Invalid appointment in filter:', appt);
+      return false;
+    }
     const matchesStatus = filter.status === "ALL" || appt.status === filter.status;
     const matchesDateFrom = !filter.dateFrom || new Date(appt.date) >= new Date(filter.dateFrom);
     const matchesDateTo = !filter.dateTo || new Date(appt.date) <= new Date(filter.dateTo);
@@ -92,7 +115,11 @@ export default function AppointmentList({ onEdit }) {
       headerName: "Patient",
       width: 150,
       valueGetter: (params) => {
-        const name = params?.row?.patient?.user?.name ?? "N/A";
+        if (!params?.row) {
+          console.error('params.row is undefined:', params);
+          return "N/A";
+        }
+        const name = params.row.patient?.user?.name ?? "N/A";
         if (name === "N/A") console.log('Patient name missing for appointment:', params.row);
         return name;
       },
@@ -102,7 +129,11 @@ export default function AppointmentList({ onEdit }) {
       headerName: "Doctor",
       width: 150,
       valueGetter: (params) => {
-        const name = params?.row?.doctor?.user?.name ?? "N/A";
+        if (!params?.row) {
+          console.error('params.row is undefined:', params);
+          return "N/A";
+        }
+        const name = params.row.doctor?.user?.name ?? "N/A";
         if (name === "N/A") console.log('Doctor name missing for appointment:', params.row);
         return name;
       },
@@ -112,8 +143,12 @@ export default function AppointmentList({ onEdit }) {
       headerName: "Date",
       width: 200,
       valueGetter: (params) => {
+        if (!params?.row) {
+          console.error('params.row is undefined:', params);
+          return "N/A";
+        }
         try {
-          const date = params?.row?.date ? format(new Date(params.row.date), "PPp") : "N/A";
+          const date = params.row.date ? format(new Date(params.row.date), "PPp") : "N/A";
           if (date === "N/A") console.log('Date missing for appointment:', params.row);
           return date;
         } catch {
@@ -129,7 +164,11 @@ export default function AppointmentList({ onEdit }) {
       headerName: "Queue",
       width: 100,
       valueGetter: (params) => {
-        const queue = params?.row?.queue?.queueNumber ?? "N/A";
+        if (!params?.row) {
+          console.error('params.row is undefined:', params);
+          return "N/A";
+        }
+        const queue = params.row.queue?.queueNumber ?? "N/A";
         if (queue === "N/A") console.log('Queue number missing for appointment:', params.row);
         return queue;
       },
@@ -138,42 +177,48 @@ export default function AppointmentList({ onEdit }) {
       field: "actions",
       headerName: "Actions",
       width: 300,
-      renderCell: (params) => (
-        <Box sx={{ display: "flex", gap: 1 }}>
-          <Button
-            variant="outlined"
-            size="small"
-            onClick={() => onEdit(params.row)}
-            disabled={params?.row?.status === "CANCELLED" || params?.row?.status === "CHECKED_OUT"}
-          >
-            Edit
-          </Button>
-          <Button
-            variant="outlined"
-            size="small"
-            onClick={() => handleCancel(params.row.id)}
-            disabled={params?.row?.status === "CANCELLED" || params?.row?.status === "CHECKED_OUT"}
-          >
-            Cancel
-          </Button>
-          <Button
-            variant="outlined"
-            size="small"
-            onClick={() => handleCheckIn(params.row.id)}
-            disabled={params?.row?.status !== "SCHEDULED"}
-          >
-            Check In
-          </Button>
-          <Button
-            variant="outlined"
-            size="small"
-            onClick={() => handleCheckOut(params.row.id)}
-            disabled={params?.row?.status !== "CHECKED_IN"}
-          >
-            Check Out
-          </Button>
-        </Box>
-      ),
+      renderCell: (params) => {
+        if (!params?.row) {
+          console.error('params.row is undefined in renderCell:', params);
+          return null;
+        }
+        return (
+          <Box sx={{ display: "flex", gap: 1 }}>
+            <Button
+              variant="outlined"
+              size="small"
+              onClick={() => onEdit(params.row)}
+              disabled={params.row.status === "CANCELLED" || params.row.status === "CHECKED_OUT"}
+            >
+              Edit
+            </Button>
+            <Button
+              variant="outlined"
+              size="small"
+              onClick={() => handleCancel(params.row.id)}
+              disabled={params.row.status === "CANCELLED" || params.row.status === "CHECKED_OUT"}
+            >
+              Cancel
+            </Button>
+            <Button
+              variant="outlined"
+              size="small"
+              onClick={() => handleCheckIn(params.row.id)}
+              disabled={params.row.status !== "SCHEDULED"}
+            >
+              Check In
+            </Button>
+            <Button
+              variant="outlined"
+              size="small"
+              onClick={() => handleCheckOut(params.row.id)}
+              disabled={params.row.status !== "CHECKED_IN"}
+            >
+              Check Out
+            </Button>
+          </Box>
+        );
+      },
     },
   ];
 
@@ -182,14 +227,21 @@ export default function AppointmentList({ onEdit }) {
       <Typography variant="h5" gutterBottom>Appointments</Typography>
       <AppointmentFilter onFilter={setFilter} patients={patients} doctors={doctors} />
       {error && <Alert severity="error">{error}</Alert>}
-      <Box sx={{ height: 600, width: "100%" }}>
-        <DataGrid
-          rows={filteredAppointments}
-          columns={columns}
-          pageSizeOptions={[5, 10, 20]}
-          disableRowSelectionOnClick
-        />
-      </Box>
+      {loading ? (
+        <Box sx={{ display: 'flex', justifyContent: 'center', mt: 4 }}>
+          <CircularProgress />
+        </Box>
+      ) : (
+        <Box sx={{ height: 600, width: "100%" }}>
+          <DataGrid
+            rows={filteredAppointments}
+            columns={columns}
+            pageSizeOptions={[5, 10, 20]}
+            disableRowSelectionOnClick
+            getRowId={(row) => row.id}
+          />
+        </Box>
+      )}
     </Box>
   );
 }
