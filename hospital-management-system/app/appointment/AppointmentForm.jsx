@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { Box, TextField, Button, MenuItem, Select, InputLabel, FormControl, Typography, Dialog, DialogTitle, DialogContent, DialogActions } from '@mui/material';
-import SearchableSelect from './SearchableSelect';
+import SearchableSelect from '../components/SearchableSelect';
 import { createAppointment, updateAppointment } from './appointmentService';
 import { formatDate } from '../utils/date';
 import styles from './form.module.css';
