@@ -72,3 +72,54 @@ export default function Dashboard() {
         }
       }
     }
+    
+    <Box sx={{ p: 2 }}>
+<typography variant="h5" gutterbottom="">Daily Appointment Dashboard</typography>
+{appointmentsError && <alert severity="error">{appointmentsError}</alert>}
+<grid container="" spacing="{2}">
+<grid item="" xs="{12}" md="{4}">
+<card>
+<cardcontent>
+<typography variant="h6">Total Appointments</typography>
+<typography variant="h4">{stats.total}</typography>
+</cardcontent>
+</card>
+</grid>
+<grid item="" xs="{12}" md="{4}">
+<card>
+<cardcontent>
+<typography variant="h6">Scheduled</typography>
+<typography variant="h4">{stats.scheduled}</typography>
+</cardcontent>
+</card>
+</grid>
+<grid item="" xs="{12}" md="{4}">
+<card>
+<cardcontent>
+<typography variant="h6">Checked In</typography>
+<typography variant="h4">{stats.checkedIn}</typography>
+</cardcontent>
+</card>
+</grid>
+</grid>
+<Box sx={{ mt: 4, height: 400 }}>
+{/* Chart is rendered via chartjs code block */}
+
+<Box sx={{ mt: 4 }}>
+<typography variant="h6" gutterbottom="">Today's Appointments</typography>
+{todayAppointments.map((appt) => (
+<Card key={appt.id} sx={{ mb: 2 }}>
+<cardcontent>
+<typography><strong>Patient:</strong> {appt.patient?.user?.name || appt.patient?.patientId || 'N/A'}</typography>
+<typography><strong>Doctor:</strong> {appt.doctor?.user?.name || appt.doctor?.doctorId || 'N/A'}</typography>
+<typography><strong>Time:</strong> {formatDate(appt.date)}</typography>
+<typography><strong>Status:</strong> {appt.status}</typography>
+</cardcontent>
+
+))}
+
+
+);
+}
+    
+    
