@@ -5,9 +5,7 @@ const { BASE_URL, API_ROUTES } = api;
 
 export async function getAppointments() {
   try {
-    const response = await axios.get(`${BASE_URL}${API_ROUTES.APPOINTMENT}`, {
-      params: { include: 'patient,doctor' }
-    });
+    const response = await axios.get(`${BASE_URL}${API_ROUTES.APPOINTMENT}`);
     return response.data;
   } catch (error) {
     console.error('Error fetching appointments:', error);
@@ -35,46 +33,72 @@ export async function updateAppointment(id, data) {
   }
 }
 
-export async function deleteAppointment(id) {
+export async function getAvailability(params) {
   try {
-    const response = await axios.delete(`${BASE_URL}${API_ROUTES.APPOINTMENT}/${id}`);
+    const response = await axios.get(`${BASE_URL}/api/availability`, { params });
     return response.data;
   } catch (error) {
-    console.error('Error deleting appointment:', error);
+    console.error('Error fetching availability:', error);
     throw error;
   }
 }
 
-export async function getDoctorAvailability(doctorId, date) {
+export async function createAvailability(data) {
   try {
-    const response = await axios.get(`${BASE_URL}${API_ROUTES.DOCTOR}/${doctorId}/availability`, {
-      params: { date }
-    });
+    const response = await axios.post(`${BASE_URL}/api/availability`, data);
     return response.data;
   } catch (error) {
-    console.error('Error fetching doctor availability:', error);
+    console.error('Error creating availability:', error);
     throw error;
   }
 }
 
-export async function getQueueStatus(department, date) {
+export async function getQueue(params) {
   try {
-    const response = await axios.get(`${BASE_URL}${API_ROUTES.QUEUE_MNGMT}`, {
-      params: { department, date }
-    });
+    const response = await axios.get(`${BASE_URL}/api/queue`, { params });
     return response.data;
   } catch (error) {
-    console.error('Error fetching queue status:', error);
+    console.error('Error fetching queue:', error);
     throw error;
   }
 }
 
-export async function sendReminder(appointmentId) {
+export async function updateQueue(id, data) {
   try {
-    const response = await axios.post(`${BASE_URL}${API_ROUTES.APPOINTMENT}/${appointmentId}/reminder`);
+    const response = await axios.put(`${BASE_URL}/api/queue`, { id, ...data });
     return response.data;
   } catch (error) {
-    console.error('Error sending reminder:', error);
+    console.error('Error updating queue:', error);
+    throw error;
+  }
+}
+
+export async function getDepartments() {
+  try {
+    const response = await axios.get(`${BASE_URL}/api/department`);
+    return response.data;
+  } catch (error) {
+    console.error('Error fetching departments:', error);
+    throw error;
+  }
+}
+
+export async function getDoctors() {
+  try {
+    const response = await axios.get(`${BASE_URL}${API_ROUTES.DOCTOR}`);
+    return response.data;
+  } catch (error) {
+    console.error('Error fetching doctors:', error);
+    throw error;
+  }
+}
+
+export async function getPatients() {
+  try {
+    const response = await axios.get(`${BASE_URL}${API_ROUTES.PATIENT}`);
+    return response.data;
+  } catch (error) {
+    console.error('Error fetching patients:', error);
     throw error;
   }
 }
