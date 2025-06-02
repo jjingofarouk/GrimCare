@@ -1,54 +1,28 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { Box, Typography, Alert, TextField, Button, styled } from '@mui/material';
-import { DataGrid } from '@mui/x-data-grid';
+import CustomDataGrid from './CustomDataGrid';
+import { useApiData } from '../utils/api';
 import { getDoctors, getAvailability } from './appointmentService';
 import { format, parseISO } from 'date-fns';
+import { formatDate } from '../utils/date';
 
 export default function AvailableDoctorsList() {
-  const [doctors, setDoctors] = useState([]);
+  const [dateFilter, setDateFilter] = useState({ startDate: '', endDate: '' });
   const [error, setError] = useState(null);
-  const [dateFilter, setDateFilter] = useState({
-    startDate: '',
-    endDate: '',
+  const { data: doctors, error: doctorsError } = useApiData(async () => {
+    const doctorsData = await getDoctors();
+    return await Promise.all(
+      doctorsData.map(async (doctor) => {
+        const availability = await getAvailability({ doctorId: doctor.id });
+        return {
+          ...doctor,
+          availability: availability.filter(
+            (item) => item && item.startTime && item.endTime && item.status === 'AVAILABLE'
+          ),
+        };
+      })
+    );
   });
-
-  useEffect(() => {
-    const fetchDoctorsAndAvailability = async () => {
-      try {
-        const doctorsData = await getDoctors();
-        const validDoctors = Array.isArray(doctorsData)
-          ? doctorsData.filter((item) => item && item.id)
-          : [];
-
-        const doctorsWithAvailability = await Promise.all(
-          validDoctors.map(async (doctor) => {
-            try {
-              const data = await getAvailability({ doctorId: doctor.id });
-              const validAvailability = Array.isArray(data)
-                ? data.filter(
-                    (item) =>
-                      item &&
-                      item.startTime &&
-                      item.endTime &&
-                      !isNaN(new Date(item.startTime)) &&
-                      item.status === 'AVAILABLE'
-                  )
-                : [];
-              return { ...doctor, availability: validAvailability };
-            } catch (err) {
-              return { ...doctor, availability: [] };
-            }
-          })
-        );
-
-        setDoctors(doctorsWithAvailability);
-      } catch (err) {
-        setError('Failed to fetch doctors or availability');
-        console.error('Fetch error:', err);
-      }
-    };
-    fetchDoctorsAndAvailability();
-  }, []);
 
   const handleDateChange = (e) => {
     setDateFilter({ ...dateFilter, [e.target.name]: e.target.value });
@@ -74,47 +48,29 @@ export default function AvailableDoctorsList() {
   }));
 
   const columns = [
-    {
-      field: 'doctorName',
-      headerName: 'Doctor Name',
-      width: 200,
-      valueGetter: (params) => params?.row?.user?.name ?? 'N/A',
-    },
-    {
-      field: 'specialty',
-      headerName: 'Specialty',
-      width: 150,
-      valueGetter: (params) => params?.row?.specialty ?? 'N/A',
-    },
+    { field: 'doctorName', headerName: 'Doctor Name', width: 200 },
+    { field: 'specialty', headerName: 'Specialty', width: 150 },
     {
       field: 'availabilityStatus',
       headerName: 'Availability',
       width: 150,
-      valueGetter: (params) =>
-        params?.row?.availability?.length > 0 ? 'Available' : 'Not Available',
+      valueGetter: (params) => (params.row?.availability?.length > 0 ? 'Available' : 'Not Available'),
     },
     {
       field: 'availableSlots',
       headerName: 'Available Time Slots',
       width: 400,
       valueGetter: (params) => {
-        const slots = params?.row?.availability ?? [];
+        const slots = params.row?.availability || [];
         return slots.length > 0
           ? slots
-              .map(
-                (slot) =>
-                  `${format(parseISO(slot.startTime), 'PPp')} - ${format(
-                    parseISO(slot.endTime),
-                    'PPp'
-                  )}`
-              )
+              .map((slot) => `${formatDate(slot.startTime)} - ${formatDate(slot.endTime)}`)
               .join(', ')
           : 'No available slots';
       },
     },
   ];
 
-  // Styled components for modernized elements
   const ModernBox = styled(Box)(({ theme }) => ({
     width: '100vw',
     minHeight: '100vh',
@@ -211,30 +167,6 @@ export default function AvailableDoctorsList() {
     boxShadow: '0 8px 32px rgba(0, 0, 0, 0.2)',
   }));
 
-  const ModernDataGrid = styled(DataGrid)(({ theme }) => ({
-    background: 'transparent',
-    color: '#ffffff',
-    border: 'none',
-    '& .MuiDataGrid-columnHeaders': {
-      background: 'rgba(255, 255, 255, 0.1)',
-      color: '#ffffff',
-      borderRadius: '12px 12px 0 0',
-    },
-    '& .MuiDataGrid-cell': {
-      color: '#ffffff',
-      borderBottom: '1px solid rgba(255, 255, 255, 0.1)',
-    },
-    '& .MuiDataGrid-row:hover': {
-      background: 'rgba(255, 255, 255, 0.05)',
-      transition: 'background 0.3s ease',
-    },
-    '& .MuiDataGrid-footerContainer': {
-      background: 'rgba(255, 255, 255, 0.1)',
-      color: '#ffffff',
-      borderRadius: '0 0 12px 12px',
-    },
-  }));
-
   return (
     <ModernBox>
       <ModernTypography variant="h5">Available Doctors</ModernTypography>
@@ -257,15 +189,9 @@ export default function AvailableDoctorsList() {
         />
         <ModernButton onClick={handleFilter}>Filter</ModernButton>
       </ModernFilterContainer>
-      {error && <ModernAlert severity="error">{error}</ModernAlert>}
+      {(error || doctorsError) && <ModernAlert severity="error">{error || doctorsError}</ModernAlert>}
       <ModernGridContainer>
-        <ModernDataGrid
-          rows={filteredDoctors}
-          columns={columns}
-          getRowId={(row) => row.id}
-          pageSizeOptions={[5, 10, 20]}
-          disableRowSelectionOnClick
-        />
+        <CustomDataGrid rows={filteredDoctors} columns={columns} />
       </ModernGridContainer>
     </ModernBox>
   );
