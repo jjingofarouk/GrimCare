@@ -4,7 +4,6 @@ import { DataGrid } from '@mui/x-data-grid';
 import { getDoctors, getAvailability } from './appointmentService';
 import { format, parseISO } from 'date-fns';
 
-
 export default function AvailableDoctorsList() {
   const [doctors, setDoctors] = useState([]);
   const [error, setError] = useState(null);
@@ -115,8 +114,42 @@ export default function AvailableDoctorsList() {
     },
   ];
 
-  // Styled components for modernized TextField and Button
+  // Styled components for modernized elements
+  const ModernBox = styled(Box)(({ theme }) => ({
+    width: '100vw',
+    minHeight: '100vh',
+    padding: '2rem',
+    background: 'linear-gradient(135deg, #1a1a2e 0%, #16213e 100%)',
+    color: '#ffffff',
+    display: 'flex',
+    flexDirection: 'column',
+    alignItems: 'center',
+    boxSizing: 'border-box',
+  }));
+
+  const ModernTypography = styled(Typography)(({ theme }) => ({
+    fontSize: '2.5rem',
+    fontWeight: 700,
+    marginBottom: '2rem',
+    textAlign: 'center',
+    background: 'linear-gradient(45deg, #00b0ff, #80d8ff)',
+    WebkitBackgroundClip: 'text',
+    WebkitTextFillColor: 'transparent',
+    textShadow: '0 2px 4px rgba(0, 123, 255, 0.3)',
+  }));
+
+  const ModernFilterContainer = styled(Box)(({ theme }) => ({
+    display: 'flex',
+    gap: '1rem',
+    marginBottom: '2rem',
+    flexWrap: 'wrap',
+    justifyContent: 'center',
+    width: '100%',
+    maxWidth: '1200px',
+  }));
+
   const ModernTextField = styled(TextField)(({ theme }) => ({
+    minWidth: '200px',
     '& .MuiOutlinedInput-root': {
       borderRadius: '12px',
       background: 'rgba(255, 255, 255, 0.1)',
@@ -158,12 +191,54 @@ export default function AvailableDoctorsList() {
     },
   }));
 
+  const ModernAlert = styled(Alert)(({ theme }) => ({
+    marginBottom: '1rem',
+    borderRadius: '12px',
+    background: 'rgba(255, 75, 75, 0.1)',
+    backdropFilter: 'blur(10px)',
+    color: '#ff6b6b',
+    width: '100%',
+    maxWidth: '1200px',
+  }));
+
+  const ModernGridContainer = styled(Box)(({ theme }) => ({
+    width: '100%',
+    maxWidth: '1200px',
+    background: 'rgba(255, 255, 255, 0.05)',
+    borderRadius: '16px',
+    padding: '1rem',
+    backdropFilter: 'blur(10px)',
+    boxShadow: '0 8px 32px rgba(0, 0, 0, 0.2)',
+  }));
+
+  const ModernDataGrid = styled(DataGrid)(({ theme }) => ({
+    background: 'transparent',
+    color: '#ffffff',
+    border: 'none',
+    '& .MuiDataGrid-columnHeaders': {
+      background: 'rgba(255, 255, 255, 0.1)',
+      color: '#ffffff',
+      borderRadius: '12px 12px 0 0',
+    },
+    '& .MuiDataGrid-cell': {
+      color: '#ffffff',
+      borderBottom: '1px solid rgba(255, 255, 255, 0.1)',
+    },
+    '& .MuiDataGrid-row:hover': {
+      background: 'rgba(255, 255, 255, 0.05)',
+      transition: 'background 0.3s ease',
+    },
+    '& .MuiDataGrid-footerContainer': {
+      background: 'rgba(255, 255, 255, 0.1)',
+      color: '#ffffff',
+      borderRadius: '0 0 12px 12px',
+    },
+  }));
+
   return (
-    <Box className={styles.container}>
-      <Typography variant="h5" className={styles.title}>
-        Available Doctors
-      </Typography>
-      <Box className={styles.filterContainer}>
+    <ModernBox>
+      <ModernTypography variant="h5">Available Doctors</ModernTypography>
+      <ModernFilterContainer>
         <ModernTextField
           label="Start Date"
           type="date"
@@ -171,7 +246,6 @@ export default function AvailableDoctorsList() {
           value={dateFilter.startDate}
           onChange={handleDateChange}
           InputLabelProps={{ shrink: true }}
-          className={styles.textField}
         />
         <ModernTextField
           label="End Date"
@@ -180,25 +254,19 @@ export default function AvailableDoctorsList() {
           value={dateFilter.endDate}
           onChange={handleDateChange}
           InputLabelProps={{ shrink: true }}
-          className={styles.textField}
         />
         <ModernButton onClick={handleFilter}>Filter</ModernButton>
-      </Box>
-      {error && (
-        <Alert severity="error" className={styles.alert}>
-          {error}
-        </Alert>
-      )}
-      <Box className={styles.gridContainer}>
-        <DataGrid
+      </ModernFilterContainer>
+      {error && <ModernAlert severity="error">{error}</ModernAlert>}
+      <ModernGridContainer>
+        <ModernDataGrid
           rows={filteredDoctors}
           columns={columns}
           getRowId={(row) => row.id}
           pageSizeOptions={[5, 10, 20]}
           disableRowSelectionOnClick
-          className={styles.grid}
         />
-      </Box>
-    </Box>
+      </ModernGridContainer>
+    </ModernBox>
   );
 }
