@@ -10,7 +10,7 @@ import { format } from "date-fns";
 export default function AppointmentList({ onEdit }) {
   const [appointments, setAppointments] = useState([]);
   const [error, setError] = useState(null);
-  const [filter, setFilter] = useState({ status: "ALL", dateFrom: "date", dateTo: "", doctorId: "", patientId: "id", type: "ALL" });
+  const [filter, setFilter] = useState({ status: "ALL", dateFrom: "", dateTo: "", doctorId: "", patientId: "", type: "ALL" });
 
   useEffect(() => {
     const fetchAppointments = async () => {
@@ -64,7 +64,7 @@ export default function AppointmentList({ onEdit }) {
     const matchesDateTo = !filter.dateTo || new Date(appt.date) <= new Date(filter.dateTo);
     const matchesDoctor = !filter.doctorId || appt.doctorId === parseInt(filter.doctorId);
     const matchesPatient = !filter.patientId || appt.patientId === parseInt(filter.patientId);
-    const matchesType = filter.type === "ALL" || appt.type;
+    const matchesType = filter.type === "ALL" || appt.type === filter.type;
     return matchesStatus && matchesDateFrom && matchesDateTo && matchesDoctor && matchesPatient && matchesType;
   });
 
@@ -74,13 +74,13 @@ export default function AppointmentList({ onEdit }) {
       field: "patientName",
       headerName: "Patient",
       width: 150,
-      valueGetter: (params) => params?.row?.patient?.name ?? "N/A",
+      valueGetter: (params) => params?.row?.patient?.user?.name ?? "N/A",
     },
     {
       field: "doctorName",
       headerName: "Doctor",
       width: 150,
-      valueGetter: (params) => params?.row?.doctor?.name ?? "N/A",
+      valueGetter: (params) => params?.row?.doctor?.user?.name ?? "N/A",
     },
     {
       field: "date",
@@ -101,7 +101,7 @@ export default function AppointmentList({ onEdit }) {
       field: "queueNumber",
       headerName: "Queue",
       width: 100,
-      valueGetter: (params) => params?.row?.queueNumber ?? "N/A",
+      valueGetter: (params) => params?.row?.queue?.queueNumber ?? "N/A",
     },
     {
       field: "actions",
