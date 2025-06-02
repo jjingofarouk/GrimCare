@@ -7,8 +7,9 @@ export async function getAppointments() {
   try {
     const response = await axios.get(`${BASE_URL}${API_ROUTES.APPOINTMENT}`, {
       headers: { Authorization: `Bearer ${localStorage.getItem('token')}` },
-      params: { include: 'patient.user,doctor.user,queue' },
+      params: { include: 'patient.user,doctor.user,queue,department,bookedBy' },
     });
+    console.log('Appointments response:', response.data);
     return response.data;
   } catch (error) {
     console.error('Error fetching appointments:', error);
@@ -20,9 +21,9 @@ export async function createAppointment(data) {
   try {
     const response = await axios.post(`${BASE_URL}${API_ROUTES.APPOINTMENT}`, data, {
       headers: { Authorization: `Bearer ${localStorage.getItem('token')}` },
-      params: { include: 'patient.user,doctor.user,queue' },
+      params: { include: 'patient.user,doctor.user,queue,department,bookedBy' },
     });
-    console.log('Created appointment:', response.data); // Debug
+    console.log('Created appointment:', response.data);
     return response.data;
   } catch (error) {
     console.error('Error creating appointment:', error);
@@ -34,9 +35,9 @@ export async function updateAppointment(id, data) {
   try {
     const response = await axios.put(`${BASE_URL}${API_ROUTES.APPOINTMENT}/${id}`, data, {
       headers: { Authorization: `Bearer ${localStorage.getItem('token')}` },
-      params: { include: 'patient.user,doctor.user,queue' },
+      params: { include: 'patient.user,doctor.user,queue,department,bookedBy' },
     });
-    console.log('Updated appointment:', response.data); // Debug
+    console.log('Updated appointment:', response.data);
     return response.data;
   } catch (error) {
     console.error('Error updating appointment:', error);
@@ -110,8 +111,9 @@ export async function getDoctors() {
   try {
     const response = await axios.get(`${BASE_URL}${API_ROUTES.DOCTOR}`, {
       headers: { Authorization: `Bearer ${localStorage.getItem('token')}` },
-      params: { include: 'user' },
+      params: { include: 'user,department' },
     });
+    console.log('Doctors response:', response.data);
     return response.data;
   } catch (error) {
     console.error('Error fetching doctors:', error);
@@ -125,6 +127,7 @@ export async function getPatients() {
       headers: { Authorization: `Bearer ${localStorage.getItem('token')}` },
       params: { include: 'user' },
     });
+    console.log('Patients response:', response.data);
     return response.data;
   } catch (error) {
     console.error('Error fetching patients:', error);
