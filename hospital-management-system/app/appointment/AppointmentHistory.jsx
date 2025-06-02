@@ -1,57 +1,62 @@
 
-// AppointmentHistory.jsx
 import React, { useState, useEffect } from 'react';
-import styles from './AppointmentHistory.module.css';
-import AppointmentCard from './AppointmentCard';
+import { Box, Typography, Alert, FormControl, Select, MenuItem } from '@mui/material';
+import { DataGrid } from '@mui/x-data-grid';
 import { getAppointments } from './appointmentService';
+import { format } from 'date-fns';
 
-export default function AppointmentHistory({ patientId }) {
+export default function AppointmentHistory({ patients }) {
+  const [selectedPatientId, setSelectedPatientId] = useState('');
   const [appointments, setAppointments] = useState([]);
   const [error, setError] = useState(null);
-  const [page, setPage] = useState(1);
-  const appointmentsPerPage = 5;
 
   useEffect(() => {
-    const fetchAppointments = async () => {
-      try {
-        const data = await getAppointments();
-        const patientAppointments = data.filter((appt) => appt.patient.id === patientId);
-        setAppointments(patientAppointments);
-      } catch (err) {
-        setError('Failed to fetch appointment history');
-      }
-    };
-    fetchAppointments();
-  }, [patientId]);
+    if (selectedPatientId) {
+      const fetchAppointments = async () => {
+        try {
+          const data = await getAppointments();
+          const patientAppointments = data.filter((appt) => appt.patient.id === parseInt(selectedPatientId));
+          setAppointments(patientAppointments);
+        } catch (err) {
+          setError('Failed to fetch appointment history');
+        }
+      };
+      fetchAppointments();
+    }
+  }, [selectedPatientId]);
 
-  const paginatedAppointments = appointments.slice((page - 1) * appointmentsPerPage, page * appointmentsPerPage);
+  const columns = [
+    { field: 'id', headerName: 'ID', width: 90 },
+    { field: 'doctorName', headerName: 'Doctor', width: 150, valueGetter: (params) => params.row.doctor.user.name },
+    { field: 'date', headerName: 'Date', width: 200, valueGetter: (params) => format(new Date(params.row.date), 'PPp') },
+    { field: 'type', headerName: 'Type', width: 120 },
+    { field: 'status', headerName: 'Status', width: 120 },
+    { field: 'reason', headerName: 'Reason', width: 150 },
+    { field: 'notes', headerName: 'Notes', width: 200 },
+  ];
 
   return (
-    <div className={styles.container}>
-      <h2 className={styles.title}>Appointment History</h2>
-      {error && <p className={styles.error}>{error}</p>}
-      <div className={styles.list}>
-        {paginatedAppointments.map((appointment) => (
-          <AppointmentCard key={appointment.id} appointment={appointment} />
-        ))}
-      </div>
-      <div className={styles.pagination}>
-        <button
-          disabled={page === 1}
-          onClick={() => setPage((prev) => prev - 1)}
-          className={styles.pageButton}
-        >
-          Previous
-        </button>
-        <span>Page {page}</span>
-        <button
-          disabled={page * appointmentsPerPage >= appointments.length}
-          onClick={() => setPage((prev) => prev + 1)}
-          className={styles.pageButton}
-        >
-          Next
-        </button>
-      </div>
-    </div>
+    <Box sx={{ p: 2 }}>
+      <Typography variant="h5" gutterBottom>Appointment History</Typography>
+      <FormControl fullWidth sx={{ mb: 2 }}>
+        <Select value={selectedPatientId} onChange={(e) => setSelectedPatientId(e.target.value)} displayEmpty>
+          <MenuItem value="">Select Patient</MenuItem>
+          {patients.map((patient) => (
+            <MenuItem key={patient.id} value={patient.id}>{patient.user.name}</MenuItem>
+          ))}
+        </Select>
+      </FormControl>
+      {error && <Alert severity="error">{error}</Alert>}
+      {selectedPatientId && (
+        <Box sx={{ height: 400, width: '100%' }}>
+          <DataGrid
+            rows={appointments}
+            columns={columns}
+            pageSizeOptions={[5, 10, 20]}
+            disableRowSelectionOnClick
+          />
+        </Box>
+      )}
+    </Box>
   );
 }
