@@ -158,7 +158,7 @@ export default function AvailableDoctorsList() {
           columns={columns}
           getRowId={(row) => row.id}
           pageSizeOptions={[5, 10, 20]}
-          disableRowSelectionOnClick
+          disableRowSelectionOnClick
           className={styles.grid}
         />
       </Box>
