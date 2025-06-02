@@ -17,9 +17,14 @@ export default function DoctorAvailability({ doctors }) {
       const fetchAvailability = async () => {
         try {
           const data = await getAvailability({ doctorId: selectedDoctorId });
-          setAvailability(data);
+          // Validate and filter data to ensure it has required fields
+          const validData = Array.isArray(data)
+            ? data.filter(item => item && item.startTime && item.endTime && !isNaN(new Date(item.startTime)))
+            : [];
+          setAvailability(validData);
         } catch (err) {
           setError('Failed to fetch availability');
+          console.error('Fetch availability error:', err);
         }
       };
       fetchAvailability();
@@ -32,15 +37,44 @@ export default function DoctorAvailability({ doctors }) {
       await createAvailability({ ...formData, doctorId: selectedDoctorId });
       setFormData({ startTime: '', endTime: '', status: 'AVAILABLE' });
       const data = await getAvailability({ doctorId: selectedDoctorId });
-      setAvailability(data);
+      // Validate and filter data
+      const validData = Array.isArray(data)
+        ? data.filter(item => item && item.startTime && item.endTime && !isNaN(new Date(item.startTime)))
+        : [];
+      setAvailability(validData);
     } catch (err) {
       setError('Failed to create availability');
+      console.error('Create availability error:', err);
     }
   };
 
   const columns = [
-    { field: 'startTime', headerName: 'Start Time', width: 200, valueGetter: (params) => format(new Date(params.row.startTime), 'PPp') },
-    { field: 'endTime', headerName: 'End Time', width: 200, valueGetter: (params) => format(new Date(params.row.endTime), 'PPp') },
+    {
+      field: 'startTime',
+      headerName: 'Start Time',
+      width: 200,
+      valueGetter: (params) => {
+        try {
+          const date = params.row?.startTime ? new Date(params.row.startTime) : null;
+          return date && !isNaN(date) ? format(date, 'PPp') : 'N/A';
+        } catch {
+          return 'N/A';
+        }
+      },
+    },
+    {
+      field: 'endTime',
+      headerName: 'End Time',
+      width: 200,
+      valueGetter: (params) => {
+        try {
+          const date = params.row?.endTime ? new Date(params.row.endTime) : null;
+          return date && !isNaN(date) ? format(date, 'PPp') : 'N/A';
+        } catch {
+          return 'N/A';
+        }
+      },
+    },
     { field: 'status', headerName: 'Status', width: 120 },
   ];
 
