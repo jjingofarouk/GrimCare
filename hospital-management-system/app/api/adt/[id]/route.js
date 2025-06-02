@@ -45,6 +45,8 @@ export async function PUT(request, { params }) {
         admissionDate: data.admissionDate ? new Date(data.admissionDate) : undefined,
         triagePriority: data.triagePriority || null,
         triageNotes: data.triageNotes || null,
+        presentingComplaints: data.presentingComplaints || null,
+        relayedInfo: data.relayedInfo || null,
         status: data.status,
         dischargeNotes: data.dischargeNotes || null,
         dischargeDate: data.dischargeDate ? new Date(data.dischargeDate) : null,

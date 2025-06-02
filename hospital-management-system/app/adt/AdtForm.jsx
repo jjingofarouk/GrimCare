@@ -1,9 +1,10 @@
-"use client"
+// app/adt/AdmissionForm.jsx
+"use client";
 import React, { useState, useEffect } from 'react';
-import { TextField, Button, MenuItem, Grid, Paper, Typography, Box } from '@mui/material';
-import { createAdmission, updateAdmission } from './adtService';
+import { TextField, Button, MenuItem, Grid, Paper, Typography, Box, Autocomplete } from '@mui/material';
+import { createAdmission, updateAdmission, getPatients } from './adtService';
 
-export default function AdmissionForm({ admission, onSubmit, patients, doctors, wards }) {
+export default function AdmissionForm({ admission, onSubmit, doctors, wards }) {
   const [formData, setFormData] = useState({
     patientId: admission?.patientId || '',
     wardId: admission?.wardId || '',
@@ -12,11 +13,24 @@ export default function AdmissionForm({ admission, onSubmit, patients, doctors, 
     status: admission?.status || 'ADMITTED',
     triagePriority: admission?.triagePriority || '',
     triageNotes: admission?.triageNotes || '',
+    presentingComplaints: admission?.presentingComplaints || '',
+    relayedInfo: admission?.relayedInfo || '',
     dischargeNotes: admission?.dischargeNotes || '',
     dischargeDate: admission?.dischargeDate ? new Date(admission.dischargeDate).toISOString().split('T')[0] : '',
   });
+  const [patients, setPatients] = useState([]);
+  const [searchQuery, setSearchQuery] = useState('');
 
   useEffect(() => {
+    async function fetchPatients() {
+      try {
+        const data = await getPatients();
+        setPatients(data);
+      } catch (error) {
+        console.error('Error fetching patients:', error);
+      }
+    }
+    fetchPatients();
     if (admission?.id) {
       setFormData({
         patientId: admission.patientId,
@@ -26,6 +40,8 @@ export default function AdmissionForm({ admission, onSubmit, patients, doctors, 
         status: admission.status || 'ADMITTED',
         triagePriority: admission.triagePriority || '',
         triageNotes: admission.triageNotes || '',
+        presentingComplaints: admission.presentingComplaints || '',
+        relayedInfo: admission.relayedInfo || '',
         dischargeNotes: admission.dischargeNotes || '',
         dischargeDate: admission.dischargeDate ? new Date(admission.dischargeDate).toISOString().split('T')[0] : '',
       });
@@ -35,6 +51,10 @@ export default function AdmissionForm({ admission, onSubmit, patients, doctors, 
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData({ ...formData, [name]: value });
+  };
+
+  const handlePatientSelect = (event, value) => {
+    setFormData({ ...formData, patientId: value ? value.id : '' });
   };
 
   const handleSubmit = async (e) => {
@@ -54,6 +74,8 @@ export default function AdmissionForm({ admission, onSubmit, patients, doctors, 
         status: 'ADMITTED',
         triagePriority: '',
         triageNotes: '',
+        presentingComplaints: '',
+        relayedInfo: '',
         dischargeNotes: '',
         dischargeDate: '',
       });
@@ -63,7 +85,7 @@ export default function AdmissionForm({ admission, onSubmit, patients, doctors, 
   };
 
   return (
-    <Box sx={{ maxWidth: 800, mx: 'auto' }}>
+    <Box sx={{ maxWidth: '100%', mx: 'auto' }}>
       <Paper sx={{ p: 3, mb: 4 }}>
         <Typography variant="h6" gutterBottom>
           {admission?.id ? 'Update Admission' : 'New Admission'}
@@ -71,21 +93,20 @@ export default function AdmissionForm({ admission, onSubmit, patients, doctors, 
         <form onSubmit={handleSubmit}>
           <Grid container spacing={2}>
             <Grid item xs={12} sm={6}>
-              <TextField
-                select
-                label="Patient"
-                name="patientId"
-                value={formData.patientId}
-                onChange={handleChange}
-                fullWidth
-                required
-              >
-                {patients.map((patient) => (
-                  <MenuItem key={patient.id} value={patient.id}>
-                    {patient.user.name}
-                  </MenuItem>
-                ))}
-              </TextField>
+              <Autocomplete
+                options={patients}
+                getOptionLabel={(option) => `${option.user.name} (${option.patientId})`}
+                onChange={handlePatientSelect}
+                renderInput={(params) => (
+                  <TextField
+                    {...params}
+                    label="Search Patient"
+                    fullWidth
+                    required
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                  />
+                )}
+              />
             </Grid>
             <Grid item xs={12} sm={6}>
               <TextField
@@ -159,6 +180,28 @@ export default function AdmissionForm({ admission, onSubmit, patients, doctors, 
                 <MenuItem value="MEDIUM">Medium</MenuItem>
                 <MenuItem value="HIGH">High</MenuItem>
               </TextField>
+            </Grid>
+            <Grid item xs={12}>
+              <TextField
+                label="Presenting Complaints"
+                name="presentingComplaints"
+                value={formData.presentingComplaints}
+                onChange={handleChange}
+                fullWidth
+                multiline
+                rows={3}
+              />
+            </Grid>
+            <Grid item xs={12}>
+              <TextField
+                label="Relayed Information"
+                name="relayedInfo"
+                value={formData.relayedInfo}
+                onChange={handleChange}
+                fullWidth
+                multiline
+                rows={3}
+              />
             </Grid>
             <Grid item xs={12}>
               <TextField

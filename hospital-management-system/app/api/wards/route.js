@@ -1,6 +1,6 @@
-// app/api/wards/route.js
 import { PrismaClient } from '@prisma/client';
 import { NextResponse } from 'next/server';
+import { v4 as uuidv4 } from 'uuid';
 
 const prisma = new PrismaClient();
 
@@ -19,15 +19,19 @@ export async function GET() {
 export async function POST(request) {
   try {
     const data = await request.json();
-    if (!data.name || !data.totalBeds) {
-      return NextResponse.json({ error: 'Missing required fields' }, { status: 400 });
+    if (!data.name || !data.totalBeds || !data.department || !data.location || !data.nurseInCharge) {
+      return NextResponse.json({ error: 'Missing required fields: name, totalBeds, department, location, nurseInCharge' }, { status: 400 });
     }
+
     const ward = await prisma.ward.create({
       data: {
         name: data.name,
-        totalBeds: data.totalBeds,
-        occupiedBeds: data.occupiedBeds || 0,
-        department: data.department || null,
+        wardNumber: data.wardNumber || `W-${uuidv4().slice(0, 8)}`,
+        totalBeds: parseInt(data.totalBeds),
+        occupiedBeds: data.occupiedBeds ? parseInt(data.occupiedBeds) : 0,
+        department: data.department,
+        location: data.location,
+        nurseInCharge: data.nurseInCharge,
       },
     });
     return NextResponse.json(ward, { status: 201 });

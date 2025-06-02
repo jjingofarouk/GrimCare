@@ -1,6 +1,6 @@
 /* Header.module.css */
 
-/* Unchanged header styles */
+/* Updated header styles with fixed height */
 .header {
   background: #ffffff !important;
   color: #1f2937 !important;
@@ -8,6 +8,8 @@
   border-bottom: 1px solid #e5e7eb;
   backdrop-filter: blur(8px);
   z-index: 1100 !important;
+  height: 64px !important; /* Explicitly set fixed height */
+  position: relative; /* Ensure proper stacking */
 }
 
 .toolbar {
@@ -15,7 +17,7 @@
   justify-content: space-between;
   align-items: center;
   padding: 0 1.5rem !important;
-  min-height: 64px !important;
+  height: 64px !important; /* Match header height, replacing min-height */
   max-width: 100%;
 }
 
@@ -37,9 +39,9 @@
 
 /* Updated logoImage to be larger and circular */
 .logoImage {
-  width: 48px; /* Increased from 32px for better visibility */
-  height: 48px; /* Increased from 32px */
-  border-radius: 50%; /* Changed to 50% for circular shape */
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
   object-fit: contain;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
   flex-shrink: 0;
@@ -47,7 +49,7 @@
 
 /* Updated headerTitle for larger, consistent size */
 .headerTitle {
-  font-size: 1.5rem !important; /* Increased from 1.375rem for better visibility */
+  font-size: 1.5rem !important;
   font-weight: 700 !important;
   color: #1e40af !important;
   letter-spacing: -0.025em;
@@ -120,7 +122,7 @@
 
 /* Updated userName for larger size */
 .userName {
-  font-size: 1rem !important; /* Increased from 0.9375rem */
+  font-size: 1rem !important;
   font-weight: 500 !important;
   color: #374151 !important;
   white-space: nowrap;
@@ -145,12 +147,12 @@
 
 /* Updated userAvatar to be larger and circular */
 .userAvatar {
-  width: 48px !important; /* Increased from 36px */
-  height: 48px !important; /* Increased from 36px */
-  border-radius: 50% !important; /* Ensure circular shape */
-  background: linear-gradient(to bottom right, #3b82f6, #2563eb) !important; /* Fixed invalid syntax */
+  width: 48px !important;
+  height: 48px !important;
+  border-radius: 50% !important;
+  background: linear-gradient(to bottom right, #3b82f6, #2563eb) !important;
   color: #ffffff !important;
-  font-size: 1rem !important; /* Increased from 0.9375rem */
+  font-size: 1rem !important;
   font-weight: 600 !important;
   box-shadow: 0 2px 4px rgba(59, 130, 246, 0.2);
   display: flex;
@@ -193,7 +195,7 @@
 @media (max-width: 768px) {
   .toolbar {
     padding: 0 1.25rem !important;
-    min-height: 64px !important;
+    height: 64px !important; /* Fixed height */
   }
   
   .logoContainer {
@@ -202,13 +204,13 @@
   }
   
   .logoImage {
-    width: 40px; /* Slightly smaller than desktop but larger than original 32px */
+    width: 40px;
     height: 40px;
-    border-radius: 50%; /* Ensure circular */
+    border-radius: 50%;
   }
   
   .headerTitle {
-    font-size: 1.25rem !important; /* Adjusted from 1.125rem for better visibility */
+    font-size: 1.25rem !important;
     max-width: 140px;
   }
   
@@ -229,17 +231,17 @@
   }
   
   .userAvatar {
-    width: 40px !important; /* Adjusted from 32px */
+    width: 40px !important;
     height: 40px !important;
-    border-radius: 50% !important; /* Ensure circular */
-    font-size: 0.875rem !important; /* Adjusted from 0.8125rem */
+    border-radius: 50% !important;
+    font-size: 0.875rem !important;
   }
 }
 
 @media (max-width: 480px) {
   .toolbar {
     padding: 0 0.75rem !important;
-    min-height: 52px !important;
+    height: 64px !important; /* Fixed height */
   }
   
   .logoContainer {
@@ -248,21 +250,21 @@
   }
   
   .logoImage {
-    width: 32px; /* Increased from 24px for better visibility */
+    width: 32px;
     height: 32px;
-    border-radius: 50%; /* Ensure circular */
+    border-radius: 50%;
   }
   
   .headerTitle {
-    font-size: 1rem !important; /* Increased from 0.875rem */
+    font-size: 1rem !important;
     max-width: 100px;
   }
   
   .userAvatar {
-    width: 32px !important; /* Increased from 24px */
+    width: 32px !important;
     height: 32px !important;
-    border-radius: 50% !important; /* Ensure circular */
-    font-size: 0.75rem !important; /* Increased from 0.625rem */
+    border-radius: 50% !important;
+    font-size: 0.75rem !important;
   }
   
   .menuIcon {
@@ -282,20 +284,20 @@
   }
   
   .userName {
-    font-size: 0.9375rem !important; /* Slightly smaller but consistent */
+    font-size: 0.9375rem !important;
     max-width: 120px;
   }
   
   .logoImage {
-    width: 44px; /* Adjusted for tablet */
+    width: 44px;
     height: 44px;
-    border-radius: 50%; /* Ensure circular */
+    border-radius: 50%;
   }
   
   .userAvatar {
-    width: 44px !important; /* Adjusted for tablet */
+    width: 44px !important;
     height: 44px !important;
-    border-radius: 50% !important; /* Ensure circular */
+    border-radius: 50% !important;
     font-size: 0.9375rem !important;
   }
 }
@@ -311,20 +313,20 @@
   }
   
   .userName {
-    font-size: 1.125rem !important; /* Increased for larger screens */
+    font-size: 1.125rem !important;
     max-width: 200px;
   }
   
   .logoImage {
-    width: 52px; /* Slightly larger for large screens */
+    width: 52px;
     height: 52px;
-    border-radius: 50%; /* Ensure circular */
+    border-radius: 50%;
   }
   
   .userAvatar {
-    width: 52px !important; /* Slightly larger */
+    width: 52px !important;
     height: 52px !important;
-    border-radius: 50% !important; /* Ensure circular */
+    border-radius: 50% !important;
     font-size: 1.125rem !important;
   }
 }
@@ -434,11 +436,11 @@
   }
   
   .logoImage {
-    box-shadow: 0 2px 4px rgba(255, 255, 255, 0.1); /* Adjusted for dark mode */
+    box-shadow: 0 2px 4px rgba(255, 255, 255, 0.1);
   }
   
   .userAvatar {
-    background: linear-gradient(to bottom right, #60a5fa, #3b82f6) !important; /* Adjusted for dark mode */
+    background: linear-gradient(to bottom right, #60a5fa, #3b82f6) !important;
     box-shadow: 0 2px 4px rgba(96, 165, 250, 0.2);
   }
 }

@@ -1,4 +1,3 @@
-// prisma/resetAndSeed.js
 const { PrismaClient } = require('@prisma/client');
 const bcrypt = require('bcryptjs');
 
@@ -6,14 +5,19 @@ const prisma = new PrismaClient();
 
 async function resetDatabase() {
   try {
-    await prisma.admission.deleteMany();
-    await prisma.transaction.deleteMany();
-    await prisma.payroll.deleteMany();
-    await prisma.costCenter.deleteMany();
+    await prisma.cSSDLog.deleteMany();
+    await prisma.cSSDRequisition.deleteMany();
+    await prisma.cSSDRecord.deleteMany();
+    await prisma.cSSDInstrument.deleteMany();
     await prisma.fixedAsset.deleteMany();
+    await prisma.payroll.deleteMany();
+    await prisma.transaction.deleteMany();
+    await prisma.discharge.deleteMany();
+    await prisma.admission.deleteMany();
     await prisma.patient.deleteMany();
     await prisma.doctor.deleteMany();
     await prisma.ward.deleteMany();
+    await prisma.costCenter.deleteMany();
     await prisma.user.deleteMany();
     console.log('Database cleared successfully');
   } catch (error) {
@@ -30,8 +34,8 @@ async function seedDatabase() {
       'Abaho Abbott', 'Abamukama Robinah', 'Abaasa Michael', 'Aber Elizabeth',
       'Aceng Princess Priscilla', 'Agona Ambrose', 'Ahimbisibwe Gideon',
       'Ainembabazi Rachael', 'Ainomugisha Barbra', 'Akampa Joanita',
-      'Arinaitwe Edward', 'Ayiekoh Allan Mwesigwa', 'Babirye Sheba Balisanyuka',
-      'Bukomeko Charles', 'Daniel Mugabe Arinaitwe', 'Fred Dratia', 'Ishimwe Mark',
+      'Arinaitwe Edward', 'Ayieko Allan Mwesigwa', 'Babirye Sheba Balisanyuka',
+      'Bukomeko Charles', 'Daniel Mugabe', 'Fred Dratia', 'Ishimwe Mark',
       'Jjingo Farouk', 'Jjuuko Ismail Nakibinge', 'Joshua Opio Ekwamu',
       'Kabagenyi Oliyer Abwooli', 'Kakande Regan', 'Kakembo Jovan',
       'Kalyango Joshua', 'Kamusime Crescent', 'Kasagga Ashraf', 'Katamba Godfrey',
@@ -49,7 +53,7 @@ async function seedDatabase() {
       'Nassuna Kevin', 'Ndagano Isaac', 'Ngobi Treva', 'Niwagaba Danson',
       'Niyigena Landry Ildefonse', 'Nomugisha Penelope', 'Ntaate Jonathan Cyrus',
       'Nuwemwiine Isaac', 'Nyinobugaiga Habibah', 'Nzayisenga Vincent',
-      'Obedgiu Bemjamin Luga', 'Odem Vincent', 'Okello John Emmanuel',
+      'Obedgiu Benjamin Luga', 'Odem Vincent', 'Okello John Emmanuel',
       'Okia Charles Simon', 'Okongel Ruth Peace', 'Oriono Felix', 'Oyala Nathan',
       'Singba Grace Zindo', 'Ssenyonga Edgar Regan', 'Sseruwano Fredrick',
       'Sserwanja Noah', 'Syodo Collins', 'Tugaine Anslem', 'Turyagyenda Joel',
@@ -87,50 +91,54 @@ async function seedDatabase() {
       'Akello Brenda', 'Sekabira Isaac', 'Namyalo Peace', 'Ojok Emmanuel'
     ];
 
+    // Users
     const users = [
       ...patientNames.map((name, index) => ({
         email: `patient${index + 1}@example.com`,
         name,
-        role: 'PATIENT'
+        role: 'PATIENT',
       })),
       ...doctorNames.map((name, index) => ({
         email: `doctor${index + 1}@example.com`,
         name,
-        role: 'DOCTOR'
+        role: 'DOCTOR',
       })),
-      { email: 'nurse.nansamba@example.com', name: 'Nansamba Jane', role: 'NURSE' },
-      { email: 'admin.okello@example.com', name: 'Okello James', role: 'ADMIN' },
+      { email: 'nurse1@example.com', name: 'Nansamba Jane', role: 'NURSE' },
+      { email: 'admin1@example.com', name: 'Okello James', role: 'ADMIN' },
     ];
 
-    const createdUsers = await Promise.all(
+    const createdUsers = await prisma.$transaction(
       users.map(user =>
         prisma.user.create({
           data: {
             email: user.email,
             name: user.name,
-            password: hashedPassword,
             role: user.role,
+            password: hashedPassword,
           },
         })
       )
     );
 
-    // Seed Patients
-    const generatePatientId = () => `LMX${Math.floor(100000 + Math.random() * 900000)}`;
+    // Patients
     const patientUsers = createdUsers.filter(user => user.role === 'PATIENT');
     const patients = patientUsers.map((user, index) => ({
-      userId: user.id,
-      dateOfBirth: new Date(1970 + Math.floor(Math.random() * 50), Math.floor(Math.random() * 12), Math.floor(Math.random() * 28)),
+      patientId: `P${100000 + index}`,
+      dateOfBirth: new Date(1960 + Math.floor(Math.random() * 50), Math.random() * 12, Math.random() * 28),
       gender: Math.random() > 0.5 ? 'Male' : 'Female',
-      phone: `256-70${Math.floor(1000000 + Math.random() * 9000000)}`,
-      address: ['Kampala', 'Mbarara', 'Gulu', 'Jinja', 'Mbale'][Math.floor(Math.random() * 5)],
-      emergencyContact: `256-70${Math.floor(1000000 + Math.random() * 9000000)}`,
-      insuranceProvider: ['AAR', 'UAP', 'Jubilee', 'Sanlam', 'ICEA'][Math.floor(Math.random() * 5)],
-      insurancePolicy: `${['AAR', 'UAP', 'JUB', 'SAN', 'ICEA'][Math.floor(Math.random() * 5)]}${Math.floor(10000 + Math.random() * 90000)}`,
-      patientId: generatePatientId(),
+      phone: `+2567${Math.floor(10000000 + Math.random() * 90000000)}`,
+      address: ['Kampala', 'Gulu', 'Mbarara', 'Jinja'][Math.floor(Math.random() * 4)],
+      emergencyContact: `Contact ${index + 1}`,
+      emergencyContactPhone: `+2567${Math.floor(10000000 + Math.random() * 90000000)}`,
+      insuranceProvider: ['AAR', 'UAP', 'Jubilee'][Math.floor(Math.random() * 3)],
+      insurancePolicy: `POL${10000 + index}`,
+      bloodType: ['A+', 'B+', 'O+', 'AB+'][Math.floor(Math.random() * 4)],
+      allergies: Math.random() > 0.7 ? 'Peanuts' : null,
+      medicalHistory: Math.random() > 0.7 ? 'Hypertension' : null,
+      user: { connect: { id: user.id } },
     }));
 
-    const createdPatients = await Promise.all(
+    const createdPatients = await prisma.$transaction(
       patients.map(patient =>
         prisma.patient.create({
           data: patient,
@@ -138,20 +146,22 @@ async function seedDatabase() {
       )
     );
 
-    // Seed Doctors
+    // Doctors
     const specialties = [
       'Cardiology', 'Pediatrics', 'Orthopedics', 'Neurology', 'General Medicine',
       'Oncology', 'Dermatology', 'Gastroenterology', 'Endocrinology', 'Pulmonology',
-      'Urology', 'Ophthalmology', 'ENT', 'Rheumatology', 'Nephrology'
     ];
     const doctorUsers = createdUsers.filter(user => user.role === 'DOCTOR');
     const doctors = doctorUsers.map((user, index) => ({
-      user: { connect: { id: user.id } },
+      doctorId: `D${100000 + index}`,
       specialty: specialties[Math.floor(Math.random() * specialties.length)],
-      licenseNumber: `LIC${10001 + index}`
+      licenseNumber: `LIC${10000 + index}`,
+      phone: `+2567${Math.floor(10000000 + Math.random() * 90000000)}`,
+      office: `Room ${index + 101}`,
+      user: { connect: { id: user.id } },
     }));
 
-    const createdDoctors = await Promise.all(
+    const createdDoctors = await prisma.$transaction(
       doctors.map(doctor =>
         prisma.doctor.create({
           data: doctor,
@@ -159,22 +169,16 @@ async function seedDatabase() {
       )
     );
 
-    // Seed Wards
+    // Wards
     const wards = [
-      { name: 'Medical Ward', totalBeds: 30, occupiedBeds: 0, department: 'General Medicine' },
-      { name: 'Surgical Ward', totalBeds: 25, occupiedBeds: 0, department: 'Surgery' },
-      { name: 'Pediatric Ward', totalBeds: 20, occupiedBeds: 0, department: 'Pediatrics' },
-      { name: 'Maternity Ward', totalBeds: 15, occupiedBeds: 0, department: 'Obstetrics' },
-      { name: 'Neonatal Unit (NICU)', totalBeds: 10, occupiedBeds: 0, department: 'Neonatal Care' },
-      { name: 'Emergency Department', totalBeds: 12, occupiedBeds: 0, department: 'Emergency' },
-      { name: 'Intensive Care Unit (ICU)', totalBeds: 8, occupiedBeds: 0, department: 'Critical Care' },
-      { name: 'Orthopedic Ward', totalBeds: 15, occupiedBeds: 0, department: 'Orthopedics' },
-      { name: 'Psychiatric Ward', totalBeds: 10, occupiedBeds: 0, department: 'Psychiatry' },
-      { name: 'Isolation Ward', totalBeds: 5, occupiedBeds: 0, department: 'Infectious Diseases' },
-      { name: 'General Ward', totalBeds: 20, occupiedBeds: 0, department: 'General Medicine' },
+      { name: 'Medical Ward', wardNumber: 'W1001', totalBeds: 30, department: 'General Medicine', location: 'Building A', nurseInCharge: 'Nansamba Jane' },
+      { name: 'Surgical Ward', wardNumber: 'W1002', totalBeds: 25, department: 'Surgery', location: 'Building B', nurseInCharge: 'Nansamba Jane' },
+      { name: 'Pediatric Ward', wardNumber: 'W1003', totalBeds: 20, department: 'Pediatrics', location: 'Building C', nurseInCharge: 'Nansamba Jane' },
+      { name: 'Maternity Ward', wardNumber: 'W1004', totalBeds: 15, department: 'Obstetrics', location: 'Building D', nurseInCharge: 'Nansamba Jane' },
+      { name: 'ICU', wardNumber: 'W1005', totalBeds: 10, department: 'Critical Care', location: 'Building E', nurseInCharge: 'Nansamba Jane' },
     ];
 
-    const createdWards = await Promise.all(
+    const createdWards = await prisma.$transaction(
       wards.map(ward =>
         prisma.ward.create({
           data: ward,
@@ -182,20 +186,20 @@ async function seedDatabase() {
       )
     );
 
-    // Seed Admissions
+    // Admissions
     const admissions = Array.from({ length: 20 }, (_, index) => ({
       patientId: createdPatients[Math.floor(Math.random() * createdPatients.length)].id,
       doctorId: createdDoctors[Math.floor(Math.random() * createdDoctors.length)].id,
       wardId: createdWards[Math.floor(Math.random() * createdWards.length)].id,
-      admissionDate: new Date(2025, 4, Math.floor(Math.random() * 30) + 1),
+      admissionDate: new Date(2025, 0, Math.random() * 28 + 1),
       triagePriority: ['LOW', 'MEDIUM', 'HIGH'][Math.floor(Math.random() * 3)],
-      triageNotes: `Patient condition: ${['Stable', 'Critical', 'Moderate'][Math.floor(Math.random() * 3)]}`,
-      status: ['ADMITTED', 'PENDING', 'DISCHARGED'][Math.floor(Math.random() * 3)],
-      dischargeDate: Math.random() > 0.7 ? new Date(2025, 5, Math.floor(Math.random() * 30) + 1) : null,
-      dischargeNotes: Math.random() > 0.7 ? 'Discharged with medication' : null,
+      triageNotes: `Triage notes for admission ${index + 1}`,
+      status: ['PENDING', 'ADMITTED', 'DISCHARGED'][Math.floor(Math.random() * 3)],
+      dischargeDate: Math.random() > 0.5 ? new Date(2025, 1, Math.random() * 28 + 1) : null,
+      dischargeNotes: Math.random() > 0.5 ? 'Discharged with follow-up' : null,
     }));
 
-    await Promise.all(
+    await prisma.$transaction(
       admissions.map(admission =>
         prisma.admission.create({
           data: admission,
@@ -203,16 +207,34 @@ async function seedDatabase() {
       )
     );
 
-    // Seed CostCenters
+    // Discharges
+    const discharges = admissions
+      .filter(a => a.status === 'DISCHARGED')
+      .map((admission, index) => ({
+        patientId: admission.patientId,
+        doctorId: admission.doctorId,
+        dischargeDate: admission.dischargeDate || new Date(2025, 1, Math.random() * 28 + 1),
+        dischargeNotes: 'Discharged with medication',
+        followUpInstructions: 'Follow-up in 2 weeks',
+        medications: 'Paracetamol, Amoxicillin',
+      }));
+
+    await prisma.$transaction(
+      discharges.map(discharge =>
+        prisma.discharge.create({
+          data: discharge,
+        })
+      )
+    );
+
+    // Cost Centers
     const costCenters = [
       { name: 'Pharmacy', department: 'Medical Services' },
       { name: 'Laboratory', department: 'Diagnostics' },
       { name: 'Surgical Unit', department: 'Surgery' },
-      { name: 'Radiology', department: 'Diagnostics' },
-      { name: 'Emergency', department: 'Emergency Services' },
     ];
 
-    const createdCostCenters = await Promise.all(
+    const createdCostCenters = await prisma.$transaction(
       costCenters.map(costCenter =>
         prisma.costCenter.create({
           data: costCenter,
@@ -220,21 +242,19 @@ async function seedDatabase() {
       )
     );
 
-    // Seed Transactions
-    const transactionTypes = ['EXPENSE', 'REVENUE', 'REFUND'];
-    const transactionCategories = ['Pharmacy', 'Laboratory', 'Surgery', 'Consultation', 'Radiology'];
-    const transactions = Array.from({ length: 50 }, (_, index) => ({
-      description: `${transactionCategories[Math.floor(Math.random() * transactionCategories.length)]} for Patient ${Math.floor(Math.random() * 100) + 1}`,
-      amount: Math.floor(Math.random() * 500000) + 50000,
-      category: transactionCategories[Math.floor(Math.random() * transactionCategories.length)],
-      status: ['COMPLETED', 'PENDING', 'FAILED'][Math.floor(Math.random() * 3)],
-      type: transactionTypes[Math.floor(Math.random() * transactionTypes.length)],
+    // Transactions
+    const transactions = Array.from({ length: 30 }, (_, index) => ({
+      description: `Service ${index + 1}`,
+      amount: Math.random() * 100000 + 10000,
+      category: ['Consultation', 'Lab', 'Pharmacy'][Math.floor(Math.random() * 3)],
+      status: ['COMPLETED', 'PENDING'][Math.floor(Math.random() * 2)],
+      type: ['REVENUE', 'EXPENSE'][Math.floor(Math.random() * 2)],
       costCenterId: createdCostCenters[Math.floor(Math.random() * createdCostCenters.length)].id,
       patientId: createdPatients[Math.floor(Math.random() * createdPatients.length)].id,
-      date: new Date(2025, Math.floor(Math.random() * 5), Math.floor(Math.random() * 30) + 1),
+      date: new Date(2025, Math.random() * 5, Math.random() * 28 + 1),
     }));
 
-    await Promise.all(
+    await prisma.$transaction(
       transactions.map(transaction =>
         prisma.transaction.create({
           data: transaction,
@@ -242,18 +262,18 @@ async function seedDatabase() {
       )
     );
 
-    // Seed Payrolls
+    // Payrolls
     const payrollUsers = createdUsers.filter(user => ['DOCTOR', 'NURSE', 'ADMIN'].includes(user.role));
     const payrolls = payrollUsers.map((user, index) => ({
       userId: user.id,
-      salary: Math.floor(Math.random() * 5000000) + 2000000,
-      taxes: Math.floor(Math.random() * 1500000) + 500000,
-      benefits: Math.floor(Math.random() * 500000) + 100000,
-      period: `2025-0${Math.floor(Math.random() * 5) + 1}`,
+      salary: Math.random() * 4000000 + 1000000,
+      taxes: Math.random() * 1000000,
+      benefits: Math.random() * 500000,
+      period: `2025-0${Math.floor(Math.random() * 6) + 1}`,
       status: ['PAID', 'PENDING'][Math.floor(Math.random() * 2)],
     }));
 
-    await Promise.all(
+    await prisma.$transaction(
       payrolls.map(payroll =>
         prisma.payroll.create({
           data: payroll,
@@ -261,38 +281,81 @@ async function seedDatabase() {
       )
     );
 
-    // Seed FixedAssets
+    // Fixed Assets
     const fixedAssets = [
-      {
-        name: 'Ultrasound Machine',
-        purchaseDate: new Date('2023-06-01'),
-        purchaseCost: 25000000,
-        depreciation: 5000000,
-        currentValue: 20000000,
-        status: 'ACTIVE',
-      },
-      {
-        name: 'Surgical Table',
-        purchaseDate: new Date('2022-09-15'),
-        purchaseCost: 15000000,
-        depreciation: 4500000,
-        currentValue: 10500000,
-        status: 'ACTIVE',
-      },
-      {
-        name: 'X-Ray Machine',
-        purchaseDate: new Date('2024-01-10'),
-        purchaseCost: 30000000,
-        depreciation: 6000000,
-        currentValue: 24000000,
-        status: 'ACTIVE',
-      },
+      { name: 'Ultrasound Machine', purchaseDate: new Date('2023-01-01'), purchaseCost: 20000000, depreciation: 4000000, currentValue: 16000000, status: 'ACTIVE' },
+      { name: 'X-Ray Machine', purchaseDate: new Date('2022-06-01'), purchaseCost: 30000000, depreciation: 6000000, currentValue: 24000000, status: 'ACTIVE' },
     ];
 
-    await Promise.all(
+    await prisma.$transaction(
       fixedAssets.map(asset =>
         prisma.fixedAsset.create({
           data: asset,
+        })
+      )
+    );
+
+    // CSSD Instruments
+    const cssdInstruments = [
+      { name: 'Scalpel', serialNumber: 'SC001', type: 'Surgical', status: 'AVAILABLE', stockQuantity: 10, minStockThreshold: 5 },
+      { name: 'Forceps', serialNumber: 'FC001', type: 'Surgical', status: 'AVAILABLE', stockQuantity: 15, minStockThreshold: 5 },
+    ];
+
+    const createdInstruments = await prisma.$transaction(
+      cssdInstruments.map(instrument =>
+        prisma.cSSDInstrument.create({
+          data: instrument,
+        })
+      )
+    );
+
+    // CSSD Records
+    const cssdRecords = createdInstruments.map((instrument, index) => ({
+      instrumentId: instrument.id,
+      sterilizationDate: new Date(2025, 0, Math.random() * 28 + 1),
+      sterilizationMethod: 'Autoclave',
+      cycleNumber: `CY${1000 + index}`,
+      status: 'STERILIZED',
+      qualityCheck: 'Passed',
+    }));
+
+    await prisma.$transaction(
+      cssdRecords.map(record =>
+        prisma.cSSDRecord.create({
+          data: record,
+        })
+      )
+    );
+
+    // CSSD Requisitions
+    const cssdRequisitions = Array.from({ length: 5 }, (_, index) => ({
+      instrumentId: createdInstruments[Math.floor(Math.random() * createdInstruments.length)].id,
+      department: ['Surgery', 'Maternity'][Math.floor(Math.random() * 2)],
+      requestedBy: payrollUsers[Math.floor(Math.random() * payrollUsers.length)].id,
+      quantity: Math.floor(Math.random() * 5) + 1,
+      status: ['PENDING', 'APPROVED'][Math.floor(Math.random() * 2)],
+    }));
+
+    await prisma.$transaction(
+      cssdRequisitions.map(requisition =>
+        prisma.cSSDRequisition.create({
+          data: requisition,
+        })
+      )
+    );
+
+    // CSSD Logs
+    const cssdLogs = Array.from({ length: 10 }, (_, index) => ({
+      instrumentId: createdInstruments[Math.floor(Math.random() * createdInstruments.length)].id,
+      userId: payrollUsers[Math.floor(Math.random() * payrollUsers.length)].id,
+      action: ['STERILIZED', 'ISSUED'][Math.floor(Math.random() * 2)],
+      details: `Log entry ${index + 1}`,
+    }));
+
+    await prisma.$transaction(
+      cssdLogs.map(log =>
+        prisma.cSSDLog.create({
+          data: log,
         })
       )
     );
@@ -301,8 +364,6 @@ async function seedDatabase() {
   } catch (error) {
     console.error('Error seeding database:', error);
     throw error;
-  } finally {
-    await prisma.$disconnect();
   }
 }
 

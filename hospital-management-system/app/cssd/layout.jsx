@@ -1,14 +1,20 @@
-// hospital-management-system/app/clinical-settings/layout.jsx
-  
+'use client';
 import React from 'react';
+import { AppBar, Toolbar, Typography, Container } from '@mui/material';
 
 export default function CssdLayout({ children }) {
   return (
-    <div className="min-h-screen bg-gray-100">
-      <header className="bg-blue-500 text-white p-4">
-        <h1 className="text-2xl font-bold">CSSD Management</h1>
-      </header>
-      <main className="p-4">{children}</main>
+    <div style={{ minHeight: '100vh', backgroundColor: '#f5f5f5' }}>
+      <AppBar position="static" sx={{ backgroundColor: '#1976d2' }}>
+        <Toolbar>
+          <Typography variant="h6" component="div">
+            CSSD Management
+          </Typography>
+        </Toolbar>
+      </AppBar>
+      <Container sx={{ py: 4, width: '100%', maxWidth: '100%' }}>
+        {children}
+      </Container>
     </div>
   );
 }

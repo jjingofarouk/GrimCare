@@ -2,76 +2,82 @@ hospital-management-system git:(main) ✗ node prisma/seed.js
 Database cleared successfully
 Error seeding database: PrismaClientValidationError: 
 Invalid `prisma.patient.create()` invocation in
-/project/workspace/hospital-management-system/prisma/seed.js:137:24
+/project/workspace/hospital-management-system/prisma/seed.js:143:24
 
-  134 
-  135 const createdPatients = await Promise.all(
-  136   patients.map(patient =>
-→ 137     prisma.patient.create({
+  140 
+  141 const createdPatients = await prisma.$transaction(
+  142   patients.map(patient =>
+→ 143     prisma.patient.create({
             data: {
-              userId: 33,
-              dateOfBirth: new Date("1979-07-26T00:00:00.000Z"),
+              userId: 1,
+              ~~~~~~
+              patientId: "P100000",
+              dateOfBirth: new Date("2008-07-12T00:00:00.000Z"),
               gender: "Female",
-              phone: "256-708127551",
-              address: "Jinja",
-              emergencyContact: "256-707239711",
+              phone: "+256721579300",
+              address: "Kampala",
+              emergencyContact: "Contact 1",
+              emergencyContactPhone: "+256749908784",
               insuranceProvider: "UAP",
-              insurancePolicy: "SAN10800",
-              patientId: "LMX465382",
-              ~~~~~~~~~
-          ?   id?: Int,
+              insurancePolicy: "POL10000",
+              bloodType: "B+",
+              allergies: null,
+              medicalHistory: null,
           ?   createdAt?: DateTime,
           ?   updatedAt?: DateTime,
-          ?   admissions?: AdmissionUncheckedCreateNestedManyWithoutPatientInput
+          ?   user?: UserCreateNestedOneWithoutPatientInput,
+          ?   admissions?: AdmissionCreateNestedManyWithoutPatientInput,
+          ?   discharges?: DischargeCreateNestedManyWithoutPatientInput,
+          ?   transactions?: TransactionCreateNestedManyWithoutPatientInput
             }
           })
 
-Unknown argument `patientId`. Available options are marked with ?.
+Unknown argument `userId`. Did you mean `user`? Available options are marked with ?.
     at wn (/project/workspace/hospital-management-system/node_modules/@prisma/client/runtime/library.js:29:1363)
     at $n.handleRequestError (/project/workspace/hospital-management-system/node_modules/@prisma/client/runtime/library.js:121:6958)
     at $n.handleAndLogRequestError (/project/workspace/hospital-management-system/node_modules/@prisma/client/runtime/library.js:121:6623)
     at $n.request (/project/workspace/hospital-management-system/node_modules/@prisma/client/runtime/library.js:121:6307)
-    at async l (/project/workspace/hospital-management-system/node_modules/@prisma/client/runtime/library.js:130:9633)
-    at async Promise.all (index 0)
-    at async seedDatabase (/project/workspace/hospital-management-system/prisma/seed.js:135:29)
-    at async main (/project/workspace/hospital-management-system/prisma/seed.js:314:5) {
+    at async l (/project/workspace/hospital-management-system/node_modules/@prisma/client/runtime/library.js:130:9633) {
   clientVersion: '5.22.0'
 }
 Error in main: PrismaClientValidationError: 
 Invalid `prisma.patient.create()` invocation in
-/project/workspace/hospital-management-system/prisma/seed.js:137:24
+/project/workspace/hospital-management-system/prisma/seed.js:143:24
 
-  134 
-  135 const createdPatients = await Promise.all(
-  136   patients.map(patient =>
-→ 137     prisma.patient.create({
+  140 
+  141 const createdPatients = await prisma.$transaction(
+  142   patients.map(patient =>
+→ 143     prisma.patient.create({
             data: {
-              userId: 33,
-              dateOfBirth: new Date("1979-07-26T00:00:00.000Z"),
+              userId: 1,
+              ~~~~~~
+              patientId: "P100000",
+              dateOfBirth: new Date("2008-07-12T00:00:00.000Z"),
               gender: "Female",
-              phone: "256-708127551",
-              address: "Jinja",
-              emergencyContact: "256-707239711",
+              phone: "+256721579300",
+              address: "Kampala",
+              emergencyContact: "Contact 1",
+              emergencyContactPhone: "+256749908784",
               insuranceProvider: "UAP",
-              insurancePolicy: "SAN10800",
-              patientId: "LMX465382",
-              ~~~~~~~~~
-          ?   id?: Int,
+              insurancePolicy: "POL10000",
+              bloodType: "B+",
+              allergies: null,
+              medicalHistory: null,
           ?   createdAt?: DateTime,
           ?   updatedAt?: DateTime,
-          ?   admissions?: AdmissionUncheckedCreateNestedManyWithoutPatientInput
+          ?   user?: UserCreateNestedOneWithoutPatientInput,
+          ?   admissions?: AdmissionCreateNestedManyWithoutPatientInput,
+          ?   discharges?: DischargeCreateNestedManyWithoutPatientInput,
+          ?   transactions?: TransactionCreateNestedManyWithoutPatientInput
             }
           })
 
-Unknown argument `patientId`. Available options are marked with ?.
+Unknown argument `userId`. Did you mean `user`? Available options are marked with ?.
     at wn (/project/workspace/hospital-management-system/node_modules/@prisma/client/runtime/library.js:29:1363)
     at $n.handleRequestError (/project/workspace/hospital-management-system/node_modules/@prisma/client/runtime/library.js:121:6958)
     at $n.handleAndLogRequestError (/project/workspace/hospital-management-system/node_modules/@prisma/client/runtime/library.js:121:6623)
     at $n.request (/project/workspace/hospital-management-system/node_modules/@prisma/client/runtime/library.js:121:6307)
-    at async l (/project/workspace/hospital-management-system/node_modules/@prisma/client/runtime/library.js:130:9633)
-    at async Promise.all (index 0)
-    at async seedDatabase (/project/workspace/hospital-management-system/prisma/seed.js:135:29)
-    at async main (/project/workspace/hospital-management-system/prisma/seed.js:314:5) {
+    at async l (/project/workspace/hospital-management-system/node_modules/@prisma/client/runtime/library.js:130:9633) {
   clientVersion: '5.22.0'
 }
 ➜  hospital-management-system git:(main) ✗ 

@@ -1,15 +1,14 @@
 // app/adt/TriageDashboard.jsx
 "use client";
-
 import React, { useState, useEffect } from 'react';
 import { Box, Typography, Alert } from '@mui/material';
-import { Pie } from 'react-chartjs-2';
-import { Chart as ChartJS, ArcElement, Tooltip, Legend } from 'chart.js';
 import { getAdmissions } from './adtService';
+import { Chart as ChartJS, ArcElement, Tooltip, Legend, Title } from 'chart.js';
+import { Pie } from 'react-chartjs-2';
 import styles from './TriageDashboard.module.css';
 
-// Register Chart.js components for pie chart
-ChartJS.register(ArcElement, Tooltip, Legend);
+// Register Chart.js components
+ChartJS.register(ArcElement, Tooltip, Legend, Title);
 
 export default function TriageDashboard() {
   const [triageData, setTriageData] = useState({ LOW: 0, MEDIUM: 0, HIGH: 0 });
@@ -36,6 +35,9 @@ export default function TriageDashboard() {
     fetchAdmissions();
   }, []);
 
+  const total = triageData.LOW + triageData.MEDIUM + triageData.HIGH;
+
+  // Chart.js data configuration
   const chartData = {
     labels: ['Low', 'Medium', 'High'],
     datasets: [
@@ -49,6 +51,7 @@ export default function TriageDashboard() {
     ],
   };
 
+  // Chart.js options configuration
   const chartOptions = {
     responsive: true,
     maintainAspectRatio: false,
@@ -62,7 +65,9 @@ export default function TriageDashboard() {
       },
       tooltip: {
         callbacks: {
-          label: (context) => `${context.label}: ${context.parsed}`,
+          label: function (context) {
+            return `${context.label}: ${context.parsed}`;
+          },
         },
       },
       title: {
@@ -73,8 +78,6 @@ export default function TriageDashboard() {
       },
     },
   };
-
-  const total = triageData.LOW + triageData.MEDIUM + triageData.HIGH;
 
   return (
     <Box className={styles.container}>
