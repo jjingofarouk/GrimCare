@@ -2,8 +2,8 @@
 
 import React, { useState } from 'react';
 import { Box, Typography, Alert, Button, TextField, FormControl, InputLabel, Select, MenuItem } from '@mui/material';
-import SearchableSelect from './SearchableSelect';
-import CustomDataGrid from './CustomDataGrid';
+import SearchableSelect from '../components/SearchableSelect';
+import CustomDataGrid from '../components/CustomDataGrid';
 import { useApiData } from '../utils/api';
 import { getAvailability, createAvailability } from './appointmentService';
 
