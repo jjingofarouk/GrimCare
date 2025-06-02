@@ -3,7 +3,7 @@ import { Box, Typography, Alert, TextField, Button, styled } from '@mui/material
 import { DataGrid } from '@mui/x-data-grid';
 import { getDoctors, getAvailability } from './appointmentService';
 import { format, parseISO } from 'date-fns';
-import styles from './Availability.module.css';
+
 
 export default function AvailableDoctorsList() {
   const [doctors, setDoctors] = useState([]);
