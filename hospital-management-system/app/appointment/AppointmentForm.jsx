@@ -20,6 +20,9 @@ export default function AppointmentForm({ patients, doctors, departments, onSucc
   const [openConfirm, setOpenConfirm] = useState(false);
 
   useEffect(() => {
+    console.log('Patients prop:', patients); // Debug
+    console.log('Doctors prop:', doctors); // Debug
+    console.log('Appointment prop:', appointment); // Debug
     if (appointment) {
       const date = appointment.date ? new Date(appointment.date) : null;
       setFormData({
@@ -61,17 +64,28 @@ export default function AppointmentForm({ patients, doctors, departments, onSucc
   const confirmSubmission = async () => {
     setLoading(true);
     try {
-      const data = { ...formData, bookedById: userId };
+      const data = {
+        ...formData,
+        patientId: parseInt(formData.patientId),
+        doctorId: parseInt(formData.doctorId),
+        departmentId: formData.departmentId ? parseInt(formData.departmentId) : null,
+        date: new Date(formData.date),
+        bookedById: userId,
+      };
+      console.log('Submitting appointment data:', data); // Debug
+      let response;
       if (appointment) {
-        await updateAppointment(appointment.id, data);
+        response = await updateAppointment(appointment.id, data);
       } else {
-        await createAppointment(data);
+        response = await createAppointment(data);
       }
+      console.log('Appointment response:', response); // Debug
       onSuccess();
       setFormData({ patientId: '', doctorId: '', departmentId: '', date: '', type: 'REGULAR', reason: '', notes: '' });
       setOpenConfirm(false);
     } catch (err) {
       setError('Failed to process appointment');
+      console.error('Submission error:', err);
     } finally {
       setLoading(false);
     }
@@ -87,7 +101,7 @@ export default function AppointmentForm({ patients, doctors, departments, onSucc
         <Select name="patientId" value={formData.patientId} onChange={handleChange} required>
           <MenuItem value="">Select Patient</MenuItem>
           {patients.map((patient) => (
-            <MenuItem key={patient.id} value={patient.id}>{patient.user.name}</MenuItem>
+            <MenuItem key={patient.id} value={patient.id}>{patient.user?.name || 'Unknown'}</MenuItem>
           ))}
         </Select>
       </FormControl>
@@ -96,7 +110,7 @@ export default function AppointmentForm({ patients, doctors, departments, onSucc
         <Select name="doctorId" value={formData.doctorId} onChange={handleChange} required>
           <MenuItem value="">Select Doctor</MenuItem>
           {doctors.map((doctor) => (
-            <MenuItem key={doctor.id} value={doctor.id}>{doctor.user.name} ({doctor.specialty})</MenuItem>
+            <MenuItem key={doctor.id} value={doctor.id}>{doctor.user?.name || 'Unknown'} ({doctor.specialty})</MenuItem>
           ))}
         </Select>
       </FormControl>
@@ -160,8 +174,8 @@ export default function AppointmentForm({ patients, doctors, departments, onSucc
       <Dialog open={openConfirm} onClose={() => setOpenConfirm(false)}>
         <DialogTitle>Confirm Appointment</DialogTitle>
         <DialogContent>
-          <Typography><strong>Patient:</strong> {patients.find((p) => p.id === parseInt(formData.patientId))?.user.name || 'N/A'}</Typography>
-          <Typography><strong>Doctor:</strong> {doctors.find((d) => d.id === parseInt(formData.doctorId))?.user.name || 'N/A'}</Typography>
+          <Typography><strong>Patient:</strong> {patients.find((p) => p.id === parseInt(formData.patientId))?.user?.name || 'Unknown'}</Typography>
+          <Typography><strong>Doctor:</strong> {doctors.find((d) => d.id === parseInt(formData.doctorId))?.user?.name || 'Unknown'}</Typography>
           <Typography><strong>Department:</strong> {departments.find((d) => d.id === parseInt(formData.departmentId))?.name || 'N/A'}</Typography>
           <Typography><strong>Date:</strong> {formData.date && !isNaN(new Date(formData.date)) ? format(new Date(formData.date), 'PPp') : 'Invalid Date'}</Typography>
           <Typography><strong>Type:</strong> {formData.type}</Typography>
