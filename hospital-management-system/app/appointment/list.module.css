@@ -1,0 +1,101 @@
+.container {
+  width: 100vw;
+  max-width: 100%;
+  padding: 16px;
+  box-sizing: border-box;
+  overflow-x: hidden;
+}
+
+.title {
+  font-size: 24px;
+  font-weight: 600;
+  margin-bottom: 16px;
+  color: #333;
+}
+
+.filterContainer {
+  margin-bottom: 16px;
+  width: 100%;
+  padding: 8px;
+  background-color: #f5f5f5;
+  border-radius: 4px;
+}
+
+.errorAlert {
+  margin-bottom: 16px;
+  width: 100%;
+}
+
+.loadingContainer {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100%;
+  min-height: 400px;
+  width: 100%;
+}
+
+.dataGridContainer {
+  width: 100%;
+  height: calc(100vh - 200px);
+  min-height: 400px;
+}
+
+.dataGrid {
+  width: 100%;
+  background-color: #fff;
+  border-radius: 4px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.dataGrid :global(.MuiDataGrid-root) {
+  border: none;
+}
+
+.dataGrid :global(.MuiDataGrid-columnHeaders) {
+  background-color: #f5f5f5;
+  border-bottom: 1px solid #e0e0e0;
+}
+
+.dataGrid :global(.MuiDataGrid-cell) {
+  padding: 8px;
+}
+
+.dataGrid :global(.MuiDataGrid-row:hover) {
+  background-color: #fafafa;
+}
+
+.actionButtons {
+  display: flex;
+  gap: 8px;
+}
+
+.actionButtons button {
+  text-transform: none;
+  font-size: 12px;
+  padding: 4px 8px;
+  border-radius: 4px;
+}
+
+@media (max-width: 600px) {
+  .container {
+    padding: 8px;
+  }
+
+  .title {
+    font-size: 20px;
+  }
+
+  .dataGridContainer {
+    height: calc(100vh - 150px);
+  }
+
+  .actionButtons {
+    flex-direction: column;
+    gap: 4px;
+  }
+
+  .actionButtons button {
+    width: 100%;
+  }
+}
