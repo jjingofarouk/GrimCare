@@ -6,6 +6,7 @@ import { DataGrid } from "@mui/x-data-grid";
 import AppointmentFilter from "./AppointmentFilter";
 import { getAppointments, updateAppointment, getPatients, getDoctors } from "./appointmentService";
 import { format } from "date-fns";
+import styles from './list.module.css';
 
 export default function AppointmentList({ onEdit }) {
   const [appointments, setAppointments] = useState([]);
