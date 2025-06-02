@@ -21,16 +21,14 @@ export default function AppointmentList({ onEdit }) {
         setError('Failed to fetch appointments');
         console.error('Fetch appointments error:', err);
       }
-    };
-    fetchAppointments();
+    });
+    await fetchAppointments();
   }, []);
 
   const handleCancel = async (id) => {
     try {
       await updateAppointment(id, { status: 'CANCELLED' });
-      setAppointments((prev) =>
-        prev.map((appt) => (appt.id === id ? { ...appt, status: 'CANCELLED' } : appt))
-      );
+      setAppointments((prev) => prev.map((appt) => (appt.id === id ? { ...appt, status: 'CANCELLED' } : appt)));
     } catch (err) {
       setError('Failed to cancel appointment');
     }
@@ -39,9 +37,7 @@ export default function AppointmentList({ onEdit }) {
   const handleCheckIn = async (id) => {
     try {
       await updateAppointment(id, { status: 'CHECKED_IN', checkInTime: new Date() });
-      setAppointments((prev) =>
-        prev.map((appt) => (appt.id === id ? { ...appt, status: 'CHECKED_IN', checkInTime: new Date() } : appt))
-      );
+      setAppointments((prev) => prev.map((appt) => (appt.id === id ? { ...appt, status: 'CHECKED_IN', checkInTime: new Date() } : appt)));
     } catch (err) {
       setError('Failed to check in appointment');
     }
@@ -50,9 +46,7 @@ export default function AppointmentList({ onEdit }) {
   const handleCheckOut = async (id) => {
     try {
       await updateAppointment(id, { status: 'CHECKED_OUT', checkOutTime: new Date() });
-      setAppointments((prev) =>
-        prev.map((appt) => (appt.id === id ? { ...appt, status: 'CHECKED_OUT', checkOutTime: new Date() } : appt))
-      );
+      setAppointments((prev) => prev.map((appt) => (appt.id === id ? { ...appt, status: 'CHECKED_OUT', checkOutTime: new Date() } : appt)));
     } catch (err) {
       setError('Failed to check out appointment');
     }
@@ -62,9 +56,9 @@ export default function AppointmentList({ onEdit }) {
     const matchesStatus = filter.status === 'ALL' || appt.status === filter.status;
     const matchesDateFrom = !filter.dateFrom || new Date(appt.date) >= new Date(filter.dateFrom);
     const matchesDateTo = !filter.dateTo || new Date(appt.date) <= new Date(filter.dateTo);
-    const matchesDoctor = !filter.doctorId || appt.doctor?.id === parseInt(filter.doctorId);
-    const matchesPatient = !filter.patientId || appt.patient?.id === parseInt(filter.patientId);
-    const matchesType = filter.type === 'ALL' || appt.type === filter.type;
+    const matchesDoctor = !filter.doctorId || appt.doctorId === parseInt(filter.doctorId);
+    const matchesPatient = !filter.patientId || appt.patientId === parseInt(filter.patientId);
+    const matchesType = filter.type === 'ALL' || appt.type;
     return matchesStatus && matchesDateFrom && matchesDateTo && matchesDoctor && matchesPatient && matchesType;
   });
 
@@ -74,13 +68,13 @@ export default function AppointmentList({ onEdit }) {
       field: 'patientName', 
       headerName: 'Patient', 
       width: 150, 
-      valueGetter: (params) => params?.row?.patient?.user?.name ?? 'N/A' 
+      valueGetter: (params) => params?.row?.patient?.name ?? 'N/A' 
     },
     { 
       field: 'doctorName', 
       headerName: 'Doctor', 
       width: 150, 
-      valueGetter: (params) => params?.row?.doctor?.user?.name ?? 'N/A' 
+      valueGetter: (params) => params?.row?.doctor?.name ?? 'N/A' 
     },
     { 
       field: 'date', 
@@ -101,7 +95,7 @@ export default function AppointmentList({ onEdit }) {
       field: 'queueNumber', 
       headerName: 'Queue', 
       width: 100, 
-      valueGetter: (params) => params?.row?.queue?.queueNumber ?? 'N/A' 
+      valueGetter: (params) => params?.row?.queueNumber ?? 'N/A' 
     },
     {
       field: 'actions',
