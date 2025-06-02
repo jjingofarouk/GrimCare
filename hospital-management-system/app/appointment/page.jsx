@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from 'react';
-import { Container, Paper, Tabs, Tab, Box, Typography, MenuItem, Select, FormControl } from '@mui/material';
+import { Container, Paper, Tabs, Tab, Box, Typography, FormControl, Select, MenuItem } from '@mui/material';
 import AppointmentList from './AppointmentList';
 import AppointmentForm from './AppointmentForm';
 import AppointmentConfirmation from './AppointmentConfirmation';
@@ -9,7 +9,10 @@ import AppointmentHistory from './AppointmentHistory';
 import DoctorSchedule from './DoctorSchedule';
 import NotificationBanner from './NotificationBanner';
 import SearchBar from './SearchBar';
-import {  getDoctors, getPatients } from './appointmentService';
+import AppointmentDashboard from './AppointmentDashboard';
+import DoctorAvailability from './DoctorAvailability';
+import AppointmentReport from './AppointmentReport';
+import { getDoctors, getPatients, checkInAppointment, checkOutAppointment } from './appointmentService';
 import styles from './AppointmentPage.module.css';
 
 export default function AppointmentPage() {
@@ -17,7 +20,7 @@ export default function AppointmentPage() {
   const [doctors, setDoctors] = useState([]);
   const [selectedAppointment, setSelectedAppointment] = useState(null);
   const [showConfirmation, setShowConfirmation] = useState(null);
-  const [activeTab, setActiveTab] = useState('form');
+  const [activeTab, setActiveTab] = useState('dashboard');
   const [searchQuery, setSearchQuery] = useState('');
   const [refreshKey, setRefreshKey] = useState(0);
 
@@ -46,6 +49,24 @@ export default function AppointmentPage() {
   const handleEdit = (appointment) => {
     setSelectedAppointment(appointment);
     setActiveTab('form');
+  };
+
+  const handleCheckIn = async (id) => {
+    try {
+      await checkInAppointment(id);
+      setRefreshKey((prev) => prev + 1);
+    } catch (err) {
+      console.error('Failed to check in');
+    }
+  };
+
+  const handleCheckOut = async (id) => {
+    try {
+      await checkOutAppointment(id);
+      setRefreshKey((prev) => prev + 1);
+    } catch (err) {
+      console.error('Failed to check out');
+    }
   };
 
   const handleSearch = (query) => {
@@ -80,13 +101,17 @@ export default function AppointmentPage() {
               },
             }}
           >
+            <Tab label="Dashboard" value="dashboard" />
             <Tab label="Book" value="form" />
             <Tab label="List" value="list" />
             <Tab label="History" value="history" />
             <Tab label="Schedule" value="schedule" />
+            <Tab label="Availability" value="availability" />
+            <Tab label="Report" value="report" />
           </Tabs>
         </Box>
         <Box className={styles.content}>
+          {activeTab === 'dashboard' && <AppointmentDashboard />}
           {activeTab === 'form' && (
             <AppointmentForm
               patients={patients}
@@ -101,6 +126,8 @@ export default function AppointmentPage() {
               <AppointmentList
                 key={refreshKey}
                 onEdit={handleEdit}
+                onCheckIn={handleCheckIn}
+                onCheckOut={handleCheckOut}
                 searchQuery={searchQuery}
               />
             </>
@@ -114,9 +141,7 @@ export default function AppointmentPage() {
               >
                 <MenuItem value="">Select Patient</MenuItem>
                 {patients.map((patient) => (
-                  <MenuItem key={patient.id} value={patient.id}>
-                    {patient.name}
-                  </MenuItem>
+                  <MenuItem key={patient.id} value={patient.id}>{patient.name}</MenuItem>
                 ))}
               </Select>
             </FormControl>
@@ -133,9 +158,7 @@ export default function AppointmentPage() {
               >
                 <MenuItem value="">Select Doctor</MenuItem>
                 {doctors.map((doctor) => (
-                  <MenuItem key={doctor.id} value={doctor.id}>
-                    {doctor.name}
-                  </MenuItem>
+                  <MenuItem key={doctor.id} value={doctor.id}>{doctor.name}</MenuItem>
                 ))}
               </Select>
             </FormControl>
@@ -143,6 +166,8 @@ export default function AppointmentPage() {
           {activeTab.startsWith('schedule-') && (
             <DoctorSchedule doctorId={activeTab.split('-')[1]} />
           )}
+          {activeTab === 'availability' && <DoctorAvailability />}
+          {activeTab === 'report' && <AppointmentReport />}
         </Box>
       </Paper>
       {showConfirmation && (
