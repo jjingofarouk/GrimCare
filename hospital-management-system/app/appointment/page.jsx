@@ -1,3 +1,4 @@
+// AppointmentPage.jsx
 "use client";
 
 import React, { useState, useEffect } from 'react';
@@ -11,6 +12,7 @@ import DoctorAvailability from './DoctorAvailability';
 import AvailableDoctorsList from './AvailableDoctorsList';
 import DepartmentForm from './DepartmentForm';
 import Dashboard from './Dashboard';
+import SearchBar from './SearchBar';
 import { getDepartments, getDoctors, getPatients } from './appointmentService';
 import styles from './page.module.css';
 
@@ -18,6 +20,8 @@ export default function AppointmentPage({ userId }) {
   const [patients, setPatients] = useState([]);
   const [doctors, setDoctors] = useState([]);
   const [departments, setDepartments] = useState([]);
+  const [filteredPatients, setFilteredPatients] = useState([]);
+  const [filteredDoctors, setFilteredDoctors] = useState([]);
   const [selectedAppointment, setSelectedAppointment] = useState(null);
   const [activeTab, setActiveTab] = useState('dashboard');
   const [refreshKey, setRefreshKey] = useState(0);
@@ -39,12 +43,24 @@ export default function AppointmentPage({ userId }) {
         setPatients(Array.isArray(patientsData) ? patientsData.filter(p => p && p.user) : []);
         setDoctors(Array.isArray(doctorsData) ? doctorsData.filter(d => d && d.user) : []);
         setDepartments(Array.isArray(departmentsData) ? departmentsData : []);
+        setFilteredPatients(Array.isArray(patientsData) ? patientsData.filter(p => p && p.user) : []);
+        setFilteredDoctors(Array.isArray(doctorsData) ? doctorsData.filter(d => d && d.user) : []);
       } catch (err) {
         console.error('Failed to fetch data:', err);
       }
     };
     fetchData();
   }, []);
+
+  const handleSearch = (query) => {
+    const lowerQuery = query.toLowerCase();
+    setFilteredPatients(
+      patients.filter(p => p.user?.name?.toLowerCase().includes(lowerQuery))
+    );
+    setFilteredDoctors(
+      doctors.filter(d => d.user?.name?.toLowerCase().includes(lowerQuery))
+    );
+  };
 
   const handleSuccess = () => {
     setSelectedAppointment(null);
@@ -64,6 +80,7 @@ export default function AppointmentPage({ userId }) {
   return (
     <Container maxWidth="xl" sx={{ py: 4 }}>
       <Box sx={{ p: 0, m: 0 }}>
+        <SearchBar onSearch={handleSearch} />
         <Tabs
           value={activeTab}
           onChange={handleTabChange}
@@ -85,8 +102,8 @@ export default function AppointmentPage({ userId }) {
           {activeTab === 'dashboard' && <Dashboard />}
           {activeTab === 'form' && (
             <AppointmentForm
-              patients={patients}
-              doctors={doctors}
+              patients={filteredPatients}
+              doctors={filteredDoctors}
               departments={departments}
               onSuccess={handleSuccess}
               appointment={selectedAppointment}
@@ -100,16 +117,16 @@ export default function AppointmentPage({ userId }) {
             />
           )}
           {activeTab === 'history' && (
-            <AppointmentHistory patients={patients} />
+            <AppointmentHistory patients={filteredPatients} />
           )}
           {activeTab === 'schedule' && (
-            <DoctorSchedule doctors={doctors} />
+            <DoctorSchedule doctors={filteredDoctors} />
           )}
           {activeTab === 'queue' && (
-            <QueueManagement doctors={doctors} />
+            <QueueManagement doctors={filteredDoctors} />
           )}
           {activeTab === 'availability' && (
-            <DoctorAvailability doctors={doctors} />
+            <DoctorAvailability doctors={filteredDoctors} />
           )}
           {activeTab === 'availableDoctors' && (
             <AvailableDoctorsList />
