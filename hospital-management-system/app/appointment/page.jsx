@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from 'react';
-import { Container, Paper, Tabs, Tab, Box, Typography } from '@mui/material';
+import { Container, Paper, Tabs, Tab, Box } from '@mui/material';
 import AppointmentForm from './AppointmentForm';
 import AppointmentList from './AppointmentList';
 import AppointmentHistory from './AppointmentHistory';
@@ -9,7 +9,7 @@ import DoctorSchedule from './DoctorSchedule';
 import QueueManagement from './QueueManagement';
 import DoctorAvailability from './DoctorAvailability';
 import AvailableDoctorsList from './AvailableDoctorsList';
-import DepartmentForm from './DepartmentForm';
+import DepartmentForm from '../departments/DepartmentForm';
 import Dashboard from './Dashboard';
 import { getDepartments, getDoctors, getPatients } from './appointmentService';
 
@@ -29,9 +29,11 @@ export default function AppointmentPage({ userId }) {
           getDoctors(),
           getDepartments(),
         ]);
-        setPatients(patientsData);
-        setDoctors(doctorsData);
-        setDepartments(departmentsData);
+        console.log('Fetched patients:', patientsData); // Debug
+        console.log('Fetched doctors:', doctorsData); // Debug
+        setPatients(Array.isArray(patientsData) ? patientsData.filter(p => p && p.user) : []);
+        setDoctors(Array.isArray(doctorsData) ? doctorsData.filter(d => d && d.user) : []);
+        setDepartments(Array.isArray(departmentsData) ? departmentsData : []);
       } catch (err) {
         console.error('Failed to fetch data:', err);
       }
@@ -56,8 +58,7 @@ export default function AppointmentPage({ userId }) {
 
   return (
     <Container maxWidth="xl" sx={{ py: 4 }}>
-      <Typography variant="h4" gutterBottom>Appointment Management</Typography>
-      <Paper elevation={3} sx={{ p: 2 }}>
+      <Box sx={{ p: 0, m: 0' }}>
         <Tabs
           value={activeTab}
           onChange={handleTabChange}
@@ -81,7 +82,7 @@ export default function AppointmentPage({ userId }) {
             <AppointmentForm
               patients={patients}
               doctors={doctors}
-              departments={departments}
+              departments={department}
               onSuccess={handleSuccess}
               appointment={selectedAppointment}
               userId={userId}
@@ -97,7 +98,8 @@ export default function AppointmentPage({ userId }) {
             <AppointmentHistory patients={patients} />
           )}
           {activeTab === 'schedule' && (
-            <DoctorSchedule doctors={doctors} />
+            <DoctorSchedule doctors={doctors}
+            />
           )}
           {activeTab === 'queue' && (
             <QueueManagement doctors={doctors} />
@@ -110,7 +112,7 @@ export default function AppointmentPage({ userId }) {
           )}
           {activeTab === 'departments' && <DepartmentForm />}
         </Box>
-      </Paper>
+      </Box>
     </Container>
   );
 }
