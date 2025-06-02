@@ -1,11 +1,11 @@
 
-// AppointmentFilter.jsx
 import React, { useState } from 'react';
-import styles from './AppointmentFilter.module.css';
+import { Box, TextField, MenuItem, Select, InputLabel, FormControl, Button } from '@mui/material';
 
 export default function AppointmentFilter({ onFilter, patients = [], doctors = [] }) {
   const [filters, setFilters] = useState({
     status: 'ALL',
+    type: 'ALL',
     dateFrom: '',
     dateTo: '',
     doctorId: '',
@@ -22,59 +22,63 @@ export default function AppointmentFilter({ onFilter, patients = [], doctors = [
   };
 
   return (
-    <form className={styles.filterForm} onSubmit={handleSubmit}>
-      <div className={styles.field}>
-        <label htmlFor="status">Status</label>
-        <select id="status" name="status" value={filters.status} onChange={handleChange}>
-          <option value="ALL">All</option>
-          <option value="SCHEDULED">Scheduled</option>
-          <option value="COMPLETED">Completed</option>
-          <option value="CANCELLED">Cancelled</option>
-        </select>
-      </div>
-      <div className={styles.field}>
-        <label htmlFor="dateFrom">From Date</label>
-        <input
-          id="dateFrom"
-          type="date"
-          name="dateFrom"
-          value={filters.dateFrom}
-          onChange={handleChange}
-        />
-      </div>
-      <div className={styles.field}>
-        <label htmlFor="dateTo">To Date</label>
-        <input
-          id="dateTo"
-          type="date"
-          name="dateTo"
-          value={filters.dateTo}
-          onChange={handleChange}
-        />
-      </div>
-      <div className={styles.field}>
-        <label htmlFor="doctorId">Doctor</label>
-        <select id="doctorId" name="doctorId" value={filters.doctorId} onChange={handleChange}>
-          <option value="">All Doctors</option>
+    <Box component="form" onSubmit={handleSubmit} sx={{ display: 'flex', gap: 2, flexWrap: 'wrap', mb: 2 }}>
+      <FormControl sx={{ minWidth: 120 }}>
+        <InputLabel>Status</InputLabel>
+        <Select name="status" value={filters.status} onChange={handleChange}>
+          <MenuItem value="ALL">All</MenuItem>
+          <MenuItem value="SCHEDULED">Scheduled</MenuItem>
+          <MenuItem value="CHECKED_IN">Checked In</MenuItem>
+          <MenuItem value="CHECKED_OUT">Checked Out</MenuItem>
+          <MenuItem value="COMPLETED">Completed</MenuItem>
+          <MenuItem value="CANCELLED">Cancelled</MenuItem>
+          <MenuItem value="NO_SHOW">No Show</MenuItem>
+        </Select>
+      </FormControl>
+      <FormControl sx={{ minWidth: 120 }}>
+        <InputLabel>Type</InputLabel>
+        <Select name="type" value={filters.type} onChange={handleChange}>
+          <MenuItem value="ALL">All</MenuItem>
+          <MenuItem value="REGULAR">Regular</MenuItem>
+          <MenuItem value="WALK_IN">Walk-In</MenuItem>
+          <MenuItem value="EMERGENCY">Emergency</MenuItem>
+        </Select>
+      </FormControl>
+      <TextField
+        label="From Date"
+        type="date"
+        name="dateFrom"
+        value={filters.dateFrom}
+        onChange={handleChange}
+        InputLabelProps={{ shrink: true }}
+      />
+      <TextField
+        label="To Date"
+        type="date"
+        name="dateTo"
+        value={filters.dateTo}
+        onChange={handleChange}
+        InputLabelProps={{ shrink: true }}
+      />
+      <FormControl sx={{ minWidth: 120 }}>
+        <InputLabel>Doctor</InputLabel>
+        <Select name="doctorId" value={filters.doctorId} onChange={handleChange}>
+          <MenuItem value="">All Doctors</MenuItem>
           {doctors.map((doctor) => (
-            <option key={doctor.id} value={doctor.id}>
-              {doctor.name}
-            </option>
+            <MenuItem key={doctor.id} value={doctor.id}>{doctor.user.name}</MenuItem>
           ))}
-        </select>
-      </div>
-      <div className={styles.field}>
-        <label htmlFor="patientId">Patient</label>
-        <select id="patientId" name="patientId" value={filters.patientId} onChange={handleChange}>
-          <option value="">All Patients</option>
+        </Select>
+      </FormControl>
+      <FormControl sx={{ minWidth: 120 }}>
+        <InputLabel>Patient</InputLabel>
+        <Select name="patientId" value={filters.patientId} onChange={handleChange}>
+          <MenuItem value="">All Patients</MenuItem>
           {patients.map((patient) => (
-            <option key={patient.id} value={patient.id}>
-              {patient.name}
-            </option>
+            <MenuItem key={patient.id} value={patient.id}>{patient.user.name}</MenuItem>
           ))}
-        </select>
-      </div>
-      <button type="submit" className={styles.button}>Apply Filters</button>
-    </form>
+        </Select>
+      </FormControl>
+      <Button type="submit" variant="contained">Apply Filters</Button>
+    </Box>
   );
 }
