@@ -1,225 +1,250 @@
 generator client {
-provider = "prisma-client-js"
+  provider = "prisma-client-js"
 }
 
 datasource db {
-provider = "sqlite"
-url      = "file:./dev.db"
+  provider = "sqlite"
+  url      = "file:./dev.db"
 }
 
 model User {
-id            Int              @id @default(autoincrement())
-email         String           @unique
-name          String
-password      String
-role          String           @default("PATIENT") // PATIENT, DOCTOR, ADMIN, NURSE
-createdAt     DateTime         @default(now())
-updatedAt     DateTime         @updatedAt
-doctor        Doctor?          @relation(fields: [doctorId], references: [id])
-doctorId      Int?             @unique
-patient       Patient?         @relation(fields: [patientId], references: [id])
-patientId     Int?             @unique
-payrolls      Payroll[]
-cssdLogs      CSSDLog[]        @relation("LoggedBy")
-cssdRequisitions CSSDRequisition[] @relation("RequisitionRequestedBy")
+  id            Int              @id @default(autoincrement())
+  email         String           @unique
+  name          String
+  password      String
+  role          String           @default("PATIENT")
+  createdAt     DateTime         @default(now())
+  updatedAt     DateTime         @updatedAt
+  doctor        Doctor?          @relation(fields: [doctorId], references: [id])
+  doctorId      Int?             @unique
+  patient       Patient?         @relation(fields: [patientId], references: [id])
+  patientId     Int?             @unique
+  payrolls      Payroll[]
+  cssdLogs      CSSDLog[]        @relation("LoggedBy")
+  cssdRequisitions CSSDRequisition[] @relation("RequisitionRequestedBy")
 }
 
 model Doctor {
-id            Int         @id @default(autoincrement())
-user          User?       @relation
-doctorId      String      @unique
-specialty     String
-licenseNumber String      @unique
-phone         String?
-office        String?
-createdAt     DateTime    @default(now())
-updatedAt     DateTime    @updatedAt
-admissions    Admission[] @relation("DoctorAdmissions")
-discharges    Discharge[] @relation("DischargingDoctor")
+  id            Int         @id @default(autoincrement())
+  user          User?       @relation
+  doctorId      String      @unique
+  specialty     String
+  department    String?
+  licenseNumber String      @unique
+  phone         String?
+  office        String?
+  createdAt     DateTime    @default(now())
+  updatedAt     DateTime    @updatedAt
+  admissions    Admission[] @relation("DoctorAdmissions")
+  discharges    Discharge[] @relation("DischargingDoctor")
+  appointments  Appointment[] @relation("DoctorAppointments")
+  availability  DoctorAvailability[]
 }
 
 model Patient {
-id                Int           @id @default(autoincrement())
-user              User?         @relation
-patientId         String        @unique
-dateOfBirth       DateTime?
-gender            String?
-phone             String?
-address           String?
-emergencyContact  String?
-emergencyContactPhone String?
-insuranceProvider String?
-insurancePolicy   String?
-bloodType         String?
-allergies         String?
-medicalHistory    String?
-admissions        Admission[]
-discharges        Discharge[]   @relation("DischargedPatient")
-transactions      Transaction[] @relation("PatientTransactions")
-createdAt         DateTime      @default(now())
-updatedAt         DateTime      @updatedAt
+  id                Int           @id @default(autoincrement())
+  user              User?         @relation
+  patientId         String        @unique
+  dateOfBirth       DateTime?
+  gender            String?
+  phone             String?
+  address           String?
+  emergencyContact  String?
+  emergencyContactPhone String?
+  insuranceProvider String?
+  insurancePolicy   String?
+  bloodType         Stringolis?
+  allergies         String?
+  medicalHistory    String?
+  admissions        Admission[]
+  discharges        Discharge[]   @relation("DischargedPatient")
+  transactions      Transaction[] @relation("PatientTransactions")
+  appointments      Appointment[] @relation("PatientAppointments")
+  createdAt         DateTime      @default(now())
+  updatedAt         DateTime      @updatedAt
+}
+
+model Appointment {
+  id                Int              @id @default(autoincrement())
+  patientId         Int
+  patient           Patient          @relation("PatientAppointments", fields: [patientId], references: [id])
+  doctorId          Int
+  doctor            Doctor           @relation("DoctorAppointments", fields: [doctorId], references: [id])
+  department        String?
+  appointmentDate   DateTime
+  status            String           @default("SCHEDULED")
+  type              String           @default("REGULAR") // REGULAR, WALK_IN, EMERGENCY
+  reason            String
+  notes             String?
+  checkInTime       DateTime?
+  checkOutTime      DateTime?
+  queueNumber       Int?
+  reminderSent      Boolean          @default(false)
+  createdAt         DateTime         @default(now())
+  updatedAt         DateTime         @updatedAt
+}
+
+model DoctorAvailability {
+  id            Int       @id @default(autoincrement())
+  doctorId      Int
+  doctor        Doctor    @relation(fields: [doctorId], references: [id])
+  dayOfWeek     String
+  startTime     String
+  endTime       String
+  isAvailable   Boolean   @default(true)
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
 }
 
 model Admission {
-id                Int       @id @default(autoincrement())
-patientId         Int
-patient           Patient   @relation(fields: [patientId], references: [id])
-doctorId          Int?
-doctor            Doctor?   @relation("DoctorAdmissions", fields: [doctorId], references: [id])
-wardId            Int?
-ward              Ward?     @relation(fields: [wardId], references: [id])
-admissionDate     DateTime  @default(now())
-scheduledDate     DateTime?
-preAdmissionNotes String?
-presentingComplaints String?
-relayedInfo       String?
-triagePriority    String?
-triageNotes       String?
-status            String    @default("PENDING") // PENDING, ADMITTED, DISCHARGED
-dischargeDate     DateTime?
-dischargeNotes    String?
-createdAt         DateTime  @default(now())
-updatedAt         DateTime  @updatedAt
+  id                Int       @id @default(autoincrement())
+  patientId         Int
+  patient           Patient   @relation(fields: [patientId], references: [id])
+  doctorId          Int?
+  doctor            Doctor?   @relation("DoctorAdmissions", fields: [doctorId], references: [id])
+  wardId            Int?
+  ward              Ward?     @relation(fields: [wardId], references: [id])
+  admissionDate     DateTime  @default(now())
+  scheduledDate     DateTime?
+  preAdmissionNotes String?
+  presentingComplaints String?
+  relayedInfo       String?
+  triagePriority    String?
+  triageNotes       String?
+  status            String    @default("PENDING")
+  dischargeDate     DateTime?
+  dischargeNotes    String?
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @updatedAt
 }
 
 model Discharge {
-id                Int       @id @default(autoincrement())
-patientId         Int
-patient           Patient   @relation("DischargedPatient", fields: [patientId], references: [id])
-doctorId          Int
-doctor            Doctor    @relation("DischargingDoctor", fields: [doctorId], references: [id])
-dischargeDate     DateTime  @default(now())
-dischargeNotes    String?
-followUpInstructions String?
-medications       String?
-createdAt         DateTime  @default(now())
-updatedAt         DateTime  @updatedAt
+  id                Int       @id @default(autoincrement())
+  patientId         Int
+  patient           Patient   @relation("DischargedPatient", fields: [patientId], references: [id])
+  doctorId          Int
+  doctor            Doctor    @relation("DischargingDoctor", fields: [doctorId], references: [id])
+  dischargeDate     DateTime  @default(now())
+  dischargeNotes    String?
+  followUpInstructions String?
+  medications       String?
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @updatedAt
 }
 
 model Ward {
-id            Int         @id @default(autoincrement())
-name          String
-wardNumber    String      @unique
-totalBeds     Int
-occupiedBeds  Int         @default(0)
-department    String?
-location      String?
-nurseInCharge String?
-admissions    Admission[]
-createdAt     DateTime    @default(now())
-updatedAt     DateTime    @updatedAt
+  id            Int         @id @default(autoincrement())
+  name          String
+  wardNumber    String      @unique
+  totalBeds     Int
+  occupiedBeds  Int         @default(0)
+  department    String?
+  location      String?
+  nurseInCharge String?
+  admissions    Admission[]
+  createdAt     DateTime    @default(now())
+  updatedAt     DateTime    @updatedAt
 }
 
 model Transaction {
-id            Int          @id @default(autoincrement())
-description   String
-amount        Float
-category      String
-status        String
-date          DateTime     @default(now())
-type          String
-costCenterId  Int?
-costCenter    CostCenter?  @relation(fields: [costCenterId], references: [id])
-patientId     Int?
-patient       Patient?     @relation("PatientTransactions", fields: [patientId], references: [id])
-createdAt     DateTime     @default(now())
-updatedAt     DateTime     @updatedAt
+  id            Int          @id @default(autoincrement())
+  description   String
+  amount        Float
+  category      String
+  status        String
+  date          DateTime     @default(now())
+  type          String
+  costCenterId  Int?
+  costCenter    CostCenter?  @relation(fields: [costCenterId], references: [id])
+  patientId     Int?
+  patient       Patient?     @relation("PatientTransactions", fields: [patientId], references: [id])
+  createdAt     DateTime     @default(now())
+  updatedAt     DateTime     @updatedAt
 }
 
 model Payroll {
-id        Int       @id @default(autoincrement())
-userId    Int
-user      User      @relation(fields: [userId], references: [id])
-salary    Float
-taxes     Float
-benefits  Float
-period    String
-status    String
-createdAt DateTime  @default(now())
-updatedAt DateTime  @updatedAt
+  id        Int       @id @default(autoincrement())
+  userId    Int
+  user      User      @relation(fields: [userId], references: [id])
+  salary    Float
+  taxes     Float
+  benefits  Float
+  period    String
+  status    String
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
 }
 
 model CostCenter {
-id            Int           @id @default(autoincrement())
-name          String
-department    String
-transactions  Transaction[]
-createdAt     DateTime      @default(now())
-updatedAt     DateTime      @updatedAt
+  id            Int           @id @default(autoincrement())
+  name          String
+  department    String
+  transactions  Transaction[]
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
 }
 
 model FixedAsset {
-id            Int       @id @default(autoincrement())
-name          String
-purchaseDate  DateTime
-purchaseCost  Float
-depreciation  Float
-currentValue  Float
-status        String
-createdAt     DateTime  @default(now())
-updatedAt     DateTime  @updatedAt
+  id            Int       @id @default(autoincrement())
+  name          String
+  purchaseDate  DateTime
+  purchaseCost  Float
+  depreciation  Float
+  currentValue  Float
+  status        String
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
 }
 
 model CSSDInstrument {
-id                 Int       @id @default(autoincrement())
-name               String
-serialNumber       String    @unique
-type               String?
-status             String    @default("AVAILABLE")
-lastSterilized     DateTime?
-location           String?
-stockQuantity      Int       @default(1)
-minStockThreshold  Int       @default(1)
-createdAt          DateTime  @default(now())
-updatedAt          DateTime  @updatedAt
-cssdRecords        CSSDRecord[]
-requisitions       CSSDRequisition[] @relation("RequisitionInstrument")
-logs               CSSDLog[]         @relation("InstrumentLogs")
+  id                 Int       @id @default(autoincrement())
+  name               String
+  serialNumber       String    @unique
+  type               String?
+  status             String    @default("AVAILABLE")
+  lastSterilized     DateTime?
+  location           String?
+  stockQuantity      Int       @default(1)
+  minStockThreshold  Int       @default(1)
+  createdAt          DateTime  @default(now())
+  updatedAt          DateTime  @updatedAt
+  cssdRecords        CSSDRecord[]
+  requisitions       CSSDRequisition[] @relation("RequisitionInstrument")
+  logs               CSSDLog[]         @relation("InstrumentLogs")
 }
 
 model CSSDRecord {
-id                 Int       @id @default(autoincrement())
-instrumentId       Int
-instrument         CSSDInstrument @relation(fields: [instrumentId], references: [id])
-sterilizationDate   DateTime?
-sterilizationMethod String?
-cycleNumber        String?
-status             String    @default("PENDING")
-qualityCheck       String?
-notes              String?
-createdAt          DateTime  @default(now())
-updatedAt          DateTime  @updatedAt
-logs               CSSDLog[] @relation("RecordLogs")
+  id                 Int       @id @default(autoincrement())
+  instrumentId       Int
+  instrument         CSSDInstrument @relation(fields: [instrumentId], references: [id])
+  sterilizationDate   DateTime?
+  sterilizationMethod String?
+  cycleNumber        String?
+  status             String    @default("PENDING")
+  qualityCheck       String?
+  notes              String?
+  createdAt          DateTime  @default(now())
+  updatedAt          DateTime  @updatedAt
+  logs               CSSDLog[] @relation("RecordLogs")
 }
 
 model CSSDRequisition {
-id              Int       @id @default(autoincrement())
-instrumentId    Int
-instrument      CSSDInstrument @relation("RequisitionInstrument", fields: [instrumentId], references: [id])
-department      String
-requestedBy     Int
-user            User      @relation("RequisitionRequestedBy", fields: [requestedBy], references: [id])
-quantity        Int
-requestDate     DateTime  @default(now())
-dispatchDate    DateTime?
-status          String    @default("PENDING")
-notes           String?
-createdAt       DateTime  @default(now())
-updatedAt       DateTime  @updatedAt
-logs            CSSDLog[] @relation("RequisitionLogs")
+  id              Int       @id @default(autoincrement())
+  instrumentId    Int
+  instrument      CSSDInstrument @relation("RequisitionInstrument", fields: [instrumentId], references: [id])
+  department      String
+  requestedBy     Int
+  user            User      @relation("RequisitionRequestedBy", fields: [requestedBy], references: [id])
+  quantity        Int
+  requestDate     DateTime  @default(now())
+  dispatchDate    DateTime?
+  status          String    @default("PENDING")
+  notes           String?
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+  logs            CSSDLog[] @relation("RequisitionLogs")
 }
 
 model CSSDLog {
-id              Int            @id @default(autoincrement())
-instrumentId    Int?
-instrument      CSSDInstrument? @relation("InstrumentLogs", fields: [instrumentId], references: [id])
-recordId        Int?
-record          CSSDRecord?    @relation("RecordLogs", fields: [recordId], references: [id])
-requisitionId   Int?
-requisition     CSSDRequisition? @relation("RequisitionLogs", fields: [requisitionId], references: [id])
-userId          Int
-user            User           @relation("LoggedBy", fields: [userId], references: [id])
-action          String
-details         String?
-createdAt       DateTime       @default(now())
-}
+  id              Int            @id @default(autoincrement())
+  instrumentId
