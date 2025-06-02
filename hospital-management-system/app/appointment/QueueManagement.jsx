@@ -5,6 +5,7 @@ import { Box, Typography, Alert, Button } from '@mui/material';
 import { DataGrid } from '@mui/x-data-grid';
 import { getQueue, updateQueue } from './appointmentService';
 import { format } from 'date-fns';
+import styles from './Queue.module.css';
 
 export default function QueueManagement({ doctorId }) {
   const [queues, setQueues] = useState([]);
