@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Box, Typography, Alert, Button, CircularProgress } from '@mui/material';
 import AppointmentFilter from './AppointmentFilter';
-import CustomDataGrid from './CustomDataGrid';
+import CustomDataGrid from '../components/CustomDataGrid';
 import { updateAppointment } from './appointmentService';
 import { useApiData } from '../utils/api';
 import { getAppointments, getPatients, getDoctors } from './appointmentService';
