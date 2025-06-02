@@ -9,7 +9,7 @@ import DoctorSchedule from './DoctorSchedule';
 import QueueManagement from './QueueManagement';
 import DoctorAvailability from './DoctorAvailability';
 import AvailableDoctorsList from './AvailableDoctorsList';
-import DepartmentForm from '../departments/DepartmentForm';
+import DepartmentForm from './DepartmentForm';
 import Dashboard from './Dashboard';
 import { getDepartments, getDoctors, getPatients } from './appointmentService';
 
