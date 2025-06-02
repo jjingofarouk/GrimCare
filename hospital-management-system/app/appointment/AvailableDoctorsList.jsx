@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Box, Typography, Alert, TextField, Button, styled } from '@mui/material';
-import CustomDataGrid from './CustomDataGrid';
+import CustomDataGrid from '../components/CustomDataGrid';
 import { useApiData } from '../utils/api';
 import { getDoctors, getAvailability } from './appointmentService';
 import { format, parseISO } from 'date-fns';
