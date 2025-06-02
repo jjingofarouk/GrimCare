@@ -1,17 +1,21 @@
-
-// AppointmentList.jsx
 "use client";
 
 import React, { useState, useEffect } from 'react';
-import styles from './AppointmentList.module.css';
+import { Box, Typography, TextField, FormControl, InputLabel, Select, MenuItem, Button } from '@mui/material';
 import AppointmentCard from './AppointmentCard';
-import AppointmentFilter from './AppointmentFilter';
-import { getAppointments, updateAppointment } from './appointmentService';
+import { getAppointments, updateAppointment, deleteAppointment } from './appointmentService';
 
-export default function AppointmentList({ onEdit, searchQuery }) {
+export default function AppointmentList({ onEdit }) {
   const [appointments, setAppointments] = useState([]);
   const [error, setError] = useState(null);
-  const [filter, setFilter] = useState({ status: 'ALL', dateFrom: '', dateTo: '', doctorId: '', patientId: '' });
+  const [filters, setFilters] = useState({
+    status: 'ALL',
+    dateFrom: '',
+    dateTo: '',
+    doctorId: '',
+    patientId: '',
+    department: '',
+  });
 
   useEffect(() => {
     const fetchAppointments = async () => {
@@ -28,46 +32,98 @@ export default function AppointmentList({ onEdit, searchQuery }) {
   const handleCancel = async (id) => {
     try {
       await updateAppointment(id, { status: 'CANCELLED' });
-      setAppointments((prev) =>
-        prev.map((appt) => (appt.id === id ? { ...appt, status: 'CANCELLED' } : appt))
-      );
+      setAppointments(appointments.map((appt) => appt.id === id ? { ...appt, status: 'CANCELLED' } : appt));
     } catch (err) {
       setError('Failed to cancel appointment');
     }
   };
 
-  const handleFilter = (newFilters) => {
-    setFilter(newFilters);
+  const handleCheckIn = async (id) => {
+    try {
+      await updateAppointment(id, { checkInTime: new Date(), status: 'CHECKED_IN' });
+      setAppointments(appointments.map((appt) => appt.id === id ? { ...appt, checkInTime: new Date(), status: 'CHECKED_IN' } : appt));
+    } catch (err) {
+      setError('Failed to check in');
+    }
   };
 
-  const filteredAppointments = appointments
-    .filter((appt) => {
-      const matchesStatus = filter.status === 'ALL' || appt.status === filter.status;
-      const matchesDateFrom = !filter.dateFrom || new Date(appt.date) >= new Date(filter.dateFrom);
-      const matchesDateTo = !filter.dateTo || new Date(appt.date) <= new Date(filter.dateTo);
-      const matchesDoctor = !filter.doctorId || appt.doctor.id === filter.doctorId;
-      const matchesPatient = !filter.patientId || appt.patient.id === filter.patientId;
-      const matchesSearch = !searchQuery || 
-        appt.patient.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        appt.doctor.name.toLowerCase().includes(searchQuery.toLowerCase());
-      return matchesStatus && matchesDateFrom && matchesDateTo && matchesDoctor && matchesPatient && matchesSearch;
-    });
+  const handleCheckOut = async (id) => {
+    try {
+      await updateAppointment(id, { checkOutTime: new Date(), status: 'COMPLETED' });
+      setAppointments(appointments.map((appt) => appt.id === id ? { ...appt, checkOutTime: new Date(), status: 'COMPLETED' } : appt));
+    } catch (err) {
+      setError('Failed to check out');
+    }
+  };
+
+  const handleFilterChange = (e) => {
+    setFilters({ ...filters, [e.target.name]: e.target.value });
+  };
+
+  const filteredAppointments = appointments.filter((appt) => {
+    const matchesStatus = filters.status === 'ALL' || appt.status === filters.status;
+    const matchesDateFrom = !filters.dateFrom || new Date(appt.appointmentDate) >= new Date(filters.dateFrom);
+    const matchesDateTo = !filters.dateTo || new Date(appt.appointmentDate) <= new Date(filters.dateTo);
+    const matchesDoctor = !filters.doctorId || appt.doctorId === parseInt(filters.doctorId);
+    const matchesPatient = !filters.patientId || appt.patientId === parseInt(filters.patientId);
+    const matchesDepartment = !filters.department || appt.department === filters.department;
+    return matchesStatus && matchesDateFrom && matchesDateTo && matchesDoctor && matchesPatient && matchesDepartment;
+  });
 
   return (
-    <div className={styles.container}>
-      <h2 className={styles.title}>Appointments</h2>
-      <AppointmentFilter onFilter={handleFilter} />
-      {error && <p className={styles.error}>{error}</p>}
-      <div className={styles.list}>
+    <Box sx={{ p: 3 }}>
+      <Typography variant="h5" gutterBottom>Appointments</Typography>
+      <Box display="flex" gap={2} mb={3}>
+        <FormControl sx={{ minWidth: 120 }}>
+          <InputLabel>Status</InputLabel>
+          <Select name="status" value={filters.status} onChange={handleFilterChange}>
+            <MenuItem value="ALL">All</MenuItem>
+            <MenuItem value="SCHEDULED">Scheduled</MenuItem>
+            <MenuItem value="CHECKED_IN">Checked In</MenuItem>
+            <MenuItem value="COMPLETED">Completed</MenuItem>
+            <MenuItem value="CANCELLED">Cancelled</MenuItem>
+          </Select>
+        </FormControl>
+        <TextField
+          label="From Date"
+          type="date"
+          name="dateFrom"
+          value={filters.dateFrom}
+          onChange={handleFilterChange}
+          InputLabelProps={{ shrink: true }}
+        />
+        <TextField
+          label="To Date"
+          type="date"
+          name="dateTo"
+          value={filters.dateTo}
+          onChange={handleFilterChange}
+          InputLabelProps={{ shrink: true }}
+        />
+        <FormControl sx={{ minWidth: 120 }}>
+          <InputLabel>Department</InputLabel>
+          <Select name="department" value={filters.department} onChange={handleFilterChange}>
+            <MenuItem value="">All</MenuItem>
+            <MenuItem value="Cardiology">Cardiology</MenuItem>
+            <MenuItem value="Pediatrics">Pediatrics</MenuItem>
+            <MenuItem value="General Medicine">General Medicine</MenuItem>
+            <MenuItem value="Gynecology">Gynecology</MenuItem>
+          </Select>
+        </FormControl>
+      </Box>
+      {error && <Typography color="error" sx={{ mb: 2 }}>{error}</Typography>}
+      <Box>
         {filteredAppointments.map((appointment) => (
           <AppointmentCard
             key={appointment.id}
             appointment={appointment}
             onEdit={onEdit}
             onCancel={handleCancel}
+            onCheckIn={handleCheckIn}
+            onCheckOut={handleCheckOut}
           />
         ))}
-      </div>
-    </div>
+      </Box>
+    </Box>
   );
 }
