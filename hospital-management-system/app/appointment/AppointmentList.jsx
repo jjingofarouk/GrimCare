@@ -1,9 +1,8 @@
 "use client";
 
 import React, { useState, useEffect } from 'react';
-import { Box, Typography, Alert } from '@mui/material';
+import { Box, Typography, Alert, Button } from '@mui/material';
 import { DataGrid } from '@mui/x-data-grid';
-import AppointmentCard from './AppointmentCard';
 import AppointmentFilter from './AppointmentFilter';
 import { getAppointments, updateAppointment } from './appointmentService';
 import { format } from 'date-fns';
@@ -17,7 +16,7 @@ export default function AppointmentList({ onEdit }) {
     const fetchAppointments = async () => {
       try {
         const data = await getAppointments();
-        setAppointments(data);
+        setAppointments(Array.isArray(data) ? data : []);
       } catch (err) {
         setError('Failed to fetch appointments');
       }
@@ -62,33 +61,86 @@ export default function AppointmentList({ onEdit }) {
     const matchesStatus = filter.status === 'ALL' || appt.status === filter.status;
     const matchesDateFrom = !filter.dateFrom || new Date(appt.date) >= new Date(filter.dateFrom);
     const matchesDateTo = !filter.dateTo || new Date(appt.date) <= new Date(filter.dateTo);
-    const matchesDoctor = !filter.doctorId || appt.doctor.id === parseInt(filter.doctorId);
-    const matchesPatient = !filter.patientId || appt.patient.id === parseInt(filter.patientId);
+    const matchesDoctor = !filter.doctorId || appt.doctor?.id === parseInt(filter.doctorId);
+    const matchesPatient = !filter.patientId || appt.patient?.id === parseInt(filter.patientId);
     const matchesType = filter.type === 'ALL' || appt.type === filter.type;
     return matchesStatus && matchesDateFrom && matchesDateTo && matchesDoctor && matchesPatient && matchesType;
   });
 
   const columns = [
     { field: 'id', headerName: 'ID', width: 90 },
-    { field: 'patientName', headerName: 'Patient', width: 150, valueGetter: (params) => params.row.patient.user.name },
-    { field: 'doctorName', headerName: 'Doctor', width: 150, valueGetter: (params) => params.row.doctor.user.name },
-    { field: 'date', headerName: 'Date', width: 200, valueGetter: (params) => format(new Date(params.row.date), 'PPp') },
+    { 
+      field: 'patientName', 
+      headerName: 'Patient', 
+      width: 150, 
+      valueGetter: (params) => params.row?.patient?.user?.name || 'N/A' 
+    },
+    { 
+      field: 'doctorName', 
+      headerName: 'Doctor', 
+      width: 150, 
+      valueGetter: (params) => params.row?.doctor?.user?.name || 'N/A' 
+    },
+    { 
+      field: 'date', 
+      headerName: 'Date', 
+      width: 200, 
+      valueGetter: (params) => {
+        try {
+          return params.row?.date ? format(new Date(params.row.date), 'PPp') : 'N/A';
+        } catch {
+          return 'N/A';
+        }
+      }
+    },
     { field: 'type', headerName: 'Type', width: 120 },
     { field: 'status', headerName: 'Status', width: 120 },
     { field: 'reason', headerName: 'Reason', width: 150 },
-    { field: 'queueNumber', headerName: 'Queue', width: 100, valueGetter: (params) => params.row.queue?.queueNumber || 'N/A' },
+    { 
+      field: 'queueNumber', 
+      headerName: 'Queue', 
+      width: 100, 
+      valueGetter: (params) => params.row?.queue?.queueNumber || 'N/A' 
+    },
     {
       field: 'actions',
       headerName: 'Actions',
       width: 300,
       renderCell: (params) => (
-        <AppointmentCard
-          appointment={params.row}
-          onEdit={onEdit}
-          onCancel={handleCancel}
-          onCheckIn={handleCheckIn}
-          onCheckOut={handleCheckOut}
-        />
+        <Box sx={{ display: 'flex', gap: 1 }}>
+          <Button 
+            variant="outlined" 
+            size="small" 
+            onClick={() => onEdit(params.row)}
+            disabled={params.row?.status === 'CANCELLED' || params.row?.status === 'CHECKED_OUT'}
+          >
+            Edit
+          </Button>
+          <Button 
+            variant="outlined" 
+            size="small" 
+            onClick={() => handleCancel(params.row.id)}
+            disabled={params.row?.status === 'CANCELLED' || params.row?.status === 'CHECKED_OUT'}
+          >
+            Cancel
+          </Button>
+          <Button 
+            variant="outlined" 
+            size="small" 
+            onClick={() => handleCheckIn(params.row.id)}
+            disabled={params.row?.status !== 'SCHEDULED'}
+          >
+            Check In
+          </Button>
+          <Button 
+            variant="outlined" 
+            size="small" 
+            onClick={() => handleCheckOut(params.row.id)}
+            disabled={params.row?.status !== 'CHECKED_IN'}
+          >
+            Check Out
+          </Button>
+        </Box>
       ),
     },
   ];
