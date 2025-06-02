@@ -24,13 +24,17 @@ export default function AppointmentPage({ userId }) {
   useEffect(() => {
     const fetchData = async () => {
       try {
+        const token = localStorage.getItem('token');
+        if (!token) throw new Error('No authentication token found');
+
         const [patientsData, doctorsData, departmentsData] = await Promise.all([
           getPatients(),
           getDoctors(),
           getDepartments(),
         ]);
-        console.log('Fetched patients:', patientsData); // Debug
-        console.log('Fetched doctors:', doctorsData); // Debug
+        console.log('Fetched patients:', JSON.stringify(patientsData, null, 2));
+        console.log('Fetched doctors:', JSON.stringify(doctorsData, null, 2));
+        console.log('Fetched departments:', JSON.stringify(departmentsData, null, 2));
         setPatients(Array.isArray(patientsData) ? patientsData.filter(p => p && p.user) : []);
         setDoctors(Array.isArray(doctorsData) ? doctorsData.filter(d => d && d.user) : []);
         setDepartments(Array.isArray(departmentsData) ? departmentsData : []);
@@ -58,7 +62,7 @@ export default function AppointmentPage({ userId }) {
 
   return (
     <Container maxWidth="xl" sx={{ py: 4 }}>
-      <Box sx={{ p: 0, m: 0' }}>
+      <Box sx={{ p: 0, m: 0 }}>
         <Tabs
           value={activeTab}
           onChange={handleTabChange}
@@ -82,7 +86,7 @@ export default function AppointmentPage({ userId }) {
             <AppointmentForm
               patients={patients}
               doctors={doctors}
-              departments={department}
+              departments={departments}
               onSuccess={handleSuccess}
               appointment={selectedAppointment}
               userId={userId}
@@ -98,8 +102,7 @@ export default function AppointmentPage({ userId }) {
             <AppointmentHistory patients={patients} />
           )}
           {activeTab === 'schedule' && (
-            <DoctorSchedule doctors={doctors}
-            />
+            <DoctorSchedule doctors={doctors} />
           )}
           {activeTab === 'queue' && (
             <QueueManagement doctors={doctors} />
