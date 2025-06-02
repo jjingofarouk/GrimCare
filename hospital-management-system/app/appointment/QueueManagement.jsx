@@ -1,64 +1,34 @@
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import { Box, Typography, Alert, Button } from '@mui/material';
-import { DataGrid } from '@mui/x-data-grid';
+import CustomDataGrid from './CustomDataGrid';
+import { useApiData } from '../utils/api';
 import { getQueue, updateQueue } from './appointmentService';
-import { format } from 'date-fns';
 import styles from './Queue.module.css';
 
-export default function QueueManagement({ doctorId }) {
-  const [queues, setQueues] = useState([]);
+export default function QueueManagement({ doctors, doctorId }) {
+  const { data: queues, error: queueError, loading: queueLoading } = useApiData(
+    () => getQueue({ doctorId })
+  );
   const [error, setError] = useState(null);
-
-  useEffect(() => {
-    const fetchQueue = async () => {
-      try {
-        const data = await getQueue({ doctorId });
-        setQueues(
-          data.map((item) => ({
-            ...item,
-            id: item.id || Math.random().toString(),
-          }))
-        );
-      } catch (err) {
-        setError('Failed to fetch queue');
-      }
-    };
-    fetchQueue();
-  }, [doctorId]);
 
   const handleStatusChange = async (id, status) => {
     try {
       await updateQueue(id, { status });
-      setQueues((prev) =>
-        prev.map((q) => (q.id === id ? { ...q, status } : q))
-      );
+      // Refresh handled by parent or API hook
     } catch (err) {
-      setError('Failed to update queue status');
+      setError('Failed to update queue status: ' + err.message);
     }
   };
 
   const columns = [
     { field: 'queueNumber', headerName: 'Queue Number', width: 120 },
-    {
-      field: 'patientName',
-      headerName: 'Patient',
-      width: 150,
-      valueGetter: (params) => params?.appointment?.patient?.user?.name ?? 'N/A',
-    },
-    {
-      field: 'doctorName',
-      headerName: 'Doctor',
-      width: 150,
-      valueGetter: (params) => params?.appointment?.doctor?.user?.name ?? 'N/A',
-    },
+    { field: 'patientName', headerName: 'Patient', width: 150 },
+    { field: 'doctorName', headerName: 'Doctor', width: 150 },
     {
       field: 'date',
       headerName: 'Date',
       width: 200,
-      valueGetter: (params) =>
-        params?.appointment?.date
-          ? format(new Date(params.appointment.date), 'PPp')
-          : 'N/A',
+      valueGetter: (params) => params.row?.appointment?.date || 'N/A',
     },
     { field: 'status', headerName: 'Status', width: 120 },
     {
@@ -67,7 +37,7 @@ export default function QueueManagement({ doctorId }) {
       width: 200,
       renderCell: (params) => (
         <>
-          {params?.status === 'WAITING' && (
+          {params.row?.status === 'WAITING' && (
             <Button
               variant="contained"
               onClick={() => handleStatusChange(params.id, 'IN_PROGRESS')}
@@ -76,7 +46,7 @@ export default function QueueManagement({ doctorId }) {
               Start
             </Button>
           )}
-          {params?.status === 'IN_PROGRESS' && (
+          {params.row?.status === 'IN_PROGRESS' && (
             <Button
               variant="contained"
               onClick={() => handleStatusChange(params.id, 'COMPLETED')}
@@ -94,20 +64,20 @@ export default function QueueManagement({ doctorId }) {
       <Typography variant="h5" className={styles.title}>
         Queue Management
       </Typography>
-      {error && (
+      {(error || queueError) && (
         <Alert severity="error" className={styles.alert}>
-          {error}
+          {error || queueError}
         </Alert>
       )}
-      <Box className={styles.gridContainer}>
-        <DataGrid
-          rows={queues}
-          columns={columns}
-          pageSizeOptions={[5, 10, 20]}
-          disableRowSelectionOnClick
-          className={styles.grid}
-        />
-      </Box>
+      {queueLoading ? (
+        <Box sx={{ display: 'flex', justifyContent: 'center', mt: 4 }}>
+          <CircularProgress />
+        </Box>
+      ) : (
+        <Box className={styles.gridContainer}>
+          <CustomDataGrid rows={queues} columns={columns} />
+        </Box>
+      )}
     </Box>
   );
 }
