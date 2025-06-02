@@ -14,7 +14,10 @@ export default function QueueManagement({ doctorId }) {
     const fetchQueue = async () => {
       try {
         const data = await getQueue({ doctorId });
-        setQueues(data);
+        setQueues(data.map(item => ({
+          ...item,
+          id: item.id || Math.random().toString(), // Ensure each row has a unique id
+        })));
       } catch (err) {
         setError('Failed to fetch queue');
       }
@@ -37,42 +40,42 @@ export default function QueueManagement({ doctorId }) {
       field: 'patientName', 
       headerName: 'Patient', 
       width: 150, 
-      valueGetter: (params) => params.row.appointment?.patient?.user?.name || 'N/A' 
+      valueGetter: ({ row }) => row.appointment?.patient?.user?.name ?? 'N/A'
     },
     { 
       field: 'doctorName', 
       headerName: 'Doctor', 
       width: 150, 
-      valueGetter: (params) => params.row.appointment?.doctor?.user?.name || 'N/A' 
+      valueGetter: ({ row }) => row.appointment?.doctor?.user?.name ?? 'N/A'
     },
     { 
       field: 'date', 
       headerName: 'Date', 
       width: 200, 
-      valueGetter: (params) => params.row.appointment?.date 
-        ? format(new Date(params.row.appointment.date), 'PPp') 
-        : 'N/A' 
+      valueGetter: ({ row }) => row.appointment?.date 
+        ? format(new Date(row.appointment.date), 'PPp') 
+        : 'N/A'
     },
     { field: 'status', headerName: 'Status', width: 120 },
     {
       field: 'actions',
       headerName: 'Actions',
       width: 200,
-      renderCell: (params) => (
+      renderCell: ({ row }) => (
         <>
-          {params.row.status === 'WAITING' && (
+          {row.status === 'WAITING' && (
             <Button
               variant="contained"
-              onClick={() => handleStatusChange(params.row.id, 'IN_PROGRESS')}
+              onClick={() => handleStatusChange(row.id, 'IN_PROGRESS')}
               sx={{ mr: 1 }}
             >
               Start
             </Button>
           )}
-          {params.row.status === 'IN_PROGRESS' && (
+          {row.status === 'IN_PROGRESS' && (
             <Button
               variant="contained"
-              onClick={() => handleStatusChange(params.row.id, 'COMPLETED')}
+              onClick={() => handleStatusChange(row.id, 'COMPLETED')}
             >
               Complete
             </Button>
