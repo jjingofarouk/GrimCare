@@ -12,7 +12,7 @@ import AvailableDoctorsList from './AvailableDoctorsList';
 import DepartmentForm from './DepartmentForm';
 import Dashboard from './Dashboard';
 import { getDepartments, getDoctors, getPatients } from './appointmentService';
-import styles from 'page.module.css';
+import styles from './page.module.css';
 
 export default function AppointmentPage({ userId }) {
   const [patients, setPatients] = useState([]);
