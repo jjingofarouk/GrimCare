@@ -33,9 +33,26 @@ export default function QueueManagement({ doctorId }) {
 
   const columns = [
     { field: 'queueNumber', headerName: 'Queue Number', width: 120 },
-    { field: 'patientName', headerName: 'Patient', width: 150, valueGetter: (params) => params.row.appointment.patient.user.name },
-    { field: 'doctorName', headerName: 'Doctor', width: 150, valueGetter: (params) => params.row.appointment.doctor.user.name },
-    { field: 'date', headerName: 'Date', width: 200, valueGetter: (params) => format(new Date(params.row.appointment.date), 'PPp') },
+    { 
+      field: 'patientName', 
+      headerName: 'Patient', 
+      width: 150, 
+      valueGetter: (params) => params.row.appointment?.patient?.user?.name || 'N/A' 
+    },
+    { 
+      field: 'doctorName', 
+      headerName: 'Doctor', 
+      width: 150, 
+      valueGetter: (params) => params.row.appointment?.doctor?.user?.name || 'N/A' 
+    },
+    { 
+      field: 'date', 
+      headerName: 'Date', 
+      width: 200, 
+      valueGetter: (params) => params.row.appointment?.date 
+        ? format(new Date(params.row.appointment.date), 'PPp') 
+        : 'N/A' 
+    },
     { field: 'status', headerName: 'Status', width: 120 },
     {
       field: 'actions',
