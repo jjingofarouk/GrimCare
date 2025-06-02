@@ -8,6 +8,7 @@ import AppointmentHistory from './AppointmentHistory';
 import DoctorSchedule from './DoctorSchedule';
 import QueueManagement from './QueueManagement';
 import DoctorAvailability from './DoctorAvailability';
+import DepartmentForm from '../departments/DepartmentForm';
 import Dashboard from './Dashboard';
 import { getDepartments, getDoctors, getPatients } from './appointmentService';
 
@@ -31,7 +32,7 @@ export default function AppointmentPage({ userId }) {
         setDoctors(doctorsData);
         setDepartments(departmentsData);
       } catch (err) {
-        console.error('Failed to fetch data');
+        console.error('Failed to fetch data:', err);
       }
     };
     fetchData();
@@ -70,6 +71,7 @@ export default function AppointmentPage({ userId }) {
           <Tab label="Schedule" value="schedule" />
           <Tab label="Queue" value="queue" />
           <Tab label="Availability" value="availability" />
+          <Tab label="Departments" value="departments" />
         </Tabs>
         <Box>
           {activeTab === 'dashboard' && <Dashboard />}
@@ -101,6 +103,7 @@ export default function AppointmentPage({ userId }) {
           {activeTab === 'availability' && (
             <DoctorAvailability doctors={doctors} />
           )}
+          {activeTab === 'departments' && <DepartmentForm />}
         </Box>
       </Paper>
     </Container>
