@@ -1,5 +1,3 @@
-"use client";
-
 import React, { useState, useEffect } from 'react';
 import { Box, Typography, Alert, Button } from '@mui/material';
 import { DataGrid } from '@mui/x-data-grid';
@@ -15,10 +13,12 @@ export default function QueueManagement({ doctorId }) {
     const fetchQueue = async () => {
       try {
         const data = await getQueue({ doctorId });
-        setQueues(data.map(item => ({
-          ...item,
-          id: item.id || Math.random().toString(),
-        })));
+        setQueues(
+          data.map((item) => ({
+            ...item,
+            id: item.id || Math.random().toString(),
+          }))
+        );
       } catch (err) {
         setError('Failed to fetch queue');
       }
@@ -29,7 +29,9 @@ export default function QueueManagement({ doctorId }) {
   const handleStatusChange = async (id, status) => {
     try {
       await updateQueue(id, { status });
-      setQueues((prev) => prev.map((q) => (q.id === id ? { ...q, status } : q)));
+      setQueues((prev) =>
+        prev.map((q) => (q.id === id ? { ...q, status } : q))
+      );
     } catch (err) {
       setError('Failed to update queue status');
     }
@@ -37,25 +39,26 @@ export default function QueueManagement({ doctorId }) {
 
   const columns = [
     { field: 'queueNumber', headerName: 'Queue Number', width: 120 },
-    { 
-      field: 'patientName', 
-      headerName: 'Patient', 
-      width: 150, 
-      valueGetter: (params) => params?.appointment?.patient?.user?.name ?? 'N/A'
+    {
+      field: 'patientName',
+      headerName: 'Patient',
+      width: 150,
+      valueGetter: (params) => params?.appointment?.patient?.user?.name ?? 'N/A',
     },
-    { 
-      field: 'doctorName', 
-      headerName: 'Doctor', 
-      width: 150, 
-      valueGetter: (params) => params?.appointment?.doctor?.user?.name ?? 'N/A'
+    {
+      field: 'doctorName',
+      headerName: 'Doctor',
+      width: 150,
+      valueGetter: (params) => params?.appointment?.doctor?.user?.name ?? 'N/A',
     },
-    { 
-      field: 'date', 
-      headerName: 'Date', 
-      width: 200, 
-      valueGetter: (params) => params?.appointment?.date 
-        ? format(new Date(params.appointment.date), 'PPp') 
-        : 'N/A'
+    {
+      field: 'date',
+      headerName: 'Date',
+      width: 200,
+      valueGetter: (params) =>
+        params?.appointment?.date
+          ? format(new Date(params.appointment.date), 'PPp')
+          : 'N/A',
     },
     { field: 'status', headerName: 'Status', width: 120 },
     {
@@ -87,15 +90,22 @@ export default function QueueManagement({ doctorId }) {
   ];
 
   return (
-    <Box sx={{ p: 2 }}>
-      <Typography variant="h5" gutterBottom>Queue Management</Typography>
-      {error && <Alert severity="error">{error}</Alert>}
-      <Box sx={{ height: 400, width: '100%' }}>
+    <Box className={styles.container}>
+      <Typography variant="h5" className={styles.title}>
+        Queue Management
+      </Typography>
+      {error && (
+        <Alert severity="error" className={styles.alert}>
+          {error}
+        </Alert>
+      )}
+      <Box className={styles.gridContainer}>
         <DataGrid
           rows={queues}
           columns={columns}
           pageSizeOptions={[5, 10, 20]}
           disableRowSelectionOnClick
+          className={styles.grid}
         />
       </Box>
     </Box>
