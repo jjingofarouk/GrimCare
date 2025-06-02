@@ -21,11 +21,12 @@ export default function AppointmentForm({ patients, doctors, departments, onSucc
 
   useEffect(() => {
     if (appointment) {
+      const date = appointment.date ? new Date(appointment.date) : null;
       setFormData({
         patientId: appointment.patientId || '',
         doctorId: appointment.doctorId || '',
         departmentId: appointment.departmentId || '',
-        date: appointment.date ? new Date(appointment.date).toISOString().slice(0, 16) : '',
+        date: date && !isNaN(date) ? date.toISOString().slice(0, 16) : '',
         type: appointment.type || 'REGULAR',
         reason: appointment.reason || '',
         notes: appointment.notes || '',
@@ -43,8 +44,8 @@ export default function AppointmentForm({ patients, doctors, departments, onSucc
       return false;
     }
     const selectedDate = new Date(formData.date);
-    if (selectedDate < new Date()) {
-      setError('Cannot schedule appointments in the past.');
+    if (isNaN(selectedDate) || selectedDate < new Date()) {
+      setError('Please select a valid future date.');
       return false;
     }
     setError(null);
@@ -159,10 +160,10 @@ export default function AppointmentForm({ patients, doctors, departments, onSucc
       <Dialog open={openConfirm} onClose={() => setOpenConfirm(false)}>
         <DialogTitle>Confirm Appointment</DialogTitle>
         <DialogContent>
-          <Typography><strong>Patient:</strong> {patients.find((p) => p.id === parseInt(formData.patientId))?.user.name}</Typography>
-          <Typography><strong>Doctor:</strong> {doctors.find((d) => d.id === parseInt(formData.doctorId))?.user.name}</Typography>
+          <Typography><strong>Patient:</strong> {patients.find((p) => p.id === parseInt(formData.patientId))?.user.name || 'N/A'}</Typography>
+          <Typography><strong>Doctor:</strong> {doctors.find((d) => d.id === parseInt(formData.doctorId))?.user.name || 'N/A'}</Typography>
           <Typography><strong>Department:</strong> {departments.find((d) => d.id === parseInt(formData.departmentId))?.name || 'N/A'}</Typography>
-          <Typography><strong>Date:</strong> {format(new Date(formData.date), 'PPp')}</Typography>
+          <Typography><strong>Date:</strong> {formData.date && !isNaN(new Date(formData.date)) ? format(new Date(formData.date), 'PPp') : 'Invalid Date'}</Typography>
           <Typography><strong>Type:</strong> {formData.type}</Typography>
           <Typography><strong>Reason:</strong> {formData.reason}</Typography>
           <Typography><strong>Notes:</strong> {formData.notes || 'N/A'}</Typography>
