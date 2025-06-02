@@ -4,25 +4,39 @@ import React, { useState, useEffect } from "react";
 import { Box, Typography, Alert, Button } from "@mui/material";
 import { DataGrid } from "@mui/x-data-grid";
 import AppointmentFilter from "./AppointmentFilter";
-import { getAppointments, updateAppointment } from "./appointmentService";
+import { getAppointments, updateAppointment, getPatients, getDoctors } from "./appointmentService";
 import { format } from "date-fns";
 
 export default function AppointmentList({ onEdit }) {
   const [appointments, setAppointments] = useState([]);
+  const [patients, setPatients] = useState([]);
+  const [doctors, setDoctors] = useState([]);
   const [error, setError] = useState(null);
   const [filter, setFilter] = useState({ status: "ALL", dateFrom: "", dateTo: "", doctorId: "", patientId: "", type: "ALL" });
 
   useEffect(() => {
-    const fetchAppointments = async () => {
+    const fetchData = async () => {
       try {
-        const data = await getAppointments();
-        setAppointments(Array.isArray(data) ? data.filter((item) => item && item.id) : []);
+        const token = localStorage.getItem('token');
+        if (!token) throw new Error('No authentication token found');
+
+        const [appointmentsData, patientsData, doctorsData] = await Promise.all([
+          getAppointments(),
+          getPatients(),
+          getDoctors(),
+        ]);
+        console.log('Fetched appointments:', JSON.stringify(appointmentsData, null, 2));
+        console.log('Fetched patients:', JSON.stringify(patientsData, null, 2));
+        console.log('Fetched doctors:', JSON.stringify(doctorsData, null, 2));
+        setAppointments(Array.isArray(appointmentsData) ? appointmentsData.filter((item) => item && item.id) : []);
+        setPatients(Array.isArray(patientsData) ? patientsData.filter((item) => item && item.id && item.user) : []);
+        setDoctors(Array.isArray(doctorsData) ? doctorsData.filter((item) => item && item.id && item.user) : []);
       } catch (err) {
-        setError("Failed to fetch appointments");
-        console.error("Fetch appointments error:", err);
+        setError("Failed to fetch data: " + err.message);
+        console.error("Fetch error:", err);
       }
     };
-    fetchAppointments();
+    fetchData();
   }, []);
 
   const handleCancel = async (id) => {
@@ -33,6 +47,7 @@ export default function AppointmentList({ onEdit }) {
       );
     } catch (err) {
       setError("Failed to cancel appointment");
+      console.error("Cancel error:", err);
     }
   };
 
@@ -44,6 +59,7 @@ export default function AppointmentList({ onEdit }) {
       );
     } catch (err) {
       setError("Failed to check in appointment");
+      console.error("Check-in error:", err);
     }
   };
 
@@ -55,6 +71,7 @@ export default function AppointmentList({ onEdit }) {
       );
     } catch (err) {
       setError("Failed to check out appointment");
+      console.error("Check-out error:", err);
     }
   };
 
@@ -74,13 +91,21 @@ export default function AppointmentList({ onEdit }) {
       field: "patientName",
       headerName: "Patient",
       width: 150,
-      valueGetter: (params) => params?.row?.patient?.user?.name ?? "N/A",
+      valueGetter: (params) => {
+        const name = params?.row?.patient?.user?.name ?? "N/A";
+        if (name === "N/A") console.log('Patient name missing for appointment:', params.row);
+        return name;
+      },
     },
     {
       field: "doctorName",
       headerName: "Doctor",
       width: 150,
-      valueGetter: (params) => params?.row?.doctor?.user?.name ?? "N/A",
+      valueGetter: (params) => {
+        const name = params?.row?.doctor?.user?.name ?? "N/A";
+        if (name === "N/A") console.log('Doctor name missing for appointment:', params.row);
+        return name;
+      },
     },
     {
       field: "date",
@@ -88,7 +113,9 @@ export default function AppointmentList({ onEdit }) {
       width: 200,
       valueGetter: (params) => {
         try {
-          return params?.row?.date ? format(new Date(params.row.date), "PPp") : "N/A";
+          const date = params?.row?.date ? format(new Date(params.row.date), "PPp") : "N/A";
+          if (date === "N/A") console.log('Date missing for appointment:', params.row);
+          return date;
         } catch {
           return "N/A";
         }
@@ -101,7 +128,11 @@ export default function AppointmentList({ onEdit }) {
       field: "queueNumber",
       headerName: "Queue",
       width: 100,
-      valueGetter: (params) => params?.row?.queue?.queueNumber ?? "N/A",
+      valueGetter: (params) => {
+        const queue = params?.row?.queue?.queueNumber ?? "N/A";
+        if (queue === "N/A") console.log('Queue number missing for appointment:', params.row);
+        return queue;
+      },
     },
     {
       field: "actions",
@@ -149,7 +180,7 @@ export default function AppointmentList({ onEdit }) {
   return (
     <Box sx={{ p: 2 }}>
       <Typography variant="h5" gutterBottom>Appointments</Typography>
-      <AppointmentFilter onFilter={setFilter} />
+      <AppointmentFilter onFilter={setFilter} patients={patients} doctors={doctors} />
       {error && <Alert severity="error">{error}</Alert>}
       <Box sx={{ height: 600, width: "100%" }}>
         <DataGrid
