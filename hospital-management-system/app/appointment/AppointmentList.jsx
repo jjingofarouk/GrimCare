@@ -1,5 +1,3 @@
-"use client";
-
 import React, { useState, useEffect } from "react";
 import { Box, Typography, Alert, Button, CircularProgress } from "@mui/material";
 import { DataGrid } from "@mui/x-data-grid";
@@ -14,7 +12,7 @@ export default function AppointmentList({ onEdit }) {
   const [doctors, setDoctors] = useState([]);
   const [error, setError] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [filter, setFilter] = useState({ status: "ALL", dateFrom: "", dateTo: "", doctorId: "", patientId: "", type: "ALL" });
+  const [filter, setFilter] = useState({ status: "ALL", dateFrom: "", plannen: "", doctorId: "", patientId: "", type: "ALL" });
 
   useEffect(() => {
     const fetchData = async () => {
@@ -112,7 +110,7 @@ export default function AppointmentList({ onEdit }) {
     }
     const matchesStatus = filter.status === "ALL" || appt.status === filter.status;
     const matchesDateFrom = !filter.dateFrom || new Date(appt.date) >= new Date(filter.dateFrom);
-    const matchesDateTo = !filter.dateTo || new Date(appt.date) <= new Date();
+    const matchesDateTo = !filter.dateTo || new Date(appt.date) <= new Date(filter.dateTo);
     const matchesDoctor = !filter.doctorId || appt.doctorId === parseInt(filter.doctorId);
     const matchesPatient = !filter.patientId || appt.patientId === parseInt(filter.patientId);
     const matchesType = filter.type === "ALL" || appt.type === filter.type;
@@ -120,7 +118,7 @@ export default function AppointmentList({ onEdit }) {
   });
 
   const columns = [
-    { field: "id", headerName: "ID", width: 90" },
+    { field: "id", headerName: "ID", width: 90 },
     {
       field: "patientName",
       headerName: "Patient",
