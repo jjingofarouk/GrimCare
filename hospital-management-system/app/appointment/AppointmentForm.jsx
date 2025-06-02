@@ -1,20 +1,19 @@
 "use client";
 
 import React, { useState, useEffect } from 'react';
-import { Box, TextField, MenuItem, Button, Typography, Dialog, DialogTitle, DialogContent, DialogActions, FormControl, InputLabel, Select } from '@mui/material';
-import { getDoctorAvailability, createAppointment, updateAppointment } from './appointmentService';
+import { Box, TextField, Button, MenuItem, Select, InputLabel, FormControl, Typography, Dialog, DialogTitle, DialogContent, DialogActions } from '@mui/material';
+import { createAppointment, updateAppointment } from './appointmentService';
 
-export default function AppointmentForm({ patients, doctors, onSuccess, appointment }) {
+export default function AppointmentForm({ patients, doctors, departments, onSuccess, appointment, userId }) {
   const [formData, setFormData] = useState({
     patientId: '',
     doctorId: '',
-    department: '',
-    appointmentDate: '',
+    departmentId: '',
+    date: '',
+    type: 'REGULAR',
     reason: '',
     notes: '',
-    type: 'REGULAR',
   });
-  const [availableSlots, setAvailableSlots] = useState([]);
   const [error, setError] = useState(null);
   const [loading, setLoading] = useState(false);
   const [openConfirm, setOpenConfirm] = useState(false);
@@ -24,39 +23,30 @@ export default function AppointmentForm({ patients, doctors, onSuccess, appointm
       setFormData({
         patientId: appointment.patientId || '',
         doctorId: appointment.doctorId || '',
-        department: appointment.department || '',
-        appointmentDate: appointment.appointmentDate ? new Date(appointment.appointmentDate).toISOString().slice(0, 16) : '',
+        departmentId: appointment.departmentId || '',
+        date: appointment.date ? new Date(appointment.date).toISOString().slice(0, 16) : '',
+        type: appointment.type || 'REGULAR',
         reason: appointment.reason || '',
         notes: appointment.notes || '',
-        type: appointment.type || 'REGULAR',
       });
     }
   }, [appointment]);
 
-  useEffect(() => {
-    if (formData.doctorId && formData.appointmentDate) {
-      const date = new Date(formData.appointmentDate).toISOString().split('T')[0];
-      getDoctorAvailability(formData.doctorId, date).then(slots => {
-        setAvailableSlots(slots);
-      }).catch(() => setError('Failed to fetch availability'));
-    }
-  }, [formData.doctorId, formData.appointmentDate]);
-
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
-    setError(null);
   };
 
   const validateForm = () => {
-    if (!formData.patientId || !formData.doctorId || !formData.appointmentDate || !formData.reason || !formData.type) {
+    if (!formData.patientId || !formData.doctorId || !formData.date || !formData.reason) {
       setError('All required fields must be filled.');
       return false;
     }
-    const selectedDate = new Date(formData.appointmentDate);
+    const selectedDate = new Date(formData.date);
     if (selectedDate < new Date()) {
       setError('Cannot schedule appointments in the past.');
       return false;
     }
+    setError(null);
     return true;
   };
 
@@ -69,14 +59,14 @@ export default function AppointmentForm({ patients, doctors, onSuccess, appointm
   const confirmSubmission = async () => {
     setLoading(true);
     try {
-      const data = { ...formData, appointmentDate: new Date(formData.appointmentDate) };
+      const data = { ...formData, bookedById: userId };
       if (appointment) {
         await updateAppointment(appointment.id, data);
       } else {
         await createAppointment(data);
       }
       onSuccess();
-      setFormData({ patientId: '', doctorId: '', department: '', appointmentDate: '', reason: '', notes: '', type: 'REGULAR' });
+      setFormData({ patientId: '', doctorId: '', departmentId: '', date: '', type: 'REGULAR', reason: '', notes: '' });
       setOpenConfirm(false);
     } catch (err) {
       setError('Failed to process appointment');
@@ -85,9 +75,12 @@ export default function AppointmentForm({ patients, doctors, onSuccess, appointm
     }
   };
 
+  const reasons = ['Consultation', 'Follow-up', 'Emergency', 'Routine Checkup', 'Other'];
+
   return (
-    <Box component="form" onSubmit={handleSubmit} sx={{ p: 2 }}>
-      <FormControl fullWidth sx={{ mb: 2 }}>
+    <Box component="form" onSubmit={handleSubmit} sx={{ maxWidth: 600, mx: 'auto', p: 2 }}>
+      <Typography variant="h6" gutterBottom>Create Appointment</Typography>
+      <FormControl fullWidth margin="normal">
         <InputLabel>Patient</InputLabel>
         <Select name="patientId" value={formData.patientId} onChange={handleChange} required>
           <MenuItem value="">Select Patient</MenuItem>
@@ -96,7 +89,7 @@ export default function AppointmentForm({ patients, doctors, onSuccess, appointm
           ))}
         </Select>
       </FormControl>
-      <FormControl fullWidth sx={{ mb: 2 }}>
+      <FormControl fullWidth margin="normal">
         <InputLabel>Doctor</InputLabel>
         <Select name="doctorId" value={formData.doctorId} onChange={handleChange} required>
           <MenuItem value="">Select Doctor</MenuItem>
@@ -105,77 +98,77 @@ export default function AppointmentForm({ patients, doctors, onSuccess, appointm
           ))}
         </Select>
       </FormControl>
-      <FormControl fullWidth sx={{ mb: 2 }}>
+      <FormControl fullWidth margin="normal">
         <InputLabel>Department</InputLabel>
-        <Select name="department" value={formData.department} onChange={handleChange}>
+        <Select name="departmentId" value={formData.departmentId} onChange={handleChange}>
           <MenuItem value="">Select Department</MenuItem>
-          <MenuItem value="Cardiology">Cardiology</MenuItem>
-          <MenuItem value="Pediatrics">Pediatrics</MenuItem>
-          <MenuItem value="General Medicine">General Medicine</MenuItem>
-          <MenuItem value="Gynecology">Gynecology</MenuItem>
+          {departments.map((dept) => (
+            <MenuItem key={dept.id} value={dept.id}>{dept.name}</MenuItem>
+          ))}
         </Select>
       </FormControl>
       <TextField
         fullWidth
-        label="Appointment Date"
+        margin="normal"
+        label="Date"
         type="datetime-local"
-        name="appointmentDate"
-        value={formData.appointmentDate}
+        name="date"
+        value={formData.date}
         onChange={handleChange}
         required
-        sx={{ mb: 2 }}
+        InputLabelProps={{ shrink: true }}
       />
-      <FormControl fullWidth sx={{ mb: 2 }}>
-        <InputLabel>Reason</InputLabel>
-        <Select name="reason" value={formData.reason} onChange={handleChange} required>
-          <MenuItem value="">Select Reason</MenuItem>
-          <MenuItem value="Consultation">Consultation</MenuItem>
-          <MenuItem value="Follow-up">Follow-up</MenuItem>
-          <MenuItem value="Emergency">Emergency</MenuItem>
-          <MenuItem value="Routine Checkup">Routine Checkup</MenuItem>
-          <MenuItem value="Other">Other</MenuItem>
-        </Select>
-      </FormControl>
-      <FormControl fullWidth sx={{ mb: 2 }}>
+      <FormControl fullWidth margin="normal">
         <InputLabel>Type</InputLabel>
-        <Select name="type" value={formData.type} onChange={handleChange} required>
+        <Select name="type" value={formData.type} onChange={handleChange}>
           <MenuItem value="REGULAR">Regular</MenuItem>
-          <MenuItem value="WALK_IN">Walk-in</MenuItem>
+          <MenuItem value="WALK_IN">Walk-In</MenuItem>
           <MenuItem value="EMERGENCY">Emergency</MenuItem>
         </Select>
       </FormControl>
+      <FormControl fullWidth margin="normal">
+        <InputLabel>Reason</InputLabel>
+        <Select name="reason" value={formData.reason} onChange={handleChange} required>
+          <MenuItem value="">Select Reason</MenuItem>
+          {reasons.map((reason) => (
+            <MenuItem key={reason} value={reason}>{reason}</MenuItem>
+          ))}
+        </Select>
+      </FormControl>
       <TextField
         fullWidth
+        margin="normal"
         label="Notes"
         name="notes"
         value={formData.notes}
         onChange={handleChange}
         multiline
         rows={4}
-        sx={{ mb: 2 }}
       />
-      {error && <Typography color="error" sx={{ mb: 2 }}>{error}</Typography>}
-      <Box display="flex" gap={2}>
+      {error && <Typography color="error">{error}</Typography>}
+      <Box mt={2} display="flex" gap={2}>
         <Button type="submit" variant="contained" disabled={loading}>
           {loading ? 'Processing...' : appointment ? 'Update Appointment' : 'Create Appointment'}
         </Button>
-        <Button variant="outlined" onClick={() => setFormData({ patientId: '', doctorId: '', department: '', appointmentDate: '', reason: '', notes: '', type: 'REGULAR' })}>
-          Reset
+        <Button variant="outlined" onClick={() => setFormData({ patientId: '', doctorId: '', departmentId: '', date: '', type: 'REGULAR', reason: '', notes: '' })}>
+          Clear
         </Button>
       </Box>
 
       <Dialog open={openConfirm} onClose={() => setOpenConfirm(false)}>
         <DialogTitle>Confirm Appointment</DialogTitle>
         <DialogContent>
-          <Typography>Patient: {patients.find((p) => p.id === formData.patientId)?.user.name}</Typography>
-          <Typography>Doctor: {doctors.find((d) => d.id === formData.doctorId)?.user.name}</Typography>
-          <Typography>Date: {new Date(formData.appointmentDate).toLocaleString()}</Typography>
-          <Typography>Reason: {formData.reason}</Typography>
-          <Typography>Type: {formData.type}</Typography>
+          <Typography><strong>Patient:</strong> {patients.find((p) => p.id === parseInt(formData.patientId))?.user.name}</Typography>
+          <Typography><strong>Doctor:</strong> {doctors.find((d) => d.id === parseInt(formData.doctorId))?.user.name}</Typography>
+          <Typography><strong>Department:</strong> {departments.find((d) => d.id === parseInt(formData.departmentId))?.name || 'N/A'}</Typography>
+          <Typography><strong>Date:</strong> {format(new Date(formData.date), 'PPp')}</Typography>
+          <Typography><strong>Type:</strong> {formData.type}</Typography>
+          <Typography><strong>Reason:</strong> {formData.reason}</Typography>
+          <Typography><strong>Notes:</strong> {formData.notes || 'N/A'}</Typography>
         </DialogContent>
         <DialogActions>
-          <Button onClick={confirmSubmission} disabled={loading}>Confirm</Button>
-          <Button onClick={() => setOpenConfirm(false)} disabled={loading}>Cancel</Button>
+          <Button onClick={confirmSubmission} variant="contained" disabled={loading}>Confirm</Button>
+          <Button onClick={() => setOpenConfirm(false)} variant="outlined">Cancel</Button>
         </DialogActions>
       </Dialog>
     </Box>
