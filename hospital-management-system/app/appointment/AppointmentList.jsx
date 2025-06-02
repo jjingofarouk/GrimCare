@@ -1,21 +1,17 @@
 "use client";
 
 import React, { useState, useEffect } from 'react';
-import { Box, Typography, TextField, FormControl, InputLabel, Select, MenuItem, Button } from '@mui/material';
+import { Box, Typography, Alert } from '@mui/material';
+import { DataGrid } from '@mui/x-data-grid';
 import AppointmentCard from './AppointmentCard';
-import { getAppointments, updateAppointment, deleteAppointment } from './appointmentService';
+import AppointmentFilter from './AppointmentFilter';
+import { getAppointments, updateAppointment } from './appointmentService';
+import { format } from 'date-fns';
 
 export default function AppointmentList({ onEdit }) {
   const [appointments, setAppointments] = useState([]);
   const [error, setError] = useState(null);
-  const [filters, setFilters] = useState({
-    status: 'ALL',
-    dateFrom: '',
-    dateTo: '',
-    doctorId: '',
-    patientId: '',
-    department: '',
-  });
+  const [filter, setFilter] = useState({ status: 'ALL', dateFrom: '', dateTo: '', doctorId: '', patientId: '', type: 'ALL' });
 
   useEffect(() => {
     const fetchAppointments = async () => {
@@ -32,7 +28,9 @@ export default function AppointmentList({ onEdit }) {
   const handleCancel = async (id) => {
     try {
       await updateAppointment(id, { status: 'CANCELLED' });
-      setAppointments(appointments.map((appt) => appt.id === id ? { ...appt, status: 'CANCELLED' } : appt));
+      setAppointments((prev) =>
+        prev.map((appt) => (appt.id === id ? { ...appt, status: 'CANCELLED' } : appt))
+      );
     } catch (err) {
       setError('Failed to cancel appointment');
     }
@@ -40,89 +38,73 @@ export default function AppointmentList({ onEdit }) {
 
   const handleCheckIn = async (id) => {
     try {
-      await updateAppointment(id, { checkInTime: new Date(), status: 'CHECKED_IN' });
-      setAppointments(appointments.map((appt) => appt.id === id ? { ...appt, checkInTime: new Date(), status: 'CHECKED_IN' } : appt));
+      await updateAppointment(id, { status: 'CHECKED_IN', checkInTime: new Date() });
+      setAppointments((prev) =>
+        prev.map((appt) => (appt.id === id ? { ...appt, status: 'CHECKED_IN', checkInTime: new Date() } : appt))
+      );
     } catch (err) {
-      setError('Failed to check in');
+      setError('Failed to check in appointment');
     }
   };
 
   const handleCheckOut = async (id) => {
     try {
-      await updateAppointment(id, { checkOutTime: new Date(), status: 'COMPLETED' });
-      setAppointments(appointments.map((appt) => appt.id === id ? { ...appt, checkOutTime: new Date(), status: 'COMPLETED' } : appt));
+      await updateAppointment(id, { status: 'CHECKED_OUT', checkOutTime: new Date() });
+      setAppointments((prev) =>
+        prev.map((appt) => (appt.id === id ? { ...appt, status: 'CHECKED_OUT', checkOutTime: new Date() } : appt))
+      );
     } catch (err) {
-      setError('Failed to check out');
+      setError('Failed to check out appointment');
     }
   };
 
-  const handleFilterChange = (e) => {
-    setFilters({ ...filters, [e.target.name]: e.target.value });
-  };
-
   const filteredAppointments = appointments.filter((appt) => {
-    const matchesStatus = filters.status === 'ALL' || appt.status === filters.status;
-    const matchesDateFrom = !filters.dateFrom || new Date(appt.appointmentDate) >= new Date(filters.dateFrom);
-    const matchesDateTo = !filters.dateTo || new Date(appt.appointmentDate) <= new Date(filters.dateTo);
-    const matchesDoctor = !filters.doctorId || appt.doctorId === parseInt(filters.doctorId);
-    const matchesPatient = !filters.patientId || appt.patientId === parseInt(filters.patientId);
-    const matchesDepartment = !filters.department || appt.department === filters.department;
-    return matchesStatus && matchesDateFrom && matchesDateTo && matchesDoctor && matchesPatient && matchesDepartment;
+    const matchesStatus = filter.status === 'ALL' || appt.status === filter.status;
+    const matchesDateFrom = !filter.dateFrom || new Date(appt.date) >= new Date(filter.dateFrom);
+    const matchesDateTo = !filter.dateTo || new Date(appt.date) <= new Date(filter.dateTo);
+    const matchesDoctor = !filter.doctorId || appt.doctor.id === parseInt(filter.doctorId);
+    const matchesPatient = !filter.patientId || appt.patient.id === parseInt(filter.patientId);
+    const matchesType = filter.type === 'ALL' || appt.type === filter.type;
+    return matchesStatus && matchesDateFrom && matchesDateTo && matchesDoctor && matchesPatient && matchesType;
   });
 
+  const columns = [
+    { field: 'id', headerName: 'ID', width: 90 },
+    { field: 'patientName', headerName: 'Patient', width: 150, valueGetter: (params) => params.row.patient.user.name },
+    { field: 'doctorName', headerName: 'Doctor', width: 150, valueGetter: (params) => params.row.doctor.user.name },
+    { field: 'date', headerName: 'Date', width: 200, valueGetter: (params) => format(new Date(params.row.date), 'PPp') },
+    { field: 'type', headerName: 'Type', width: 120 },
+    { field: 'status', headerName: 'Status', width: 120 },
+    { field: 'reason', headerName: 'Reason', width: 150 },
+    { field: 'queueNumber', headerName: 'Queue', width: 100, valueGetter: (params) => params.row.queue?.queueNumber || 'N/A' },
+    {
+      field: 'actions',
+      headerName: 'Actions',
+      width: 300,
+      renderCell: (params) => (
+        <AppointmentCard
+          appointment={params.row}
+          onEdit={onEdit}
+          onCancel={handleCancel}
+          onCheckIn={handleCheckIn}
+          onCheckOut={handleCheckOut}
+        />
+      ),
+    },
+  ];
+
   return (
-    <Box sx={{ p: 3 }}>
+    <Box sx={{ p: 2 }}>
       <Typography variant="h5" gutterBottom>Appointments</Typography>
-      <Box display="flex" gap={2} mb={3}>
-        <FormControl sx={{ minWidth: 120 }}>
-          <InputLabel>Status</InputLabel>
-          <Select name="status" value={filters.status} onChange={handleFilterChange}>
-            <MenuItem value="ALL">All</MenuItem>
-            <MenuItem value="SCHEDULED">Scheduled</MenuItem>
-            <MenuItem value="CHECKED_IN">Checked In</MenuItem>
-            <MenuItem value="COMPLETED">Completed</MenuItem>
-            <MenuItem value="CANCELLED">Cancelled</MenuItem>
-          </Select>
-        </FormControl>
-        <TextField
-          label="From Date"
-          type="date"
-          name="dateFrom"
-          value={filters.dateFrom}
-          onChange={handleFilterChange}
-          InputLabelProps={{ shrink: true }}
+      <AppointmentFilter onFilter={setFilter} />
+      {error && <Alert severity="error">{error}</Alert>}
+      <Box sx={{ height: 600, width: '100%' }}>
+        <DataGrid
+          rows={filteredAppointments}
+          columns={columns}
+          pageSizeOptions={[5, 10, 20]}
+          disableRowSelectionOnClick
         />
-        <TextField
-          label="To Date"
-          type="date"
-          name="dateTo"
-          value={filters.dateTo}
-          onChange={handleFilterChange}
-          InputLabelProps={{ shrink: true }}
-        />
-        <FormControl sx={{ minWidth: 120 }}>
-          <InputLabel>Department</InputLabel>
-          <Select name="department" value={filters.department} onChange={handleFilterChange}>
-            <MenuItem value="">All</MenuItem>
-            <MenuItem value="Cardiology">Cardiology</MenuItem>
-            <MenuItem value="Pediatrics">Pediatrics</MenuItem>
-            <MenuItem value="General Medicine">General Medicine</MenuItem>
-            <MenuItem value="Gynecology">Gynecology</MenuItem>
-          </Select>
-        </FormControl>
-      </Box>
-      {error && <Typography color="error" sx={{ mb: 2 }}>{error}</Typography>}
-      <Box>
-        {filteredAppointments.map((appointment) => (
-          <AppointmentCard
-            key={appointment.id}
-            appointment={appointment}
-            onEdit={onEdit}
-            onCancel={handleCancel}
-            onCheckIn={handleCheckIn}
-            onCheckOut={handleCheckOut}
-          />
-        ))}
       </Box>
     </Box>
   );
