@@ -1,94 +1,47 @@
 "use client";
 
-import React, { useState, useEffect } from 'react';
-import { Box, Typography, Alert, Button, TextField, FormControl, Select, MenuItem, InputLabel } from '@mui/material';
-import { DataGrid } from '@mui/x-data-grid';
+import React, { useState } from 'react';
+import { Box, Typography, Alert, Button, TextField, FormControl, InputLabel, Select, MenuItem } from '@mui/material';
+import SearchableSelect from './SearchableSelect';
+import CustomDataGrid from './CustomDataGrid';
+import { useApiData } from '../utils/api';
 import { getAvailability, createAvailability } from './appointmentService';
-import { format } from 'date-fns';
 
 export default function DoctorAvailability({ doctors }) {
   const [selectedDoctorId, setSelectedDoctorId] = useState('');
-  const [availability, setAvailability] = useState([]);
-  const [error, setError] = useState(null);
   const [formData, setFormData] = useState({ startTime: '', endTime: '', status: 'AVAILABLE' });
-
-  useEffect(() => {
-    if (selectedDoctorId) {
-      const fetchAvailability = async () => {
-        try {
-          const data = await getAvailability({ doctorId: selectedDoctorId });
-          // Validate and filter data to ensure it has required fields
-          const validData = Array.isArray(data)
-            ? data.filter(item => item && item.startTime && item.endTime && !isNaN(new Date(item.startTime)))
-            : [];
-          setAvailability(validData);
-        } catch (err) {
-          setError('Failed to fetch availability');
-          console.error('Fetch availability error:', err);
-        }
-      };
-      fetchAvailability();
-    }
-  }, [selectedDoctorId]);
+  const { data: availability, error: availabilityError } = useApiData(
+    () => selectedDoctorId ? getAvailability({ doctorId: selectedDoctorId }) : Promise.resolve([]),
+    [selectedDoctorId]
+  );
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
       await createAvailability({ ...formData, doctorId: selectedDoctorId });
       setFormData({ startTime: '', endTime: '', status: 'AVAILABLE' });
-      const data = await getAvailability({ doctorId: selectedDoctorId });
-      // Validate and filter data
-      const validData = Array.isArray(data)
-        ? data.filter(item => item && item.startTime && item.endTime && !isNaN(new Date(item.startTime)))
-        : [];
-      setAvailability(validData);
     } catch (err) {
-      setError('Failed to create availability');
-      console.error('Create availability error:', err);
+      setError('Failed to create availability: ' + err.message);
     }
   };
 
   const columns = [
-    {
-      field: 'startTime',
-      headerName: 'Start Time',
-      width: 200,
-      valueGetter: (params) => {
-        try {
-          const date = params.row?.startTime ? new Date(params.row.startTime) : null;
-          return date && !isNaN(date) ? format(date, 'PPp') : 'N/A';
-        } catch {
-          return 'N/A';
-        }
-      },
-    },
-    {
-      field: 'endTime',
-      headerName: 'End Time',
-      width: 200,
-      valueGetter: (params) => {
-        try {
-          const date = params.row?.endTime ? new Date(params.row.endTime) : null;
-          return date && !isNaN(date) ? format(date, 'PPp') : 'N/A';
-        } catch {
-          return 'N/A';
-        }
-      },
-    },
+    { field: 'startTime', headerName: 'Start Time', width: 200 },
+    { field: 'endTime', headerName: 'End Time', width: 200 },
     { field: 'status', headerName: 'Status', width: 120 },
   ];
 
   return (
     <Box sx={{ p: 2 }}>
       <Typography variant="h5" gutterBottom>Doctor Availability</Typography>
-      <FormControl fullWidth sx={{ mb: 2 }}>
-        <Select value={selectedDoctorId} onChange={(e) => setSelectedDoctorId(e.target.value)} displayEmpty>
-          <MenuItem value="">Select Doctor</MenuItem>
-          {doctors.map((doctor) => (
-            <MenuItem key={doctor.id} value={doctor.id}>{doctor.user.name} ({doctor.specialty})</MenuItem>
-          ))}
-        </Select>
-      </FormControl>
+      <SearchableSelect
+        label="Doctor"
+        options={doctors}
+        value={selectedDoctorId}
+        onChange={setSelectedDoctorId}
+        getOptionLabel={(doctor) => `${doctor.user?.name || doctor.doctorId || 'Unknown'} (${doctor.specialty || 'N/A'})`}
+        getOptionValue={(doctor) => doctor.id}
+      />
       {selectedDoctorId && (
         <>
           <Box component="form" onSubmit={handleSubmit} sx={{ display: 'flex', gap: 2, mb: 2 }}>
@@ -119,14 +72,9 @@ export default function DoctorAvailability({ doctors }) {
             </FormControl>
             <Button type="submit" variant="contained">Add Availability</Button>
           </Box>
-          {error && <Alert severity="error">{error}</Alert>}
+          {availabilityError && <Alert severity="error">{availabilityError}</Alert>}
           <Box sx={{ height: 400, width: '100%' }}>
-            <DataGrid
-              rows={availability}
-              columns={columns}
-              pageSizeOptions={[5, 10, 20]}
-              disableRowSelectionOnClick
-            />
+            <CustomDataGrid rows={availability} columns={columns} />
           </Box>
         </>
       )}
