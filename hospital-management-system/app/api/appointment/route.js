@@ -6,6 +6,10 @@ const prisma = new PrismaClient();
 export async function GET() {
   try {
     const appointments = await prisma.appointment.findMany({
+      where: {
+        patient: { userId: { not: null } },
+        doctor: { userId: { not: null } },
+      },
       include: {
         patient: { include: { user: true } },
         doctor: { include: { user: true } },
@@ -14,6 +18,7 @@ export async function GET() {
         queue: true,
       },
     });
+    console.log('Appointments fetched from API:', JSON.stringify(appointments, null, 2));
     return NextResponse.json(appointments);
   } catch (error) {
     console.error('GET /api/appointment error:', error);
@@ -28,6 +33,19 @@ export async function POST(request) {
     const data = await request.json();
     if (!data.patientId || !data.doctorId || !data.date || !data.reason) {
       return NextResponse.json({ error: 'Missing required fields' }, { status: 400 });
+    }
+
+    const patient = await prisma.patient.findUnique({
+      where: { id: parseInt(data.patientId) },
+      include: { user: true },
+    });
+    const doctor = await prisma.doctor.findUnique({
+      where: { id: parseInt(data.doctorId) },
+      include: { user: true },
+    });
+
+    if (!patient?.user || !doctor?.user) {
+      return NextResponse.json({ error: 'Invalid patient or doctor: missing user data' }, { status: 400 });
     }
 
     const existingAppointment = await prisma.appointment.findFirst({
@@ -106,6 +124,21 @@ export async function PUT(request, { params }) {
 
   try {
     const data = await request.json();
+    if (data.patientId || data.doctorId) {
+      const patient = data.patientId ? await prisma.patient.findUnique({
+        where: { id: parseInt(data.patientId) },
+        include: { user: true },
+      }) : null;
+      const doctor = data.doctorId ? await prisma.doctor.findUnique({
+        where: { id: parseInt(data.doctorId) },
+        include: { user: true },
+      }) : null;
+
+      if ((data.patientId && !patient?.user) || (data.doctorId && !doctor?.user)) {
+        return NextResponse.json({ error: 'Invalid patient or doctor: missing user data' }, { status: 400 });
+      }
+    }
+
     const existingAppointment = await prisma.appointment.findFirst({
       where: {
         doctorId: data.doctorId ? parseInt(data.doctorId) : undefined,
