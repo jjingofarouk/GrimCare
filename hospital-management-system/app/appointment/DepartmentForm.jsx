@@ -15,7 +15,7 @@ export default function DepartmentForm() {
     const fetchDepartments = async () => {
       try {
         const data = await getDepartments();
-        setDepartments(Array.isArray(data) ? data.filter(item => item && item.id) : []);
+        setDepartments(Array.isArray(data) ? data.filter(item => item !== null && item !== undefined && item.id) : []);
       } catch (err) {
         setError('Failed to fetch departments');
         console.error('Fetch departments error:', err);
@@ -45,7 +45,7 @@ export default function DepartmentForm() {
       await createDepartment(formData);
       setFormData({ name: '', description: '' });
       const data = await getDepartments();
-      setDepartments(Array.isArray(data) ? data.filter(item => item && item.id) : []);
+      setDepartments(Array.isArray(data) ? data.filter(item => item !== null && item !== undefined && item.id) : []);
     } catch (err) {
       setError('Failed to create department');
       console.error('Create department error:', err);
@@ -59,13 +59,13 @@ export default function DepartmentForm() {
       field: 'name', 
       headerName: 'Department Name', 
       width: 200,
-      valueGetter: (params) => params.row?.name || 'N/A'
+      valueGetter: (params) => params?.row?.name ?? 'N/A'
     },
     { 
       field: 'description', 
       headerName: 'Description', 
       width: 300, 
-      valueGetter: (params) => params.row?.description || 'N/A' 
+      valueGetter: (params) => params?.row?.description ?? 'N/A' 
     },
     { 
       field: 'createdAt', 
@@ -73,7 +73,7 @@ export default function DepartmentForm() {
       width: 200, 
       valueGetter: (params) => {
         try {
-          return params.row?.createdAt ? new Date(params.row.createdAt).toLocaleString() : 'N/A';
+          return params?.row?.createdAt ? new Date(params.row.createdAt).toLocaleString() : 'N/A';
         } catch {
           return 'N/A';
         }
