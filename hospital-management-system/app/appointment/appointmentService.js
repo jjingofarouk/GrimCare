@@ -1,7 +1,12 @@
+
+
 import axios from 'axios';
+import axiosRetry from 'axios-retry';
 import api from '../api';
 
 const { BASE_URL, API_ROUTES } = api;
+
+axiosRetry(axios, { retries: 3, retryDelay: (retryCount) => retryCount * 1000 });
 
 export async function getAppointments() {
   try {
@@ -9,7 +14,9 @@ export async function getAppointments() {
       headers: { Authorization: `Bearer ${localStorage.getItem('token')}` },
       params: { include: 'patient.user,doctor.user,queue,department,bookedBy' },
     });
-    console.log('Appointments response:', response.data);
+    if (!Array.isArray(response.data)) {
+      throw new Error('Invalid response format: Expected array');
+    }
     return response.data;
   } catch (error) {
     console.error('Error fetching appointments:', error);
@@ -23,11 +30,10 @@ export async function createAppointment(data) {
       headers: { Authorization: `Bearer ${localStorage.getItem('token')}` },
       params: { include: 'patient.user,doctor.user,queue,department,bookedBy' },
     });
-    console.log('Created appointment:', response.data);
     return response.data;
   } catch (error) {
     console.error('Error creating appointment:', error);
-    throw error;
+    throw new Error(error.response?.data?.message || 'Failed to create appointment');
   }
 }
 
@@ -37,11 +43,10 @@ export async function updateAppointment(id, data) {
       headers: { Authorization: `Bearer ${localStorage.getItem('token')}` },
       params: { include: 'patient.user,doctor.user,queue,department,bookedBy' },
     });
-    console.log('Updated appointment:', response.data);
     return response.data;
   } catch (error) {
     console.error('Error updating appointment:', error);
-    throw error;
+    throw new Error(error.response?.data?.message || 'Failed to update appointment');
   }
 }
 
@@ -54,7 +59,7 @@ export async function getAvailability(params) {
     return response.data;
   } catch (error) {
     console.error('Error fetching availability:', error);
-    throw error;
+    throw new Error(error.response?.data?.message || 'Failed to fetch availability');
   }
 }
 
@@ -66,7 +71,7 @@ export async function createAvailability(data) {
     return response.data;
   } catch (error) {
     console.error('Error creating availability:', error);
-    throw error;
+    throw new Error(error.response?.data?.message || 'Failed to create availability');
   }
 }
 
@@ -79,7 +84,7 @@ export async function getQueue(params) {
     return response.data;
   } catch (error) {
     console.error('Error fetching queue:', error);
-    throw error;
+    throw new Error(error.response?.data?.message || 'Failed to fetch queue');
   }
 }
 
@@ -91,7 +96,7 @@ export async function updateQueue(id, data) {
     return response.data;
   } catch (error) {
     console.error('Error updating queue:', error);
-    throw error;
+    throw new Error(error.response?.data?.message || 'Failed to update queue');
   }
 }
 
@@ -103,7 +108,7 @@ export async function getDepartments() {
     return response.data;
   } catch (error) {
     console.error('Error fetching departments:', error);
-    throw error;
+    throw new Error(error.response?.data?.message || 'Failed to fetch departments');
   }
 }
 
@@ -113,11 +118,10 @@ export async function getDoctors() {
       headers: { Authorization: `Bearer ${localStorage.getItem('token')}` },
       params: { include: 'user,department' },
     });
-    console.log('Doctors response:', response.data);
     return response.data;
   } catch (error) {
     console.error('Error fetching doctors:', error);
-    throw error;
+    throw new Error(error.response?.data?.message || 'Failed to fetch doctors');
   }
 }
 
@@ -127,10 +131,9 @@ export async function getPatients() {
       headers: { Authorization: `Bearer ${localStorage.getItem('token')}` },
       params: { include: 'user' },
     });
-    console.log('Patients response:', response.data);
     return response.data;
   } catch (error) {
     console.error('Error fetching patients:', error);
-    throw error;
+    throw new Error(error.response?.data?.message || 'Failed to fetch patients');
   }
 }
