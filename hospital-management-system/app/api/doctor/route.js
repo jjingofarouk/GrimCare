@@ -5,10 +5,17 @@ import { v4 as uuidv4 } from 'uuid';
 
 const prisma = new PrismaClient();
 
-export async function GET() {
+export async function GET(request) {
   try {
+    const { searchParams } = new URL(request.url);
+    const include = searchParams.get('include')?.split(',').reduce((acc, curr) => {
+      if (curr === 'user') acc.user = true;
+      if (curr === 'department') acc.department = true;
+      return acc;
+    }, {}) || { user: true };
+
     const doctors = await prisma.doctor.findMany({
-      include: { user: true },
+      include,
     });
     return NextResponse.json(doctors);
   } catch (error) {
@@ -52,9 +59,10 @@ export async function POST(request) {
           licenseNumber: data.licenseNumber,
           phone: data.phone || null,
           office: data.office || null,
+          department: data.departmentId ? { connect: { id: parseInt(data.departmentId) } } : undefined,
           user: { connect: { id: user.id } },
         },
-        include: { user: true },
+        include: { user: true, department: true },
       });
     });
 
