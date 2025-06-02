@@ -5,17 +5,22 @@ const { BASE_URL, API_ROUTES } = api;
 
 export async function getAppointments() {
   try {
-    const response = await axios.get(`${BASE_URL}${API_ROUTES.APPOINTMENT}`);
+    const response = await axios.get(`${BASE_URL}${API_ROUTES.APPOINTMENT}`, {
+      headers: { Authorization: `Bearer ${localStorage.getItem('token')}` },
+      params: { include: 'patient.user,doctor.user,queue' },
+    });
     return response.data;
   } catch (error) {
     console.error('Error fetching appointments:', error);
-    throw error;
+    throw new Error(error.response?.data?.message || 'Failed to fetch appointments');
   }
 }
 
 export async function createAppointment(data) {
   try {
-    const response = await axios.post(`${BASE_URL}${API_ROUTES.APPOINTMENT}`, data);
+    const response = await axios.post(`${BASE_URL}${API_ROUTES.APPOINTMENT}`, data, {
+      headers: { Authorization: `Bearer ${localStorage.getItem('token')}` },
+    });
     return response.data;
   } catch (error) {
     console.error('Error creating appointment:', error);
@@ -25,7 +30,9 @@ export async function createAppointment(data) {
 
 export async function updateAppointment(id, data) {
   try {
-    const response = await axios.put(`${BASE_URL}${API_ROUTES.APPOINTMENT}/${id}`, data);
+    const response = await axios.put(`${BASE_URL}${API_ROUTES.APPOINTMENT}/${id}`, data, {
+      headers: { Authorization: `Bearer ${localStorage.getItem('token')}` },
+    });
     return response.data;
   } catch (error) {
     console.error('Error updating appointment:', error);
@@ -35,7 +42,10 @@ export async function updateAppointment(id, data) {
 
 export async function getAvailability(params) {
   try {
-    const response = await axios.get(`${BASE_URL}/api/availability`, { params });
+    const response = await axios.get(`${BASE_URL}/api/availability`, {
+      params,
+      headers: { Authorization: `Bearer ${localStorage.getItem('token')}` },
+    });
     return response.data;
   } catch (error) {
     console.error('Error fetching availability:', error);
@@ -45,7 +55,9 @@ export async function getAvailability(params) {
 
 export async function createAvailability(data) {
   try {
-    const response = await axios.post(`${BASE_URL}/api/availability`, data);
+    const response = await axios.post(`${BASE_URL}/api/availability`, data, {
+      headers: { Authorization: `Bearer ${localStorage.getItem('token')}` },
+    });
     return response.data;
   } catch (error) {
     console.error('Error creating availability:', error);
@@ -55,7 +67,10 @@ export async function createAvailability(data) {
 
 export async function getQueue(params) {
   try {
-    const response = await axios.get(`${BASE_URL}/api/queue`, { params });
+    const response = await axios.get(`${BASE_URL}/api/queue`, {
+      params,
+      headers: { Authorization: `Bearer ${localStorage.getItem('token')}` },
+    });
     return response.data;
   } catch (error) {
     console.error('Error fetching queue:', error);
@@ -65,7 +80,9 @@ export async function getQueue(params) {
 
 export async function updateQueue(id, data) {
   try {
-    const response = await axios.put(`${BASE_URL}/api/queue`, { id, ...data });
+    const response = await axios.put(`${BASE_URL}/api/queue`, { id, ...data }, {
+      headers: { Authorization: `Bearer ${localStorage.getItem('token')}` },
+    });
     return response.data;
   } catch (error) {
     console.error('Error updating queue:', error);
@@ -75,7 +92,9 @@ export async function updateQueue(id, data) {
 
 export async function getDepartments() {
   try {
-    const response = await axios.get(`${BASE_URL}/api/department`);
+    const response = await axios.get(`${BASE_URL}/api/department`, {
+      headers: { Authorization: `Bearer ${localStorage.getItem('token')}` },
+    });
     return response.data;
   } catch (error) {
     console.error('Error fetching departments:', error);
@@ -85,7 +104,9 @@ export async function getDepartments() {
 
 export async function getDoctors() {
   try {
-    const response = await axios.get(`${BASE_URL}${API_ROUTES.DOCTOR}`);
+    const response = await axios.get(`${BASE_URL}${API_ROUTES.DOCTOR}`, {
+      headers: { Authorization: `Bearer ${localStorage.getItem('token')}` },
+    });
     return response.data;
   } catch (error) {
     console.error('Error fetching doctors:', error);
@@ -95,7 +116,9 @@ export async function getDoctors() {
 
 export async function getPatients() {
   try {
-    const response = await axios.get(`${BASE_URL}${API_ROUTES.PATIENT}`);
+    const response = await axios.get(`${BASE_URL}${API_ROUTES.PATIENT}`, {
+      headers: { Authorization: `Bearer ${localStorage.getItem('token')}` },
+    });
     return response.data;
   } catch (error) {
     console.error('Error fetching patients:', error);
