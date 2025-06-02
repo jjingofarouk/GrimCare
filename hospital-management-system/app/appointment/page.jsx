@@ -8,7 +8,8 @@ import AppointmentHistory from './AppointmentHistory';
 import DoctorSchedule from './DoctorSchedule';
 import QueueManagement from './QueueManagement';
 import DoctorAvailability from './DoctorAvailability';
-import DepartmentForm from './DepartmentForm';
+import AvailableDoctorsList from './AvailableDoctorsList';
+import DepartmentForm from '../departments/DepartmentForm';
 import Dashboard from './Dashboard';
 import { getDepartments, getDoctors, getPatients } from './appointmentService';
 
@@ -71,6 +72,7 @@ export default function AppointmentPage({ userId }) {
           <Tab label="Schedule" value="schedule" />
           <Tab label="Queue" value="queue" />
           <Tab label="Availability" value="availability" />
+          <Tab label="Available Doctors" value="availableDoctors" />
           <Tab label="Departments" value="departments" />
         </Tabs>
         <Box>
@@ -102,6 +104,9 @@ export default function AppointmentPage({ userId }) {
           )}
           {activeTab === 'availability' && (
             <DoctorAvailability doctors={doctors} />
+          )}
+          {activeTab === 'availableDoctors' && (
+            <AvailableDoctorsList />
           )}
           {activeTab === 'departments' && <DepartmentForm />}
         </Box>
