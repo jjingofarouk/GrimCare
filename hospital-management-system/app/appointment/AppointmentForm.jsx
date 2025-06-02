@@ -1,7 +1,8 @@
+// AppointmentForm.jsx
 "use client";
 
 import React, { useState, useEffect } from 'react';
-import { Box, TextField, Button, MenuItem, Select, InputLabel, FormControl, Typography, Dialog, DialogTitle, DialogContent, DialogActions } from '@mui/material';
+import { Box, TextField, Button, MenuItem, Select, InputLabel, FormControl, Typography, Dialog, DialogTitle, DialogContent, DialogActions, Autocomplete } from '@mui/material';
 import { createAppointment, updateAppointment } from './appointmentService';
 import { format } from 'date-fns';
 import styles from './form.module.css';
@@ -21,9 +22,9 @@ export default function AppointmentForm({ patients, doctors, departments, onSucc
   const [openConfirm, setOpenConfirm] = useState(false);
 
   useEffect(() => {
-    console.log('Patients prop:', patients); // Debug
-    console.log('Doctors prop:', doctors); // Debug
-    console.log('Appointment prop:', appointment); // Debug
+    console.log('Patients prop:', patients);
+    console.log('Doctors prop:', doctors);
+    console.log('Appointment prop:', appointment);
     if (appointment) {
       const date = appointment.date ? new Date(appointment.date) : null;
       setFormData({
@@ -73,14 +74,14 @@ export default function AppointmentForm({ patients, doctors, departments, onSucc
         date: new Date(formData.date),
         bookedById: userId,
       };
-      console.log('Submitting appointment data:', data); // Debug
+      console.log('Submitting appointment data:', data);
       let response;
       if (appointment) {
         response = await updateAppointment(appointment.id, data);
       } else {
         response = await createAppointment(data);
       }
-      console.log('Appointment response:', response); // Debug
+      console.log('Appointment response:', response);
       onSuccess();
       setFormData({ patientId: '', doctorId: '', departmentId: '', date: '', type: 'REGULAR', reason: '', notes: '' });
       setOpenConfirm(false);
@@ -98,22 +99,22 @@ export default function AppointmentForm({ patients, doctors, departments, onSucc
     <Box component="form" onSubmit={handleSubmit} sx={{ maxWidth: 600, mx: 'auto', p: 2 }}>
       <Typography variant="h6" gutterBottom>Create Appointment</Typography>
       <FormControl fullWidth margin="normal">
-        <InputLabel>Patient</InputLabel>
-        <Select name="patientId" value={formData.patientId} onChange={handleChange} required>
-          <MenuItem value="">Select Patient</MenuItem>
-          {patients.map((patient) => (
-            <MenuItem key={patient.id} value={patient.id}>{patient.user?.name || 'Unknown'}</MenuItem>
-          ))}
-        </Select>
+        <Autocomplete
+          options={patients}
+          getOptionLabel={(option) => option.user?.name || 'Unknown'}
+          onChange={(e, value) => setFormData({ ...formData, patientId: value?.id || '' })}
+          value={patients.find(p => p.id === parseInt(formData.patientId)) || null}
+          renderInput={(params) => <TextField {...params} label="Patient" required />}
+        />
       </FormControl>
       <FormControl fullWidth margin="normal">
-        <InputLabel>Doctor</InputLabel>
-        <Select name="doctorId" value={formData.doctorId} onChange={handleChange} required>
-          <MenuItem value="">Select Doctor</MenuItem>
-          {doctors.map((doctor) => (
-            <MenuItem key={doctor.id} value={doctor.id}>{doctor.user?.name || 'Unknown'} ({doctor.specialty})</MenuItem>
-          ))}
-        </Select>
+        <Autocomplete
+          options={doctors}
+          getOptionLabel={(option) => `${option.user?.name || 'Unknown'} (${option.specialty})`}
+          onChange={(e, value) => setFormData({ ...formData, doctorId: value?.id || '' })}
+          value={doctors.find(d => d.id === parseInt(formData.doctorId)) || null}
+          renderInput={(params) => <TextField {...params} label="Doctor" required />}
+        />
       </FormControl>
       <FormControl fullWidth margin="normal">
         <InputLabel>Department</InputLabel>
