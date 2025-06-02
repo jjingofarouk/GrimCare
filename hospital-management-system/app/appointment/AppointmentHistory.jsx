@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Box, Typography, Alert } from '@mui/material';
 import SearchableSelect from '../components/SearchableSelect';
-import CustomDataGrid from './CustomDataGrid';
+import CustomDataGrid from '../components/CustomDataGrid';
 import { useApiData } from '../utils/api';
 import { getAppointments } from './appointmentService';
 
