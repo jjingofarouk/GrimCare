@@ -15,11 +15,13 @@ export default function AppointmentHistory({ patients }) {
 
   useEffect(() => {
     const fetchAppointments = async () => {
-      if (!selectedPatientId) return;
       setLoading(true);
       try {
         const token = localStorage.getItem('token');
-        const response = await axios.get(`${api.BASE_URL}${api.API_ROUTES.APPOINTMENT}?patientId=${selectedPatientId}`, {
+        const url = selectedPatientId 
+          ? `${api.BASE_URL}${api.API_ROUTES.APPOINTMENT}?patientId=${selectedPatientId}`
+          : `${api.BASE_URL}${api.API_ROUTES.APPOINTMENT}`;
+        const response = await axios.get(url, {
           headers: { Authorization: `Bearer ${token}` },
         });
         const formattedAppointments = response.data.map((appt, index) => ({
@@ -58,29 +60,27 @@ export default function AppointmentHistory({ patients }) {
         Appointment History
       </Typography>
       <SearchableSelect
-        label="Patient"
-        options={patients}
+        label="Patient (optional)"
+        options={[{ id: '', user: { name: 'All Patients' } }, ...patients]}
         value={selectedPatientId}
         onChange={setSelectedPatientId}
-        getOptionLabel={(patient) => patient.user?.name || patient.patientId || 'Unknown'}
+        getOptionLabel={(patient) => patient.user?.name || patient.patientId || 'All Patients'}
         getOptionValue={(patient) => patient.id}
       />
       {error && <Alert severity="error" sx={{ mb: 2 }}>{error}</Alert>}
-      {selectedPatientId && (
-        <Box sx={{ height: 400, width: '100%', mt: 2, bgcolor: 'white', borderRadius: 2 }}>
-          {loading ? (
-            <CircularProgress />
-          ) : (
-            <DataGrid
-              rows={appointments}
-              columns={columns}
-              pageSizeOptions={[5, 10, 20]}
-              disableRowSelectionOnClick
-              getRowId={(row) => row.id}
-            />
-          )}
-        </Box>
-      )}
+      <Box sx={{ height: 400, width: '100%', mt: 2, bgcolor: 'white', borderRadius: 2 }}>
+        {loading ? (
+          <CircularProgress />
+        ) : (
+          <DataGrid
+            rows={appointments}
+            columns={columns}
+            pageSizeOptions={[5, 10, 20]}
+            disableRowSelectionOnClick
+            getRowId={(row) => row.id}
+          />
+        )}
+      </Box>
     </Box>
   );
 }
