@@ -1,303 +1,405 @@
-// prisma/seed.js
 const { PrismaClient } = require('@prisma/client');
-const bcrypt = require('bcryptjs');
 
 const prisma = new PrismaClient();
 
-async function resetDatabase() {
-  // Delete data in reverse order to avoid foreign key constraints
+async function main() {
+  // Delete all existing data
   await prisma.cSSDLog.deleteMany();
   await prisma.cSSDRequisition.deleteMany();
   await prisma.cSSDRecord.deleteMany();
   await prisma.cSSDInstrument.deleteMany();
   await prisma.fixedAsset.deleteMany();
+  await prisma.costCenter.deleteMany();
   await prisma.payroll.deleteMany();
   await prisma.transaction.deleteMany();
-  await prisma.costCenter.deleteMany();
   await prisma.queue.deleteMany();
-  await prisma.admission.deleteMany();
-  await prisma.discharge.deleteMany();
   await prisma.doctorAvailability.deleteMany();
   await prisma.appointment.deleteMany();
+  await prisma.discharge.deleteMany();
+  await prisma.admission.deleteMany();
   await prisma.ward.deleteMany();
+  await prisma.department.deleteMany();
   await prisma.patient.deleteMany();
   await prisma.doctor.deleteMany();
-  await prisma.department.deleteMany();
   await prisma.user.deleteMany();
-  console.log('Database reset successfully.');
-}
-
-async function seedDatabase() {
-  // Hash passwords
-  const hashedPassword = await bcrypt.hash('password123', 10);
-
-  // Create Departments
-  const departments = await Promise.all([
-    prisma.department.create({
-      data: {
-        name: 'Cardiology',
-        description: 'Heart-related treatments',
-      },
-    }),
-    prisma.department.create({
-      data: {
-        name: 'Orthopedics',
-        description: 'Bone and joint treatments',
-      },
-    }),
-  ]);
 
   // Create Users
-  const users = await Promise.all([
-    prisma.user.create({
-      data: {
-        email: 'admin@example.com',
+  await prisma.user.createMany({
+    data: [
+      {
+        email: 'admin@hospital.com',
         name: 'Admin User',
-        password: hashedPassword,
+        password: '$2b$10$123456789012345678901234567890123456789012345678901234', // Hashed password
         role: 'ADMIN',
       },
-    }),
-    prisma.user.create({
-      data: {
-        email: 'doctor1@example.com',
-        name: 'Dr. John Doe',
-        password: hashedPassword,
+      {
+        email: 'dr.john@hospital.com',
+        name: 'Dr. John Smith',
+        password: '$2b$10$123456789012345678901234567890123456789012345678901234',
         role: 'DOCTOR',
       },
-    }),
-    prisma.user.create({
-      data: {
-        email: 'patient1@example.com',
-        name: 'Jane Smith',
-        password: hashedPassword,
+      {
+        email: 'dr.jane@hospital.com',
+        name: 'Dr. Jane Doe',
+        password: '$2b$10$123456789012345678901234567890123456789012345678901234',
+        role: 'DOCTOR',
+      },
+      {
+        email: 'patient.alice@hospital.com',
+        name: 'Alice Johnson',
+        password: '$2b$10$123456789012345678901234567890123456789012345678901234',
         role: 'PATIENT',
       },
-    }),
-    prisma.user.create({
-      data: {
-        email: 'nurse1@example.com',
-        name: 'Nurse Nancy',
-        password: hashedPassword,
+      {
+        email: 'patient.bob@hospital.com',
+        name: 'Bob Williams',
+        password: '$2b$10$123456789012345678901234567890123456789012345678901234',
+        role: 'PATIENT',
+      },
+      {
+        email: 'nurse.emily@hospital.com',
+        name: 'Emily Brown',
+        password: '$2b$10$123456789012345678901234567890123456789012345678901234',
         role: 'NURSE',
       },
-    }),
-  ]);
+    ],
+  });
+
+  // Fetch created users
+  const admin = await prisma.user.findUnique({ where: { email: 'admin@hospital.com' } });
+  const drJohn = await prisma.user.findUnique({ where: { email: 'dr.john@hospital.com' } });
+  const drJane = await prisma.user.findUnique({ where: { email: 'dr.jane@hospital.com' } });
+  const alice = await prisma.user.findUnique({ where: { email: 'patient.alice@hospital.com' } });
+  const bob = await prisma.user.findUnique({ where: { email: 'patient.bob@hospital.com' } });
+  const emily = await prisma.user.findUnique({ where: { email: 'nurse.emily@hospital.com' } });
+
+  // Create Departments
+  await prisma.department.createMany({
+    data: [
+      { name: 'Cardiology', description: 'Heart and vascular care' },
+      { name: 'Orthopedics', description: 'Bone and joint care' },
+      { name: 'General Medicine', description: 'Primary care services' },
+    ],
+  });
+
+  const cardiology = await prisma.department.findUnique({ where: { name: 'Cardiology' } });
+  const orthopedics = await prisma.department.findUnique({ where: { name: 'Orthopedics' } });
 
   // Create Doctors
-  const doctor = await prisma.doctor.create({
-    data: {
-      user: { connect: { id: users[1].id } },
-      doctorId: 'DOC001',
-      specialty: 'Cardiologist',
-      licenseNumber: 'LIC12345',
-      phone: '123-456-7890',
-      office: 'Room 101',
-      department: { connect: { id: departments[0].id } },
-    },
+  await prisma.doctor.createMany({
+    data: [
+      {
+        doctorId: 'DOC001',
+        specialty: 'Cardiology',
+        licenseNumber: 'LIC001',
+        phone: '555-0101',
+        office: 'Room 101',
+        departmentId: cardiology.id,
+        user: { connect: { id: drJohn.id } },
+      },
+      {
+        doctorId: 'DOC002',
+        specialty: 'Orthopedics',
+        licenseNumber: 'LIC002',
+        phone: '555-0102',
+        office: 'Room 102',
+        departmentId: orthopedics.id,
+        user: { connect: { id: drJane.id } },
+      },
+    ],
   });
 
   // Create Patients
-  const patient = await prisma.patient.create({
-    data: {
-      user: { connect: { id: users[2].id } },
-      patientId: 'PAT001',
-      dateOfBirth: new Date('1990-05-15'),
-      gender: 'Female',
-      phone: '987-654-3210',
-      address: '123 Main St',
-      emergencyContact: 'John Smith',
-      emergencyContactPhone: '555-555-5555',
-      insuranceProvider: 'HealthCorp',
-      insurancePolicy: 'POL123456',
-      bloodType: 'O+',
-      allergies: 'Peanuts',
-      medicalHistory: 'Asthma',
-    },
+  await prisma.patient.createMany({
+    data: [
+      {
+        patientId: 'PAT001',
+        dateOfBirth: new Date('1985-05-15'),
+        gender: 'Female',
+        phone: '555-0201',
+        address: '123 Main St',
+        emergencyContact: 'Tom Johnson',
+        emergencyContactPhone: '555-0202',
+        insuranceProvider: 'HealthCare Inc.',
+        insurancePolicy: 'POL001',
+        bloodType: 'A+',
+        allergies: 'Penicillin',
+        medicalHistory: 'Hypertension',
+        user: { connect: { id: alice.id } },
+      },
+      {
+        patientId: 'PAT002',
+        dateOfBirth: new Date('1990-08-22'),
+        gender: 'Male',
+        phone: '555-0203',
+        address: '456 Oak Ave',
+        emergencyContact: 'Sarah Williams',
+        emergencyContactPhone: '555-0204',
+        insuranceProvider: 'MediCare',
+        insurancePolicy: 'POL002',
+        bloodType: 'O-',
+        allergies: 'None',
+        medicalHistory: 'Asthma',
+        user: { connect: { id: bob.id } },
+      },
+    ],
   });
 
+  const patientAlice = await prisma.patient.findUnique({ where: { patientId: 'PAT001' } });
+  const patientBob = await prisma.patient.findUnique({ where: { patientId: 'PAT002' } });
+  const doctorJohn = await prisma.doctor.findUnique({ where: { doctorId: 'DOC001' } });
+  const doctorJane = await prisma.doctor.findUnique({ where: { doctorId: 'DOC002' } });
+
   // Create Wards
-  const ward = await prisma.ward.create({
-    data: {
-      name: 'Cardiology Ward',
-      wardNumber: 'W001',
-      totalBeds: 20,
-      occupiedBeds: 5,
-      department: 'Cardiology',
-      location: 'Building A, Floor 2',
-      nurseInCharge: 'Nurse Nancy',
-    },
+  await prisma.ward.createMany({
+    data: [
+      {
+        name: 'Cardiology Ward',
+        wardNumber: 'CW001',
+        totalBeds: 20,
+        occupiedBeds: 5,
+        department: 'Cardiology',
+        location: 'Building A, Floor 2',
+        nurseInCharge: 'Emily Brown',
+      },
+      {
+        name: 'Orthopedic Ward',
+        wardNumber: 'OW001',
+        totalBeds: 15,
+        occupiedBeds: 3,
+        department: 'Orthopedics',
+        location: 'Building B, Floor 3',
+        nurseInCharge: 'Emily Brown',
+      },
+    ],
+  });
+
+  const cardioWard = await prisma.ward.findUnique({ where: { wardNumber: 'CW001' } });
+
+  // Create Admissions
+  await prisma.admission.createMany({
+    data: [
+      {
+        patientId: patientAlice.id,
+        doctorId: doctorJohn.id,
+        wardId: cardioWard.id,
+        admissionDate: new Date('2025-06-01'),
+        presentingComplaints: 'Chest pain',
+        triagePriority: 'High',
+        triageNotes: 'Requires immediate attention',
+        status: 'ADMITTED',
+      },
+    ],
   });
 
   // Create Appointments
-  const appointment = await prisma.appointment.create({
-    data: {
-      patient: { connect: { id: patient.id } },
-      doctor: { connect: { id: doctor.id } },
-      department: { connect: { id: departments[0].id } },
-      bookedBy: { connect: { id: users[0].id } },
-      date: new Date('2025-06-10T10:00:00Z'),
-      status: 'SCHEDULED',
-      type: 'REGULAR',
-      reason: 'Chest pain evaluation',
-      notes: 'Patient reports occasional palpitations',
-    },
+  await prisma.appointment.createMany({
+    data: [
+      {
+        patientId: patientAlice.id,
+        doctorId: doctorJohn.id,
+        departmentId: cardiology.id,
+        bookedById: admin.id,
+        date: new Date('2025-06-05T10:00:00Z'),
+        status: 'SCHEDULED',
+        type: 'REGULAR',
+        reason: 'Follow-up',
+        notes: 'Check blood pressure',
+      },
+      {
+        patientId: patientBob.id,
+        doctorId: doctorJane.id,
+        departmentId: orthopedics.id,
+        bookedById: admin.id,
+        date: new Date('2025-06-06T14:00:00Z'),
+        status: 'SCHEDULED',
+        type: 'REGULAR',
+        reason: 'Knee pain',
+        notes: 'Review X-ray results',
+      },
+    ],
   });
 
-  // Create Queue
-  await prisma.queue.create({
-    data: {
-      appointment: { connect: { id: appointment.id } },
-      queueNumber: 1,
-      status: 'WAITING',
-    },
+  const appointment1 = await prisma.appointment.findFirst({ where: { patientId: patientAlice.id } });
+  const appointment2 = await prisma.appointment.findFirst({ where: { patientId: patientBob.id } });
+
+  // Create Queues
+  await prisma.queue.createMany({
+    data: [
+      {
+        appointmentId: appointment1.id,
+        queueNumber: 1,
+        status: 'WAITING',
+      },
+      {
+        appointmentId: appointment2.id,
+        queueNumber: 1,
+        status: 'WAITING',
+      },
+    ],
   });
 
   // Create Doctor Availability
-  await prisma.doctorAvailability.create({
-    data: {
-      doctor: { connect: { id: doctor.id } },
-      startTime: new Date('2025-06-10T09:00:00Z'),
-      endTime: new Date('2025-06-10T17:00:00Z'),
-      status: 'AVAILABLE',
-    },
+  await prisma.doctorAvailability.createMany({
+    data: [
+      {
+        doctorId: doctorJohn.id,
+        startTime: new Date('2025-06-05T08:00:00Z'),
+        endTime: new Date('2025-06-05T12:00:00Z'),
+        status: 'AVAILABLE',
+      },
+      {
+        doctorId: doctorJane.id,
+        startTime: new Date('2025-06-06T13:00:00Z'),
+        endTime: new Date('2025-06-06T17:00:00Z'),
+        status: 'AVAILABLE',
+      },
+    ],
   });
 
-  // Create Admission
-  const admission = await prisma.admission.create({
-    data: {
-      patient: { connect: { id: patient.id } },
-      doctor: { connect: { id: doctor.id } },
-      ward: { connect: { id: ward.id } },
-      admissionDate: new Date('2025-06-01T08:00:00Z'),
-      presentingComplaints: 'Chest pain',
-      triagePriority: 'HIGH',
-      triageNotes: 'Requires immediate evaluation',
-      status: 'ADMITTED',
-    },
+  // Create Discharges
+  await prisma.discharge.createMany({
+    data: [
+      {
+        patientId: patientAlice.id,
+        doctorId: doctorJohn.id,
+        dischargeDate: new Date('2025-06-02'),
+        dischargeNotes: 'Stable condition',
+        followUpInstructions: 'Follow up in 1 week',
+        medications: 'Aspirin 75mg daily',
+      },
+    ],
   });
 
-  // Create Discharge
-  await prisma.discharge.create({
-    data: {
-      patient: { connect: { id: patient.id } },
-      doctor: { connect: { id: doctor.id } },
-      dischargeDate: new Date('2025-06-05T12:00:00Z'),
-      dischargeNotes: 'Patient stable, discharged with medication',
-      followUpInstructions: 'Follow up in 2 weeks',
-      medications: 'Aspirin 81mg daily',
-    },
+  // Create Transactions
+  await prisma.transaction.createMany({
+    data: [
+      {
+        description: 'Consultation Fee',
+        amount: 150.0,
+        category: 'Consultation',
+        status: 'PAID',
+        date: new Date('2025-06-01'),
+        type: 'DEBIT',
+        patientId: patientAlice.id,
+      },
+    ],
   });
 
-  // Create Cost Center
-  const costCenter = await prisma.costCenter.create({
-    data: {
-      name: 'Cardiology Services',
-      department: 'Cardiology',
-    },
+  // Create Payrolls
+  await prisma.payroll.createMany({
+    data: [
+      {
+        userId: drJohn.id,
+        salary: 10000.0,
+        taxes: 2000.0,
+        benefits: 500.0,
+        period: '2025-05',
+        status: 'PAID',
+      },
+    ],
   });
 
-  // Create Transaction
-  await prisma.transaction.create({
-    data: {
-      description: 'Consultation Fee',
-      amount: 150.0,
-      category: 'Consultation',
-      status: 'COMPLETED',
-      type: 'DEBIT',
-      costCenter: { connect: { id: costCenter.id } },
-      patient: { connect: { id: patient.id } },
-    },
+  // Create Cost Centers
+  await prisma.costCenter.createMany({
+    data: [
+      { name: 'Cardiology Clinic', department: 'Cardiology' },
+    ],
   });
 
-  // Create Payroll
-  await prisma.payroll.create({
-    data: {
-      user: { connect: { id: users[1].id } },
-      salary: 5000.0,
-      taxes: 1000.0,
-      benefits: 500.0,
-      period: '2025-06',
-      status: 'PAID',
-    },
+  // Create Fixed Assets
+  await prisma.fixedAsset.createMany({
+    data: [
+      {
+        name: 'ECG Machine',
+        purchaseDate: new Date('2024-01-15'),
+        purchaseCost: 5000.0,
+        depreciation: 500.0,
+        currentValue: 4500.0,
+        status: 'ACTIVE',
+      },
+    ],
   });
 
-  // Create Fixed Asset
-  await prisma.fixedAsset.create({
-    data: {
-      name: 'ECG Machine',
-      purchaseDate: new Date('2024-01-10'),
-      purchaseCost: 10000.0,
-      depreciation: 2000.0,
-      currentValue: 8000.0,
-      status: 'ACTIVE',
-    },
+  // Create CSSD Instruments
+  await prisma.cSSDInstrument.createMany({
+    data: [
+      {
+        name: 'Scalpel',
+        serialNumber: 'SC001',
+        type: 'Surgical',
+        status: 'AVAILABLE',
+        lastSterilized: new Date('2025-05-30'),
+        location: 'CSSD Storage',
+        stockQuantity: 10,
+        minStockThreshold: 2,
+      },
+    ],
   });
 
-  // Create CSSD Instrument
-  const cssdInstrument = await prisma.cSSDInstrument.create({
-    data: {
-      name: 'Surgical Scissors',
-      serialNumber: 'INST001',
-      type: 'Cutting',
-      status: 'AVAILABLE',
-      lastSterilized: new Date('2025-05-30T10:00:00Z'),
-      location: 'CSSD Storage',
-      stockQuantity: 10,
-      minStockThreshold: 5,
-    },
+  const scalpel = await prisma.cSSDInstrument.findUnique({ where: { serialNumber: 'SC001' } });
+
+  // Create CSSD Records
+  await prisma.cSSDRecord.createMany({
+    data: [
+      {
+        instrumentId: scalpel.id,
+        sterilizationDate: new Date('2025-05-30'),
+        sterilizationMethod: 'Autoclave',
+        cycleNumber: 'CY001',
+        status: 'COMPLETED',
+        qualityCheck: 'Passed',
+        notes: 'Ready for use',
+      },
+    ],
   });
 
-  // Create CSSD Record
-  const cssdRecord = await prisma.cSSDRecord.create({
-    data: {
-      instrument: { connect: { id: cssdInstrument.id } },
-      sterilizationDate: new Date('2025-05-30T10:00:00Z'),
-      sterilizationMethod: 'Autoclave',
-      cycleNumber: 'CYCLE001',
-      status: 'COMPLETED',
-      qualityCheck: 'Passed',
-      notes: 'No issues observed',
-    },
+  const cssdRecord = await prisma.cSSDRecord.findFirst({ where: { instrumentId: scalpel.id } });
+
+  // Create CSSD Requisitions
+  await prisma.cSSDRequisition.createMany({
+    data: [
+      {
+        instrumentId: scalpel.id,
+        department: 'Cardiology',
+        requestedBy: emily.id,
+        quantity: 2,
+        requestDate: new Date('2025-06-01'),
+        status: 'PENDING',
+        notes: 'Urgent for surgery',
+      },
+    ],
   });
 
-  // Create CSSD Requisition
-  const cssdRequisition = await prisma.cSSDRequisition.create({
-    data: {
-      instrument: { connect: { id: cssdInstrument.id } },
-      department: 'Cardiology',
-      requestedBy: users[1].id,
-      quantity: 2,
-      status: 'PENDING',
-      notes: 'Urgent request for surgery',
-    },
+  const requisition = await prisma.cSSDRequisition.findFirst({ where: { instrumentId: scalpel.id } });
+
+  // Create CSSD Logs
+  await prisma.cSSDLog.createMany({
+    data: [
+      {
+        instrumentId: scalpel.id,
+        recordId: cssdRecord.id,
+        userId: emily.id,
+        action: 'STERILIZED',
+        details: 'Instrument sterilized and logged',
+      },
+      {
+        requisitionId: requisition.id,
+        userId: emily.id,
+        action: 'REQUESTED',
+        details: 'Requisition for 2 scalpels',
+      },
+    ],
   });
 
-  // Create CSSD Log
-  await prisma.cSSDLog.create({
-    data: {
-      instrument: { connect: { id: cssdInstrument.id } },
-      record: { connect: { id: cssdRecord.id } },
-      requisition: { connect: { id: cssdRequisition.id } },
-      user: { connect: { id: users[0].id } },
-      action: 'STERILIZATION_COMPLETED',
-      details: 'Instrument sterilized and ready for use',
-    },
-  });
-
-  console.log('Database seeded successfully.');
+  console.log('Seed data created successfully');
 }
 
-async function main() {
-  try {
-    console.log('Resetting database...');
-    await resetDatabase();
-    console.log('Seeding database...');
-    await seedDatabase();
-  } catch (error) {
-    console.error('Error during seeding:', error);
-  } finally {
+main()
+  .catch((e) => {
+    console.error(e);
+    process.exit(1);
+  })
+  .finally(async () => {
     await prisma.$disconnect();
-  }
-}
-
-main();
+  });
