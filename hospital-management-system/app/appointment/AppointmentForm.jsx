@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import { Box, TextField, Button, MenuItem, Select, InputLabel, FormControl, Typography, Dialog, DialogTitle, DialogContent, DialogActions } from '@mui/material';
 import SearchableSelect from '../components/SearchableSelect';
-import api from '../utils/api';
+import api from '../api';
 import styles from './form.module.css';
 
 export default function AppointmentForm({ patients, doctors, departments, onSuccess, appointment, userId }) {
