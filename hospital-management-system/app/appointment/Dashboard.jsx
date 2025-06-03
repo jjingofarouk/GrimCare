@@ -1,13 +1,14 @@
 "use client";
 
 import React, { useState, useEffect } from 'react';
-import { Box, Typography, CircularProgress, Alert, Card, CardContent, Grid } from '@mui/material';
-import { Bar } from 'react-chartjs-2';
+import { Box, Typography, CircularProgress, Alert, Card, CardContent, Grid, styled } from '@mui/material';
+import { Bar, Doughnut } from 'react-chartjs-2';
 import {
   Chart as ChartJS,
   CategoryScale,
   LinearScale,
   BarElement,
+  ArcElement,
   Title,
   Tooltip,
   Legend,
@@ -15,22 +16,101 @@ import {
 import axios from 'axios';
 import api from '../api';
 
-ChartJS.register(CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend);
+ChartJS.register(CategoryScale, LinearScale, BarElement, ArcElement, Title, Tooltip, Legend);
+
+const ModernBox = styled(Box)(({ theme }) => ({
+  padding: '2rem',
+  background: 'linear-gradient(135deg, #1a1a2e 0%, #16213e 100%)',
+  minHeight: '100vh',
+  color: '#ffffff',
+  [theme.breakpoints.down('sm')]: {
+    padding: '1rem',
+  },
+}));
+
+const ModernTypography = styled(Typography)(({ theme }) => ({
+  fontWeight: 700,
+  background: 'linear-gradient(45deg, #00b0ff, #80d8ff)',
+  WebkitBackgroundClip: 'text',
+  WebkitTextFillColor: 'transparent',
+  textShadow: '0 2px 4px rgba(0, 123, 255, 0.3)',
+  marginBottom: '1.5rem',
+  textAlign: 'center',
+  [theme.breakpoints.down('sm')]: {
+    fontSize: '1.8rem',
+  },
+}));
+
+const ModernCard = styled(Card)(({ theme }) => ({
+  background: 'rgba(255, 255, 255, 0.1)',
+  backdropFilter: 'blur(10px)',
+  borderRadius: '16px',
+  border: '1px solid rgba(255, 255, 255, 0.2)',
+  transition: 'transform 0.3s ease, box-shadow 0.3s ease',
+  '&:hover': {
+    transform: 'translateY(-5px)',
+    boxShadow: '0 8px 32px rgba(0, 123, 255, 0.3)',
+  },
+  [theme.breakpoints.down('sm')]: {
+    marginBottom: '1rem',
+  },
+}));
+
+const ModernCardContent = styled(CardContent)(({ theme }) => ({
+  color: '#ffffff',
+  textAlign: 'center',
+  '& .MuiTypography-h6': {
+    color: 'rgba(255, 255, 255, 0.7)',
+    fontSize: '1rem',
+    marginBottom: '0.5rem',
+  },
+  '& .MuiTypography-h4': {
+    background: 'linear-gradient(45deg, #00b0ff, #80d8ff)',
+    WebkitBackgroundClip: 'text',
+    WebkitTextFillColor: 'transparent',
+    fontWeight: 700,
+  },
+}));
+
+const ChartContainer = styled(Box)(({ theme }) => ({
+  background: 'rgba(255, 255, 255, 0.05)',
+  borderRadius: '16px',
+  padding: '1.5rem',
+  marginBottom: '2rem',
+  maxWidth: '800px',
+  margin: '0 auto',
+  [theme.breakpoints.down('sm')]: {
+    padding: '1rem',
+  },
+}));
 
 export default function Dashboard() {
-  const [appointments, setAppointments] = useState([]);
+  const [data, setData] = useState({
+    appointments: [],
+    doctors: [],
+    queues: [],
+    availability: [],
+  });
   const [error, setError] = useState(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    async function fetchAppointments() {
+    async function fetchData() {
       setLoading(true);
       try {
         const token = localStorage.getItem('token');
-        const response = await axios.get(`${api.BASE_URL}${api.API_ROUTES.APPOINTMENT}`, {
-          headers: { Authorization: `Bearer ${token}` },
+        const [appointmentsRes, doctorsRes, queuesRes, availabilityRes] = await Promise.all([
+          axios.get(`${api.BASE_URL}${api.API_ROUTES.APPOINTMENT}`, { headers: { Authorization: `Bearer ${token}` } }),
+          axios.get(`${api.BASE_URL}${api.API_ROUTES.DOCTOR}`, { headers: { Authorization: `Bearer ${token}` } }),
+          axios.get(`${api.BASE_URL}${api.API_ROUTES.QUEUE}`, { headers: { Authorization: `Bearer ${token}` } }),
+          axios.get(`${api.BASE_URL}${api.API_ROUTES.AVAILABILITY}`, { headers: { Authorization: `Bearer ${token}` } }),
+        ]);
+        setData({
+          appointments: appointmentsRes.data,
+          doctors: doctorsRes.data,
+          queues: queuesRes.data,
+          availability: availabilityRes.data,
         });
-        setAppointments(response.data);
         setError(null);
       } catch (err) {
         setError(err.response?.data?.error || err.message);
@@ -38,10 +118,10 @@ export default function Dashboard() {
         setLoading(false);
       }
     }
-    fetchAppointments();
+    fetchData();
   }, []);
 
-  const todayAppointments = appointments.filter((appt) => {
+  const todayAppointments = data.appointments.filter((appt) => {
     const date = new Date(appt.date);
     const today = new Date();
     return (
@@ -52,14 +132,16 @@ export default function Dashboard() {
   });
 
   const stats = {
-    total: todayAppointments.length,
+    totalAppointments: todayAppointments.length,
     scheduled: todayAppointments.filter((appt) => appt.status === 'SCHEDULED').length,
     checkedIn: todayAppointments.filter((appt) => appt.status === 'CHECKED_IN').length,
     completed: todayAppointments.filter((appt) => appt.status === 'COMPLETED').length,
     cancelled: todayAppointments.filter((appt) => appt.status === 'CANCELLED').length,
+    availableDoctors: data.availability.filter((avail) => avail.status === 'AVAILABLE').length,
+    activeQueues: data.queues.filter((queue) => queue.status === 'WAITING' || queue.status === 'IN_PROGRESS').length,
   };
 
-  const chartData = {
+  const appointmentChartData = {
     labels: ['Scheduled', 'Checked In', 'Completed', 'Cancelled'],
     datasets: [
       {
@@ -82,13 +164,25 @@ export default function Dashboard() {
     ],
   };
 
+  const doctorChartData = {
+    labels: ['Available Doctors', 'Active Queues'],
+    datasets: [
+      {
+        data: [stats.availableDoctors, stats.activeQueues],
+        backgroundColor: ['rgba(153, 102, 255, 0.6)', 'rgba(255, 159, 64, 0.6)'],
+        borderColor: ['rgba(153, 102, 255, 1)', 'rgba(255, 159, 64, 1)'],
+        borderWidth: 1,
+      },
+    ],
+  };
+
   const chartOptions = {
     responsive: true,
     plugins: {
       title: {
         display: true,
-        text: 'Appointment Status Distribution',
         color: '#ffffff',
+        font: { size: 16 },
       },
       legend: {
         labels: {
@@ -99,82 +193,113 @@ export default function Dashboard() {
     scales: {
       y: {
         beginAtZero: true,
-        ticks: {
-          color: '#ffffff',
-        },
+        ticks: { color: '#ffffff' },
+        grid: { color: 'rgba(255, 255, 255, 0.1)' },
       },
       x: {
-        ticks: {
+        ticks: { color: '#ffffff' },
+        grid: { color: 'rgba(255, 255, 255, 0.1)' },
+      },
+    },
+  };
+
+  const doughnutOptions = {
+    responsive: true,
+    plugins: {
+      title: {
+        display: true,
+        text: 'Doctor & Queue Overview',
+        color: '#ffffff',
+        font: { size: 16 },
+      },
+      legend: {
+        labels: {
           color: '#ffffff',
         },
+        position: 'bottom',
       },
     },
   };
 
   return (
-    <Box sx={{ p: 2 }}>
-      <Typography variant="h5" gutterBottom>
-        Daily Appointment Dashboard
-      </Typography>
-      {error && <Alert severity="error">{error}</Alert>}
+    <ModernBox>
+      <ModernTypography variant="h4">Healthcare Dashboard</ModernTypography>
+      {error && <Alert severity="error" sx={{ mb: 2, bgcolor: 'rgba(255, 75, 75, 0.1)', color: '#ff6b6b' }}>{error}</Alert>}
       {loading ? (
-        <CircularProgress />
+        <CircularProgress sx={{ color: '#00b0ff' }} />
       ) : (
         <>
-          <Box sx={{ mt: 2, height: 400 }}>
-            <Bar data={chartData} options={chartOptions} />
-          </Box>
-          <Grid container spacing={2}>
-            <Grid item xs={12} md={4}>
-              <Card>
-                <CardContent>
+          <Grid container spacing={3} sx={{ mb: 4 }}>
+            <Grid item xs={12} sm={6} md={3}>
+              <ModernCard>
+                <ModernCardContent>
                   <Typography variant="h6">Total Appointments</Typography>
-                  <Typography variant="h4">{stats.total}</Typography>
-                </CardContent>
-              </Card>
+                  <Typography variant="h4">{stats.totalAppointments}</Typography>
+                </ModernCardContent>
+              </ModernCard>
             </Grid>
-            <Grid item xs={12} md={4}>
-              <Card>
-                <CardContent>
+            <Grid item xs={12} sm={6} md={3}>
+              <ModernCard>
+                <ModernCardContent>
                   <Typography variant="h6">Scheduled</Typography>
                   <Typography variant="h4">{stats.scheduled}</Typography>
-                </CardContent>
-              </Card>
+                </ModernCardContent>
+              </ModernCard>
             </Grid>
-            <Grid item xs={12} md={4}>
-              <Card>
-                <CardContent>
-                  <Typography variant="h6">Checked In</Typography>
-                  <Typography variant="h4">{stats.checkedIn}</Typography>
-                </CardContent>
-              </Card>
+            <Grid item xs={12} sm={6} md={3}>
+              <ModernCard>
+                <ModernCardContent>
+                  <Typography variant="h6">Available Doctors</Typography>
+                  <Typography variant="h4">{stats.availableDoctors}</Typography>
+                </ModernCardContent>
+              </ModernCard>
+            </Grid>
+            <Grid item xs={12} sm={6} md={3}>
+              <ModernCard>
+                <ModernCardContent>
+                  <Typography variant="h6">Active Queues</Typography>
+                  <Typography variant="h4">{stats.activeQueues}</Typography>
+                </ModernCardContent>
+              </ModernCard>
+            </Grid>
+          </Grid>
+          <Grid container spacing={3}>
+            <Grid item xs={12} md={6}>
+              <ChartContainer>
+                <Bar
+                  data={appointmentChartData}
+                  options={{ ...chartOptions, plugins: { ...chartOptions.plugins, title: { ...chartOptions.plugins.title, text: 'Appointment Status Distribution' } } }}
+                />
+              </ChartContainer>
+            </Grid>
+            <Grid item xs={12} md={6}>
+              <ChartContainer>
+                <Doughnut data={doctorChartData} options={doughnutOptions} />
+              </ChartContainer>
             </Grid>
           </Grid>
           <Box sx={{ mt: 4 }}>
-            <Typography variant="h6" gutterBottom>
+            <Typography variant="h6" gutterBottom sx={{ color: '#ffffff' }}>
               Today's Appointments
             </Typography>
-            {todayAppointments.map((appt) => (
-              <Card key={appt.id} sx={{ mb: 2 }}>
-                <CardContent>
-                  <Typography>
-                    <strong>Patient:</strong> {appt.patient?.user?.name || appt.patient?.patientId || 'N/A'}
-                  </Typography>
-                  <Typography>
-                    <strong>Doctor:</strong> {appt.doctor?.user?.name || appt.doctor?.doctorId || 'N/A'}
-                  </Typography>
-                  <Typography>
-                    <strong>Time:</strong> {new Date(appt.date).toLocaleString()}
-                  </Typography>
-                  <Typography>
-                    <strong>Status:</strong> {appt.status}
-                  </Typography>
-                </CardContent>
-              </Card>
-            ))}
+            <Grid container spacing={2}>
+              {todayAppointments.map((appt) => (
+                <Grid item xs={12} sm={6} md={4} key={appt.id}>
+                  <ModernCard>
+                    <ModernCardContent>
+                      <Typography><strong>Patient:</strong> {appt.patient?.user?.name || appt.patient?.patientId || 'N/A'}</Typography>
+                      <Typography><strong>Doctor:</strong> {appt.doctor?.user?.name || appt.doctor?.doctorId || 'N/A'}</Typography>
+                      <Typography><strong>Time:</strong> {appt.date ? new Date(appt.date).toLocaleString() : 'N/A'}</Typography>
+                      <Typography><strong>Status:</strong> {appt.status || 'N/A'}</Typography>
+                      <Typography><strong>Reason:</strong> {appt.reason || 'N/A'}</Typography>
+                    </ModernCardContent>
+                  </ModernCard>
+                </Grid>
+              ))}
+            </Grid>
           </Box>
         </>
       )}
-    </Box>
+    </ModernBox>
   );
 }
