@@ -1,7 +1,9 @@
+"use client";
+
 import React, { useState, useEffect } from 'react';
 import { Box, Typography, Alert, Button, CircularProgress } from '@mui/material';
+import { DataGrid } from '@mui/x-data-grid';
 import SearchableSelect from '../components/SearchableSelect';
-import CustomDataGrid from '../components/CustomDataGrid';
 import axios from 'axios';
 import api from '../api';
 
@@ -20,14 +22,15 @@ export default function QueueManagement({ doctors }) {
         const response = await axios.get(`${api.BASE_URL}${api.API_ROUTES.APPOINTMENT}?resource=queue&doctorId=${selectedDoctorId}`, {
           headers: { Authorization: `Bearer ${token}` },
         });
-        setQueueItems(response.data.map(item => ({
-          id: item.id,
-          patientName: item.appointment?.patient?.user?.name || 'N/A',
-          doctorName: item.appointment?.doctor?.user?.name || 'N/A',
+        const formattedQueueItems = response.data.map((item, index) => ({
+          id: item.id || `queue-${index + 1}`,
+          patientName: item.appointment?.patient?.user?.name || item.appointment?.patient?.patientId || 'N/A',
+          doctorName: item.appointment?.doctor?.user?.name || item.appointment?.doctor?.doctorId || 'N/A',
           queueNumber: item.queueNumber || 'N/A',
           status: item.status || 'WAITING',
           appointmentDate: item.appointment?.date ? new Date(item.appointment.date).toLocaleString() : 'N/A',
-        })));
+        }));
+        setQueueItems(formattedQueueItems);
         setError(null);
       } catch (err) {
         setError(err.response?.data?.error || err.message);
@@ -91,8 +94,10 @@ export default function QueueManagement({ doctors }) {
   ];
 
   return (
-    <Box sx={{ p: 2 }}>
-      <Typography variant="h5" gutterBottom>Queue Management</Typography>
+    <Box sx={{ p: 2, maxWidth: 1000, mx: 'auto', bgcolor: '#f5f5f5', borderRadius: 2 }}>
+      <Typography variant="h5" gutterBottom sx={{ fontWeight: 700, color: '#1976d2' }}>
+        Queue Management
+      </Typography>
       <SearchableSelect
         label="Doctor"
         options={doctors}
@@ -101,13 +106,19 @@ export default function QueueManagement({ doctors }) {
         getOptionLabel={(doctor) => `${doctor.user?.name || doctor.doctorId || 'Unknown'} (${doctor.specialty || 'N/A'})`}
         getOptionValue={(doctor) => doctor.id}
       />
-      {error && <Alert severity="error">{error}</Alert>}
+      {error && <Alert severity="error" sx={{ mb: 2 }}>{error}</Alert>}
       {selectedDoctorId && (
-        <Box sx={{ height: 400, width: '100%', mt: 2 }}>
+        <Box sx={{ height: 400, width: '100%', mt: 2, bgcolor: 'white', borderRadius: 2 }}>
           {loading ? (
             <CircularProgress />
           ) : (
-            <CustomDataGrid rows={queueItems} columns={columns} />
+            <DataGrid
+              rows={queueItems}
+              columns={columns}
+              pageSizeOptions={[5, 10, 20]}
+              disableRowSelectionOnClick
+              getRowId={(row) => row.id}
+            />
           )}
         </Box>
       )}
