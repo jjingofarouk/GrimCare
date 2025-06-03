@@ -132,7 +132,8 @@ export default function Dashboard() {
   });
 
   const stats = {
-    totalAppointments: todayAppointments.length,
+    totalAppointments: data.appointments.length, // Total from AppointmentList
+    todayAppointments: todayAppointments.length,
     scheduled: todayAppointments.filter((appt) => appt.status === 'SCHEDULED').length,
     checkedIn: todayAppointments.filter((appt) => appt.status === 'CHECKED_IN').length,
     completed: todayAppointments.filter((appt) => appt.status === 'COMPLETED').length,
@@ -145,7 +146,7 @@ export default function Dashboard() {
     labels: ['Scheduled', 'Checked In', 'Completed', 'Cancelled'],
     datasets: [
       {
-        label: 'Appointments',
+        label: 'Today\'s Appointments',
         data: [stats.scheduled, stats.checkedIn, stats.completed, stats.cancelled],
         backgroundColor: [
           'rgba(75, 192, 192, 0.6)',
@@ -241,8 +242,8 @@ export default function Dashboard() {
             <Grid item xs={12} sm={6} md={3}>
               <ModernCard>
                 <ModernCardContent>
-                  <Typography variant="h6">Scheduled</Typography>
-                  <Typography variant="h4">{stats.scheduled}</Typography>
+                  <Typography variant="h6">Today's Appointments</Typography>
+                  <Typography variant="h4">{stats.todayAppointments}</Typography>
                 </ModernCardContent>
               </ModernCard>
             </Grid>
@@ -268,7 +269,7 @@ export default function Dashboard() {
               <ChartContainer>
                 <Bar
                   data={appointmentChartData}
-                  options={{ ...chartOptions, plugins: { ...chartOptions.plugins, title: { ...chartOptions.plugins.title, text: 'Appointment Status Distribution' } } }}
+                  options={{ ...chartOptions, plugins: { ...chartOptions.plugins, title: { ...chartOptions.plugins.title, text: 'Today\'s Appointment Status' } } }}
                 />
               </ChartContainer>
             </Grid>
