@@ -53,8 +53,8 @@
 
 .tabIndicator {
   background-color: #2563eb !important; /* Blue indicator */
-  height: 3px !important
-  border-radius: 2px !important
+  height: 3px !important;
+  border-radius: 2px !important;
 }
 
 .content {
