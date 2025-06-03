@@ -24,7 +24,7 @@ async function main() {
   await prisma.user.deleteMany();
 
   // Create Users
-  const users = await prisma.user.createMany({
+  await prisma.user.createMany({
     data: [
       {
         email: 'admin@hospital.com',
@@ -74,7 +74,7 @@ async function main() {
   const emily = await prisma.user.findUnique({ where: { email: 'nurse.emily@hospital.com' } });
 
   // Create Departments
-  const departments = await prisma.department.createMany({
+  await prisma.department.createMany({
     data: [
       { name: 'Cardiology', description: 'Heart and vascular care' },
       { name: 'Orthopedics', description: 'Bone and joint care' },
@@ -89,22 +89,22 @@ async function main() {
   await prisma.doctor.createMany({
     data: [
       {
-        userId: drJohn.id,
         doctorId: 'DOC001',
         specialty: 'Cardiology',
         licenseNumber: 'LIC001',
         phone: '555-0101',
         office: 'Room 101',
         departmentId: cardiology.id,
+        user: { connect: { id: drJohn.id } },
       },
       {
-        userId: drJane.id,
         doctorId: 'DOC002',
         specialty: 'Orthopedics',
         licenseNumber: 'LIC002',
         phone: '555-0102',
         office: 'Room 102',
         departmentId: orthopedics.id,
+        user: { connect: { id: drJane.id } },
       },
     ],
   });
@@ -113,7 +113,6 @@ async function main() {
   await prisma.patient.createMany({
     data: [
       {
-        userId: alice.id,
         patientId: 'PAT001',
         dateOfBirth: new Date('1985-05-15'),
         gender: 'Female',
@@ -126,9 +125,9 @@ async function main() {
         bloodType: 'A+',
         allergies: 'Penicillin',
         medicalHistory: 'Hypertension',
+        user: { connect: { id: alice.id } },
       },
       {
-        userId: bob.id,
         patientId: 'PAT002',
         dateOfBirth: new Date('1990-08-22'),
         gender: 'Male',
@@ -141,6 +140,7 @@ async function main() {
         bloodType: 'O-',
         allergies: 'None',
         medicalHistory: 'Asthma',
+        user: { connect: { id: bob.id } },
       },
     ],
   });
@@ -390,7 +390,7 @@ async function main() {
         details: 'Requisition for 2 scalpels',
       },
     ],
-  ]);
+  });
 
   console.log('Seed data created successfully');
 }
