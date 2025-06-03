@@ -29,7 +29,7 @@ async function main() {
       {
         email: 'admin@hospital.com',
         name: 'Admin User',
-        password: '$2b$10$123456789012345678901234567890123456789012345678901234', // Hashed password
+        password: '$2b$10$123456789012345678901234567890123456789012345678901234',
         role: 'ADMIN',
       },
       {
@@ -95,7 +95,7 @@ async function main() {
         phone: '555-0101',
         office: 'Room 101',
         departmentId: cardiology.id,
-        user: { connect: { id: drJohn.id } },
+        userId: drJohn.id,
       },
       {
         doctorId: 'DOC002',
@@ -104,7 +104,7 @@ async function main() {
         phone: '555-0102',
         office: 'Room 102',
         departmentId: orthopedics.id,
-        user: { connect: { id: drJane.id } },
+        userId: drJane.id,
       },
     ],
   });
@@ -125,7 +125,7 @@ async function main() {
         bloodType: 'A+',
         allergies: 'Penicillin',
         medicalHistory: 'Hypertension',
-        user: { connect: { id: alice.id } },
+        userId: alice.id,
       },
       {
         patientId: 'PAT002',
@@ -140,7 +140,7 @@ async function main() {
         bloodType: 'O-',
         allergies: 'None',
         medicalHistory: 'Asthma',
-        user: { connect: { id: bob.id } },
+        userId: bob.id,
       },
     ],
   });
