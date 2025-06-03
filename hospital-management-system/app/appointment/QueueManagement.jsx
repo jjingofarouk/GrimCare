@@ -1,111 +1,114 @@
-"use client";
-
 import React, { useState, useEffect } from 'react';
-import { Box, Typography, Alert, Button, CircularProgress } from '@mui/material';
+import { Box, Typography, Alert, Button } from '@mui/material';
+import SearchableSelect from '../components/SearchableSelect';
 import CustomDataGrid from '../components/CustomDataGrid';
+import axios from 'axios';
 import api from '../api';
-import styles from './Queue.module.css';
 
-export default function QueueManagement({ doctorId }) {
-  const [queues, setQueues] = useState([]);
+export default function QueueManagement({ doctors }) {
+  const [selectedDoctorId, setSelectedDoctorId] = useState('');
+  const [queueItems, setQueueItems] = useState([]);
   const [error, setError] = useState(null);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
     async function fetchQueue() {
+      if (!selectedDoctorId) return;
+      setLoading(true);
       try {
-        setLoading(true);
-        const response = await fetch(`${api.BASE_URL}${api.API_ROUTES.QUEUE}?doctorId=${doctorId}`);
-        if (!response.ok) throw new Error('Failed to fetch queue');
-        const data = await response.json();
-        const mappedQueues = data.map(queue => ({
-          id: queue.id,
-          queueNumber: queue.queueNumber || 'N/A',
-          patientName: queue.patient?.user?.name || 'N/A',
-          doctorName: queue.doctor?.user?.name || 'N/A',
-          date: queue.date ? new Date(queue.date).toLocaleString() : 'N/A',
-          status: queue.queueStatus || 'WAITING',
-        }));
-        setQueues(mappedQueues);
+        const token = localStorage.getItem('token');
+        const response = await axios.get(`${api.BASE_URL}${api.API_ROUTES.APPOINTMENT}?resource=queue&doctorId=${selectedDoctorId}`, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        setQueueItems(response.data.map(item => ({
+          id: item.id,
+          patientName: item.appointment?.patient?.user?.name || 'N/A',
+          doctorName: item.appointment?.doctor?.user?.name || 'N/A',
+          queueNumber: item.queueNumber || 'N/A',
+          status: item.status || 'WAITING',
+          appointmentDate: item.appointment?.date ? new Date(item.appointment.date).toLocaleString() : 'N/A',
+        })));
         setError(null);
       } catch (err) {
-        setError(err.message);
+        setError(err.response?.data?.error || err.message);
       } finally {
         setLoading(false);
       }
     }
     fetchQueue();
-  }, [doctorId]);
+  }, [selectedDoctorId]);
 
-  const handleStatusChange = async (id, status) => {
+  const handleStatusUpdate = async (id, newStatus) => {
     try {
-      const response = await fetch(`${api.BASE_URL}${api.API_ROUTES.QUEUE}`, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ id, status }),
+      const token = localStorage.getItem('token');
+      await axios.put(`${api.BASE_URL}${api.API_ROUTES.APPOINTMENT}/${id}`, {
+        resource: 'queue',
+        status: newStatus,
+      }, {
+        headers: { Authorization: `Bearer ${token}` },
       });
-      if (!response.ok) throw new Error('Failed to update queue status');
-      const updatedQueue = await response.json();
-      setQueues(queues.map(queue =>
-        queue.id === id ? { ...queue, status: updatedQueue.queueStatus } : queue
+      setQueueItems(queueItems.map(item =>
+        item.id === id ? { ...item, status: newStatus } : item
       ));
       setError(null);
     } catch (err) {
-      setError('Failed to update queue status: ' + err.message);
+      setError('Failed to update queue status: ' + (err.response?.data?.error || err.message));
     }
   };
 
   const columns = [
-    { field: 'queueNumber', headerName: 'Queue Number', width: 120 },
+    { field: 'id', headerName: 'ID', width: 90 },
     { field: 'patientName', headerName: 'Patient', width: 150 },
     { field: 'doctorName', headerName: 'Doctor', width: 150 },
-    { field: 'date', headerName: 'Date', width: 200 },
+    { field: 'queueNumber', headerName: 'Queue Number', width: 120 },
+    { field: 'appointmentDate', headerName: 'Appointment Date', width: 200 },
     { field: 'status', headerName: 'Status', width: 120 },
     {
       field: 'actions',
       headerName: 'Actions',
       width: 200,
       renderCell: (params) => (
-        <>
-          {params.row?.status === 'WAITING' && (
-            <Button
-              variant="contained"
-              onClick={() => handleStatusChange(params.id, 'IN_PROGRESS')}
-              sx={{ mr: 1 }}
-            >
-              Start
-            </Button>
-          )}
-          {params.row?.status === 'IN_PROGRESS' && (
-            <Button
-              variant="contained"
-              onClick={() => handleStatusChange(params.id, 'COMPLETED')}
-            >
-              Complete
-            </Button>
-          )}
-        </>
+        <Box sx={{ display: 'flex', gap: 1 }}>
+          <Button
+            variant="outlined"
+            size="small"
+            onClick={() => handleStatusUpdate(params.row.id, 'IN_PROGRESS')}
+            disabled={params.row.status !== 'WAITING'}
+          >
+            Start
+          </Button>
+          <Button
+            variant="outlined"
+            size="small"
+            onClick={() => handleStatusUpdate(params.row.id, 'COMPLETED')}
+            disabled={params.row.status !== 'IN_PROGRESS'}
+          >
+            Complete
+          </Button>
+        </Box>
       ),
     },
   ];
 
   return (
-    <Box className={styles.container}>
-      <Typography variant="h5" className={styles.title}>
-        Queue Management
-      </Typography>
-      {error && (
-        <Alert severity="error" className={styles.alert}>
-          {error}
-        </Alert>
-      )}
-      {loading ? (
-        <Box sx={{ display: 'flex', justifyContent: 'center', mt: 4 }}>
-          <CircularProgress />
-        </Box>
-      ) : (
-        <Box className={styles.gridContainer}>
-          <CustomDataGrid rows={queues} columns={columns} />
+    <Box sx={{ p: 2 }}>
+      <Typography variant="h5" gutterBottom>Queue Management</Typography>
+      <SearchableSelect
+        label="Doctor"
+        options={doctors}
+        value={selectedDoctorId}
+        onChange={setSelectedDoctorId}
+        getOptionLabel={(doctor) => `${doctor.user?.name || doctor.doctorId || 'Unknown'} (${doctor.specialty || 'N/A'})`}
+        getOptionValue={(doctor) => doctor.id}
+      />
+      {error && <Alert severity="error">{error}</Alert>}
+      {selectedDoctorId && (
+        <Box sx={{ height: 400, width: '100%', mt: 2 }}>
+          {loading ? (
+            <CircularProgress />
+          ) : (
+            <CustomDataGrid rows={queueItems} columns={columns} />
+          )}
         </Box>
       )}
     </Box>
