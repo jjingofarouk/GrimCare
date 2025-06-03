@@ -25,7 +25,7 @@ async function main() {
     await prisma.user.deleteMany();
 
     // Create Users
-    const users = await prisma.user.createMany({
+    await prisma.user.createMany({
       data: [
         {
           email: 'admin@hospital.com',
@@ -59,9 +59,6 @@ async function main() {
         },
         {
           email: 'nurse.emily@hospital.com',
-          name: 'Emily Brown',
-          password: '$2b$10$123456789012345678901234567890123456789012345678901234',
-          role: 'NURSE',
         },
       ],
     });
