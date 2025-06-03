@@ -14,15 +14,17 @@ export default function QueueManagement({ doctors }) {
   const [filteredQueueItems, setFilteredQueueItems] = useState([]);
   const [filter, setFilter] = useState({ status: '', date: '' });
   const [error, setError] = useState(null);
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    async function fetchQueue() {
-      if (!selectedDoctorId) return;
+    async function fetchQueue(doctorId = '') {
       setLoading(true);
       try {
         const token = localStorage.getItem('token');
-        const response = await axios.get(`${api.BASE_URL}${api.API_ROUTES.APPOINTMENT}?resource=queue&doctorId=${selectedDoctorId}`, {
+        const url = doctorId
+          ? `${api.BASE_URL}${api.API_ROUTES.APPOINTMENT}?resource=queue&doctorId=${doctorId}`
+          : `${api.BASE_URL}${api.API_ROUTES.APPOINTMENT}?resource=queue`;
+        const response = await axios.get(url, {
           headers: { Authorization: `Bearer ${token}` },
         });
         const formattedQueueItems = response.data.map((item, index) => ({
@@ -42,7 +44,7 @@ export default function QueueManagement({ doctors }) {
         setLoading(false);
       }
     }
-    fetchQueue();
+    fetchQueue(selectedDoctorId);
   }, [selectedDoctorId]);
 
   const applyFilters = (data, currentFilter) => {
@@ -129,15 +131,16 @@ export default function QueueManagement({ doctors }) {
       <Typography variant="h5" gutterBottom className={styles.title}>
         Queue Management
       </Typography>
-      <SearchableSelect
-        label="Doctor"
-        options={doctors}
-        value={selectedDoctorId}
-        onChange={setSelectedDoctorId}
-        getOptionLabel={(doctor) => `${doctor.user?.name || doctor.doctorId || 'Unknown'} (${doctor.specialty || 'N/A'})`}
-        getOptionValue={(doctor) => doctor.id}
-      />
       <Box className={styles.filterContainer}>
+        <SearchableSelect
+          label="Filter by Doctor"
+          options={doctors}
+          value={selectedDoctorId}
+          onChange={setSelectedDoctorId}
+          getOptionLabel={(doctor) => `${doctor.user?.name || doctor.doctorId || 'Unknown'} (${doctor.specialty || 'N/A'})`}
+          getOptionValue={(doctor) => doctor.id}
+          className={styles.searchSelect}
+        />
         <TextField
           label="Filter by Date"
           type="date"
@@ -162,21 +165,20 @@ export default function QueueManagement({ doctors }) {
         </FormControl>
       </Box>
       {error && <Alert severity="error" className={styles.alert}>{error}</Alert>}
-      {selectedDoctorId && (
-        <Box className={styles.gridContainer}>
-          {loading ? (
-            <CircularProgress className={styles.loader} />
-          ) : (
-            <DataGrid
-              rows={filteredQueueItems}
-              columns={columns}
-              pageSizeOptions={[5, 10, 20]}
-              disableRowSelectionOnClick
-              getRowId={(row) => row.id}
-            />
-          )}
-        </Box>
-      )}
+      <Box className={styles.gridContainer}>
+        {loading ? (
+          <CircularProgress className={styles.loader} />
+        ) : (
+          <DataGrid
+            rows={filteredQueueItems}
+            columns={columns}
+            pageSizeOptions={[5, 10, 20]}
+            disableRowSelectionOnClick
+            getRowId={(row) => row.id}
+            className={styles.dataGrid}
+          />
+        )}
+      </Box>
     </Box>
   );
 }
