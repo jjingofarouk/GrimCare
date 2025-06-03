@@ -12,6 +12,7 @@ import {
   Tooltip,
   Legend,
 } from 'chart.js';
+import axios from 'axios';
 import api from '../api';
 
 ChartJS.register(CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend);
@@ -23,15 +24,16 @@ export default function Dashboard() {
 
   useEffect(() => {
     async function fetchAppointments() {
+      setLoading(true);
       try {
-        setLoading(true);
-        const response = await fetch(`${api.BASE_URL}${api.API_ROUTES.APPOINTMENT}`);
-        if (!response.ok) throw new Error('Failed to fetch appointments');
-        const data = await response.json();
-        setAppointments(data);
+        const token = localStorage.getItem('token');
+        const response = await axios.get(`${api.BASE_URL}${api.API_ROUTES.APPOINTMENT}`, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        setAppointments(response.data);
         setError(null);
       } catch (err) {
-        setError(err.message);
+        setError(err.response?.data?.error || err.message);
       } finally {
         setLoading(false);
       }
@@ -116,9 +118,7 @@ export default function Dashboard() {
       </Typography>
       {error && <Alert severity="error">{error}</Alert>}
       {loading ? (
-        <Box sx={{ display: 'flex', justifyContent: 'center', mt: 4 }}>
-          <CircularProgress />
-        </Box>
+        <CircularProgress />
       ) : (
         <>
           <Box sx={{ mt: 2, height: 400 }}>
@@ -158,12 +158,10 @@ export default function Dashboard() {
               <Card key={appt.id} sx={{ mb: 2 }}>
                 <CardContent>
                   <Typography>
-                    <strong>Patient:</strong>{' '}
-                    {appt.patient?.user?.name || appt.patient?.patientId || 'N/A'}
+                    <strong>Patient:</strong> {appt.patient?.user?.name || appt.patient?.patientId || 'N/A'}
                   </Typography>
                   <Typography>
-                    <strong>Doctor:</strong>{' '}
-                    {appt.doctor?.user?.name || appt.doctor?.doctorId || 'N/A'}
+                    <strong>Doctor:</strong> {appt.doctor?.user?.name || appt.doctor?.doctorId || 'N/A'}
                   </Typography>
                   <Typography>
                     <strong>Time:</strong> {new Date(appt.date).toLocaleString()}
