@@ -1,18 +1,20 @@
 "use client";
 
 import React, { useState, useEffect } from 'react';
-import { Box, Typography, Alert, Button, CircularProgress } from '@mui/material';
+import { Box, Typography, Alert, Button, CircularProgress, TextField } from '@mui/material';
 import { DataGrid } from '@mui/x-data-grid';
 import SearchableSelect from '../components/SearchableSelect';
 import axios from 'axios';
 import api from '../api';
-import styles from './Queue.module.css';
+import styles from './QueueManagement.module.css';
 
 export default function QueueManagement({ doctors }) {
   const [selectedDoctorId, setSelectedDoctorId] = useState('');
   const [queueItems, setQueueItems] = useState([]);
+  const [filteredQueueItems, setFilteredQueueItems] = useState([]);
   const [error, setError] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [filters, setFilters] = useState({ patientName: '', status: '', queueNumber: '' });
 
   useEffect(() => {
     async function fetchQueue(doctorId = '') {
@@ -34,6 +36,7 @@ export default function QueueManagement({ doctors }) {
           appointmentDate: item.appointment?.date ? new Date(item.appointment.date).toLocaleString() : 'N/A',
         }));
         setQueueItems(formattedQueueItems);
+        setFilteredQueueItems(formattedQueueItems);
         setError(null);
       } catch (err) {
         setError(err.response?.data?.error || err.message);
@@ -43,6 +46,23 @@ export default function QueueManagement({ doctors }) {
     }
     fetchQueue(selectedDoctorId);
   }, [selectedDoctorId]);
+
+  useEffect(() => {
+    const applyFilters = () => {
+      let filtered = [...queueItems];
+      if (filters.patientName) {
+        filtered = filtered.filter(item => item.patientName.toLowerCase().includes(filters.patientName.toLowerCase()));
+      }
+      if (filters.status) {
+        filtered = filtered.filter(item => item.status.toLowerCase().includes(filters.status.toLowerCase()));
+      }
+      if (filters.queueNumber) {
+        filtered = filtered.filter(item => item.queueNumber.toString().includes(filters.queueNumber));
+      }
+      setFilteredQueueItems(filtered);
+    };
+    applyFilters();
+  }, [filters, queueItems]);
 
   const handleStatusUpdate = async (id, newStatus) => {
     try {
@@ -60,6 +80,10 @@ export default function QueueManagement({ doctors }) {
     } catch (err) {
       setError('Failed to update queue status: ' + (err.response?.data?.error || err.message));
     }
+  };
+
+  const handleFilterChange = (e) => {
+    setFilters({ ...filters, [e.target.name]: e.target.value });
   };
 
   const columns = [
@@ -101,22 +125,45 @@ export default function QueueManagement({ doctors }) {
       <Typography variant="h5" className={styles.title}>
         Queue Management
       </Typography>
-      <SearchableSelect
-        label="Filter by Doctor"
-        options={doctors}
-        value={selectedDoctorId}
-        onChange={setSelectedDoctorId}
-        getOptionLabel={(doctor) => `${doctor.user?.name || doctor.doctorId || 'Unknown'} (${doctor.specialty || 'N/A'})`}
-        getOptionValue={(doctor) => doctor.id}
-        className={styles.searchSelect}
-      />
+      <Box className={styles.filterContainer}>
+        <SearchableSelect
+          label="Filter by Doctor"
+          options={doctors}
+          value={selectedDoctorId}
+          onChange={setSelectedDoctorId}
+          getOptionLabel={(doctor) => `${doctor.user?.name || doctor.doctorId || 'Unknown'} (${doctor.specialty || 'N/A'})`}
+          getOptionValue={(doctor) => doctor.id}
+          className={styles.searchSelect}
+        />
+        <TextField
+          label="Filter by Patient"
+          name="patientName"
+          value={filters.patientName}
+          onChange={handleFilterChange}
+          className={styles.filterInput}
+        />
+        <TextField
+          label="Filter by Status"
+          name="status"
+          value={filters.status}
+          onChange={handleFilterChange}
+          className={styles.filterInput}
+        />
+        <TextField
+          label="Filter by Queue Number"
+          name="queueNumber"
+          value={filters.queueNumber}
+          onChange={handleFilterChange}
+          className={styles.filterInput}
+        />
+      </Box>
       {error && <Alert severity="error" className={styles.alert}>{error}</Alert>}
       <Box className={styles.dataGridContainer}>
         {loading ? (
           <CircularProgress className={styles.loader} />
         ) : (
           <DataGrid
-            rows={queueItems}
+            rows={filteredQueueItems}
             columns={columns}
             pageSizeOptions={[5, 10, 20]}
             disableRowSelectionOnClick
