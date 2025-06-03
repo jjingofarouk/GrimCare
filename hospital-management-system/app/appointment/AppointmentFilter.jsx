@@ -1,5 +1,7 @@
 import React, { useState } from 'react';
 import { Box, TextField, MenuItem, Select, InputLabel, FormControl, Button } from '@mui/material';
+import axios from 'axios';
+import api from '../api';
 
 export default function AppointmentFilter({ onFilter, patients = [], doctors = [] }) {
   const [filters, setFilters] = useState({
