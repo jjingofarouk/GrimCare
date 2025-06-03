@@ -1,9 +1,8 @@
-"use client";
-
 import React, { useState, useEffect } from 'react';
 import { Box, Typography, Alert } from '@mui/material';
 import SearchableSelect from '../components/SearchableSelect';
 import CustomDataGrid from '../components/CustomDataGrid';
+import axios from 'axios';
 import api from '../api';
 
 export default function DoctorSchedule({ doctors }) {
@@ -14,29 +13,24 @@ export default function DoctorSchedule({ doctors }) {
 
   useEffect(() => {
     async function fetchAppointments() {
-      if (!selectedDoctorId) {
-        setAppointments([]);
-        return;
-      }
+      if (!selectedDoctorId) return;
       setLoading(true);
       try {
-        const response = await fetch(`${api.BASE_URL}${api.API_ROUTES.APPOINTMENT}?doctorId=${selectedDoctorId}`);
-        if (!response.ok) throw new Error('Failed to fetch appointments');
-        const data = await response.json();
-        const filteredAppointments = data
-          .filter((appt) => appt.status === 'SCHEDULED')
-          .map((appt) => ({
-            id: appt.id,
-            patientName: appt.patient?.user?.name || 'N/A',
-            date: appt.date ? new Date(appt.date).toLocaleString() : 'N/A',
-            type: appt.type || 'N/A',
-            reason: appt.reason || 'N/A',
-            queueNumber: appt.queueNumber || 'N/A',
-          }));
-        setAppointments(filteredAppointments);
+        const token = localStorage.getItem('token');
+        const response = await axios.get(`${api.BASE_URL}${api.API_ROUTES.APPOINTMENT}?doctorId=${selectedDoctorId}&status=SCHEDULED`, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        setAppointments(response.data.map(appt => ({
+          id: appt.id,
+          patientName: appt.patient?.user?.name || 'N/A',
+          date: appt.date ? new Date(appt.date).toLocaleString() : 'N/A',
+          type: appt.type || 'N/A',
+          reason: appt.reason || 'N/A',
+          queueNumber: appt.queue?.queueNumber || 'N/A',
+        })));
         setError(null);
       } catch (err) {
-        setError(err.message);
+        setError(err.response?.data?.error || err.message);
       } finally {
         setLoading(false);
       }
@@ -50,7 +44,7 @@ export default function DoctorSchedule({ doctors }) {
     { field: 'date', headerName: 'Date', width: 200 },
     { field: 'type', headerName: 'Type', width: 120 },
     { field: 'reason', headerName: 'Reason', width: 150 },
-    { field: 'queueNumber', headerName: 'Queue', width: 100 },
+    { field: 'queueNumber', headerName: 'Queue Number', width: 120 },
   ];
 
   return (
@@ -66,8 +60,12 @@ export default function DoctorSchedule({ doctors }) {
       />
       {error && <Alert severity="error">{error}</Alert>}
       {selectedDoctorId && (
-        <Box sx={{ height: 400, width: '100%' }}>
-          <CustomDataGrid rows={appointments} columns={columns} loading={loading} />
+        <Box sx={{ height: 400, width: '100%', mt: 2 }}>
+          {loading ? (
+            <CircularProgress />
+          ) : (
+            <CustomDataGrid rows={appointments} columns={columns} />
+          )}
         </Box>
       )}
     </Box>
