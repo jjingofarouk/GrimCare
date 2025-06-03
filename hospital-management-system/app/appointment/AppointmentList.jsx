@@ -1,45 +1,105 @@
-import React, { useState } from 'react';
+"use client";
+import React, { useState, useEffect } from 'react';
 import { Box, Typography, Alert, Button, CircularProgress } from '@mui/material';
+import { DataGrid } from '@mui/x-data-grid';
+import { getAppointments, getPatients, getDoctors, updateAppointment } from './appointmentService';
 import AppointmentFilter from './AppointmentFilter';
-import CustomDataGrid from '../components/CustomDataGrid';
-import { updateAppointment } from './appointmentService';
-import { useApiData } from '../utils/api';
-import { getAppointments, getPatients, getDoctors } from './appointmentService';
-import styles from './list.module.css';
+import styles from './AppointmentList.module.css';
 
 export default function AppointmentList({ onEdit }) {
-  const [filter, setFilter] = useState({ status: 'ALL', dateFrom: '', dateTo: '', doctorId: '', patientId: '', type: 'ALL' });
-  const { data: appointments, error: appointmentsError, loading: appointmentsLoading } = useApiData(getAppointments);
-  const { data: patients } = useApiData(getPatients);
-  const { data: doctors } = useApiData(getDoctors);
+  const [appointments, setAppointments] = useState([]);
+  const [patients, setPatients] = useState([]);
+  const [doctors, setDoctors] = useState([]);
   const [error, setError] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [filter, setFilter] = useState({ status: 'ALL', dateFrom: '', dateTo: '', doctorId: '', patientId: '', type: 'ALL' });
+
+  useEffect(() => {
+    async function fetchData() {
+      try {
+        setLoading(true);
+        const [appointmentsData, patientsData, doctorsData] = await Promise.all([
+          getAppointments(),
+          getPatients(),
+          getDoctors(),
+        ]);
+
+        // Map appointments to include patientName and doctorName
+        const mappedAppointments = appointmentsData.map(appt => {
+          const patient = patientsData.find(p => p.id === appt.patientId);
+          const doctor = doctorsData.find(d => d.id === appt.doctorId);
+          return {
+            id: appt.id,
+            patientId: appt.patientId,
+            patientName: patient?.user?.name || appt.patient?.user?.name || 'Unknown',
+            doctorId: appt.doctorId,
+            doctorName: doctor?.user?.name || appt.doctor?.user?.name || 'Unknown',
+            date: appt.date ? new Date(appt.date).toLocaleString() : 'N/A',
+            type: appt.type || 'N/A',
+            status: appt.status || 'N/A',
+            reason: appt.reason || 'N/A',
+            queueNumber: appt.queue?.queueNumber || 'N/A',
+            checkInTime: appt.checkInTime ? new Date(appt.checkInTime).toLocaleString() : null,
+            checkOutTime: appt.checkOutTime ? new Date(appt.checkOutTime).toLocaleString() : null,
+          };
+        });
+
+        setAppointments(mappedAppointments);
+        setPatients(patientsData);
+        setDoctors(doctorsData);
+        setError(null);
+      } catch (error) {
+        console.error('Error fetching data:', error);
+        setError(error.message || 'Failed to fetch appointments, patients, or doctors');
+      } finally {
+        setLoading(false);
+      }
+    }
+    fetchData();
+  }, []);
 
   const handleCancel = async (id) => {
     try {
       await updateAppointment(id, { status: 'CANCELLED' });
-      // Refresh handled by parent via refreshKey
+      setAppointments(appointments.map(appt =>
+        appt.id === id ? { ...appt, status: 'CANCELLED' } : appt
+      ));
+      setError(null);
     } catch (err) {
+      console.error('Error canceling appointment:', err);
       setError('Failed to cancel appointment: ' + err.message);
     }
   };
 
   const handleCheckIn = async (id) => {
     try {
-      await updateAppointment(id, { status: 'CHECKED_IN', checkInTime: new Date() });
+      const checkInTime = new Date();
+      await updateAppointment(id, { status: 'CHECKED_IN', checkInTime });
+      setAppointments(appointments.map(appt =>
+        appt.id === id ? { ...appt, status: 'CHECKED_IN', checkInTime: checkInTime.toLocaleString() } : appt
+      ));
+      setError(null);
     } catch (err) {
+      console.error('Error checking in appointment:', err);
       setError('Failed to check in appointment: ' + err.message);
     }
   };
 
   const handleCheckOut = async (id) => {
     try {
-      await updateAppointment(id, { status: 'CHECKED_OUT', checkOutTime: new Date() });
+      const checkOutTime = new Date();
+      await updateAppointment(id, { status: 'CHECKED_OUT', checkOutTime });
+      setAppointments(appointments.map(appt =>
+        appt.id === id ? { ...appt, status: 'CHECKED_OUT', checkOutTime: checkOutTime.toLocaleString() } : appt
+      ));
+      setError(null);
     } catch (err) {
+      console.error('Error checking out appointment:', err);
       setError('Failed to check out appointment: ' + err.message);
     }
   };
 
-  const filteredAppointments = appointments.filter((appt) => {
+  const filteredAppointments = appointments.filter(appt => {
     if (!appt || !appt.id) return false;
     const matchesStatus = filter.status === 'ALL' || appt.status === filter.status;
     const matchesDateFrom = !filter.dateFrom || new Date(appt.date) >= new Date(filter.dateFrom);
@@ -58,12 +118,7 @@ export default function AppointmentList({ onEdit }) {
     { field: 'type', headerName: 'Type', width: 120 },
     { field: 'status', headerName: 'Status', width: 120 },
     { field: 'reason', headerName: 'Reason', width: 150 },
-    {
-      field: 'queueNumber',
-      headerName: 'Queue',
-      width: 100,
-      valueGetter: (params) => params.row?.queue?.queueNumber || 'N/A',
-    },
+    { field: 'queueNumber', headerName: 'Queue', width: 100 },
     {
       field: 'actions',
       headerName: 'Actions',
@@ -75,6 +130,7 @@ export default function AppointmentList({ onEdit }) {
             size="small"
             onClick={() => onEdit(params.row)}
             disabled={params.row.status === 'CANCELLED' || params.row.status === 'CHECKED_OUT'}
+            className={styles.actionButton}
           >
             Edit
           </Button>
@@ -83,6 +139,7 @@ export default function AppointmentList({ onEdit }) {
             size="small"
             onClick={() => handleCancel(params.row.id)}
             disabled={params.row.status === 'CANCELLED' || params.row.status === 'CHECKED_OUT'}
+            className={styles.actionButton}
           >
             Cancel
           </Button>
@@ -91,6 +148,7 @@ export default function AppointmentList({ onEdit }) {
             size="small"
             onClick={() => handleCheckIn(params.row.id)}
             disabled={params.row.status !== 'SCHEDULED'}
+            className={styles.actionButton}
           >
             Check In
           </Button>
@@ -99,6 +157,7 @@ export default function AppointmentList({ onEdit }) {
             size="small"
             onClick={() => handleCheckOut(params.row.id)}
             disabled={params.row.status !== 'CHECKED_IN'}
+            className={styles.actionButton}
           >
             Check Out
           </Button>
@@ -108,18 +167,40 @@ export default function AppointmentList({ onEdit }) {
   ];
 
   return (
-    <Box sx={{ p: 2 }}>
-      <Typography variant="h5" gutterBottom>Appointments</Typography>
+    <Box className={styles.container}>
+      <Typography variant="h6" className={styles.title}>
+        Appointments List
+      </Typography>
       <AppointmentFilter onFilter={setFilter} patients={patients} doctors={doctors} />
-      {(error || appointmentsError) && <Alert severity="error">{error || appointmentsError}</Alert>}
-      {appointmentsLoading ? (
+      {error && (
+        <Alert severity="error" className={styles.alert}>
+          {error}
+        </Alert>
+      )}
+      {loading ? (
         <Box sx={{ display: 'flex', justifyContent: 'center', mt: 4 }}>
           <CircularProgress />
         </Box>
       ) : (
-        <Box sx={{ height: 600, width: '100%' }}>
-          <CustomDataGrid rows={filteredAppointments} columns={columns} />
-        </Box>
+        <>
+          {filteredAppointments.length === 0 && !error && (
+            <Alert severity="info" className={styles.alert}>
+              No appointments found.
+            </Alert>
+          )}
+          <Box className={styles.tableWrapper}>
+            <DataGrid
+              rows={filteredAppointments}
+              columns={columns}
+              pageSizeOptions={[5, 10, 25]}
+              disableRowSelectionOnClick
+              initialState={{
+                pagination: { paginationModel: { pageSize: 10 } },
+              }}
+              className={styles.dataGrid}
+            />
+          </Box>
+        </>
       )}
     </Box>
   );
