@@ -1,5 +1,3 @@
-
-
 "use client";
 
 import React, { useState, useEffect } from 'react';
@@ -8,11 +6,14 @@ import { DataGrid } from '@mui/x-data-grid';
 import SearchableSelect from '../components/SearchableSelect';
 import axios from 'axios';
 import api from '../api';
+import styles from './DoctorAvailability.module.css';
 
 export default function DoctorAvailability({ doctors }) {
   const [selectedDoctorId, setSelectedDoctorId] = useState('');
   const [formData, setFormData] = useState({ startTime: '', endTime: '', status: 'AVAILABLE' });
   const [availability, setAvailability] = useState([]);
+  const [filteredAvailability, setFilteredAvailability] = useState([]);
+  const [filter, setFilter] = useState({ status: '', date: '' });
   const [error, setError] = useState(null);
   const [loading, setLoading] = useState(false);
 
@@ -27,9 +28,10 @@ export default function DoctorAvailability({ doctors }) {
         });
         const formattedAvailability = response.data.map((item, index) => ({
           ...item,
-          id: item.id || index + 1, // Ensure unique ID for DataGrid
+          id: item.id || index + 1,
         }));
         setAvailability(formattedAvailability);
+        applyFilters(formattedAvailability, filter);
         setError(null);
       } catch (err) {
         setError(err.response?.data?.error || err.message);
@@ -39,6 +41,25 @@ export default function DoctorAvailability({ doctors }) {
     }
     fetchAvailability();
   }, [selectedDoctorId]);
+
+  const applyFilters = (data, currentFilter) => {
+    let filtered = [...data];
+    if (currentFilter.status) {
+      filtered = filtered.filter(item => item.status === currentFilter.status);
+    }
+    if (currentFilter.date) {
+      const filterDate = new Date(currentFilter.date).toDateString();
+      filtered = filtered.filter(item => {
+        const itemDate = new Date(item.startTime).toDateString();
+        return itemDate === filterDate;
+      });
+    }
+    setFilteredAvailability(filtered);
+  };
+
+  useEffect(() => {
+    applyFilters(availability, filter);
+  }, [filter, availability]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -62,10 +83,15 @@ export default function DoctorAvailability({ doctors }) {
         id: item.id || index + 1,
       }));
       setAvailability(formattedAvailability);
+      applyFilters(formattedAvailability, filter);
       setError(null);
     } catch (err) {
       setError('Failed to create availability: ' + (err.response?.data?.error || err.message));
     }
+  };
+
+  const handleFilterChange = (e) => {
+    setFilter({ ...filter, [e.target.name]: e.target.value });
   };
 
   const columns = [
@@ -85,8 +111,8 @@ export default function DoctorAvailability({ doctors }) {
   ];
 
   return (
-    <Box sx={{ p: 2, maxWidth: 800, mx: 'auto', bgcolor: '#f5f5f5', borderRadius: 2 }}>
-      <Typography variant="h5" gutterBottom sx={{ fontWeight: 700, color: '#1976d2' }}>
+    <Box className={styles.container}>
+      <Typography variant="h5" gutterBottom className={styles.title}>
         Doctor Availability
       </Typography>
       <SearchableSelect
@@ -99,7 +125,7 @@ export default function DoctorAvailability({ doctors }) {
       />
       {selectedDoctorId && (
         <>
-          <Box component="form" onSubmit={handleSubmit} sx={{ display: 'flex', gap: 2, mb: 2, flexWrap: 'wrap' }}>
+          <Box component="form" onSubmit={handleSubmit} className={styles.form}>
             <TextField
               label="Start Time"
               type="datetime-local"
@@ -108,7 +134,7 @@ export default function DoctorAvailability({ doctors }) {
               onChange={(e) => setFormData({ ...formData, [e.target.name]: e.target.value })}
               InputLabelProps={{ shrink: true }}
               required
-              sx={{ minWidth: 200 }}
+              className={styles.input}
             />
             <TextField
               label="End Time"
@@ -118,9 +144,9 @@ export default function DoctorAvailability({ doctors }) {
               onChange={(e) => setFormData({ ...formData, [e.target.name]: e.target.value })}
               InputLabelProps={{ shrink: true }}
               required
-              sx={{ minWidth: 200 }}
+              className={styles.input}
             />
-            <FormControl sx={{ minWidth: 120 }}>
+            <FormControl className={styles.input}>
               <InputLabel>Status</InputLabel>
               <Select
                 name="status"
@@ -131,17 +157,40 @@ export default function DoctorAvailability({ doctors }) {
                 <MenuItem value="UNAVAILABLE">Unavailable</MenuItem>
               </Select>
             </FormControl>
-            <Button type="submit" variant="contained" sx={{ bgcolor: '#1976d2' }}>
+            <Button type="submit" variant="contained" className={styles.button}>
               Add Availability
             </Button>
           </Box>
-          {error && <Alert severity="error" sx={{ mb: 2 }}>{error}</Alert>}
+          <Box className={styles.filterContainer}>
+            <TextField
+              label="Filter by Date"
+              type="date"
+              name="date"
+              value={filter.date}
+              onChange={handleFilterChange}
+              InputLabelProps={{ shrink: true }}
+              className={styles.filterInput}
+            />
+            <FormControl className={styles.filterInput}>
+              <InputLabel>Filter by Status</InputLabel>
+              <Select
+                name="status"
+                value={filter.status}
+                onChange={handleFilterChange}
+              >
+                <MenuItem value="">All</MenuItem>
+                <MenuItem value="AVAILABLE">Available</MenuItem>
+                <MenuItem value="UNAVAILABLE">Unavailable</MenuItem>
+              </Select>
+            </FormControl>
+          </Box>
+          {error && <Alert severity="error" className={styles.alert}>{error}</Alert>}
           {loading ? (
-            <CircularProgress />
+            <CircularProgress className={styles.loader} />
           ) : (
-            <Box sx={{ height: 400, width: '100%', bgcolor: 'white', borderRadius: 2 }}>
+            <Box className={styles.gridContainer}>
               <DataGrid
-                rows={availability}
+                rows={filteredAvailability}
                 columns={columns}
                 pageSizeOptions={[5, 10, 20]}
                 disableRowSelectionOnClick
