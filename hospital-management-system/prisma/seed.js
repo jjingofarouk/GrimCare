@@ -95,7 +95,7 @@ async function main() {
         phone: '555-0101',
         office: 'Room 101',
         departmentId: cardiology.id,
-        user: { connect: { id: drJohn.id } },
+        doctorId: drJohn.id,
       },
       {
         doctorId: 'DOC002',
@@ -104,7 +104,7 @@ async function main() {
         phone: '555-0102',
         office: 'Room 102',
         departmentId: orthopedics.id,
-        user: { connect: { id: drJane.id } },
+        doctorId: drJane.id,
       },
     ],
   });
@@ -125,7 +125,7 @@ async function main() {
         bloodType: 'A+',
         allergies: 'Penicillin',
         medicalHistory: 'Hypertension',
-        user: { connect: { id: alice.id } },
+        patientId: alice.id,
       },
       {
         patientId: 'PAT002',
@@ -140,7 +140,7 @@ async function main() {
         bloodType: 'O-',
         allergies: 'None',
         medicalHistory: 'Asthma',
-        user: { connect: { id: bob.id } },
+        patientId: bob.id,
       },
     ],
   });
