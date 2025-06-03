@@ -17,22 +17,20 @@ export default function DoctorAvailability({ doctors }) {
   const [error, setError] = useState(null);
   const [loading, setLoading] = useState(true);
 
+  // Fetch all availability data on component mount
   useEffect(() => {
-    async function fetchAvailability(doctorId = '') {
+    async function fetchAllAvailability() {
       setLoading(true);
       try {
         const token = localStorage.getItem('token');
-        const url = doctorId
-          ? `${api.BASE_URL}${api.API_ROUTES.APPOINTMENT}?resource=availability&doctorId=${doctorId}`
-          : `${api.BASE_URL}${api.API_ROUTES.APPOINTMENT}?resource=availability`;
-        const response = await axios.get(url, {
+        const response = await axios.get(`${api.BASE_URL}${api.API_ROUTES.APPOINTMENT}?resource=availability`, {
           headers: { Authorization: `Bearer ${token}` },
         });
         const formattedAvailability = response.data.map((item, index) => ({
           ...item,
           id: item.id || index + 1,
-          doctorName: item.doctor?.user?.name || item.doctor?.doctorId || 'Unknown',
-          doctorSpecialty: item.doctor?.specialty || 'N/A',
+          doctorName: item.doctor?.user?.name || item.doctor?.doctorId || 'Unknown Doctor',
+          specialty: item.doctor?.specialty || 'N/A'
         }));
         setAvailability(formattedAvailability);
         setFilteredAvailability(formattedAvailability);
@@ -43,14 +41,28 @@ export default function DoctorAvailability({ doctors }) {
         setLoading(false);
       }
     }
-    fetchAvailability(selectedDoctorId);
-  }, [selectedDoctorId]);
+    fetchAllAvailability();
+  }, []);
 
-  const applyFilters = (data, currentFilter) => {
+  // Filter availability when doctor is selected or filters change
+  useEffect(() => {
+    applyFilters(availability, filter, selectedDoctorId);
+  }, [filter, availability, selectedDoctorId]);
+
+  const applyFilters = (data, currentFilter, doctorId) => {
     let filtered = [...data];
+    
+    // Filter by selected doctor
+    if (doctorId) {
+      filtered = filtered.filter(item => item.doctorId === parseInt(doctorId));
+    }
+    
+    // Filter by status
     if (currentFilter.status) {
       filtered = filtered.filter(item => item.status === currentFilter.status);
     }
+    
+    // Filter by date
     if (currentFilter.date) {
       const filterDate = new Date(currentFilter.date).toDateString();
       filtered = filtered.filter(item => {
@@ -58,17 +70,14 @@ export default function DoctorAvailability({ doctors }) {
         return itemDate === filterDate;
       });
     }
+    
     setFilteredAvailability(filtered);
   };
-
-  useEffect(() => {
-    applyFilters(availability, filter);
-  }, [filter, availability]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!selectedDoctorId) {
-      setError('Please select a doctor first.');
+      setError('Please select a doctor to add availability.');
       return;
     }
     if (!formData.startTime || !formData.endTime) {
@@ -83,21 +92,19 @@ export default function DoctorAvailability({ doctors }) {
         { headers: { Authorization: `Bearer ${token}` } }
       );
       setFormData({ startTime: '', endTime: '', status: 'AVAILABLE' });
-      // Refresh availability data
-      const url = selectedDoctorId
-        ? `${api.BASE_URL}${api.API_ROUTES.APPOINTMENT}?resource=availability&doctorId=${selectedDoctorId}`
-        : `${api.BASE_URL}${api.API_ROUTES.APPOINTMENT}?resource=availability`;
-      const response = await axios.get(url, {
+      
+      // Refresh all availability data
+      const response = await axios.get(`${api.BASE_URL}${api.API_ROUTES.APPOINTMENT}?resource=availability`, {
         headers: { Authorization: `Bearer ${token}` },
       });
       const formattedAvailability = response.data.map((item, index) => ({
         ...item,
         id: item.id || index + 1,
-        doctorName: item.doctor?.user?.name || item.doctor?.doctorId || 'Unknown',
-        doctorSpecialty: item.doctor?.specialty || 'N/A',
+        doctorName: item.doctor?.user?.name || item.doctor?.doctorId || 'Unknown Doctor',
+        specialty: item.doctor?.specialty || 'N/A'
       }));
       setAvailability(formattedAvailability);
-      applyFilters(formattedAvailability, filter);
+      applyFilters(formattedAvailability, filter, selectedDoctorId);
       setError(null);
     } catch (err) {
       setError('Failed to create availability: ' + (err.response?.data?.error || err.message));
@@ -109,8 +116,8 @@ export default function DoctorAvailability({ doctors }) {
   };
 
   const columns = [
-    { field: 'doctorName', headerName: 'Doctor', width: 150 },
-    { field: 'doctorSpecialty', headerName: 'Specialty', width: 120 },
+    { field: 'doctorName', headerName: 'Doctor', width: 180 },
+    { field: 'specialty', headerName: 'Specialty', width: 150 },
     {
       field: 'startTime',
       headerName: 'Start Time',
@@ -132,39 +139,7 @@ export default function DoctorAvailability({ doctors }) {
         Doctor Availability
       </Typography>
       
-      <Box className={styles.filterContainer}>
-        <SearchableSelect
-          label="Filter by Doctor"
-          options={doctors}
-          value={selectedDoctorId}
-          onChange={setSelectedDoctorId}
-          getOptionLabel={(doctor) => `${doctor.user?.name || doctor.doctorId || 'Unknown'} (${doctor.specialty || 'N/A'})`}
-          getOptionValue={(doctor) => doctor.id}
-          className={styles.searchSelect}
-        />
-        <TextField
-          label="Filter by Date"
-          type="date"
-          name="date"
-          value={filter.date}
-          onChange={handleFilterChange}
-          InputLabelProps={{ shrink: true }}
-          className={styles.filterInput}
-        />
-        <FormControl className={styles.filterInput}>
-          <InputLabel>Filter by Status</InputLabel>
-          <Select
-            name="status"
-            value={filter.status}
-            onChange={handleFilterChange}
-          >
-            <MenuItem value="">All</MenuItem>
-            <MenuItem value="AVAILABLE">Available</MenuItem>
-            <MenuItem value="UNAVAILABLE">Unavailable</MenuItem>
-          </Select>
-        </FormControl>
-      </Box>
-
+      {/* Add Availability Form */}
       <Box component="form" onSubmit={handleSubmit} className={styles.form}>
         <SearchableSelect
           label="Select Doctor (Required for adding availability)"
@@ -211,9 +186,44 @@ export default function DoctorAvailability({ doctors }) {
         </Button>
       </Box>
 
+      {/* Filter Controls */}
+      <Box className={styles.filterContainer}>
+        <SearchableSelect
+          label="Filter by Doctor"
+          options={doctors}
+          value={selectedDoctorId}
+          onChange={setSelectedDoctorId}
+          getOptionLabel={(doctor) => `${doctor.user?.name || doctor.doctorId || 'Unknown'} (${doctor.specialty || 'N/A'})`}
+          getOptionValue={(doctor) => doctor.id}
+          className={styles.filterInput}
+        />
+        <TextField
+          label="Filter by Date"
+          type="date"
+          name="date"
+          value={filter.date}
+          onChange={handleFilterChange}
+          InputLabelProps={{ shrink: true }}
+          className={styles.filterInput}
+        />
+        <FormControl className={styles.filterInput}>
+          <InputLabel>Filter by Status</InputLabel>
+          <Select
+            name="status"
+            value={filter.status}
+            onChange={handleFilterChange}
+          >
+            <MenuItem value="">All</MenuItem>
+            <MenuItem value="AVAILABLE">Available</MenuItem>
+            <MenuItem value="UNAVAILABLE">Unavailable</MenuItem>
+          </Select>
+        </FormControl>
+      </Box>
+
       {error && <Alert severity="error" className={styles.alert}>{error}</Alert>}
       
-      <Box className={styles.dataGridContainer}>
+      {/* Data Grid */}
+      <Box className={styles.gridContainer}>
         {loading ? (
           <CircularProgress className={styles.loader} />
         ) : (
@@ -223,7 +233,6 @@ export default function DoctorAvailability({ doctors }) {
             pageSizeOptions={[5, 10, 20]}
             disableRowSelectionOnClick
             getRowId={(row) => row.id}
-            className={styles.dataGrid}
           />
         )}
       </Box>
