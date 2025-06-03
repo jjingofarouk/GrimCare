@@ -35,7 +35,17 @@ export async function getAppointment(id) {
 
 export async function createAppointment(data) {
   const { patientId, doctorId, departmentId, date, type, reason, notes, bookedById } = data;
-  const queueNumber = await prisma.queue.count({ where: { appointment: { doctorId, date: { gte: new Date(date.getFullYear(), date.getMonth(), date.getDate()), lte: new Date(date.getFullYear(), date.getMonth(), date.getDate(), 23, 59, 59) } } }) + 1;
+  const queueNumber = await prisma.queue.count({
+    where: {
+      appointment: {
+        doctorId: parseInt(doctorId),
+        date: {
+          gte: new Date(date.getFullYear(), date.getMonth(), date.getDate()),
+          lte: new Date(date.getFullYear(), date.getMonth(), date.getDate(), 23, 59, 59),
+        },
+      },
+    },
+  }) + 1;
 
   return prisma.$transaction(async (tx) => {
     const appointment = await tx.appointment.create({
