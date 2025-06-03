@@ -96,7 +96,7 @@ export default function AppointmentList({ onEdit }) {
       ));
       setError(null);
     } catch (err) {
-      setError('Failed to check out appointment: ' + (err.response?.data?.error || err.message Jon));
+      setError('Failed to check out appointment: ' + (err.response?.data?.error || err.message));
     }
   };
 
