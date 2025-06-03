@@ -33,13 +33,13 @@ export default function AppointmentList({ onEdit }) {
           patientName: appt.patient?.user?.name || 'N/A',
           doctorId: appt.doctorId,
           doctorName: appt.doctor?.user?.name || 'N/A',
-          date: appt.date ? new Date(appt.date).toLocaleString() : 'N/A',
+          date: appt.date ? new Date(appt.date).toLocaleString('en-US', { dateStyle: 'medium', timeStyle: 'short' }) : 'N/A',
           type: appt.type || 'N/A',
           status: appt.status || 'N/A',
           reason: appt.reason || 'N/A',
           queueNumber: appt.queue?.queueNumber || 'N/A',
-          checkInTime: appt.checkInTime ? new Date(appt.checkInTime).toLocaleString() : null,
-          checkOutTime: appt.checkOutTime ? new Date(appt.checkOutTime).toLocaleString() : null,
+          checkInTime: appt.checkInTime ? new Date(appt.checkInTime).toLocaleString('en-US', { dateStyle: 'medium', timeStyle: 'short' }) : null,
+          checkOutTime: appt.checkOutTime ? new Date(appt.checkOutTime).toLocaleString('en-US', { dateStyle: 'medium', timeStyle: 'short' }) : null,
         })));
         setPatients(patientsData.data);
         setDoctors(doctorsData.data);
@@ -76,7 +76,7 @@ export default function AppointmentList({ onEdit }) {
         headers: { Authorization: `Bearer ${token}` },
       });
       setAppointments(appointments.map(appt =>
-        appt.id === id ? { ...appt, status: 'CHECKED_IN', checkInTime: checkInTime.toLocaleString() } : appt
+        appt.id === id ? { ...appt, status: 'CHECKED_IN', checkInTime: checkInTime.toLocaleString('en-US', { dateStyle: 'medium', timeStyle: 'short' }) } : appt
       ));
       setError(null);
     } catch (err) {
@@ -92,7 +92,7 @@ export default function AppointmentList({ onEdit }) {
         headers: { Authorization: `Bearer ${token}` },
       });
       setAppointments(appointments.map(appt =>
-        appt.id === id ? { ...appt, status: 'CHECKED_OUT', checkOutTime: checkOutTime.toLocaleString() } : appt
+        appt.id === id ? { ...appt, status: 'CHECKED_OUT', checkOutTime: checkOutTime.toLocaleString('en-US', { dateStyle: 'medium', timeStyle: 'short' }) } : appt
       ));
       setError(null);
     } catch (err) {
@@ -112,26 +112,37 @@ export default function AppointmentList({ onEdit }) {
   });
 
   const columns = [
-    { field: 'id', headerName: 'ID', width: 90 },
-    { field: 'patientName', headerName: 'Patient', width: 200 },
-    { field: 'doctorName', headerName: 'Doctor', width: 200 },
-    { field: 'date', headerName: 'Date', width: 200 },
-    { field: 'type', headerName: 'Type', width: 120 },
-    { field: 'status', headerName: 'Status', width: 120 },
-    { field: 'reason', headerName: 'Reason', width: 150 },
-    { field: 'queueNumber', headerName: 'Queue', width: 100 },
+    { field: 'id', headerName: 'ID', width: 80, align: 'center', headerAlign: 'center' },
+    { field: 'patientName', headerName: 'Patient', width: 180 },
+    { field: 'doctorName', headerName: 'Doctor', width: 180 },
+    { field: 'date', headerName: 'Date', width: 160 },
+    { field: 'type', headerName: 'Type', width: 100, align: 'center', headerAlign: 'center' },
+    { 
+      field: 'status', 
+      headerName: 'Status', 
+      width: 100, 
+      align: 'center', 
+      headerAlign: 'center',
+      renderCell: (params) => (
+        <Box className={`${styles.status} ${styles[`status${params.value}`]}`}>
+          {params.value}
+        </Box>
+      )
+    },
+    { field: 'reason', headerName: 'Reason', width: 140 },
+    { field: 'queueNumber', headerName: 'Queue', width: 80, align: 'center', headerAlign: 'center' },
     {
       field: 'actions',
       headerName: 'Actions',
-      width: 300,
+      width: 320,
       renderCell: (params) => (
-        <Box sx={{ display: 'flex', gap: 1 }}>
+        <Box className={styles.actionContainer}>
           <Button
             variant="outlined"
             size="small"
             onClick={() => onEdit(params.row)}
             disabled={params.row.status === 'CANCELLED' || params.row.status === 'CHECKED_OUT'}
-            className={styles.actionButton}
+            className={`${styles.actionButton} ${styles.editButton}`}
           >
             Edit
           </Button>
@@ -140,7 +151,7 @@ export default function AppointmentList({ onEdit }) {
             size="small"
             onClick={() => handleCancel(params.row.id)}
             disabled={params.row.status === 'CANCELLED' || params.row.status === 'CHECKED_OUT'}
-            className={styles.actionButton}
+            className={`${styles.actionButton} ${styles.cancelButton}`}
           >
             Cancel
           </Button>
@@ -149,7 +160,7 @@ export default function AppointmentList({ onEdit }) {
             size="small"
             onClick={() => handleCheckIn(params.row.id)}
             disabled={params.row.status !== 'SCHEDULED'}
-            className={styles.actionButton}
+            className={`${styles.actionButton} ${styles.checkInButton}`}
           >
             Check In
           </Button>
@@ -158,7 +169,7 @@ export default function AppointmentList({ onEdit }) {
             size="small"
             onClick={() => handleCheckOut(params.row.id)}
             disabled={params.row.status !== 'CHECKED_IN'}
-            className={styles.actionButton}
+            className={`${styles.actionButton} ${styles.checkOutButton}`}
           >
             Check Out
           </Button>
@@ -169,24 +180,26 @@ export default function AppointmentList({ onEdit }) {
 
   return (
     <Box className={styles.container}>
-      <Typography variant="h6" className={styles.title}>
-        Appointments List
-      </Typography>
-      <AppointmentFilter onFilter={setFilter} patients={patients} doctors={doctors} />
+      <Box className={styles.header}>
+        <Typography variant="h6" className={styles.title}>
+          Appointments
+        </Typography>
+        <AppointmentFilter onFilter={setFilter} patients={patients} doctors={doctors} />
+      </Box>
       {error && (
         <Alert severity="error" className={styles.alert}>
           {error}
         </Alert>
       )}
       {loading ? (
-        <Box sx={{ display: 'flex', justifyContent: 'center', mt: 4 }}>
-          <CircularProgress />
+        <Box className={styles.loading}>
+          <CircularProgress size={32} />
         </Box>
       ) : (
         <>
           {filteredAppointments.length === 0 && !error && (
             <Alert severity="info" className={styles.alert}>
-              No appointments found.
+              No appointments found
             </Alert>
           )}
           <Box className={styles.tableWrapper}>
@@ -199,6 +212,7 @@ export default function AppointmentList({ onEdit }) {
                 pagination: { paginationModel: { pageSize: 10 } },
               }}
               className={styles.dataGrid}
+              autoHeight
             />
           </Box>
         </>
