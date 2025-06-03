@@ -12,8 +12,10 @@ export default function DoctorAvailability({ doctors }) {
   const [selectedDoctorId, setSelectedDoctorId] = useState('');
   const [formData, setFormData] = useState({ startTime: '', endTime: '', status: 'AVAILABLE' });
   const [availability, setAvailability] = useState([]);
+  const [filteredAvailability, setFilteredAvailability] = useState([]);
   const [error, setError] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [filters, setFilters] = useState({ status: '', startTime: '' });
 
   useEffect(() => {
     async function fetchAvailability(doctorId = '') {
@@ -31,6 +33,7 @@ export default function DoctorAvailability({ doctors }) {
           id: item.id || index + 1,
         }));
         setAvailability(formattedAvailability);
+        setFilteredAvailability(formattedAvailability);
         setError(null);
       } catch (err) {
         setError(err.response?.data?.error || err.message);
@@ -40,6 +43,20 @@ export default function DoctorAvailability({ doctors }) {
     }
     fetchAvailability(selectedDoctorId);
   }, [selectedDoctorId]);
+
+  useEffect(() => {
+    const applyFilters = () => {
+      let filtered = [...availability];
+      if (filters.status) {
+        filtered = filtered.filter(item => item.status.toLowerCase().includes(filters.status.toLowerCase()));
+      }
+      if (filters.startTime) {
+        filtered = filtered.filter(item => item.startTime && new Date(item.startTime).toLocaleString().includes(filters.startTime));
+      }
+      setFilteredAvailability(filtered);
+    };
+    applyFilters();
+  }, [filters, availability]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -66,10 +83,15 @@ export default function DoctorAvailability({ doctors }) {
         id: item.id || index + 1,
       }));
       setAvailability(formattedAvailability);
+      setFilteredAvailability(formattedAvailability);
       setError(null);
     } catch (err) {
       setError('Failed to create availability: ' + (err.response?.data?.error || err.message));
     }
+  };
+
+  const handleFilterChange = (e) => {
+    setFilters({ ...filters, [e.target.name]: e.target.value });
   };
 
   const columns = [
@@ -93,15 +115,31 @@ export default function DoctorAvailability({ doctors }) {
       <Typography variant="h5" className={styles.title}>
         Doctor Availability
       </Typography>
-      <SearchableSelect
-        label="Filter by Doctor"
-        options={doctors}
-        value={selectedDoctorId}
-        onChange={setSelectedDoctorId}
-        getOptionLabel={(doctor) => `${doctor.user?.name || doctor.doctorId || 'Unknown'} (${doctor.specialty || 'N/A'})`}
-        getOptionValue={(doctor) => doctor.id}
-        className={styles.searchSelect}
-      />
+      <Box className={styles.filterContainer}>
+        <SearchableSelect
+          label="Filter by Doctor"
+          options={doctors}
+          value={selectedDoctorId}
+          onChange={setSelectedDoctorId}
+          getOptionLabel={(doctor) => `${doctor.user?.name || doctor.doctorId || 'Unknown'} (${doctor.specialty || 'N/A'})`}
+          getOptionValue={(doctor) => doctor.id}
+          className={styles.searchSelect}
+        />
+        <TextField
+          label="Filter by Status"
+          name="status"
+          value={filters.status}
+          onChange={handleFilterChange}
+          className={styles.filterInput}
+        />
+        <TextField
+          label="Filter by Start Time"
+          name="startTime"
+          value={filters.startTime}
+          onChange={handleFilterChange}
+          className={styles.filterInput}
+        />
+      </Box>
       <Box component="form" onSubmit={handleSubmit} className={styles.form}>
         <TextField
           label="Start Time"
@@ -144,7 +182,7 @@ export default function DoctorAvailability({ doctors }) {
           <CircularProgress className={styles.loader} />
         ) : (
           <DataGrid
-            rows={availability}
+            rows={filteredAvailability}
             columns={columns}
             pageSizeOptions={[5, 10, 20]}
             disableRowSelectionOnClick
