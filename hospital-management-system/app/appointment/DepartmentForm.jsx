@@ -78,6 +78,13 @@ export default function DepartmentForm() {
       <Box component="form" onSubmit={handleSubmit} sx={{ display: 'flex', flexDirection: 'column', gap: 2, mb: 4 }}>
         <TextField
           label="Department Name"
+          name="name"
+          value={formData.name}
+          onChange={handleChange}
+          fullWidth
+        />
+        <TextField
+          label="Description"
           name="description"
           value={formData.description}
           onChange={handleChange}
