@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from 'react';
-import { Box, Typography, CircularProgress, Alert, TextField, Button } from '@mui/material';
+import { Box, Typography, Alert, TextField, Button, Skeleton } from '@mui/material';
 import { DataGrid } from '@mui/x-data-grid';
 import axios from 'axios';
 import api from '../api';
@@ -30,7 +30,7 @@ export default function AvailableDoctorsList() {
               (item) => item?.startTime && item?.endTime && item.status === 'AVAILABLE'
             );
             return {
-              id: doctor.id || `doctor-${Math.random()}`, // Fallback ID
+              id: doctor.id || `doctor-${Math.random()}`,
               name: doctor.user?.name || doctor.doctorId || 'N/A',
               specialty: doctor.specialty || 'N/A',
               availability: availableSlots,
@@ -125,7 +125,11 @@ export default function AvailableDoctorsList() {
       </Box>
       {error && <Alert severity="error" sx={{ mb: 2 }}>{error}</Alert>}
       {loading ? (
-        <CircularProgress />
+        <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+          <Skeleton variant="rectangular" width="100%" height={400} />
+          <Skeleton variant="text" width="60%" />
+          <Skeleton variant="text" width="80%" />
+        </Box>
       ) : (
         <Box sx={{ height: 400, width: '100%', bgcolor: 'white', borderRadius: 2 }}>
           <DataGrid
