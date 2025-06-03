@@ -1,10 +1,9 @@
-"use client";
-
 import React, { useState, useEffect } from 'react';
 import { Box, Typography, Alert } from '@mui/material';
 import SearchableSelect from '../components/SearchableSelect';
 import CustomDataGrid from '../components/CustomDataGrid';
-import api from '../utils/api';
+import axios from 'axios';
+import api from '../api';
 
 export default function AppointmentHistory({ patients }) {
   const [selectedPatientId, setSelectedPatientId] = useState('');
@@ -13,17 +12,15 @@ export default function AppointmentHistory({ patients }) {
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    async function fetchAppointments() {
-      if (!selectedPatientId) {
-        setAppointments([]);
-        return;
-      }
+    const fetchAppointments = async () => {
+      if (!selectedPatientId) return;
       setLoading(true);
       try {
-        const response = await fetch(`${api.BASE_URL}${api.API_ROUTES.APPOINTMENT}?patientId=${selectedPatientId}`);
-        if (!response.ok) throw new Error('Failed to fetch appointments');
-        const data = await response.json();
-        const mappedAppointments = data.map(appt => ({
+        const token = localStorage.getItem('token');
+        const response = await axios.get(`${api.BASE_URL}${api.API_ROUTES.APPOINTMENT}?patientId=${selectedPatientId}`, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        setAppointments(response.data.map(appt => ({
           id: appt.id,
           doctorName: appt.doctor?.user?.name || 'N/A',
           date: appt.date ? new Date(appt.date).toLocaleString() : 'N/A',
@@ -31,15 +28,14 @@ export default function AppointmentHistory({ patients }) {
           status: appt.status || 'N/A',
           reason: appt.reason || 'N/A',
           notes: appt.notes || 'N/A',
-        }));
-        setAppointments(mappedAppointments);
+        })));
         setError(null);
       } catch (err) {
-        setError(err.message);
+        setError(err.response?.data?.error || err.message);
       } finally {
         setLoading(false);
       }
-    }
+    };
     fetchAppointments();
   }, [selectedPatientId]);
 
@@ -67,7 +63,7 @@ export default function AppointmentHistory({ patients }) {
       {error && <Alert severity="error">{error}</Alert>}
       {selectedPatientId && (
         <Box sx={{ height: 400, width: '100%' }}>
-          <CustomDataGrid rows={appointments} columns={columns} loading={loading} />
+          <CustomDataGrid rows={appointments} columns={columns} />
         </Box>
       )}
     </Box>
