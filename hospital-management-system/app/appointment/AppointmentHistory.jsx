@@ -6,6 +6,7 @@ import { DataGrid } from '@mui/x-data-grid';
 import SearchableSelect from '../components/SearchableSelect';
 import axios from 'axios';
 import api from '../api';
+import styles from './AppointmentHistory.module.css';
 
 export default function AppointmentHistory({ patients }) {
   const [selectedPatientId, setSelectedPatientId] = useState('');
@@ -55,22 +56,27 @@ export default function AppointmentHistory({ patients }) {
   ];
 
   return (
-    <Box sx={{ p: 2, maxWidth: 1000, mx: 'auto', bgcolor: '#f5f5f5', borderRadius: 2 }}>
-      <Typography variant="h5" gutterBottom sx={{ fontWeight: 700, color: '#1976d2' }}>
+    <Box className={styles.container}>
+      <Typography className={styles.title}>
         Appointment History
       </Typography>
-      <SearchableSelect
-        label="Patient (optional)"
-        options={[{ id: '', user: { name: 'All Patients' } }, ...patients]}
-        value={selectedPatientId}
-        onChange={setSelectedPatientId}
-        getOptionLabel={(patient) => patient.user?.name || patient.patientId || 'All Patients'}
-        getOptionValue={(patient) => patient.id}
-      />
-      {error && <Alert severity="error" sx={{ mb: 2 }}>{error}</Alert>}
-      <Box sx={{ height: 400, width: '100%', mt: 2, bgcolor: 'white', borderRadius: 2 }}>
+      <Box className={styles.searchContainer}>
+        <SearchableSelect
+          label="Patient"
+          options={[{ id: '', user: { name: 'All Patients' } }, ...patients]}
+          value={selectedPatientId}
+          onChange={setSelectedPatientId}
+          getOptionLabel={(patient) => patient.user?.name || patient.patientId || 'All Patients'}
+          getOptionValue={(patient) => patient.id}
+          className={styles.searchInput}
+        />
+      </Box>
+      {error && <Alert className={styles.alert} severity="error">{error}</Alert>}
+      <Box className={styles.tableContainer}>
         {loading ? (
-          <CircularProgress />
+          <Box className={styles.loader}>
+            <CircularProgress />
+          </Box>
         ) : (
           <DataGrid
             rows={appointments}
