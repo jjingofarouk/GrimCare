@@ -61,7 +61,7 @@ export default function AppointmentHistory({ patients }) {
         Appointment History
       </Typography>
       <SearchableSelect
-        label="Filter by Patient"
+        label=" "
         options={patients}
         value={selectedPatientId}
         onChange={setSelectedPatientId}
