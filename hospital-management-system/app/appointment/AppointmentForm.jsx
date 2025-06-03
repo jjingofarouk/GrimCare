@@ -125,7 +125,7 @@ export default function AppointmentForm({ patients, doctors, departments, onSucc
       <Box component="form" onSubmit={handleSubmit} className={`${styles.formBox} ${styles.fadeIn}`}>
         <Typography variant="h6" className={styles.title}>Create Appointment</Typography>
         <SearchableSelect
-          label="Patient"
+          label=" "
           options={fetchedPatients.length > 0 ? fetchedPatients : patients}
           value={formData.patientId}
           onChange={(value) => setFormData({ ...formData, patientId: value })}
@@ -135,7 +135,7 @@ export default function AppointmentForm({ patients, doctors, departments, onSucc
           className={styles.formControl}
         />
         <SearchableSelect
-          label="Doctor"
+          label=" "
           options={fetchedDoctors.length > 0 ? fetchedDoctors : doctors}
           value={formData.doctorId}
           onChange={(value) => setFormData({ ...formData, doctorId: value })}
@@ -156,7 +156,7 @@ export default function AppointmentForm({ patients, doctors, departments, onSucc
         <TextField
           fullWidth
           className={styles.formControl}
-          label="Date"
+          label=" "
           type="datetime-local"
           name="date"
           value={formData.date}
@@ -185,7 +185,7 @@ export default function AppointmentForm({ patients, doctors, departments, onSucc
         <TextField
           fullWidth
           className={styles.formControl}
-          label="Notes"
+          label=" "
           name="notes"
           value={formData.notes}
           onChange={handleChange}
