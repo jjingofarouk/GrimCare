@@ -1,28 +1,48 @@
-import React, { useState } from 'react';
+"use client";
+
+import React, { useState, useEffect } from 'react';
 import { Box, Typography, Alert, TextField, Button, styled } from '@mui/material';
 import CustomDataGrid from '../components/CustomDataGrid';
-import { useApiData } from '../utils/api';
-import { getDoctors, getAvailability } from './appointmentService';
-import { format, parseISO } from 'date-fns';
-import { formatDate } from '../utils/date';
+import api from '../api';
 
 export default function AvailableDoctorsList() {
   const [dateFilter, setDateFilter] = useState({ startDate: '', endDate: '' });
+  const [doctors, setDoctors] = useState([]);
   const [error, setError] = useState(null);
-  const { data: doctors, error: doctorsError } = useApiData(async () => {
-    const doctorsData = await getDoctors();
-    return await Promise.all(
-      doctorsData.map(async (doctor) => {
-        const availability = await getAvailability({ doctorId: doctor.id });
-        return {
-          ...doctor,
-          availability: availability.filter(
-            (item) => item && item.startTime && item.endTime && item.status === 'AVAILABLE'
-          ),
-        };
-      })
-    );
-  });
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    async function fetchDoctors() {
+      try {
+        setLoading(true);
+        const response = await fetch(`${api.BASE_URL}${api.API_ROUTES.DOCTOR}`);
+        if (!response.ok) throw new Error('Failed to fetch doctors');
+        const doctorsData = await response.json();
+        const doctorsWithAvailability = await Promise.all(
+          doctorsData.map(async (doctor) => {
+            const availabilityRes = await fetch(
+              `${api.BASE_URL}${api.API_ROUTES.AVAILABILITY}?doctorId=${doctor.id}`
+            );
+            if (!availabilityRes.ok) throw new Error('Failed to fetch availability');
+            const availability = await availabilityRes.json();
+            return {
+              ...doctor,
+              availability: availability.filter(
+                (item) => item && item.startTime && item.endTime && item.status === 'AVAILABLE'
+              ),
+            };
+          })
+        );
+        setDoctors(doctorsWithAvailability);
+        setError(null);
+      } catch (err) {
+        setError(err.message);
+      } finally {
+        setLoading(false);
+      }
+    }
+    fetchDoctors();
+  }, []);
 
   const handleDateChange = (e) => {
     setDateFilter({ ...dateFilter, [e.target.name]: e.target.value });
@@ -41,14 +61,14 @@ export default function AvailableDoctorsList() {
     availability: dateFilter.startDate && dateFilter.endDate
       ? doctor.availability.filter(
           (slot) =>
-            parseISO(slot.startTime) >= parseISO(dateFilter.startDate) &&
-            parseISO(slot.endTime) <= parseISO(dateFilter.endDate)
+            new Date(slot.startTime) >= new Date(dateFilter.startDate) &&
+            new Date(slot.endTime) <= new Date(dateFilter.endDate)
         )
       : doctor.availability,
   }));
 
   const columns = [
-    { field: 'doctorName', headerName: 'Doctor Name', width: 200 },
+    { field: 'doctorName', headerName: 'Doctor Name', width: 200, valueGetter: (params) => params.row.user?.name || 'N/A' },
     { field: 'specialty', headerName: 'Specialty', width: 150 },
     {
       field: 'availabilityStatus',
@@ -64,7 +84,7 @@ export default function AvailableDoctorsList() {
         const slots = params.row?.availability || [];
         return slots.length > 0
           ? slots
-              .map((slot) => `${formatDate(slot.startTime)} - ${formatDate(slot.endTime)}`)
+              .map((slot) => `${new Date(slot.startTime).toLocaleString()} - ${new Date(slot.endTime).toLocaleString()}`)
               .join(', ')
           : 'No available slots';
       },
@@ -189,9 +209,9 @@ export default function AvailableDoctorsList() {
         />
         <ModernButton onClick={handleFilter}>Filter</ModernButton>
       </ModernFilterContainer>
-      {(error || doctorsError) && <ModernAlert severity="error">{error || doctorsError}</ModernAlert>}
+      {error && <ModernAlert severity="error">{error}</ModernAlert>}
       <ModernGridContainer>
-        <CustomDataGrid rows={filteredDoctors} columns={columns} />
+        <CustomDataGrid rows={filteredDoctors} columns={columns} loading={loading} />
       </ModernGridContainer>
     </ModernBox>
   );
