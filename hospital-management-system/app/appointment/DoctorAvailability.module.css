@@ -14,10 +14,16 @@
   font-size: 1.5rem;
 }
 
-.searchSelect {
+.filterContainer {
+  display: flex;
+  gap: 16px;
   margin-bottom: 16px;
+  flex-wrap: wrap;
+}
+
+.searchSelect, .filterInput {
   width: 100%;
-  max-width: 400px;
+  max-width: 200px;
 }
 
 .form {
@@ -70,17 +76,12 @@
     font-size: 1.25rem;
   }
 
-  .searchSelect {
+  .searchSelect, .filterInput, .textField, .formControl {
     max-width: 100%;
   }
 
-  .textField, .formControl {
-    min-width: 100%;
-  }
-
-  .form {
+  .filterContainer, .form {
     flex-direction: column;
-    gap: 8px;
   }
 
   .dataGridContainer {
@@ -97,7 +98,7 @@
     font-size: 1.375rem;
   }
 
-  .textField, .formControl {
-    min-width: 150px;
+  .searchSelect, .filterInput, .textField, .formControl {
+    max-width: 150px;
   }
 }
