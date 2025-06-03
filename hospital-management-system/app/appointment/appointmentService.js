@@ -1,5 +1,3 @@
-
-
 import axios from 'axios';
 import axiosRetry from 'axios-retry';
 import api from '../api';
@@ -17,7 +15,14 @@ export async function getAppointments() {
     if (!Array.isArray(response.data)) {
       throw new Error('Invalid response format: Expected array');
     }
-    return response.data;
+    const appointments = response.data;
+    const invalidAppointments = appointments.filter(
+      (appt) => !appt.patient?.user || !appt.doctor?.user
+    );
+    if (invalidAppointments.length > 0) {
+      console.warn('Appointments with missing user data:', JSON.stringify(invalidAppointments, null, 2));
+    }
+    return appointments;
   } catch (error) {
     console.error('Error fetching appointments:', error);
     throw new Error(error.response?.data?.message || 'Failed to fetch appointments');
@@ -118,7 +123,15 @@ export async function getDoctors() {
       headers: { Authorization: `Bearer ${localStorage.getItem('token')}` },
       params: { include: 'user,department' },
     });
-    return response.data;
+    if (!Array.isArray(response.data)) {
+      throw new Error('Invalid response format: Expected array');
+    }
+    const doctors = response.data;
+    const invalidDoctors = doctors.filter((doc) => !doc.user);
+    if (invalidDoctors.length > 0) {
+      console.warn('Doctors with missing user data:', JSON.stringify(invalidDoctors, null, 2));
+    }
+    return doctors;
   } catch (error) {
     console.error('Error fetching doctors:', error);
     throw new Error(error.response?.data?.message || 'Failed to fetch doctors');
@@ -131,7 +144,15 @@ export async function getPatients() {
       headers: { Authorization: `Bearer ${localStorage.getItem('token')}` },
       params: { include: 'user' },
     });
-    return response.data;
+    if (!Array.isArray(response.data)) {
+      throw new Error('Invalid response format: Expected array');
+    }
+    const patients = response.data;
+    const invalidPatients = patients.filter((patient) => !patient.user);
+    if (invalidPatients.length > 0) {
+      console.warn('Patients with missing user data:', JSON.stringify(invalidPatients, null, 2));
+    }
+    return patients;
   } catch (error) {
     console.error('Error fetching patients:', error);
     throw new Error(error.response?.data?.message || 'Failed to fetch patients');
