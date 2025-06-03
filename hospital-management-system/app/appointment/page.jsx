@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from 'react';
-import { Container, Tabs, Tab, Box, Alert } from '@mui/material';
+import { Container, Tabs, Tab, Box, Alert, CircularProgress } from '@mui/material';
 import AppointmentForm from './AppointmentForm';
 import AppointmentList from './AppointmentList';
 import AppointmentHistory from './AppointmentHistory';
@@ -11,16 +11,18 @@ import DoctorAvailability from './DoctorAvailability';
 import AvailableDoctorsList from './AvailableDoctorsList';
 import DepartmentForm from './DepartmentForm';
 import Dashboard from './Dashboard';
-import api from '../api';
+import axios from 'axios';
+import api from '../../api';
 import styles from './page.module.css';
 
-export default function AppointmentPage({ userId }) {
+export default function AppointmentPage({ user }) {
   const [selectedAppointment, setSelectedAppointment] = useState(null);
   const [activeTab, setActiveTab] = useState('dashboard');
   const [refreshKey, setRefreshKey] = useState(0);
   const [patients, setPatients] = useState([]);
   const [doctors, setDoctors] = useState([]);
   const [departments, setDepartments] = useState([]);
+  const [userId, setUserId] = useState(null);
   const [error, setError] = useState(null);
   const [loading, setLoading] = useState(true);
 
@@ -28,23 +30,26 @@ export default function AppointmentPage({ userId }) {
     async function fetchData() {
       try {
         setLoading(true);
+        const token = localStorage.getItem('token');
+        if (!token) throw new Error('No authentication token found');
         const [patientsRes, doctorsRes, departmentsRes] = await Promise.all([
-          fetch(`${api.BASE_URL}${api.API_ROUTES.PATIENT}`),
-          fetch(`${api.BASE_URL}${api.API_ROUTES.DOCTOR}`),
-          fetch(`${api.BASE_URL}${api.API_ROUTES.DEPARTMENT}`),
+          axios.get(`${api.BASE_URL}${api.API_ROUTES.APPOINTMENT}?resource=patients`, {
+            headers: { Authorization: `Bearer ${token}` },
+          }),
+          axios.get(`${api.BASE_URL}${api.API_ROUTES.APPOINTMENT}?resource=doctors`, {
+            headers: { Authorization: `Bearer ${token}` },
+          }),
+          axios.get(`${api.BASE_URL}${api.API_ROUTES.APPOINTMENT}?resource=departments`, {
+            headers: { Authorization: `Bearer ${token}` },
+          }),
         ]);
-        if (!patientsRes.ok || !doctorsRes.ok || !departmentsRes.ok) {
-          throw new Error('Failed to fetch data');
-        }
-        const patientsData = await patientsRes.json();
-        const doctorsData = await doctorsRes.json();
-        const departmentsData = await departmentsRes.json();
-        setPatients(patientsData);
-        setDoctors(doctorsData);
-        setDepartments(departmentsData);
+        setPatients(patientsRes.data);
+        setDoctors(doctorsRes.data);
+        setDepartments(departmentsRes.data);
+        setUserId(JSON.parse(atob(token.split('.')[1])).id);
         setError(null);
       } catch (err) {
-        setError(err.message);
+        setError(err.response?.data?.error || err.message);
       } finally {
         setLoading(false);
       }
@@ -55,6 +60,7 @@ export default function AppointmentPage({ userId }) {
   const handleSuccess = () => {
     setSelectedAppointment(null);
     setRefreshKey((prev) => prev + 1);
+    setActiveTab('list');
   };
 
   const handleEdit = (appointment) => {
@@ -68,10 +74,10 @@ export default function AppointmentPage({ userId }) {
   };
 
   return (
-    <Container maxWidth="xl" sx={{ py prolly: 4 }}>
+    <Container maxWidth="xl" sx={{ py: 4 }}>
       <Box sx={{ p: 0, m: 0 }}>
         {error && (
-          <Alert severity="error">
+          <Alert severity="error" className={styles.alert}>
             {error}
           </Alert>
         )}
@@ -117,21 +123,21 @@ export default function AppointmentPage({ userId }) {
                 />
               )}
               {activeTab === 'history' && (
-                <AppointmentHistory patients={patients} />
+                <AppointmentHistory patients={patients} key={refreshKey} />
               )}
               {activeTab === 'schedule' && (
-                <DoctorSchedule doctors={doctors} />
+                <DoctorSchedule doctors={doctors} key={refreshKey} />
               )}
               {activeTab === 'queue' && (
-                <QueueManagement doctorId={userId} />
+                <QueueManagement doctors={doctors} key={refreshKey} />
               )}
               {activeTab === 'availability' && (
-                <DoctorAvailability doctors={doctors} />
+                <DoctorAvailability doctors={doctors} key={refreshKey} />
               )}
               {activeTab === 'availableDoctors' && (
-                <AvailableDoctorsList />
+                <AvailableDoctorsList key={refreshKey} />
               )}
-              {activeTab === 'departments' && <DepartmentForm />}
+              {activeTab === 'departments' && <DepartmentForm key={refreshKey} />}
             </Box>
           </>
         )}
