@@ -6,7 +6,7 @@ import { DataGrid } from '@mui/x-data-grid';
 import SearchableSelect from '../components/SearchableSelect';
 import axios from 'axios';
 import api from '../api';
-import styles from './QueueManagement.module.css';
+import styles from './Queue.module.css';
 
 export default function QueueManagement({ doctors }) {
   const [selectedDoctorId, setSelectedDoctorId] = useState('');
