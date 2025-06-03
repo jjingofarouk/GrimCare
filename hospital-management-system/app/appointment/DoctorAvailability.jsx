@@ -6,26 +6,29 @@ import { DataGrid } from '@mui/x-data-grid';
 import SearchableSelect from '../components/SearchableSelect';
 import axios from 'axios';
 import api from '../api';
+import styles from './DoctorAvailability.module.css';
 
 export default function DoctorAvailability({ doctors }) {
   const [selectedDoctorId, setSelectedDoctorId] = useState('');
   const [formData, setFormData] = useState({ startTime: '', endTime: '', status: 'AVAILABLE' });
   const [availability, setAvailability] = useState([]);
   const [error, setError] = useState(null);
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    async function fetchAvailability() {
-      if (!selectedDoctorId) return;
+    async function fetchAvailability(doctorId = '') {
       setLoading(true);
       try {
         const token = localStorage.getItem('token');
-        const response = await axios.get(`${api.BASE_URL}${api.API_ROUTES.APPOINTMENT}?resource=availability&doctorId=${selectedDoctorId}`, {
+        const url = doctorId
+          ? `${api.BASE_URL}${api.API_ROUTES.APPOINTMENT}?resource=availability&doctorId=${doctorId}`
+          : `${api.BASE_URL}${api.API_ROUTES.APPOINTMENT}?resource=availability`;
+        const response = await axios.get(url, {
           headers: { Authorization: `Bearer ${token}` },
         });
         const formattedAvailability = response.data.map((item, index) => ({
           ...item,
-          id: item.id || index + 1, // Ensure unique ID for DataGrid
+          id: item.id || index + 1,
         }));
         setAvailability(formattedAvailability);
         setError(null);
@@ -35,7 +38,7 @@ export default function DoctorAvailability({ doctors }) {
         setLoading(false);
       }
     }
-    fetchAvailability();
+    fetchAvailability(selectedDoctorId);
   }, [selectedDoctorId]);
 
   const handleSubmit = async (e) => {
@@ -52,9 +55,12 @@ export default function DoctorAvailability({ doctors }) {
         { headers: { Authorization: `Bearer ${token}` } }
       );
       setFormData({ startTime: '', endTime: '', status: 'AVAILABLE' });
-      const response = await axios.get(`${api.BASE_URL}${api.API_ROUTES.APPOINTMENT}?resource=availability&doctorId=${selectedDoctorId}`, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
+      const response = await axios.get(
+        selectedDoctorId
+          ? `${api.BASE_URL}${api.API_ROUTES.APPOINTMENT}?resource=availability&doctorId=${selectedDoctorId}`
+          : `${api.BASE_URL}${api.API_ROUTES.APPOINTMENT}?resource=availability`,
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
       const formattedAvailability = response.data.map((item, index) => ({
         ...item,
         id: item.id || index + 1,
@@ -83,72 +89,70 @@ export default function DoctorAvailability({ doctors }) {
   ];
 
   return (
-    <Box sx={{ p: 2, maxWidth: 800, mx: 'auto', bgcolor: '#f5f5f5', borderRadius: 2 }}>
-      <Typography variant="h5" gutterBottom sx={{ fontWeight: 700, color: '#1976d2' }}>
+    <Box className={styles.container}>
+      <Typography variant="h5" className={styles.title}>
         Doctor Availability
       </Typography>
       <SearchableSelect
-        label="Doctor"
+        label="Filter by Doctor"
         options={doctors}
         value={selectedDoctorId}
         onChange={setSelectedDoctorId}
         getOptionLabel={(doctor) => `${doctor.user?.name || doctor.doctorId || 'Unknown'} (${doctor.specialty || 'N/A'})`}
         getOptionValue={(doctor) => doctor.id}
+        className={styles.searchSelect}
       />
-      {selectedDoctorId && (
-        <>
-          <Box component="form" onSubmit={handleSubmit} sx={{ display: 'flex', gap: 2, mb: 2, flexWrap: 'wrap' }}>
-            <TextField
-              label="Start Time"
-              type="datetime-local"
-              name="startTime"
-              value={formData.startTime}
-              onChange={(e) => setFormData({ ...formData, [e.target.name]: e.target.value })}
-              InputLabelProps={{ shrink: true }}
-              required
-              sx={{ minWidth: 200 }}
-            />
-            <TextField
-              label="End Time"
-              type="datetime-local"
-              name="endTime"
-              value={formData.endTime}
-              onChange={(e) => setFormData({ ...formData, [e.target.name]: e.target.value })}
-              InputLabelProps={{ shrink: true }}
-              required
-              sx={{ minWidth: 200 }}
-            />
-            <FormControl sx={{ minWidth: 120 }}>
-              <InputLabel>Status</InputLabel>
-              <Select
-                name="status"
-                value={formData.status}
-                onChange={(e) => setFormData({ ...formData, [e.target.name]: e.target.value })}
-              >
-                <MenuItem value="AVAILABLE">Available</MenuItem>
-                <MenuItem value="UNAVAILABLE">Unavailable</MenuItem>
-              </Select>
-            </FormControl>
-            <Button type="submit" variant="contained" sx={{ bgcolor: '#1976d2' }}>
-              Add Availability
-            </Button>
-          </Box>
-          {error && <Alert severity="error" sx={{ mb: 2 }}>{error}</Alert>}
-          {loading ? (
-            <CircularProgress />
-          ) : (
-            <Box sx={{ height: 400, width: '100%', bgcolor: 'white', borderRadius: 2 }}>
-              <DataGrid
-                rows={availability}
-                columns={columns}
-                pageSizeOptions={[5, 10, 20]}
-                disableRowSelectionOnClick
-                getRowId={(row) => row.id}
-              />
-            </Box>
-          )}
-        </>
-      )}
+      <Box component="form" onSubmit={handleSubmit} className={styles.form}>
+        <TextField
+          label="Start Time"
+          type="datetime-local"
+          name="startTime"
+          value={formData.startTime}
+          onChange={(e) => setFormData({ ...formData, [e.target.name]: e.target.value })}
+          InputLabelProps={{ shrink: true }}
+          required
+          className={styles.textField}
+        />
+        <TextField
+          label="End Time"
+          type="datetime-local"
+          name="endTime"
+          value={formData.endTime}
+          onChange={(e) => setFormData({ ...formData, [e.target.name]: e.target.value })}
+          InputLabelProps={{ shrink: true }}
+          required
+          className={styles.textField}
+        />
+        <FormControl className={styles.formControl}>
+          <InputLabel>Status</InputLabel>
+          <Select
+            name="status"
+            value={formData.status}
+            onChange={(e) => setFormData({ ...formData, [e.target.name]: e.target.value })}
+          >
+            <MenuItem value="AVAILABLE">Available</MenuItem>
+            <MenuItem value="UNAVAILABLE">Unavailable</MenuItem>
+          </Select>
+        </FormControl>
+        <Button type="submit" variant="contained" className={styles.submitButton}>
+          Add Availability
+        </Button>
+      </Box>
+      {error && <Alert severity="error" className={styles.alert}>{error}</Alert>}
+      <Box className={styles.dataGridContainer}>
+        {loading ? (
+          <CircularProgress className={styles.loader} />
+        ) : (
+          <DataGrid
+            rows={availability}
+            columns={columns}
+            pageSizeOptions={[5, 10, 20]}
+            disableRowSelectionOnClick
+            getRowId={(row) => row.id}
+            className={styles.dataGrid}
+          />
+        )}
+      </Box>
     </Box>
   );
 }
