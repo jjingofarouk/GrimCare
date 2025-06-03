@@ -1,7 +1,9 @@
+"use client";
+
 import React, { useState, useEffect } from 'react';
 import { Box, Typography, Alert, CircularProgress } from '@mui/material';
+import { DataGrid } from '@mui/x-data-grid';
 import SearchableSelect from '../components/SearchableSelect';
-import CustomDataGrid from '../components/CustomDataGrid';
 import axios from 'axios';
 import api from '../api';
 
@@ -20,14 +22,15 @@ export default function DoctorSchedule({ doctors }) {
         const response = await axios.get(`${api.BASE_URL}${api.API_ROUTES.APPOINTMENT}?doctorId=${selectedDoctorId}&status=SCHEDULED`, {
           headers: { Authorization: `Bearer ${token}` },
         });
-        setAppointments(response.data.map(appt => ({
-          id: appt.id,
-          patientName: appt.patient?.user?.name || 'N/A',
+        const formattedAppointments = response.data.map((appt, index) => ({
+          id: appt.id || `appt-${index + 1}`,
+          patientName: appt.patient?.user?.name || appt.patient?.patientId || 'N/A',
           date: appt.date ? new Date(appt.date).toLocaleString() : 'N/A',
           type: appt.type || 'N/A',
           reason: appt.reason || 'N/A',
           queueNumber: appt.queue?.queueNumber || 'N/A',
-        })));
+        }));
+        setAppointments(formattedAppointments);
         setError(null);
       } catch (err) {
         setError(err.response?.data?.error || err.message);
@@ -48,8 +51,10 @@ export default function DoctorSchedule({ doctors }) {
   ];
 
   return (
-    <Box sx={{ p: 2 }}>
-      <Typography variant="h5" gutterBottom>Doctor Schedule</Typography>
+    <Box sx={{ p: 2, maxWidth: 1000, mx: 'auto', bgcolor: '#f5f5f5', borderRadius: 2 }}>
+      <Typography variant="h5" gutterBottom sx={{ fontWeight: 700, color: '#1976d2' }}>
+        Doctor Schedule
+      </Typography>
       <SearchableSelect
         label="Doctor"
         options={doctors}
@@ -58,13 +63,19 @@ export default function DoctorSchedule({ doctors }) {
         getOptionLabel={(doctor) => `${doctor.user?.name || doctor.doctorId || 'Unknown'} (${doctor.specialty || 'N/A'})`}
         getOptionValue={(doctor) => doctor.id}
       />
-      {error && <Alert severity="error">{error}</Alert>}
+      {error && <Alert severity="error" sx={{ mb: 2 }}>{error}</Alert>}
       {selectedDoctorId && (
-        <Box sx={{ height: 400, width: '100%', mt: 2 }}>
+        <Box sx={{ height: 400, width: '100%', mt: 2, bgcolor: 'white', borderRadius: 2 }}>
           {loading ? (
             <CircularProgress />
           ) : (
-            <CustomDataGrid rows={appointments} columns={columns} />
+            <DataGrid
+              rows={appointments}
+              columns={columns}
+              pageSizeOptions={[5, 10, 20]}
+              disableRowSelectionOnClick
+              getRowId={(row) => row.id}
+            />
           )}
         </Box>
       )}
