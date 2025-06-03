@@ -1,13 +1,11 @@
 "use client";
 
-import React, { useState, useEffect, useRef } from 'react';
-import { Box, Typography, Alert, Button, CircularProgress } from '@mui/material';
+import React, { useState, useEffect } from 'react';
+import { Box, Typography, Alert, Button, Skeleton, TextField, Select, MenuItem } from '@mui/material';
 import { DataGrid } from '@mui/x-data-grid';
-import { ExpandMore } from '@mui/icons-material';
 import AppointmentFilter from './AppointmentFilter';
 import axios from 'axios';
 import api from '../api';
-import styles from './AppointmentList.module.css';
 
 export default function AppointmentList({ onEdit }) {
   const [appointments, setAppointments] = useState([]);
@@ -16,8 +14,7 @@ export default function AppointmentList({ onEdit }) {
   const [error, setError] = useState(null);
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState({ status: 'ALL', dateFrom: '', dateTo: '', doctorId: '', patientId: '', type: 'ALL' });
-  const [openDropdown, setOpenDropdown] = useState(null);
-  const dropdownRefs = useRef({});
+  const [editingCell, setEditingCell] = useState(null);
 
   useEffect(() => {
     async function fetchData() {
@@ -56,17 +53,6 @@ export default function AppointmentList({ onEdit }) {
     fetchData();
   }, []);
 
-  // Close dropdown when clicking outside
-  useEffect(() => {
-    function handleClickOutside(event) {
-      if (openDropdown && !dropdownRefs.current[openDropdown]?.contains(event.target)) {
-        setOpenDropdown(null);
-      }
-    }
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
-  }, [openDropdown]);
-
   const handleCancel = async (id) => {
     try {
       const token = localStorage.getItem('token');
@@ -77,7 +63,6 @@ export default function AppointmentList({ onEdit }) {
         appt.id === id ? { ...appt, status: 'CANCELLED' } : appt
       ));
       setError(null);
-      setOpenDropdown(null);
     } catch (err) {
       setError('Failed to cancel appointment: ' + (err.response?.data?.error || err.message));
     }
@@ -94,7 +79,6 @@ export default function AppointmentList({ onEdit }) {
         appt.id === id ? { ...appt, status: 'CHECKED_IN', checkInTime: checkInTime.toLocaleString('en-US', { dateStyle: 'medium', timeStyle: 'short' }) } : appt
       ));
       setError(null);
-      setOpenDropdown(null);
     } catch (err) {
       setError('Failed to check in appointment: ' + (err.response?.data?.error || err.message));
     }
@@ -111,19 +95,49 @@ export default function AppointmentList({ onEdit }) {
         appt.id === id ? { ...appt, status: 'CHECKED_OUT', checkOutTime: checkOutTime.toLocaleString('en-US', { dateStyle: 'medium', timeStyle: 'short' }) } : appt
       ));
       setError(null);
-      setOpenDropdown(null);
     } catch (err) {
-      setError('Failed to check out appointment: ' + (err.response?.data?.error || err.message));
+      setError('Failed to check out appointment: ' + (err.response?.data?.error || err.message Jon));
     }
   };
 
   const handleEdit = (row) => {
     onEdit(row);
-    setOpenDropdown(null);
   };
 
-  const toggleDropdown = (id) => {
-    setOpenDropdown(openDropdown === id ? null : id);
+  const handleCellEditCommit = async (params) => {
+    try {
+      const token = localStorage.getItem('token');
+      const { id, field, value } = params;
+      let updatePayload = { resource: 'appointment', [field]: value };
+
+      if (field === 'date') {
+        updatePayload[field] = new Date(value).toISOString();
+      } else if (field === 'patientId') {
+        updatePayload[field] = parseInt(value);
+      } else if (field === 'doctorId') {
+        updatePayload[field] = parseInt(value);
+      } else if (field === 'queueNumber') {
+        updatePayload[field] = parseInt(value) || 'N/A';
+      }
+
+      await axios.put(`${api.BASE_URL}${api.API_ROUTES.APPOINTMENT}/${id}`, updatePayload, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+
+      setAppointments(appointments.map(appt =>
+        appt.id === id ? {
+          ...appt,
+          [field]: field === 'date' ? new Date(value).toLocaleString('en-US', { dateStyle: 'medium', timeStyle: 'short' }) :
+                  field === 'patientId' ? { ...appt, patientId: parseInt(value), patientName: patients.find(p => p.id === parseInt(value))?.user?.name || 'N/A' } :
+                  field === 'doctorId' ? { ...appt, doctorId: parseInt(value), doctorName: doctors.find(d => d.id === parseInt(value))?.user?.name || 'N/A' } :
+                  value
+        } : appt
+      ));
+      setError(null);
+      setEditingCell(null);
+    } catch (err) {
+      setError('Failed to update appointment: ' + (err.response?.data?.error || err.message));
+    }
   };
 
   const filteredAppointments = appointments.filter(appt => {
@@ -139,106 +153,171 @@ export default function AppointmentList({ onEdit }) {
 
   const columns = [
     { field: 'id', headerName: 'ID', width: 80, align: 'center', headerAlign: 'center' },
-    { field: 'patientName', headerName: 'Patient', width: 180 },
-    { field: 'doctorName', headerName: 'Doctor', width: 180 },
-    { field: 'date', headerName: 'Date', width: 160 },
-    { field: 'type', headerName: 'Type', width: 100, align: 'center', headerAlign: 'center' },
-    { 
-      field: 'status', 
-      headerName: 'Status', 
-      width: 100, 
-      align: 'center', 
+    {
+      field: 'patientId',
+      headerName: 'Patient',
+      width: 180,
+      editable: true,
+      renderCell: (params) => params.row.patientName,
+      renderEditCell: (params) => (
+        <Select
+          value={params.value || ''}
+          onChange={(e) => params.api.setEditCellValue({ id: params.id, field: params.field, value: e.target.value })}
+          fullWidth
+        >
+          {patients.map(patient => (
+            <MenuItem key={patient.id} value={patient.id}>
+              {patient.user?.name || patient.patientId || 'N/A'}
+            </MenuItem>
+          ))}
+        </Select>
+      ),
+    },
+    {
+      field: 'doctorId',
+      headerName: 'Doctor',
+      width: 180,
+      editable: true,
+      renderCell: (params) => params.row.doctorName,
+      renderEditCell: (params) => (
+        <Select
+          value={params.value || ''}
+          onChange={(e) => params.api.setEditCellValue({ id: params.id, field: params.field, value: e.target.value })}
+          fullWidth
+        >
+          {doctors.map(doctor => (
+            <MenuItem key={doctor.id} value={doctor.id}>
+              {doctor.user?.name || doctor.doctorId || 'N/A'}
+            </MenuItem>
+          ))}
+        </Select>
+      ),
+    },
+    {
+      field: 'date',
+      headerName: 'Date',
+      width: 160,
+      editable: true,
+      renderEditCell: (params) => (
+        <TextField
+          type="datetime-local"
+          value={params.value ? new Date(params.value).toISOString().slice(0, 16) : ''}
+          onChange={(e) => params.api.setEditCellValue({ id: params.id, field: params.field, value: e.target.value })}
+          fullWidth
+        />
+      ),
+    },
+    {
+      field: 'type',
+      headerName: 'Type',
+      width: 100,
+      align: 'center',
+      headerAlign: 'center',
+      editable: true,
+      renderEditCell: (params) => (
+        <Select
+          value={params.value || ''}
+          onChange={(e) => params.api.setEditCellValue({ id: params.id, field: params.field, value: e.target.value })}
+          fullWidth
+        >
+          <MenuItem value="CONSULTATION">Consultation</MenuItem>
+          <MenuItem value="FOLLOW_UP">Follow Up</MenuItem>
+          <MenuItem value="PROCEDURE">Procedure</MenuItem>
+        </Select>
+      ),
+    },
+    {
+      field: 'status',
+      headerName: 'Status',
+      width: 100,
+      align: 'center',
       headerAlign: 'center',
       renderCell: (params) => (
-        <Box className={`${styles.status} ${styles[`status${params.value}`]}`}>
+        <Box className={`status ${params.value.toLowerCase()}`}>
           {params.value}
         </Box>
-      )
+      ),
     },
-    { field: 'reason', headerName: 'Reason', width: 140 },
-    { field: 'queueNumber', headerName: 'Queue', width: 80, align: 'center', headerAlign: 'center' },
+    {
+      field: 'reason',
+      headerName: 'Reason',
+      width: 140,
+      editable: true,
+    },
+    {
+      field: 'queueNumber',
+      headerName: 'Queue',
+      width: 80,
+      align: 'center',
+      headerAlign: 'center',
+      editable: true,
+    },
     {
       field: 'actions',
       headerName: 'Actions',
-      width: 120,
+      width: 300,
       renderCell: (params) => (
-        <Box className={styles.actionContainer}>
-          <div 
-            className={styles.actionDropdown}
-            ref={(el) => dropdownRefs.current[params.row.id] = el}
+        <Box className="actionContainer">
+          <Button
+            onClick={() => handleEdit(params.row)}
+            disabled={params.row.status === 'CANCELLED' || params.row.status === 'CHECKED_OUT'}
+            className="actionButton editButton"
           >
-            <Button
-              variant="outlined"
-              size="small"
-              onClick={() => toggleDropdown(params.row.id)}
-              className={`${styles.actionButton} ${openDropdown === params.row.id ? styles.dropdownOpen : ''}`}
-              endIcon={<ExpandMore className={styles.dropdownIcon} />}
-            >
-              Actions
-            </Button>
-            {openDropdown === params.row.id && (
-              <div className={styles.dropdownMenu}>
-                <Button
-                  onClick={() => handleEdit(params.row)}
-                  disabled={params.row.status === 'CANCELLED' || params.row.status === 'CHECKED_OUT'}
-                  className={`${styles.dropdownItem} ${styles.editItem}`}
-                >
-                  Edit
-                </Button>
-                <Button
-                  onClick={() => handleCancel(params.row.id)}
-                  disabled={params.row.status === 'CANCELLED' || params.row.status === 'CHECKED_OUT'}
-                  className={`${styles.dropdownItem} ${styles.cancelItem}`}
-                >
-                  Cancel
-                </Button>
-                <Button
-                  onClick={() => handleCheckIn(params.row.id)}
-                  disabled={params.row.status !== 'SCHEDULED'}
-                  className={`${styles.dropdownItem} ${styles.checkInItem}`}
-                >
-                  Check In
-                </Button>
-                <Button
-                  onClick={() => handleCheckOut(params.row.id)}
-                  disabled={params.row.status !== 'CHECKED_IN'}
-                  className={`${styles.dropdownItem} ${styles.checkOutItem}`}
-                >
-                  Check Out
-                </Button>
-              </div>
-            )}
-          </div>
+            Edit
+          </Button>
+          <Button
+            onClick={() => handleCancel(params.row.id)}
+            disabled={params.row.status === 'CANCELLED' || params.row.status === 'CHECKED_OUT'}
+            className="actionButton cancelButton"
+          >
+            Cancel
+          </Button>
+          <Button
+            onClick={() => handleCheckIn(params.row.id)}
+            disabled={params.row.status !== 'SCHEDULED'}
+            className="actionButton checkInButton"
+          >
+            Check In
+          </Button>
+          <Button
+            onClick={() => handleCheckOut(params.row.id)}
+            disabled={params.row.status !== 'CHECKED_IN'}
+            className="actionButton checkOutButton"
+          >
+            Check Out
+          </Button>
         </Box>
       ),
     },
   ];
 
   return (
-    <Box className={styles.container}>
-      <Box className={styles.header}>
-        <Typography variant="h6" className={styles.title}>
+    <Box className="container">
+      <Box className="header">
+        <Typography variant="h6" className="title">
           Appointments
         </Typography>
         <AppointmentFilter onFilter={setFilter} patients={patients} doctors={doctors} />
       </Box>
       {error && (
-        <Alert severity="error" className={styles.alert}>
+        <Alert severity="error" className="alert">
           {error}
         </Alert>
       )}
       {loading ? (
-        <Box className={styles.loading}>
-          <CircularProgress size={32} />
+        <Box className="loading">
+          <Skeleton variant="rectangular" width="100%" height={400} />
+          <Skeleton variant="text" width="60%" />
+          <Skeleton variant="text" width="80%" />
         </Box>
       ) : (
         <>
           {filteredAppointments.length === 0 && !error && (
-            <Alert severity="info" className={styles.alert}>
+            <Alert severity="info" className="alert">
               No appointments found
             </Alert>
           )}
-          <Box className={styles.tableWrapper}>
+          <Box className="tableWrapper">
             <DataGrid
               rows={filteredAppointments}
               columns={columns}
@@ -247,8 +326,11 @@ export default function AppointmentList({ onEdit }) {
               initialState={{
                 pagination: { paginationModel: { pageSize: 10 } },
               }}
-              className={styles.dataGrid}
+              className="dataGrid"
               autoHeight
+              onCellEditStart={(params) => setEditingCell({ id: params.id, field: params.field })}
+              onCellEditStop={() => setEditingCell(null)}
+              onCellEditCommit={handleCellEditCommit}
             />
           </Box>
         </>
