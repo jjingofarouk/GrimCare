@@ -18,7 +18,31 @@ export default function DoctorAvailability({ doctors }) {
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    async function fetchAvailability() {
+    async function fetchAllAvailability() {
+      setLoading(true);
+      try {
+        const token = localStorage.getItem('token');
+        const response = await axios.get(`${api.BASE_URL}${api.API_ROUTES.APPOINTMENT}?resource=availability`, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        const formattedAvailability = response.data.map((item, index) => ({
+          ...item,
+          id: item.id || index + 1,
+        }));
+        setAvailability(formattedAvailability);
+        applyFilters(formattedAvailability, filter);
+        setError(null);
+      } catch (err) {
+        setError(err.response?.data?.error || err.message);
+      } finally {
+        setLoading(false);
+      }
+    }
+    fetchAllAvailability();
+  }, []);
+
+  useEffect(() => {
+    async function fetchDoctorAvailability() {
       if (!selectedDoctorId) return;
       setLoading(true);
       try {
@@ -39,7 +63,7 @@ export default function DoctorAvailability({ doctors }) {
         setLoading(false);
       }
     }
-    fetchAvailability();
+    fetchDoctorAvailability();
   }, [selectedDoctorId]);
 
   const applyFilters = (data, currentFilter) => {
@@ -75,9 +99,12 @@ export default function DoctorAvailability({ doctors }) {
         { headers: { Authorization: `Bearer ${token}` } }
       );
       setFormData({ startTime: '', endTime: '', status: 'AVAILABLE' });
-      const response = await axios.get(`${api.BASE_URL}${api.API_ROUTES.APPOINTMENT}?resource=availability&doctorId=${selectedDoctorId}`, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
+      const response = await axios.get(
+        selectedDoctorId 
+          ? `${api.BASE_URL}${api.API_ROUTES.APPOINTMENT}?resource=availability&doctorId=${selectedDoctorId}`
+          : `${api.BASE_URL}${api.API_ROUTES.APPOINTMENT}?resource=availability`,
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
       const formattedAvailability = response.data.map((item, index) => ({
         ...item,
         id: item.id || index + 1,
@@ -95,6 +122,15 @@ export default function DoctorAvailability({ doctors }) {
   };
 
   const columns = [
+    {
+      field: 'doctorId',
+      headerName: 'Doctor',
+      width: 200,
+      renderCell: (params) => {
+        const doctor = doctors.find(d => d.id === params.row.doctorId);
+        return doctor ? `${doctor.user?.name || doctor.doctorId || 'Unknown'} (${doctor.specialty || 'N/A'})` : 'N/A';
+      },
+    },
     {
       field: 'startTime',
       headerName: 'Start Time',
@@ -116,89 +152,85 @@ export default function DoctorAvailability({ doctors }) {
         Doctor Availability
       </Typography>
       <SearchableSelect
-        label="Doctor"
+        label="Doctor (Optional)"
         options={doctors}
         value={selectedDoctorId}
         onChange={setSelectedDoctorId}
         getOptionLabel={(doctor) => `${doctor.user?.name || doctor.doctorId || 'Unknown'} (${doctor.specialty || 'N/A'})`}
         getOptionValue={(doctor) => doctor.id}
       />
-      {selectedDoctorId && (
-        <>
-          <Box component="form" onSubmit={handleSubmit} className={styles.form}>
-            <TextField
-              label="Start Time"
-              type="datetime-local"
-              name="startTime"
-              value={formData.startTime}
-              onChange={(e) => setFormData({ ...formData, [e.target.name]: e.target.value })}
-              InputLabelProps={{ shrink: true }}
-              required
-              className={styles.input}
-            />
-            <TextField
-              label="End Time"
-              type="datetime-local"
-              name="endTime"
-              value={formData.endTime}
-              onChange={(e) => setFormData({ ...formData, [e.target.name]: e.target.value })}
-              InputLabelProps={{ shrink: true }}
-              required
-              className={styles.input}
-            />
-            <FormControl className={styles.input}>
-              <InputLabel>Status</InputLabel>
-              <Select
-                name="status"
-                value={formData.status}
-                onChange={(e) => setFormData({ ...formData, [e.target.name]: e.target.value })}
-              >
-                <MenuItem value="AVAILABLE">Available</MenuItem>
-                <MenuItem value="UNAVAILABLE">Unavailable</MenuItem>
-              </Select>
-            </FormControl>
-            <Button type="submit" variant="contained" className={styles.button}>
-              Add Availability
-            </Button>
-          </Box>
-          <Box className={styles.filterContainer}>
-            <TextField
-              label="Filter by Date"
-              type="date"
-              name="date"
-              value={filter.date}
-              onChange={handleFilterChange}
-              InputLabelProps={{ shrink: true }}
-              className={styles.filterInput}
-            />
-            <FormControl className={styles.filterInput}>
-              <InputLabel>Filter by Status</InputLabel>
-              <Select
-                name="status"
-                value={filter.status}
-                onChange={handleFilterChange}
-              >
-                <MenuItem value="">All</MenuItem>
-                <MenuItem value="AVAILABLE">Available</MenuItem>
-                <MenuItem value="UNAVAILABLE">Unavailable</MenuItem>
-              </Select>
-            </FormControl>
-          </Box>
-          {error && <Alert severity="error" className={styles.alert}>{error}</Alert>}
-          {loading ? (
-            <CircularProgress className={styles.loader} />
-          ) : (
-            <Box className={styles.gridContainer}>
-              <DataGrid
-                rows={filteredAvailability}
-                columns={columns}
-                pageSizeOptions={[5, 10, 20]}
-                disableRowSelectionOnClick
-                getRowId={(row) => row.id}
-              />
-            </Box>
-          )}
-        </>
+      <Box component="form" onSubmit={handleSubmit} className={styles.form}>
+        <TextField
+          label="Start Time"
+          type="datetime-local"
+          name="startTime"
+          value={formData.startTime}
+          onChange={(e) => setFormData({ ...formData, [e.target.name]: e.target.value })}
+          InputLabelProps={{ shrink: true }}
+          required
+          className={styles.input}
+        />
+        <TextField
+          label="End Time"
+          type="datetime-local"
+          name="endTime"
+          value={formData.endTime}
+          onChange={(e) => setFormData({ ...formData, [e.target.name]: e.target.value })}
+          InputLabelProps={{ shrink: true }}
+          required
+          className={styles.input}
+        />
+        <FormControl className={styles.input}>
+          <InputLabel>Status</InputLabel>
+          <Select
+            name="status"
+            value={formData.status}
+            onChange={(e) => setFormData({ ...formData, [e.target.name]: e.target.value })}
+          >
+            <MenuItem value="AVAILABLE">Available</MenuItem>
+            <MenuItem value="UNAVAILABLE">Unavailable</MenuItem>
+          </Select>
+        </FormControl>
+        <Button type="submit" variant="contained" className={styles.button}>
+          Add Availability
+        </Button>
+      </Box>
+      <Box className={styles.filterContainer}>
+        <TextField
+          label="Filter by Date"
+          type="date"
+          name="date"
+          value={filter.date}
+          onChange={handleFilterChange}
+          InputLabelProps={{ shrink: true }}
+          className={styles.filterInput}
+        />
+        <FormControl className={styles.filterInput}>
+          <InputLabel>Filter by Status</InputLabel>
+          <Select
+            name="status"
+            value={filter.status}
+            onChange={handleFilterChange}
+          >
+            <MenuItem value="">All</MenuItem>
+            <MenuItem value="AVAILABLE">Available</MenuItem>
+            <MenuItem value="UNAVAILABLE">Unavailable</MenuItem>
+          </Select>
+        </FormControl>
+      </Box>
+      {error && <Alert severity="error" className={styles.alert}>{error}</Alert>}
+      {loading ? (
+        <CircularProgress className={styles.loader} />
+      ) : (
+        <Box className={styles.gridContainer}>
+          <DataGrid
+            rows={filteredAvailability}
+            columns={columns}
+            pageSizeOptions={[5, 10, 20]}
+            disableRowSelectionOnClick
+            getRowId={(row) => row.id}
+          />
+        </Box>
       )}
     </Box>
   );
