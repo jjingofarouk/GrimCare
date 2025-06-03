@@ -2,6 +2,97 @@ import { PrismaClient } from '@prisma/client';
 
 const prisma = new PrismaClient();
 
+export async function getAppointments({ status, type, dateFrom, dateTo, doctorId, patientId } = {}) {
+  return prisma.appointment.findMany({
+    where: {
+      ...(status && status !== 'ALL' ? { status } : {}),
+      ...(type && type !== 'ALL' ? { type } : {}),
+      ...(dateFrom ? { date: { gte: new Date(dateFrom) } } : {}),
+      ...(dateTo ? { date: { lte: new Date(dateTo) } } : {}),
+      ...(doctorId ? { doctorId: parseInt(doctorId) } : {}),
+      ...(patientId ? { patientId: parseInt(patientId) } : {}),
+    },
+    include: {
+      patient: { include: { user: true } },
+      doctor: { include: { user: true } },
+      department: true,
+      queue: true,
+    },
+  });
+}
+
+export async function getAppointment(id) {
+  return prisma.appointment.findUnique({
+    where: { id: parseInt(id) },
+    include: {
+      patient: { include: { user: true } },
+      doctor: { include: { user: true } },
+      department: true,
+      queue: true,
+    },
+  });
+}
+
+export async function createAppointment(data) {
+  const { patientId, doctorId, departmentId, date, type, reason, notes, bookedById } = data;
+  const queueNumber = await prisma.queue.count({ where: { appointment: { doctorId, date: { gte: new Date(date.getFullYear(), date.getMonth(), date.getDate()), lte: new Date(date.getFullYear(), date.getMonth(), date.getDate(), 23, 59, 59) } } }) + 1;
+
+  return prisma.$transaction(async (tx) => {
+    const appointment = await tx.appointment.create({
+      data: {
+        patientId: parseInt(patientId),
+        doctorId: parseInt(doctorId),
+        departmentId: departmentId ? parseInt(departmentId) : null,
+        date: new Date(date),
+        type: type || 'REGULAR',
+        reason,
+        notes,
+        bookedById: bookedById ? parseInt(bookedById) : null,
+        status: 'SCHEDULED',
+      },
+      include: {
+        patient: { include: { user: true } },
+        doctor: { include: { user: true } },
+        department: true,
+      },
+    });
+
+    await tx.queue.create({
+      data: {
+        appointmentId: appointment.id,
+        queueNumber,
+        status: 'WAITING',
+      },
+    });
+
+    return appointment;
+  });
+}
+
+export async function updateAppointment(id, data) {
+  return prisma.appointment.update({
+    where: { id: parseInt(id) },
+    data: {
+      patientId: data.patientId ? parseInt(data.patientId) : undefined,
+      doctorId: data.doctorId ? parseInt(data.doctorId) : undefined,
+      departmentId: data.departmentId ? parseInt(data.departmentId) : null,
+      date: data.date ? new Date(data.date) : undefined,
+      type: data.type,
+      reason: data.reason,
+      notes: data.notes,
+      status: data.status,
+      checkInTime: data.checkInTime ? new Date(data.checkInTime) : undefined,
+      checkOutTime: data.checkOutTime ? new Date(data.checkOutTime) : undefined,
+    },
+    include: {
+      patient: { include: { user: true } },
+      doctor: { include: { user: true } },
+      department: true,
+      queue: true,
+    },
+  });
+}
+
 export async function getPatients() {
   return prisma.patient.findMany({
     include: { user: true },
@@ -10,7 +101,7 @@ export async function getPatients() {
 
 export async function getDoctors() {
   return prisma.doctor.findMany({
-    include: { user: true, department: true },
+    include: { user: true },
   });
 }
 
@@ -27,88 +118,10 @@ export async function createDepartment(data) {
   });
 }
 
-export async function getAppointments(filters = {}) {
-  const { status, type, dateFrom, dateTo, doctorId, patientId } = filters;
-  return prisma.appointment.findMany({
-    where: {
-      status: status && status !== 'ALL' ? status : undefined,
-      type: type && type !== 'ALL' ? type : undefined,
-      date: {
-        gte: dateFrom ? new Date(dateFrom) : undefined,
-        lte: dateTo ? new Date(dateTo) : undefined,
-      },
-      doctorId: doctorId ? parseInt(doctorId) : undefined,
-      patientId: patientId ? parseInt(patientId) : undefined,
-    },
-    include: {
-      patient: { include: { user: true } },
-      doctor: { include: { user: true } },
-      department: true,
-      bookedBy: true,
-    },
-  });
-}
-
-export async function createAppointment(data) {
-  const lastAppointment = await prisma.appointment.findFirst({
-    where: { doctorId: data.doctorId, date: { gte: new Date(data.date).setHours(0, 0, 0, 0) } },
-    orderBy: { queueNumber: 'desc' },
-  });
-  const queueNumber = lastAppointment ? (lastAppointment.queueNumber || 0) + 1 : 1;
-
-  return prisma.appointment.create({
-    data: {
-      patientId: data.patientId,
-      doctorId: data.doctorId,
-      departmentId: data.departmentId,
-      bookedById: data.bookedById,
-      date: new Date(data.date),
-      type: data.type,
-      reason: data.reason,
-      notes: data.notes,
-      queueNumber,
-      queueStatus: 'WAITING',
-    },
-    include: {
-      patient: { include: { user: true } },
-      doctor: { include: { user: true } },
-      department: true,
-    },
-  });
-}
-
-export async function updateAppointment(id, data) {
-  return prisma.appointment.update({
-    where: { id: parseInt(id) },
-    data: {
-      patientId: data.patientId,
-      doctorId: data.doctorId,
-      departmentId: data.departmentId,
-      date: data.date ? new Date(data.date) : undefined,
-      type: data.type,
-      reason: data.reason,
-      notes: data.notes,
-      status: data.status,
-      checkInTime: data.checkInTime ? new Date(data.checkInTime) : undefined,
-      checkOutTime: data.checkOutTime ? new Date(data.checkOutTime) : undefined,
-      queueStatus: data.queueStatus,
-    },
-    include: {
-      patient: { include: { user: true } },
-      doctor: { include: { user: true } },
-      department: true,
-    },
-  });
-}
-
-export async function getAvailability({ doctorId, startDate, endDate }) {
+export async function getAvailability({ doctorId }) {
   return prisma.doctorAvailability.findMany({
-    where: {
-      doctorId: parseInt(doctorId),
-      status: 'AVAILABLE',
-      startTime: startDate ? { gte: new Date(startDate) } : undefined,
-      endTime: endDate ? { lte: new Date(endDate) } : undefined,
-    },
+    where: { doctorId: parseInt(doctorId) },
+    orderBy: { startTime: 'asc' },
   });
 }
 
@@ -118,37 +131,39 @@ export async function createAvailability(data) {
       doctorId: parseInt(data.doctorId),
       startTime: new Date(data.startTime),
       endTime: new Date(data.endTime),
-      status: data.status,
-      dayOfWeek: data.dayOfWeek,
+      status: data.status || 'AVAILABLE',
     },
   });
 }
 
 export async function getQueue({ doctorId }) {
-  return prisma.appointment.findMany({
+  return prisma.queue.findMany({
     where: {
-      doctorId: parseInt(doctorId),
-      date: {
-        gte: new Date().setHours(0, 0, 0, 0),
-        lte: new Date().setHours(23, 59, 59, 999),
-      },
-      queueStatus: { in: ['WAITING', 'IN_PROGRESS'] },
+      appointment: { doctorId: parseInt(doctorId) },
+      status: { in: ['WAITING', 'IN_PROGRESS'] },
     },
     include: {
-      patient: { include: { user: true } },
-      doctor: { include: { user: true } },
+      appointment: {
+        include: {
+          patient: { include: { user: true } },
+          doctor: { include: { user: true } },
+        },
+      },
     },
-    orderBy: { queueNumber: 'asc' },
   });
 }
 
 export async function updateQueue(id, data) {
-  return prisma.appointment.update({
+  return prisma.queue.update({
     where: { id: parseInt(id) },
-    data: { queueStatus: data.status },
+    data: { status: data.status },
     include: {
-      patient: { include: { user: true } },
-      doctor: { include: { user: true } },
+      appointment: {
+        include: {
+          patient: { include: { user: true } },
+          doctor: { include: { user: true } },
+        },
+      },
     },
   });
 }
