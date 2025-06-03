@@ -1,11 +1,11 @@
-import React, { useState, useEffect } from 'react';
-import { Box, Typography, Alert, Button } from '@mui/material';
+import React, { useState } from 'react';
+import { Box, Typography, Alert, Button, CircularProgress } from '@mui/material';
 import CustomDataGrid from '../components/CustomDataGrid';
 import { useApiData } from '../utils/api';
 import { getQueue, updateQueue } from './appointmentService';
 import styles from './Queue.module.css';
 
-export default function QueueManagement({ doctors, doctorId }) {
+export default function QueueManagement({ doctorId }) {
   const { data: queues, error: queueError, loading: queueLoading } = useApiData(
     () => getQueue({ doctorId })
   );
@@ -14,7 +14,6 @@ export default function QueueManagement({ doctors, doctorId }) {
   const handleStatusChange = async (id, status) => {
     try {
       await updateQueue(id, { status });
-      // Refresh handled by parent or API hook
     } catch (err) {
       setError('Failed to update queue status: ' + err.message);
     }
