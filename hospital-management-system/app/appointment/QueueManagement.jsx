@@ -1,30 +1,26 @@
+
 "use client";
 
 import React, { useState, useEffect } from 'react';
-import { Box, Typography, Alert, Button, CircularProgress, TextField } from '@mui/material';
+import { Box, Typography, Alert, Button, CircularProgress } from '@mui/material';
 import { DataGrid } from '@mui/x-data-grid';
 import SearchableSelect from '../components/SearchableSelect';
 import axios from 'axios';
 import api from '../api';
-import styles from './Queue.module.css';
 
 export default function QueueManagement({ doctors }) {
   const [selectedDoctorId, setSelectedDoctorId] = useState('');
   const [queueItems, setQueueItems] = useState([]);
-  const [filteredQueueItems, setFilteredQueueItems] = useState([]);
   const [error, setError] = useState(null);
-  const [loading, setLoading] = useState(true);
-  const [filters, setFilters] = useState({ patientName: '', status: '', queueNumber: '' });
+  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    async function fetchQueue(doctorId = '') {
+    async function fetchQueue() {
+      if (!selectedDoctorId) return;
       setLoading(true);
       try {
         const token = localStorage.getItem('token');
-        const url = doctorId
-          ? `${api.BASE_URL}${api.API_ROUTES.APPOINTMENT}?resource=queue&doctorId=${doctorId}`
-          : `${api.BASE_URL}${api.API_ROUTES.APPOINTMENT}?resource=queue`;
-        const response = await axios.get(url, {
+        const response = await axios.get(`${api.BASE_URL}${api.API_ROUTES.APPOINTMENT}?resource=queue&doctorId=${selectedDoctorId}`, {
           headers: { Authorization: `Bearer ${token}` },
         });
         const formattedQueueItems = response.data.map((item, index) => ({
@@ -36,7 +32,6 @@ export default function QueueManagement({ doctors }) {
           appointmentDate: item.appointment?.date ? new Date(item.appointment.date).toLocaleString() : 'N/A',
         }));
         setQueueItems(formattedQueueItems);
-        setFilteredQueueItems(formattedQueueItems);
         setError(null);
       } catch (err) {
         setError(err.response?.data?.error || err.message);
@@ -44,25 +39,8 @@ export default function QueueManagement({ doctors }) {
         setLoading(false);
       }
     }
-    fetchQueue(selectedDoctorId);
+    fetchQueue();
   }, [selectedDoctorId]);
-
-  useEffect(() => {
-    const applyFilters = () => {
-      let filtered = [...queueItems];
-      if (filters.patientName) {
-        filtered = filtered.filter(item => item.patientName.toLowerCase().includes(filters.patientName.toLowerCase()));
-      }
-      if (filters.status) {
-        filtered = filtered.filter(item => item.status.toLowerCase().includes(filters.status.toLowerCase()));
-      }
-      if (filters.queueNumber) {
-        filtered = filtered.filter(item => item.queueNumber.toString().includes(filters.queueNumber));
-      }
-      setFilteredQueueItems(filtered);
-    };
-    applyFilters();
-  }, [filters, queueItems]);
 
   const handleStatusUpdate = async (id, newStatus) => {
     try {
@@ -80,10 +58,6 @@ export default function QueueManagement({ doctors }) {
     } catch (err) {
       setError('Failed to update queue status: ' + (err.response?.data?.error || err.message));
     }
-  };
-
-  const handleFilterChange = (e) => {
-    setFilters({ ...filters, [e.target.name]: e.target.value });
   };
 
   const columns = [
@@ -121,57 +95,34 @@ export default function QueueManagement({ doctors }) {
   ];
 
   return (
-    <Box className={styles.container}>
-      <Typography variant="h5" className={styles.title}>
+    <Box sx={{ p: 2, maxWidth: 1000, mx: 'auto', bgcolor: '#f5f5f5', borderRadius: 2 }}>
+      <Typography variant="h5" gutterBottom sx={{ fontWeight: 700, color: '#1976d2' }}>
         Queue Management
       </Typography>
-      <Box className={styles.filterContainer}>
-        <SearchableSelect
-          label="Filter by Doctor"
-          options={doctors}
-          value={selectedDoctorId}
-          onChange={setSelectedDoctorId}
-          getOptionLabel={(doctor) => `${doctor.user?.name || doctor.doctorId || 'Unknown'} (${doctor.specialty || 'N/A'})`}
-          getOptionValue={(doctor) => doctor.id}
-          className={styles.searchSelect}
-        />
-        <TextField
-          label="Filter by Patient"
-          name="patientName"
-          value={filters.patientName}
-          onChange={handleFilterChange}
-          className={styles.filterInput}
-        />
-        <TextField
-          label="Filter by Status"
-          name="status"
-          value={filters.status}
-          onChange={handleFilterChange}
-          className={styles.filterInput}
-        />
-        <TextField
-          label="Filter by Queue Number"
-          name="queueNumber"
-          value={filters.queueNumber}
-          onChange={handleFilterChange}
-          className={styles.filterInput}
-        />
-      </Box>
-      {error && <Alert severity="error" className={styles.alert}>{error}</Alert>}
-      <Box className={styles.dataGridContainer}>
-        {loading ? (
-          <CircularProgress className={styles.loader} />
-        ) : (
-          <DataGrid
-            rows={filteredQueueItems}
-            columns={columns}
-            pageSizeOptions={[5, 10, 20]}
-            disableRowSelectionOnClick
-            getRowId={(row) => row.id}
-            className={styles.dataGrid}
-          />
-        )}
-      </Box>
+      <SearchableSelect
+        label="Doctor"
+        options={doctors}
+        value={selectedDoctorId}
+        onChange={setSelectedDoctorId}
+        getOptionLabel={(doctor) => `${doctor.user?.name || doctor.doctorId || 'Unknown'} (${doctor.specialty || 'N/A'})`}
+        getOptionValue={(doctor) => doctor.id}
+      />
+      {error && <Alert severity="error" sx={{ mb: 2 }}>{error}</Alert>}
+      {selectedDoctorId && (
+        <Box sx={{ height: 400, width: '100%', mt: 2, bgcolor: 'white', borderRadius: 2 }}>
+          {loading ? (
+            <CircularProgress />
+          ) : (
+            <DataGrid
+              rows={queueItems}
+              columns={columns}
+              pageSizeOptions={[5, 10, 20]}
+              disableRowSelectionOnClick
+              getRowId={(row) => row.id}
+            />
+          )}
+        </Box>
+      )}
     </Box>
   );
 }
