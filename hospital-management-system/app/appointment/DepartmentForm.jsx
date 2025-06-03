@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from 'react';
-import { Box, Typography, CircularProgress, Alert, TextField, Button } from '@mui/material';
+import { Box, Typography, Alert, TextField, Button, Skeleton } from '@mui/material';
 import { DataGrid } from '@mui/x-data-grid';
 import axios from 'axios';
 import api from '../api';
@@ -11,6 +11,7 @@ export default function DepartmentForm() {
   const [departments, setDepartments] = useState([]);
   const [error, setError] = useState(null);
   const [loading, setLoading] = useState(false);
+  const [editingCell, setEditingCell] = useState(null);
 
   useEffect(() => {
     async function fetchDepartments() {
@@ -74,9 +75,76 @@ export default function DepartmentForm() {
     }
   };
 
+  const handleCellEditCommit = async (params) => {
+    try {
+      const token = localStorage.getItem('token');
+      const { id, field, value } = params;
+      const updatePayload = { [field]: value };
+
+      await axios.put(`${api.BASE_URL}${api.API_ROUTES.DEPARTMENT}/${id}`, updatePayload, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+
+      setDepartments(departments.map(dept =>
+        dept.id === id ? { ...dept, [field]: value } : dept
+      ));
+      setError(null);
+      setEditingCell(null);
+    } catch (err) {
+      setError('Failed to update department: ' + (err.response?.data?.error || err.message));
+    }
+  };
+
+  const handleDelete = async (id) => {
+    try {
+      const token = localStorage.getItem('token');
+      await axios.delete(`${api.BASE_URL}${api.API_ROUTES.DEPARTMENT}/${id}`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      setDepartments(departments.filter(dept => dept.id !== id));
+      setError(null);
+    } catch (err) {
+      setError('Failed to delete department: ' + (err.response?.data?.error || err.message));
+    }
+  };
+
   const columns = [
-    { field: 'name', headerName: 'Department Name', width: 200 },
-    { field: 'description', headerName: 'Description', width: 300 },
+    {
+      field: 'name',
+      headerName: 'Department Name',
+      width: 200,
+      editable: true,
+    },
+    {
+      field: 'description',
+      headerName: 'Description',
+      width: 300,
+      editable: true,
+      renderEditCell: (params) => (
+        <TextField
+          value={params.value || ''}
+          onChange={(e) => params.api.setEditCellValue({ id: params.id, field: params.field, value: e.target.value })}
+          multiline
+          rows={3}
+          fullWidth
+        />
+      ),
+    },
+    {
+      field: 'actions',
+      headerName: 'Actions',
+      width: 150,
+      renderCell: (params) => (
+        <Button
+          onClick={() => handleDelete(params.row.id)}
+          variant="outlined"
+          color="error"
+          size="small"
+        >
+          Delete
+        </Button>
+      ),
+    },
   ];
 
   return (
@@ -105,7 +173,11 @@ export default function DepartmentForm() {
         </Button>
       </Box>
       {loading ? (
-        <CircularProgress />
+        <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+          <Skeleton variant="rectangular" width="100%" height={400} />
+          <Skeleton variant="text" width="60%" />
+          <Skeleton variant="text" width="80%" />
+        </Box>
       ) : (
         <Box sx={{ height: 400, width: '100%' }}>
           <DataGrid
@@ -113,6 +185,9 @@ export default function DepartmentForm() {
             columns={columns}
             pageSizeOptions={[5, 10, 20]}
             disableRowSelectionOnClick
+            onCellEditStart={(params) => setEditingCell({ id: params.id, field: params.field })}
+            onCellEditStop={() => setEditingCell(null)}
+            onCellEditCommit={handleCellEditCommit}
           />
         </Box>
       )}
