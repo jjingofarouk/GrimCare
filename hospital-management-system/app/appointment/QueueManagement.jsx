@@ -16,27 +16,38 @@ export default function QueueManagement({ doctors }) {
   const [error, setError] = useState(null);
   const [loading, setLoading] = useState(true);
 
+  // Fetch all queue data on component mount
   useEffect(() => {
-    async function fetchQueue(doctorId = '') {
+    async function fetchAllQueues() {
       setLoading(true);
       try {
         const token = localStorage.getItem('token');
-        const url = doctorId
-          ? `${api.BASE_URL}${api.API_ROUTES.APPOINTMENT}?resource=queue&doctorId=${doctorId}`
-          : `${api.BASE_URL}${api.API_ROUTES.APPOINTMENT}?resource=queue`;
-        const response = await axios.get(url, {
-          headers: { Authorization: `Bearer ${token}` },
-        });
-        const formattedQueueItems = response.data.map((item, index) => ({
-          id: item.id || `queue-${index + 1}`,
-          patientName: item.appointment?.patient?.user?.name || item.appointment?.patient?.patientId || 'N/A',
-          doctorName: item.appointment?.doctor?.user?.name || item.appointment?.doctor?.doctorId || 'N/A',
-          queueNumber: item.queueNumber || 'N/A',
-          status: item.status || 'WAITING',
-          appointmentDate: item.appointment?.date ? new Date(item.appointment.date).toLocaleString() : 'N/A',
-        }));
-        setQueueItems(formattedQueueItems);
-        applyFilters(formattedQueueItems, filter);
+        // Fetch queue data for all doctors by making individual requests
+        const allQueueItems = [];
+
+        for (const doctor of doctors) {
+          try {
+            const response = await axios.get(`${api.BASE_URL}${api.API_ROUTES.APPOINTMENT}?resource=queue&doctorId=${doctor.id}`, {
+              headers: { Authorization: `Bearer ${token}` },
+            });
+            const doctorQueueItems = response.data.map((item, index) => ({
+              id: item.id || `${doctor.id}-queue-${index + 1}`,
+              patientName: item.appointment?.patient?.user?.name || item.appointment?.patient?.patientId || 'N/A',
+              doctorName: doctor.user?.name || doctor.doctorId || 'Unknown Doctor',
+              doctorId: doctor.id,
+              queueNumber: item.queueNumber || 'N/A',
+              status: item.status || 'WAITING',
+              appointmentDate: item.appointment?.date ? new Date(item.appointment.date).toLocaleString() : 'N/A',
+            }));
+            allQueueItems.push(...doctorQueueItems);
+          } catch (doctorErr) {
+            // Skip doctors with no queue items or errors
+            console.warn(`Failed to fetch queue for doctor ${doctor.id}:`, doctorErr.message);
+          }
+        }
+
+        setQueueItems(allQueueItems);
+        applyFilters(allQueueItems, filter, selectedDoctorId);
         setError(null);
       } catch (err) {
         setError(err.response?.data?.error || err.message);
@@ -44,14 +55,27 @@ export default function QueueManagement({ doctors }) {
         setLoading(false);
       }
     }
-    fetchQueue(selectedDoctorId);
-  }, [selectedDoctorId]);
 
-  const applyFilters = (data, currentFilter) => {
+    if (doctors && doctors.length > 0) {
+      fetchAllQueues();
+    }
+  }, [doctors]);
+
+  // Apply filters when doctor selection or other filters change
+  const applyFilters = (data, currentFilter, doctorId) => {
     let filtered = [...data];
+
+    // Filter by selected doctor
+    if (doctorId) {
+      filtered = filtered.filter(item => item.doctorId === parseInt(doctorId));
+    }
+
+    // Filter by status
     if (currentFilter.status) {
       filtered = filtered.filter(item => item.status === currentFilter.status);
     }
+
+    // Filter by date
     if (currentFilter.date) {
       const filterDate = new Date(currentFilter.date).toDateString();
       filtered = filtered.filter(item => {
@@ -59,12 +83,13 @@ export default function QueueManagement({ doctors }) {
         return itemDate === filterDate;
       });
     }
+
     setFilteredQueueItems(filtered);
   };
 
   useEffect(() => {
-    applyFilters(queueItems, filter);
-  }, [filter, queueItems]);
+    applyFilters(queueItems, filter, selectedDoctorId);
+  }, [filter, queueItems, selectedDoctorId]);
 
   const handleStatusUpdate = async (id, newStatus) => {
     try {
@@ -79,15 +104,11 @@ export default function QueueManagement({ doctors }) {
         item.id === id ? { ...item, status: newStatus } : item
       );
       setQueueItems(updatedQueueItems);
-      applyFilters(updatedQueueItems, filter);
+      applyFilters(updatedQueueItems, filter, selectedDoctorId);
       setError(null);
     } catch (err) {
       setError('Failed to update queue status: ' + (err.response?.data?.error || err.message));
     }
-  };
-
-  const handleFilterChange = (e) => {
-    setFilter({ ...filter, [e.target.name]: e.target.value });
   };
 
   const columns = [
@@ -123,62 +144,3 @@ export default function QueueManagement({ doctors }) {
           </Button>
         </Box>
       ),
-    },
-  ];
-
-  return (
-    <Box className={styles.container}>
-      <Typography variant="h5" gutterBottom className={styles.title}>
-        Queue Management
-      </Typography>
-      <Box className={styles.filterContainer}>
-        <SearchableSelect
-          label="Filter by Doctor"
-          options={doctors}
-          value={selectedDoctorId}
-          onChange={setSelectedDoctorId}
-          getOptionLabel={(doctor) => `${doctor.user?.name || doctor.doctorId || 'Unknown'} (${doctor.specialty || 'N/A'})`}
-          getOptionValue={(doctor) => doctor.id}
-          className={styles.searchSelect}
-        />
-        <TextField
-          label="Filter by Date"
-          type="date"
-          name="date"
-          value={filter.date}
-          onChange={handleFilterChange}
-          InputLabelProps={{ shrink: true }}
-          className={styles.filterInput}
-        />
-        <FormControl className={styles.filterInput}>
-          <InputLabel>Filter by Status</InputLabel>
-          <Select
-            name="status"
-            value={filter.status}
-            onChange={handleFilterChange}
-          >
-            <MenuItem value="">All</MenuItem>
-            <MenuItem value="WAITING">Waiting</MenuItem>
-            <MenuItem value="IN_PROGRESS">In Progress</MenuItem>
-            <MenuItem value="COMPLETED">Completed</MenuItem>
-          </Select>
-        </FormControl>
-      </Box>
-      {error && <Alert severity="error" className={styles.alert}>{error}</Alert>}
-      <Box className={styles.gridContainer}>
-        {loading ? (
-          <CircularProgress className={styles.loader} />
-        ) : (
-          <DataGrid
-            rows={filteredQueueItems}
-            columns={columns}
-            pageSizeOptions={[5, 10, 20]}
-            disableRowSelectionOnClick
-            getRowId={(row) => row.id}
-            className={styles.dataGrid}
-          />
-        )}
-      </Box>
-    </Box>
-  );
-}
