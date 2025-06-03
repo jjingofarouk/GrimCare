@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from 'react';
-import { Box, Typography, CircularProgress, Alert, Card, CardContent, Grid, styled } from '@mui/material';
+import { Box, Typography, Skeleton, Alert, Card, CardContent, Grid, styled } from '@mui/material';
 import { Bar, Doughnut } from 'react-chartjs-2';
 import {
   Chart as ChartJS,
@@ -132,7 +132,7 @@ export default function Dashboard() {
   });
 
   const stats = {
-    totalAppointments: data.appointments.length, // Total from AppointmentList
+    totalAppointments: data.appointments.length,
     todayAppointments: todayAppointments.length,
     scheduled: todayAppointments.filter((appt) => appt.status === 'SCHEDULED').length,
     checkedIn: todayAppointments.filter((appt) => appt.status === 'CHECKED_IN').length,
@@ -227,7 +227,12 @@ export default function Dashboard() {
       <ModernTypography variant="h4">Healthcare Dashboard</ModernTypography>
       {error && <Alert severity="error" sx={{ mb: 2, bgcolor: 'rgba(255, 75, 75, 0.1)', color: '#ff6b6b' }}>{error}</Alert>}
       {loading ? (
-        <CircularProgress sx={{ color: '#00b0ff' }} />
+        <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 2 }}>
+          <Skeleton variant="circular" width={40} height={40} sx={{ bgcolor: 'rgba(255, 255, 255, 0.2)' }} />
+          <Skeleton variant="rectangular" width="100%" height={200} sx={{ bgcolor: 'rgba(255, 255, 255, 0.2)' }} />
+          <Skeleton variant="rectangular" width="100%" height={200} sx={{ bgcolor: 'rgba(255, 255, 255, 0.2)' }} />
+          <Skeleton variant="text" width="60%" sx={{ bgcolor: 'rgba(255, 255, 255, 0.2)' }} />
+        </Box>
       ) : (
         <>
           <Grid container spacing={3} sx={{ mb: 4 }}>
