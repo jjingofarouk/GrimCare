@@ -12,6 +12,7 @@
     "migrate:dev": "prisma migrate dev",
     "migrate:deploy": "prisma migrate deploy",
     "prisma:generate": "prisma generate",
+    "seed": "npx prisma db seed -- --seed-file prisma/seed.js",
     "prepare": "husky install",
     "send:reminders": "node scripts/sendReminders.js"
   },
@@ -50,5 +51,8 @@
     "jest-environment-jsdom": "^29.7.0",
     "postcss": "^8.4.47",
     "prisma": "^5.21.1"
+  },
+  "prisma": {
+    "seed": "node prisma/seed.js"
   }
 }
