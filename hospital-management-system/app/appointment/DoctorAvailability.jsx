@@ -116,7 +116,7 @@ export default function DoctorAvailability({ doctors }) {
         Doctor Availability
       </Typography>
       <SearchableSelect
-        label="Doctor"
+        label=" "
         options={doctors}
         value={selectedDoctorId}
         onChange={setSelectedDoctorId}
