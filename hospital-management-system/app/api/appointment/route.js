@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { getAppointments, getPatients, getDoctors, getDepartments, createAppointment } from '../../appointmentService';
+import { getAppointments, getPatients, getDoctors, getDepartments, createAppointment } from '../appointment/appointmentService';
 
 export async function GET(request) {
   const { searchParams } = new URL(request.url);
