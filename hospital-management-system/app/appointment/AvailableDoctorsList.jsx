@@ -1,42 +1,40 @@
-"use client";
-
 import React, { useState, useEffect } from 'react';
 import { Box, Typography, Alert, TextField, Button, styled } from '@mui/material';
 import CustomDataGrid from '../components/CustomDataGrid';
+import axios from 'axios';
 import api from '../api';
 
 export default function AvailableDoctorsList() {
   const [dateFilter, setDateFilter] = useState({ startDate: '', endDate: '' });
   const [doctors, setDoctors] = useState([]);
   const [error, setError] = useState(null);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
     async function fetchDoctors() {
+      setLoading(true);
       try {
-        setLoading(true);
-        const response = await fetch(`${api.BASE_URL}${api.API_ROUTES.DOCTOR}`);
-        if (!response.ok) throw new Error('Failed to fetch doctors');
-        const doctorsData = await response.json();
-        const doctorsWithAvailability = await Promise.all(
-          doctorsData.map(async (doctor) => {
-            const availabilityRes = await fetch(
-              `${api.BASE_URL}${api.API_ROUTES.AVAILABILITY}?doctorId=${doctor.id}`
-            );
-            if (!availabilityRes.ok) throw new Error('Failed to fetch availability');
-            const availability = await availabilityRes.json();
+        const token = localStorage.getItem('token');
+        const response = await axios.get(`${api.BASE_URL}${api.API_ROUTES.APPOINTMENT}?resource=doctors`, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        const doctorsData = await Promise.all(
+          response.data.map(async (doctor) => {
+            const availabilityResponse = await axios.get(`${api.BASE_URL}${api.API_ROUTES.APPOINTMENT}?resource=availability&doctorId=${doctor.id}`, {
+              headers: { Authorization: `Bearer ${token}` },
+            });
             return {
               ...doctor,
-              availability: availability.filter(
+              availability: availabilityResponse.data.filter(
                 (item) => item && item.startTime && item.endTime && item.status === 'AVAILABLE'
               ),
             };
           })
         );
-        setDoctors(doctorsWithAvailability);
+        setDoctors(doctorsData);
         setError(null);
       } catch (err) {
-        setError(err.message);
+        setError(err.response?.data?.error || err.message);
       } finally {
         setLoading(false);
       }
@@ -210,9 +208,13 @@ export default function AvailableDoctorsList() {
         <ModernButton onClick={handleFilter}>Filter</ModernButton>
       </ModernFilterContainer>
       {error && <ModernAlert severity="error">{error}</ModernAlert>}
-      <ModernGridContainer>
-        <CustomDataGrid rows={filteredDoctors} columns={columns} loading={loading} />
-      </ModernGridContainer>
+      {loading ? (
+        <CircularProgress />
+      ) : (
+        <ModernGridContainer>
+          <CustomDataGrid rows={filteredDoctors} columns={columns} />
+        </ModernGridContainer>
+      )}
     </ModernBox>
   );
 }
