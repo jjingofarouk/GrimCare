@@ -23,17 +23,29 @@ export default function DoctorAvailability({ doctors }) {
       setLoading(true);
       try {
         const token = localStorage.getItem('token');
-        const response = await axios.get(`${api.BASE_URL}${api.API_ROUTES.APPOINTMENT}?resource=availability`, {
-          headers: { Authorization: `Bearer ${token}` },
-        });
-        const formattedAvailability = response.data.map((item, index) => ({
-          ...item,
-          id: item.id || index + 1,
-          doctorName: item.doctor?.user?.name || item.doctor?.doctorId || 'Unknown Doctor',
-          specialty: item.doctor?.specialty || 'N/A'
-        }));
-        setAvailability(formattedAvailability);
-        setFilteredAvailability(formattedAvailability);
+        // Fetch availability for all doctors by making individual requests
+        const allAvailability = [];
+        
+        for (const doctor of doctors) {
+          try {
+            const response = await axios.get(`${api.BASE_URL}${api.API_ROUTES.APPOINTMENT}?resource=availability&doctorId=${doctor.id}`, {
+              headers: { Authorization: `Bearer ${token}` },
+            });
+            const doctorAvailability = response.data.map((item, index) => ({
+              ...item,
+              id: item.id || `${doctor.id}-${index + 1}`,
+              doctorName: doctor.user?.name || doctor.doctorId || 'Unknown Doctor',
+              specialty: doctor.specialty || 'N/A'
+            }));
+            allAvailability.push(...doctorAvailability);
+          } catch (doctorErr) {
+            // Skip doctors with no availability or errors
+            console.warn(`Failed to fetch availability for doctor ${doctor.id}:`, doctorErr.message);
+          }
+        }
+        
+        setAvailability(allAvailability);
+        setFilteredAvailability(allAvailability);
         setError(null);
       } catch (err) {
         setError(err.response?.data?.error || err.message);
@@ -41,8 +53,11 @@ export default function DoctorAvailability({ doctors }) {
         setLoading(false);
       }
     }
-    fetchAllAvailability();
-  }, []);
+    
+    if (doctors && doctors.length > 0) {
+      fetchAllAvailability();
+    }
+  }, [doctors]);
 
   // Filter availability when doctor is selected or filters change
   useEffect(() => {
@@ -94,17 +109,27 @@ export default function DoctorAvailability({ doctors }) {
       setFormData({ startTime: '', endTime: '', status: 'AVAILABLE' });
       
       // Refresh all availability data
-      const response = await axios.get(`${api.BASE_URL}${api.API_ROUTES.APPOINTMENT}?resource=availability`, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      const formattedAvailability = response.data.map((item, index) => ({
-        ...item,
-        id: item.id || index + 1,
-        doctorName: item.doctor?.user?.name || item.doctor?.doctorId || 'Unknown Doctor',
-        specialty: item.doctor?.specialty || 'N/A'
-      }));
-      setAvailability(formattedAvailability);
-      applyFilters(formattedAvailability, filter, selectedDoctorId);
+      const allAvailability = [];
+      
+      for (const doctor of doctors) {
+        try {
+          const response = await axios.get(`${api.BASE_URL}${api.API_ROUTES.APPOINTMENT}?resource=availability&doctorId=${doctor.id}`, {
+            headers: { Authorization: `Bearer ${token}` },
+          });
+          const doctorAvailability = response.data.map((item, index) => ({
+            ...item,
+            id: item.id || `${doctor.id}-${index + 1}`,
+            doctorName: doctor.user?.name || doctor.doctorId || 'Unknown Doctor',
+            specialty: doctor.specialty || 'N/A'
+          }));
+          allAvailability.push(...doctorAvailability);
+        } catch (doctorErr) {
+          console.warn(`Failed to fetch availability for doctor ${doctor.id}:`, doctorErr.message);
+        }
+      }
+      
+      setAvailability(allAvailability);
+      applyFilters(allAvailability, filter, selectedDoctorId);
       setError(null);
     } catch (err) {
       setError('Failed to create availability: ' + (err.response?.data?.error || err.message));
