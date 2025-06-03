@@ -74,8 +74,8 @@ export default function AppointmentPage({ user }) {
   };
 
   return (
-    <Container maxWidth="xl" sx={{ py: 4 }}>
-      <Box sx={{ p: 0, m: 0 }}>
+    <Container className={styles.container}>
+      <Box className={styles.content}>
         {error && (
           <Alert severity="error" className={styles.alert}>
             {error}
@@ -92,19 +92,20 @@ export default function AppointmentPage({ user }) {
               onChange={handleTabChange}
               variant="scrollable"
               scrollButtons="auto"
-              sx={{ mb: 2 }}
+              className={styles.tabContainer}
+              TabIndicatorProps={{ className: styles.tabIndicator }}
             >
-              <Tab label="Dashboard" value="dashboard" />
-              <Tab label="Book" value="form" />
-              <Tab label="List" value="list" />
-              <Tab label="History" value="history" />
-              <Tab label="Schedule" value="schedule" />
-              <Tab label="Queue" value="queue" />
-              <Tab label="Availability" value="availability" />
-              <Tab label="Available Doctors" value="availableDoctors" />
-              <Tab label="Departments" value="departments" />
+              <Tab label="Dashboard" value="dashboard" className={`${styles.tab} ${activeTab === 'dashboard' ? styles.tabSelected : ''}`} />
+              <Tab label="Book" value="form" className={`${styles.tab} ${activeTab === 'form' ? styles.tabSelected : ''}`} />
+              <Tab label="List" value="list" className={`${styles.tab} ${activeTab === 'list' ? styles.tabSelected : ''}`} />
+              <Tab label="History" value="history" className={`${styles.tab} ${activeTab === 'history' ? styles.tabSelected : ''}`} />
+              <Tab label="Schedule" value="schedule" className={`${styles.tab} ${activeTab === 'schedule' ? styles.tabSelected : ''}`} />
+              <Tab label="Queue" value="queue" className={`${styles.tab} ${activeTab === 'queue' ? styles.tabSelected : ''}`} />
+              <Tab label="Availability" value="availability" className={`${styles.tab} ${activeTab === 'availability' ? styles.tabSelected : ''}`} />
+              <Tab label="Available Doctors" value="availableDoctors" className={`${styles.tab} ${activeTab === 'availableDoctors' ? styles.tabSelected : ''}`} />
+              <Tab label="Departments" value="departments" className={`${styles.tab} ${activeTab === 'departments' ? styles.tabSelected : ''}`} />
             </Tabs>
-            <Box>
+            <Box className={styles.content}>
               {activeTab === 'dashboard' && <Dashboard />}
               {activeTab === 'form' && (
                 <AppointmentForm
