@@ -1,3 +1,2604 @@
+Analyze my appointments module in my hospital management system app critically. I’m currently facing some issues for example failed to fetch appiintmenrrs etc. also, doctors and patients names don’t display.  They just show NA. HERE ARE all the files 
+"use client";
+
+import React, { useState, useEffect } from 'react';
+import { Container, Paper, Tabs, Tab, Box } from '@mui/material';
+import AppointmentForm from './AppointmentForm';
+import AppointmentList from './AppointmentList';
+import AppointmentHistory from './AppointmentHistory';
+import DoctorSchedule from './DoctorSchedule';
+import QueueManagement from './QueueManagement';
+import DoctorAvailability from './DoctorAvailability';
+import AvailableDoctorsList from './AvailableDoctorsList';
+import DepartmentForm from './DepartmentForm';
+import Dashboard from './Dashboard';
+import { getDepartments, getDoctors, getPatients } from './appointmentService';
+import styles from './page.module.css';
+
+export default function AppointmentPage({ userId }) {
+  const [patients, setPatients] = useState([]);
+  const [doctors, setDoctors] = useState([]);
+  const [departments, setDepartments] = useState([]);
+  const [selectedAppointment, setSelectedAppointment] = useState(null);
+  const [activeTab, setActiveTab] = useState('dashboard');
+  const [refreshKey, setRefreshKey] = useState(0);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const token = localStorage.getItem('token');
+        if (!token) throw new Error('No authentication token found');
+
+        const [patientsData, doctorsData, departmentsData] = await Promise.all([
+          getPatients(),
+          getDoctors(),
+          getDepartments(),
+        ]);
+        console.log('Fetched patients:', JSON.stringify(patientsData, null, 2));
+        console.log('Fetched doctors:', JSON.stringify(doctorsData, null, 2));
+        console.log('Fetched departments:', JSON.stringify(departmentsData, null, 2));
+        setPatients(Array.isArray(patientsData) ? patientsData.filter(p => p && p.user) : []);
+        setDoctors(Array.isArray(doctorsData) ? doctorsData.filter(d => d && d.user) : []);
+        setDepartments(Array.isArray(departmentsData) ? departmentsData : []);
+      } catch (err) {
+        console.error('Failed to fetch data:', err);
+      }
+    };
+    fetchData();
+  }, []);
+
+  const handleSuccess = () => {
+    setSelectedAppointment(null);
+    setRefreshKey((prev) => prev + 1);
+  };
+
+  const handleEdit = (appointment) => {
+    setSelectedAppointment(appointment);
+    setActiveTab('form');
+  };
+
+  const handleTabChange = (event, newValue) => {
+    setActiveTab(newValue);
+    setSelectedAppointment(null);
+  };
+
+  return (
+    <Container maxWidth="xl" sx={{ py: 4 }}>
+      <Box sx={{ p: 0, m: 0 }}>
+        <Tabs
+          value={activeTab}
+          onChange={handleTabChange}
+          variant="scrollable"
+          scrollButtons="auto"
+          sx={{ mb: 2 }}
+        >
+          <Tab label="Dashboard" value="dashboard" />
+          <Tab label="Book" value="form" />
+          <Tab label="List" value="list" />
+          <Tab label="History" value="history" />
+          <Tab label="Schedule" value="schedule" />
+          <Tab label="Queue" value="queue" />
+          <Tab label="Availability" value="availability" />
+          <Tab label="Available Doctors" value="availableDoctors" />
+          <Tab label="Departments" value="departments" />
+        </Tabs>
+        <Box>
+          {activeTab === 'dashboard' && <Dashboard />}
+          {activeTab === 'form' && (
+            <AppointmentForm
+              patients={patients}
+              doctors={doctors}
+              departments={departments}
+              onSuccess={handleSuccess}
+              appointment={selectedAppointment}
+              userId={userId}
+            />
+          )}
+          {activeTab === 'list' && (
+            <AppointmentList
+              key={refreshKey}
+              onEdit={handleEdit}
+            />
+          )}
+          {activeTab === 'history' && (
+            <AppointmentHistory patients={patients} />
+          )}
+          {activeTab === 'schedule' && (
+            <DoctorSchedule doctors={doctors} />
+          )}
+          {activeTab === 'queue' && (
+            <QueueManagement doctors={doctors} />
+          )}
+          {activeTab === 'availability' && (
+            <DoctorAvailability doctors={doctors} />
+          )}
+          {activeTab === 'availableDoctors' && (
+            <AvailableDoctorsList />
+          )}
+          {activeTab === 'departments' && <DepartmentForm />}
+        </Box>
+      </Box>
+    </Container>
+  );
+}
+
+"use client";
+
+import React, { useState, useEffect } from 'react';
+import { Box, TextField, Button, MenuItem, Select, InputLabel, FormControl, Typography, Dialog, DialogTitle, DialogContent, DialogActions } from '@mui/material';
+import { createAppointment, updateAppointment } from './appointmentService';
+import { format } from 'date-fns';
+import styles from './form.module.css';
+
+export default function AppointmentForm({ patients, doctors, departments, onSuccess, appointment, userId }) {
+  const [formData, setFormData] = useState({
+    patientId: '',
+    doctorId: '',
+    departmentId: '',
+    date: '',
+    type: 'REGULAR',
+    reason: '',
+    notes: '',
+  });
+  const [error, setError] = useState(null);
+  const [loading, setLoading] = useState(false);
+  const [openConfirm, setOpenConfirm] = useState(false);
+
+  useEffect(() => {
+    console.log('Patients prop:', patients); // Debug
+    console.log('Doctors prop:', doctors); // Debug
+    console.log('Appointment prop:', appointment); // Debug
+    if (appointment) {
+      const date = appointment.date ? new Date(appointment.date) : null;
+      setFormData({
+        patientId: appointment.patientId || '',
+        doctorId: appointment.doctorId || '',
+        departmentId: appointment.departmentId || '',
+        date: date && !isNaN(date) ? date.toISOString().slice(0, 16) : '',
+        type: appointment.type || 'REGULAR',
+        reason: appointment.reason || '',
+        notes: appointment.notes || '',
+      });
+    }
+  }, [appointment]);
+
+  const handleChange = (e) => {
+    setFormData({ ...formData, [e.target.name]: e.target.value });
+  };
+
+  const validateForm = () => {
+    if (!formData.patientId || !formData.doctorId || !formData.date || !formData.reason) {
+      setError('All required fields must be filled.');
+      return false;
+    }
+    const selectedDate = new Date(formData.date);
+    if (isNaN(selectedDate) || selectedDate < new Date()) {
+      setError('Please select a valid future date.');
+      return false;
+    }
+    setError(null);
+    return true;
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    if (!validateForm()) return;
+    setOpenConfirm(true);
+  };
+
+  const confirmSubmission = async () => {
+    setLoading(true);
+    try {
+      const data = {
+        ...formData,
+        patientId: parseInt(formData.patientId),
+        doctorId: parseInt(formData.doctorId),
+        departmentId: formData.departmentId ? parseInt(formData.departmentId) : null,
+        date: new Date(formData.date),
+        bookedById: userId,
+      };
+      console.log('Submitting appointment data:', data); // Debug
+      let response;
+      if (appointment) {
+        response = await updateAppointment(appointment.id, data);
+      } else {
+        response = await createAppointment(data);
+      }
+      console.log('Appointment response:', response); // Debug
+      onSuccess();
+      setFormData({ patientId: '', doctorId: '', departmentId: '', date: '', type: 'REGULAR', reason: '', notes: '' });
+      setOpenConfirm(false);
+    } catch (err) {
+      setError('Failed to process appointment');
+      console.error('Submission error:', err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const reasons = ['Consultation', 'Follow-up', 'Emergency', 'Routine Checkup', 'Other'];
+
+  return (
+    <Box component="form" onSubmit={handleSubmit} sx={{ maxWidth: 600, mx: 'auto', p: 2 }}>
+      <Typography variant="h6" gutterBottom>Create Appointment</Typography>
+      <FormControl fullWidth margin="normal">
+        <InputLabel>Patient</InputLabel>
+        <Select name="patientId" value={formData.patientId} onChange={handleChange} required>
+          <MenuItem value="">Select Patient</MenuItem>
+          {patients.map((patient) => (
+            <MenuItem key={patient.id} value={patient.id}>{patient.user?.name || 'Unknown'}</MenuItem>
+          ))}
+        </Select>
+      </FormControl>
+      <FormControl fullWidth margin="normal">
+        <InputLabel>Doctor</InputLabel>
+        <Select name="doctorId" value={formData.doctorId} onChange={handleChange} required>
+          <MenuItem value="">Select Doctor</MenuItem>
+          {doctors.map((doctor) => (
+            <MenuItem key={doctor.id} value={doctor.id}>{doctor.user?.name || 'Unknown'} ({doctor.specialty})</MenuItem>
+          ))}
+        </Select>
+      </FormControl>
+      <FormControl fullWidth margin="normal">
+        <InputLabel>Department</InputLabel>
+        <Select name="departmentId" value={formData.departmentId} onChange={handleChange}>
+          <MenuItem value="">Select Department</MenuItem>
+          {departments.map((dept) => (
+            <MenuItem key={dept.id} value={dept.id}>{dept.name}</MenuItem>
+          ))}
+        </Select>
+      </FormControl>
+      <TextField
+        fullWidth
+        margin="normal"
+        label="Date"
+        type="datetime-local"
+        name="date"
+        value={formData.date}
+        onChange={handleChange}
+        required
+        InputLabelProps={{ shrink: true }}
+      />
+      <FormControl fullWidth margin="normal">
+        <InputLabel>Type</InputLabel>
+        <Select name="type" value={formData.type} onChange={handleChange}>
+          <MenuItem value="REGULAR">Regular</MenuItem>
+          <MenuItem value="WALK_IN">Walk-In</MenuItem>
+          <MenuItem value="EMERGENCY">Emergency</MenuItem>
+        </Select>
+      </FormControl>
+      <FormControl fullWidth margin="normal">
+        <InputLabel>Reason</InputLabel>
+        <Select name="reason" value={formData.reason} onChange={handleChange} required>
+          <MenuItem value="">Select Reason</MenuItem>
+          {reasons.map((reason) => (
+            <MenuItem key={reason} value={reason}>{reason}</MenuItem>
+          ))}
+        </Select>
+      </FormControl>
+      <TextField
+        fullWidth
+        margin="normal"
+        label="Notes"
+        name="notes"
+        value={formData.notes}
+        onChange={handleChange}
+        multiline
+        rows={4}
+      />
+      {error && <Typography color="error">{error}</Typography>}
+      <Box mt={2} display="flex" gap={2}>
+        <Button type="submit" variant="contained" disabled={loading}>
+          {loading ? 'Processing...' : appointment ? 'Update Appointment' : 'Create Appointment'}
+        </Button>
+        <Button variant="outlined" onClick={() => setFormData({ patientId: '', doctorId: '', departmentId: '', date: '', type: 'REGULAR', reason: '', notes: '' })}>
+          Clear
+        </Button>
+      </Box>
+
+      <Dialog open={openConfirm} onClose={() => setOpenConfirm(false)}>
+        <DialogTitle>Confirm Appointment</DialogTitle>
+        <DialogContent>
+          <Typography><strong>Patient:</strong> {patients.find((p) => p.id === parseInt(formData.patientId))?.user?.name || 'Unknown'}</Typography>
+          <Typography><strong>Doctor:</strong> {doctors.find((d) => d.id === parseInt(formData.doctorId))?.user?.name || 'Unknown'}</Typography>
+          <Typography><strong>Department:</strong> {departments.find((d) => d.id === parseInt(formData.departmentId))?.name || 'N/A'}</Typography>
+          <Typography><strong>Date:</strong> {formData.date && !isNaN(new Date(formData.date)) ? format(new Date(formData.date), 'PPp') : 'Invalid Date'}</Typography>
+          <Typography><strong>Type:</strong> {formData.type}</Typography>
+          <Typography><strong>Reason:</strong> {formData.reason}</Typography>
+          <Typography><strong>Notes:</strong> {formData.notes || 'N/A'}</Typography>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={confirmSubmission} variant="contained" disabled={loading}>Confirm</Button>
+          <Button onClick={() => setOpenConfirm(false)} variant="outlined">Cancel</Button>
+        </DialogActions>
+      </Dialog>
+    </Box>
+  );
+}
+
+import React, { useState, useEffect } from "react";
+import { Box, Typography, Alert, Button, CircularProgress } from "@mui/material";
+import { DataGrid } from "@mui/x-data-grid";
+import AppointmentFilter from "./AppointmentFilter";
+import { getAppointments, updateAppointment, getPatients, getDoctors } from "./appointmentService";
+import { format } from "date-fns";
+import styles from './list.module.css';
+
+export default function AppointmentList({ onEdit }) {
+  const [appointments, setAppointments] = useState([]);
+  const [patients, setPatients] = useState([]);
+  const [doctors, setDoctors] = useState([]);
+  const [error, setError] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [filter, setFilter] = useState({ status: "ALL", dateFrom: "", plannen: "", doctorId: "", patientId: "", type: "ALL" });
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        setLoading(true);
+        const token = localStorage.getItem('token');
+        if (!token) throw new Error('No authentication token found');
+
+        const [appointmentsData, patientsData, doctorsData] = await Promise.all([
+          getAppointments(),
+          getPatients(),
+          getDoctors(),
+        ]);
+        console.log('Fetched appointments:', JSON.stringify(appointmentsData, null, 2));
+        console.log('Fetched patients:', JSON.stringify(patientsData, null, 2));
+        console.log('Fetched doctors:', JSON.stringify(doctorsData, null, 2));
+
+        const validAppointments = Array.isArray(appointmentsData)
+          ? appointmentsData.filter((item) => {
+              if (!item || typeof item !== 'object' || !item.id) {
+                console.warn('Invalid appointment:', item);
+                return false;
+              }
+              if (!item.patient?.user || !item.doctor?.user) {
+                console.warn('Appointment missing patient.user or doctor.user:', item);
+                return true; // Keep for now to debug
+              }
+              return true;
+            })
+          : [];
+        const validPatients = Array.isArray(patientsData)
+          ? patientsData.filter((item) => item && typeof item === 'object' && item.id && item.user)
+          : [];
+        const validDoctors = Array.isArray(doctorsData)
+          ? doctorsData.filter((item) => item && typeof item === 'object' && item.id && item.user)
+          : [];
+
+        if (validAppointments.length !== appointmentsData.length) {
+          console.warn('Invalid appointments filtered out:', appointmentsData.length - validAppointments.length);
+        }
+
+        setAppointments(validAppointments);
+        setPatients(validPatients);
+        setDoctors(validDoctors);
+      } catch (err) {
+        setError("Failed to fetch data: " + err.message);
+        console.error("Fetch error:", err);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchData();
+  }, []);
+
+  const handleCancel = async (id) => {
+    try {
+      await updateAppointment(id, { status: "CANCELLED" });
+      setAppointments((prev) =>
+        prev.map((appt) => (appt.id === id ? { ...appt, status: "CANCELLED" } : appt))
+      );
+    } catch (err) {
+      setError("Failed to cancel appointment");
+      console.error("Cancel error:", err);
+    }
+  };
+
+  const handleCheckIn = async (id) => {
+    try {
+      await updateAppointment(id, { status: "CHECKED_IN", checkInTime: new Date() });
+      setAppointments((prev) =>
+        prev.map((appt) => (appt.id === id ? { ...appt, status: "CHECKED_IN", checkInTime: new Date() } : appt))
+      );
+    } catch (err) {
+      setError("Failed to check in appointment");
+      console.error("Check-in error:", err);
+    }
+  };
+
+  const handleCheckOut = async (id) => {
+    try {
+      await updateAppointment(id, { status: "CHECKED_OUT", checkOutTime: new Date() });
+      setAppointments((prev) =>
+        prev.map((appt) => (appt.id === id ? { ...appt, status: "CHECKED_OUT", checkOutTime: new Date() } : appt))
+      );
+    } catch (err) {
+      setError("Failed to check out appointment");
+      console.error("Check-out error:", err);
+    }
+  };
+
+  const filteredAppointments = appointments.filter((appt) => {
+    if (!appt || !appt.id) {
+      console.warn('Invalid appointment in filter:', appt);
+      return false;
+    }
+    const matchesStatus = filter.status === "ALL" || appt.status === filter.status;
+    const matchesDateFrom = !filter.dateFrom || new Date(appt.date) >= new Date(filter.dateFrom);
+    const matchesDateTo = !filter.dateTo || new Date(appt.date) <= new Date(filter.dateTo);
+    const matchesDoctor = !filter.doctorId || appt.doctorId === parseInt(filter.doctorId);
+    const matchesPatient = !filter.patientId || appt.patientId === parseInt(filter.patientId);
+    const matchesType = filter.type === "ALL" || appt.type === filter.type;
+    return matchesStatus && matchesDateFrom && matchesDateTo && matchesDoctor && matchesPatient && matchesType;
+  });
+
+  const columns = [
+    { field: "id", headerName: "ID", width: 90 },
+    {
+      field: "patientName",
+      headerName: "Patient",
+      width: 200,
+      valueGetter: (params) => {
+        if (!params?.row) {
+          console.error('params.row is undefined:', params);
+          return "N/A";
+        }
+        const patient = params.row.patient;
+        const name = patient?.user?.name ?? (patient?.name || "N/A");
+        if (name === "N/A") console.error('Patient name missing for appointment:', JSON.stringify(params.row, null, 2));
+        return name;
+      },
+    },
+    {
+      field: "doctorName",
+      headerName: "Doctor",
+      width: 200,
+      valueGetter: (params) => {
+        if (!params?.row) {
+          console.error('params.row is undefined:', params);
+          return "N/A";
+        }
+        const doctor = params.row.doctor;
+        const name = doctor?.user?.name ?? (doctor?.name || "N/A");
+        if (name === "N/A") console.error('Doctor name missing for appointment:', JSON.stringify(params.row, null, 2));
+        return name;
+      },
+    },
+    {
+      field: "date",
+      headerName: "Date",
+      width: 200,
+      valueGetter: (params) => {
+        if (!params?.row) {
+          console.error('params.row is undefined:', params);
+          return "N/A";
+        }
+        try {
+          const date = params.row.date ? format(new Date(params.row.date), "PPp") : "N/A";
+          if (date === "N/A") console.error('Date missing for appointment:', JSON.stringify(params.row, null, 2));
+          return date;
+        } catch (err) {
+          console.error('Date parsing error:', err);
+          return "N/A";
+        }
+      },
+    },
+    { field: "type", headerName: "Type", width: 120 },
+    { field: "status", headerName: "Status", width: 120 },
+    { field: "reason", headerName: "Reason", width: 150 },
+    {
+      field: "queueNumber",
+      headerName: "Queue",
+      width: 100,
+      valueGetter: (params) => {
+        if (!params?.row) {
+          console.error('params.row is undefined:', params);
+          return "N/A";
+        }
+        const queue = params.row.queue?.queueNumber ?? "N/A";
+        if (queue === "N/A") console.error('Queue number missing for appointment:', JSON.stringify(params.row, null, 2));
+        return queue;
+      },
+    },
+    {
+      field: "actions",
+      headerName: "Actions",
+      width: 300,
+      renderCell: (params) => {
+        if (!params?.row) {
+          console.error('params.row is undefined in renderCell:', params);
+          return null;
+        }
+        return (
+          <Box sx={{ display: "flex", gap: 1 }}>
+            <Button
+              variant="outlined"
+              size="small"
+              onClick={() => onEdit(params.row)}
+              disabled={params.row.status === "CANCELLED" || params.row.status === "CHECKED_OUT"}
+            >
+              Edit
+            </Button>
+            <Button
+              variant="outlined"
+              size="small"
+              onClick={() => handleCancel(params.row.id)}
+              disabled={params.row.status === "CANCELLED" || params.row.status === "CHECKED_OUT"}
+            >
+              Cancel
+            </Button>
+            <Button
+              variant="outlined"
+              size="small"
+              onClick={() => handleCheckIn(params.row.id)}
+              disabled={params.row.status !== "SCHEDULED"}
+            >
+              Check In
+            </Button>
+            <Button
+              variant="outlined"
+              size="small"
+              onClick={() => handleCheckOut(params.row.id)}
+              disabled={params.row.status !== "CHECKED_IN"}
+            >
+              Check Out
+            </Button>
+          </Box>
+        );
+      },
+    },
+  ];
+
+  return (
+    <Box sx={{ p: 2 }}>
+      <Typography variant="h5" gutterBottom>Appointments</Typography>
+      <AppointmentFilter onFilter={setFilter} patients={patients} doctors={doctors} />
+      {error && <Alert severity="error">{error}</Alert>}
+      {loading ? (
+        <Box sx={{ display: 'flex', justifyContent: 'center', mt: 4 }}>
+          <CircularProgress />
+        </Box>
+      ) : (
+        <Box sx={{ height: 600, width: "100%" }}>
+          <DataGrid
+            rows={filteredAppointments}
+            columns={columns}
+            pageSizeOptions={[5, 10, 20]}
+            disableRowSelectionOnClick
+            getRowId={(row) => row.id}
+          />
+        </Box>
+      )}
+    </Box>
+  );
+}
+
+
+import React, { useState, useEffect } from 'react';
+import { Box, Typography, Alert, FormControl, Select, MenuItem } from '@mui/material';
+import { DataGrid } from '@mui/x-data-grid';
+import { getAppointments } from './appointmentService';
+import { format } from 'date-fns';
+
+export default function AppointmentHistory({ patients }) {
+  const [selectedPatientId, setSelectedPatientId] = useState('');
+  const [appointments, setAppointments] = useState([]);
+  const [error, setError] = useState(null);
+
+  useEffect(() => {
+    if (selectedPatientId) {
+      const fetchAppointments = async () => {
+        try {
+          const data = await getAppointments();
+          const patientAppointments = data.filter((appt) => appt.patient.id === parseInt(selectedPatientId));
+          setAppointments(patientAppointments);
+        } catch (err) {
+          setError('Failed to fetch appointment history');
+        }
+      };
+      fetchAppointments();
+    }
+  }, [selectedPatientId]);
+
+  const columns = [
+    { field: 'id', headerName: 'ID', width: 90 },
+    { field: 'doctorName', headerName: 'Doctor', width: 150, valueGetter: (params) => params.row.doctor.user.name },
+    { field: 'date', headerName: 'Date', width: 200, valueGetter: (params) => format(new Date(params.row.date), 'PPp') },
+    { field: 'type', headerName: 'Type', width: 120 },
+    { field: 'status', headerName: 'Status', width: 120 },
+    { field: 'reason', headerName: 'Reason', width: 150 },
+    { field: 'notes', headerName: 'Notes', width: 200 },
+  ];
+
+  return (
+    <Box sx={{ p: 2 }}>
+      <Typography variant="h5" gutterBottom>Appointment History</Typography>
+      <FormControl fullWidth sx={{ mb: 2 }}>
+        <Select value={selectedPatientId} onChange={(e) => setSelectedPatientId(e.target.value)} displayEmpty>
+          <MenuItem value="">Select Patient</MenuItem>
+          {patients.map((patient) => (
+            <MenuItem key={patient.id} value={patient.id}>{patient.user.name}</MenuItem>
+          ))}
+        </Select>
+      </FormControl>
+      {error && <Alert severity="error">{error}</Alert>}
+      {selectedPatientId && (
+        <Box sx={{ height: 400, width: '100%' }}>
+          <DataGrid
+            rows={appointments}
+            columns={columns}
+            pageSizeOptions={[5, 10, 20]}
+            disableRowSelectionOnClick
+          />
+        </Box>
+      )}
+    </Box>
+  );
+}
+
+
+import React, { useState, useEffect } from 'react';
+import { Box, Typography, Alert, FormControl, Select, MenuItem } from '@mui/material';
+import { DataGrid } from '@mui/x-data-grid';
+import { getAppointments } from './appointmentService';
+import { format } from 'date-fns';
+
+export default function DoctorSchedule({ doctors }) {
+  const [selectedDoctorId, setSelectedDoctorId] = useState('');
+  const [appointments, setAppointments] = useState([]);
+  const [error, setError] = useState(null);
+
+  useEffect(() => {
+    if (selectedDoctorId) {
+      const fetchAppointments = async () => {
+        try {
+          const data = await getAppointments();
+          const doctorAppointments = data.filter((appt) => appt.doctor.id === parseInt(selectedDoctorId) && appt.status === 'SCHEDULED');
+          setAppointments(doctorAppointments);
+        } catch (err) {
+          setError('Failed to fetch doctor schedule');
+        }
+      };
+      fetchAppointments();
+    }
+  }, [selectedDoctorId]);
+
+  const columns = [
+    { field: 'id', headerName: 'ID', width: 90 },
+    { field: 'patientName', headerName: 'Patient', width: 150, valueGetter: (params) => params.row.patient.user.name },
+    { field: 'date', headerName: 'Date', width: 200, valueGetter: (params) => format(new Date(params.row.date), 'PPp') },
+    { field: 'type', headerName: 'Type', width: 120 },
+    { field: 'reason', headerName: 'Reason', width: 150 },
+    { field: 'queueNumber', headerName: 'Queue', width: 100, valueGetter: (params) => params.row.queue?.queueNumber || 'N/A' },
+  ];
+
+  return (
+    <Box sx={{ p: 2 }}>
+      <Typography variant="h5" gutterBottom>Doctor Schedule</Typography>
+      <FormControl fullWidth sx={{ mb: 2 }}>
+        <Select value={selectedDoctorId} onChange={(e) => setSelectedDoctorId(e.target.value)} displayEmpty>
+          <MenuItem value="">Select Doctor</MenuItem>
+          {doctors.map((doctor) => (
+            <MenuItem key={doctor.id} value={doctor.id}>{doctor.user.name} ({doctor.specialty})</MenuItem>
+          ))}
+        </Select>
+      </FormControl>
+      {error && <Alert severity="error">{error}</Alert>}
+      {selectedDoctorId && (
+        <Box sx={{ height: 400, width: '100%' }}>
+          <DataGrid
+            rows={appointments}
+            columns={columns}
+            pageSizeOptions={[5, 10, 20]}
+            disableRowSelectionOnClick
+          />
+        </Box>
+      )}
+    </Box>
+  );
+}
+
+import React, { useState, useEffect } from 'react';
+import { Box, Typography, Alert, Button } from '@mui/material';
+import { DataGrid } from '@mui/x-data-grid';
+import { getQueue, updateQueue } from './appointmentService';
+import { format } from 'date-fns';
+import styles from './Queue.module.css';
+
+export default function QueueManagement({ doctorId }) {
+  const [queues, setQueues] = useState([]);
+  const [error, setError] = useState(null);
+
+  useEffect(() => {
+    const fetchQueue = async () => {
+      try {
+        const data = await getQueue({ doctorId });
+        setQueues(
+          data.map((item) => ({
+            ...item,
+            id: item.id || Math.random().toString(),
+          }))
+        );
+      } catch (err) {
+        setError('Failed to fetch queue');
+      }
+    };
+    fetchQueue();
+  }, [doctorId]);
+
+  const handleStatusChange = async (id, status) => {
+    try {
+      await updateQueue(id, { status });
+      setQueues((prev) =>
+        prev.map((q) => (q.id === id ? { ...q, status } : q))
+      );
+    } catch (err) {
+      setError('Failed to update queue status');
+    }
+  };
+
+  const columns = [
+    { field: 'queueNumber', headerName: 'Queue Number', width: 120 },
+    {
+      field: 'patientName',
+      headerName: 'Patient',
+      width: 150,
+      valueGetter: (params) => params?.appointment?.patient?.user?.name ?? 'N/A',
+    },
+    {
+      field: 'doctorName',
+      headerName: 'Doctor',
+      width: 150,
+      valueGetter: (params) => params?.appointment?.doctor?.user?.name ?? 'N/A',
+    },
+    {
+      field: 'date',
+      headerName: 'Date',
+      width: 200,
+      valueGetter: (params) =>
+        params?.appointment?.date
+          ? format(new Date(params.appointment.date), 'PPp')
+          : 'N/A',
+    },
+    { field: 'status', headerName: 'Status', width: 120 },
+    {
+      field: 'actions',
+      headerName: 'Actions',
+      width: 200,
+      renderCell: (params) => (
+        <>
+          {params?.status === 'WAITING' && (
+            <Button
+              variant="contained"
+              onClick={() => handleStatusChange(params.id, 'IN_PROGRESS')}
+              sx={{ mr: 1 }}
+            >
+              Start
+            </Button>
+          )}
+          {params?.status === 'IN_PROGRESS' && (
+            <Button
+              variant="contained"
+              onClick={() => handleStatusChange(params.id, 'COMPLETED')}
+            >
+              Complete
+            </Button>
+          )}
+        </>
+      ),
+    },
+  ];
+
+  return (
+    <Box className={styles.container}>
+      <Typography variant="h5" className={styles.title}>
+        Queue Management
+      </Typography>
+      {error && (
+        <Alert severity="error" className={styles.alert}>
+          {error}
+        </Alert>
+      )}
+      <Box className={styles.gridContainer}>
+        <DataGrid
+          rows={queues}
+          columns={columns}
+          pageSizeOptions={[5, 10, 20]}
+          disableRowSelectionOnClick
+          className={styles.grid}
+        />
+      </Box>
+    </Box>
+  );
+}
+
+"use client";
+
+import React, { useState, useEffect } from 'react';
+import { Box, Typography, Alert, Button, TextField, FormControl, Select, MenuItem, InputLabel } from '@mui/material';
+import { DataGrid } from '@mui/x-data-grid';
+import { getAvailability, createAvailability } from './appointmentService';
+import { format } from 'date-fns';
+
+export default function DoctorAvailability({ doctors }) {
+  const [selectedDoctorId, setSelectedDoctorId] = useState('');
+  const [availability, setAvailability] = useState([]);
+  const [error, setError] = useState(null);
+  const [formData, setFormData] = useState({ startTime: '', endTime: '', status: 'AVAILABLE' });
+
+  useEffect(() => {
+    if (selectedDoctorId) {
+      const fetchAvailability = async () => {
+        try {
+          const data = await getAvailability({ doctorId: selectedDoctorId });
+          // Validate and filter data to ensure it has required fields
+          const validData = Array.isArray(data)
+            ? data.filter(item => item && item.startTime && item.endTime && !isNaN(new Date(item.startTime)))
+            : [];
+          setAvailability(validData);
+        } catch (err) {
+          setError('Failed to fetch availability');
+          console.error('Fetch availability error:', err);
+        }
+      };
+      fetchAvailability();
+    }
+  }, [selectedDoctorId]);
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    try {
+      await createAvailability({ ...formData, doctorId: selectedDoctorId });
+      setFormData({ startTime: '', endTime: '', status: 'AVAILABLE' });
+      const data = await getAvailability({ doctorId: selectedDoctorId });
+      // Validate and filter data
+      const validData = Array.isArray(data)
+        ? data.filter(item => item && item.startTime && item.endTime && !isNaN(new Date(item.startTime)))
+        : [];
+      setAvailability(validData);
+    } catch (err) {
+      setError('Failed to create availability');
+      console.error('Create availability error:', err);
+    }
+  };
+
+  const columns = [
+    {
+      field: 'startTime',
+      headerName: 'Start Time',
+      width: 200,
+      valueGetter: (params) => {
+        try {
+          const date = params.row?.startTime ? new Date(params.row.startTime) : null;
+          return date && !isNaN(date) ? format(date, 'PPp') : 'N/A';
+        } catch {
+          return 'N/A';
+        }
+      },
+    },
+    {
+      field: 'endTime',
+      headerName: 'End Time',
+      width: 200,
+      valueGetter: (params) => {
+        try {
+          const date = params.row?.endTime ? new Date(params.row.endTime) : null;
+          return date && !isNaN(date) ? format(date, 'PPp') : 'N/A';
+        } catch {
+          return 'N/A';
+        }
+      },
+    },
+    { field: 'status', headerName: 'Status', width: 120 },
+  ];
+
+  return (
+    <Box sx={{ p: 2 }}>
+      <Typography variant="h5" gutterBottom>Doctor Availability</Typography>
+      <FormControl fullWidth sx={{ mb: 2 }}>
+        <Select value={selectedDoctorId} onChange={(e) => setSelectedDoctorId(e.target.value)} displayEmpty>
+          <MenuItem value="">Select Doctor</MenuItem>
+          {doctors.map((doctor) => (
+            <MenuItem key={doctor.id} value={doctor.id}>{doctor.user.name} ({doctor.specialty})</MenuItem>
+          ))}
+        </Select>
+      </FormControl>
+      {selectedDoctorId && (
+        <>
+          <Box component="form" onSubmit={handleSubmit} sx={{ display: 'flex', gap: 2, mb: 2 }}>
+            <TextField
+              label="Start Time"
+              type="datetime-local"
+              name="startTime"
+              value={formData.startTime}
+              onChange={(e) => setFormData({ ...formData, [e.target.name]: e.target.value })}
+              InputLabelProps={{ shrink: true }}
+              required
+            />
+            <TextField
+              label="End Time"
+              type="datetime-local"
+              name="endTime"
+              value={formData.endTime}
+              onChange={(e) => setFormData({ ...formData, [e.target.name]: e.target.value })}
+              InputLabelProps={{ shrink: true }}
+              required
+            />
+            <FormControl sx={{ minWidth: 120 }}>
+              <InputLabel>Status</InputLabel>
+              <Select name="status" value={formData.status} onChange={(e) => setFormData({ ...formData, [e.target.name]: e.target.value })}>
+                <MenuItem value="AVAILABLE">Available</MenuItem>
+                <MenuItem value="UNAVAILABLE">Unavailable</MenuItem>
+              </Select>
+            </FormControl>
+            <Button type="submit" variant="contained">Add Availability</Button>
+          </Box>
+          {error && <Alert severity="error">{error}</Alert>}
+          <Box sx={{ height: 400, width: '100%' }}>
+            <DataGrid
+              rows={availability}
+              columns={columns}
+              pageSizeOptions={[5, 10, 20]}
+              disableRowSelectionOnClick
+            />
+          </Box>
+        </>
+      )}
+    </Box>
+  );
+}
+
+import React, { useState, useEffect } from 'react';
+import { Box, Typography, Alert, TextField, Button, styled } from '@mui/material';
+import { DataGrid } from '@mui/x-data-grid';
+import { getDoctors, getAvailability } from './appointmentService';
+import { format, parseISO } from 'date-fns';
+
+export default function AvailableDoctorsList() {
+  const [doctors, setDoctors] = useState([]);
+  const [error, setError] = useState(null);
+  const [dateFilter, setDateFilter] = useState({
+    startDate: '',
+    endDate: '',
+  });
+
+  useEffect(() => {
+    const fetchDoctorsAndAvailability = async () => {
+      try {
+        const doctorsData = await getDoctors();
+        const validDoctors = Array.isArray(doctorsData)
+          ? doctorsData.filter((item) => item && item.id)
+          : [];
+
+        const doctorsWithAvailability = await Promise.all(
+          validDoctors.map(async (doctor) => {
+            try {
+              const data = await getAvailability({ doctorId: doctor.id });
+              const validAvailability = Array.isArray(data)
+                ? data.filter(
+                    (item) =>
+                      item &&
+                      item.startTime &&
+                      item.endTime &&
+                      !isNaN(new Date(item.startTime)) &&
+                      item.status === 'AVAILABLE'
+                  )
+                : [];
+              return { ...doctor, availability: validAvailability };
+            } catch (err) {
+              return { ...doctor, availability: [] };
+            }
+          })
+        );
+
+        setDoctors(doctorsWithAvailability);
+      } catch (err) {
+        setError('Failed to fetch doctors or availability');
+        console.error('Fetch error:', err);
+      }
+    };
+    fetchDoctorsAndAvailability();
+  }, []);
+
+  const handleDateChange = (e) => {
+    setDateFilter({ ...dateFilter, [e.target.name]: e.target.value });
+  };
+
+  const handleFilter = () => {
+    if (!dateFilter.startDate || !dateFilter.endDate) {
+      setError('Please select a date range');
+      return;
+    }
+    setError(null);
+  };
+
+  const filteredDoctors = doctors.map((doctor) => ({
+    ...doctor,
+    availability: dateFilter.startDate && dateFilter.endDate
+      ? doctor.availability.filter(
+          (slot) =>
+            parseISO(slot.startTime) >= parseISO(dateFilter.startDate) &&
+            parseISO(slot.endTime) <= parseISO(dateFilter.endDate)
+        )
+      : doctor.availability,
+  }));
+
+  const columns = [
+    {
+      field: 'doctorName',
+      headerName: 'Doctor Name',
+      width: 200,
+      valueGetter: (params) => params?.row?.user?.name ?? 'N/A',
+    },
+    {
+      field: 'specialty',
+      headerName: 'Specialty',
+      width: 150,
+      valueGetter: (params) => params?.row?.specialty ?? 'N/A',
+    },
+    {
+      field: 'availabilityStatus',
+      headerName: 'Availability',
+      width: 150,
+      valueGetter: (params) =>
+        params?.row?.availability?.length > 0 ? 'Available' : 'Not Available',
+    },
+    {
+      field: 'availableSlots',
+      headerName: 'Available Time Slots',
+      width: 400,
+      valueGetter: (params) => {
+        const slots = params?.row?.availability ?? [];
+        return slots.length > 0
+          ? slots
+              .map(
+                (slot) =>
+                  `${format(parseISO(slot.startTime), 'PPp')} - ${format(
+                    parseISO(slot.endTime),
+                    'PPp'
+                  )}`
+              )
+              .join(', ')
+          : 'No available slots';
+      },
+    },
+  ];
+
+  // Styled components for modernized elements
+  const ModernBox = styled(Box)(({ theme }) => ({
+    width: '100vw',
+    minHeight: '100vh',
+    padding: '2rem',
+    background: 'linear-gradient(135deg, #1a1a2e 0%, #16213e 100%)',
+    color: '#ffffff',
+    display: 'flex',
+    flexDirection: 'column',
+    alignItems: 'center',
+    boxSizing: 'border-box',
+  }));
+
+  const ModernTypography = styled(Typography)(({ theme }) => ({
+    fontSize: '2.5rem',
+    fontWeight: 700,
+    marginBottom: '2rem',
+    textAlign: 'center',
+    background: 'linear-gradient(45deg, #00b0ff, #80d8ff)',
+    WebkitBackgroundClip: 'text',
+    WebkitTextFillColor: 'transparent',
+    textShadow: '0 2px 4px rgba(0, 123, 255, 0.3)',
+  }));
+
+  const ModernFilterContainer = styled(Box)(({ theme }) => ({
+    display: 'flex',
+    gap: '1rem',
+    marginBottom: '2rem',
+    flexWrap: 'wrap',
+    justifyContent: 'center',
+    width: '100%',
+    maxWidth: '1200px',
+  }));
+
+  const ModernTextField = styled(TextField)(({ theme }) => ({
+    minWidth: '200px',
+    '& .MuiOutlinedInput-root': {
+      borderRadius: '12px',
+      background: 'rgba(255, 255, 255, 0.1)',
+      backdropFilter: 'blur(10px)',
+      border: '1px solid rgba(255, 255, 255, 0.2)',
+      transition: 'all 0.3s ease',
+      '&:hover': {
+        background: 'rgba(255, 255, 255, 0.15)',
+      },
+      '&.Mui-focused': {
+        background: 'rgba(255, 255, 255, 0.2)',
+        boxShadow: '0 0 15px rgba(0, 123, 255, 0.3)',
+      },
+      '& input': {
+        color: '#fff',
+      },
+    },
+    '& .MuiInputLabel-root': {
+      color: 'rgba(255, 255, 255, 0.7)',
+      '&.Mui-focused': {
+        color: '#00b0ff',
+      },
+    },
+  }));
+
+  const ModernButton = styled(Button)(({ theme }) => ({
+    borderRadius: '12px',
+    padding: '10px 24px',
+    background: 'linear-gradient(45deg, #00b0ff, #0052cc)',
+    color: '#fff',
+    fontWeight: 600,
+    textTransform: 'none',
+    boxShadow: '0 4px 15px rgba(0, 123, 255, 0.4)',
+    transition: 'all 0.3s ease',
+    '&:hover': {
+      background: 'linear-gradient(45deg, #00d4ff, #0073e6)',
+      boxShadow: '0 6px 20px rgba(0, 123, 255, 0.6)',
+      transform: 'translateY(-2px)',
+    },
+  }));
+
+  const ModernAlert = styled(Alert)(({ theme }) => ({
+    marginBottom: '1rem',
+    borderRadius: '12px',
+    background: 'rgba(255, 75, 75, 0.1)',
+    backdropFilter: 'blur(10px)',
+    color: '#ff6b6b',
+    width: '100%',
+    maxWidth: '1200px',
+  }));
+
+  const ModernGridContainer = styled(Box)(({ theme }) => ({
+    width: '100%',
+    maxWidth: '1200px',
+    background: 'rgba(255, 255, 255, 0.05)',
+    borderRadius: '16px',
+    padding: '1rem',
+    backdropFilter: 'blur(10px)',
+    boxShadow: '0 8px 32px rgba(0, 0, 0, 0.2)',
+  }));
+
+  const ModernDataGrid = styled(DataGrid)(({ theme }) => ({
+    background: 'transparent',
+    color: '#ffffff',
+    border: 'none',
+    '& .MuiDataGrid-columnHeaders': {
+      background: 'rgba(255, 255, 255, 0.1)',
+      color: '#ffffff',
+      borderRadius: '12px 12px 0 0',
+    },
+    '& .MuiDataGrid-cell': {
+      color: '#ffffff',
+      borderBottom: '1px solid rgba(255, 255, 255, 0.1)',
+    },
+    '& .MuiDataGrid-row:hover': {
+      background: 'rgba(255, 255, 255, 0.05)',
+      transition: 'background 0.3s ease',
+    },
+    '& .MuiDataGrid-footerContainer': {
+      background: 'rgba(255, 255, 255, 0.1)',
+      color: '#ffffff',
+      borderRadius: '0 0 12px 12px',
+    },
+  }));
+
+  return (
+    <ModernBox>
+      <ModernTypography variant="h5">Available Doctors</ModernTypography>
+      <ModernFilterContainer>
+        <ModernTextField
+          label="Start Date"
+          type="date"
+          name="startDate"
+          value={dateFilter.startDate}
+          onChange={handleDateChange}
+          InputLabelProps={{ shrink: true }}
+        />
+        <ModernTextField
+          label="End Date"
+          type="date"
+          name="endDate"
+          value={dateFilter.endDate}
+          onChange={handleDateChange}
+          InputLabelProps={{ shrink: true }}
+        />
+        <ModernButton onClick={handleFilter}>Filter</ModernButton>
+      </ModernFilterContainer>
+      {error && <ModernAlert severity="error">{error}</ModernAlert>}
+      <ModernGridContainer>
+        <ModernDataGrid
+          rows={filteredDoctors}
+          columns={columns}
+          getRowId={(row) => row.id}
+          pageSizeOptions={[5, 10, 20]}
+          disableRowSelectionOnClick
+        />
+      </ModernGridContainer>
+    </ModernBox>
+  );
+}
+
+"use client";
+
+import React, { useState, useEffect } from 'react';
+import { Box, Typography, Alert, Button, TextField, FormControl } from '@mui/material';
+import { DataGrid } from '@mui/x-data-grid';
+import { createDepartment, getDepartments } from './departmentService';
+
+export default function DepartmentForm() {
+  const [formData, setFormData] = useState({ name: '', description: '' });
+  const [departments, setDepartments] = useState([]);
+  const [error, setError] = useState(null);
+  const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    const fetchDepartments = async () => {
+      try {
+        const data = await getDepartments();
+        setDepartments(Array.isArray(data) ? data.filter(item => item !== null && item !== undefined && item.id) : []);
+      } catch (err) {
+        setError('Failed to fetch departments');
+        console.error('Fetch departments error:', err);
+      }
+    };
+    fetchDepartments();
+  }, []);
+
+  const handleChange = (e) => {
+    setFormData({ ...formData, [e.target.name]: e.target.value });
+  };
+
+  const validateForm = () => {
+    if (!formData.name.trim()) {
+      setError('Department name is required.');
+      return false;
+    }
+    setError(null);
+    return true;
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    if (!validateForm()) return;
+    setLoading(true);
+    try {
+      await createDepartment(formData);
+      setFormData({ name: '', description: '' });
+      const data = await getDepartments();
+      setDepartments(Array.isArray(data) ? data.filter(item => item !== null && item !== undefined && item.id) : []);
+    } catch (err) {
+      setError('Failed to create department');
+      console.error('Create department error:', err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const columns = [
+    { 
+      field: 'name', 
+      headerName: 'Department Name', 
+      width: 200,
+      valueGetter: (params) => params?.row?.name ?? 'N/A'
+    },
+    { 
+      field: 'description', 
+      headerName: 'Description', 
+      width: 300, 
+      valueGetter: (params) => params?.row?.description ?? 'N/A' 
+    },
+    { 
+      field: 'createdAt', 
+      headerName: 'Created At', 
+      width: 200, 
+      valueGetter: (params) => {
+        try {
+          return params?.row?.createdAt ? new Date(params.row.createdAt).toLocaleString() : 'N/A';
+        } catch {
+          return 'N/A';
+        }
+      }
+    },
+  ];
+
+  return (
+    <Box sx={{ p: 2, maxWidth: 800, mx: 'auto' }}>
+      <Typography variant="h5" gutterBottom>Manage Departments</Typography>
+      <Box component="form" onSubmit={handleSubmit} sx={{ display: 'flex', flexDirection: 'column', gap: 2, mb: 4 }}>
+        <TextField
+          label="Department Name"
+          name="name"
+          value={formData.name}
+          onChange={handleChange}
+          required
+          fullWidth
+        />
+        <TextField
+          label="Description"
+          name="description"
+          value={formData.description}
+          onChange={handleChange}
+          multiline
+          rows={3}
+          fullWidth
+        />
+        {error && <Alert severity="error">{error}</Alert>}
+        <Button type="submit" variant="contained" disabled={loading}>
+          {loading ? 'Creating...' : 'Add Department'}
+        </Button>
+      </Box>
+      <Box sx={{ height: 400, width: '100%' }}>
+        <DataGrid
+          rows={departments}
+          columns={columns}
+          pageSizeOptions={[5, 10, 20]}
+          disableRowSelectionOnClick
+        />
+      </Box>
+    </Box>
+  );
+}
+
+"use client";
+
+import React, { useState, useEffect } from 'react';
+import { Box, Typography, Alert, Card, CardContent, Grid } from '@mui/material';
+import { getAppointments } from './appointmentService';
+import { format, startOfDay, endOfDay } from 'date-fns';
+import { Bar } from 'react-chartjs-2';
+import { Chart as ChartJS, CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend } from 'chart.js';
+
+ChartJS.register(CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend);
+
+export default function Dashboard() {
+  const [appointments, setAppointments] = useState([]);
+  const [error, setError] = useState(null);
+
+  useEffect(() => {
+    const fetchAppointments = async () => {
+      try {
+        const data = await getAppointments();
+        const today = new Date();
+        const todayAppointments = data.filter(
+          (appt) => new Date(appt.date) >= startOfDay(today) && new Date(appt.date) <= endOfDay(today)
+        );
+        setAppointments(todayAppointments);
+      } catch (err) {
+        setError('Failed to fetch appointments');
+      }
+    };
+    fetchAppointments();
+  }, []);
+
+  const stats = {
+    total: appointments.length,
+    scheduled: appointments.filter((appt) => appt.status === 'SCHEDULED').length,
+    checkedIn: appointments.filter((appt) => appt.status === 'CHECKED_IN').length,
+    completed: appointments.filter((appt) => appt.status === 'COMPLETED').length,
+    cancelled: appointments.filter((appt) => appt.status === 'CANCELLED').length,
+  };
+
+  const chartData = {
+    labels: ['Scheduled', 'Checked In', 'Completed', 'Cancelled'],
+    datasets: [
+      {
+        label: 'Appointments',
+        data: [stats.scheduled, stats.checkedIn, stats.completed, stats.cancelled],
+        backgroundColor: 'rgba(75, 192, 192, 0.6)',
+      },
+    ],
+  };
+
+  return (
+    <Box sx={{ p: 2 }}>
+      <Typography variant="h5" gutterBottom>Daily Appointment Dashboard</Typography>
+      {error && <Alert severity="error">{error}</Alert>}
+      <Grid container spacing={2}>
+        <Grid item xs={12} md={4}>
+          <Card>
+            <CardContent>
+              <Typography variant="h6">Total Appointments</Typography>
+              <Typography variant="h4">{stats.total}</Typography>
+            </CardContent>
+          </Card>
+        </Grid>
+        <Grid item xs={12} md={4}>
+          <Card>
+            <CardContent>
+              <Typography variant="h6">Scheduled</Typography>
+              <Typography variant="h4">{stats.scheduled}</Typography>
+            </CardContent>
+          </Card>
+        </Grid>
+        <Grid item xs={12} md={4}>
+          <Card>
+            <CardContent>
+              <Typography variant="h6">Checked In</Typography>
+              <Typography variant="h4">{stats.checkedIn}</Typography>
+            </CardContent>
+          </Card>
+        </Grid>
+      </Grid>
+      <Box sx={{ mt: 4, height: 400 }}>
+        <Bar
+          data={chartData}
+          options={{
+            responsive: true,
+            plugins: { title: { display: true, text: 'Appointment Status Distribution' } },
+          }}
+        />
+      </Box>
+      <Box sx={{ mt: 4 }}>
+        <Typography variant="h6" gutterBottom>Today's Appointments</Typography>
+        {appointments.map((appt) => (
+          <Card key={appt.id} sx={{ mb: 2 }}>
+            <CardContent>
+              <Typography><strong>Patient:</strong> {appt.patient.user.name}</Typography>
+              <Typography><strong>Doctor:</strong> {appt.doctor.user.name}</Typography>
+              <Typography><strong>Time:</strong> {format(new Date(appt.date), 'PPp')}</Typography>
+              <Typography><strong>Status:</strong> {appt.status}</Typography>
+            </CardContent>
+          </Card>
+        ))}
+      </Box>
+    </Box>
+  );
+}
+
+
+
+import axios from 'axios';
+import api from '../api';
+
+const { BASE_URL, API_ROUTES } = api;
+
+export async function getAppointments() {
+  try {
+    const response = await axios.get(`${BASE_URL}${API_ROUTES.APPOINTMENT}`, {
+      headers: { Authorization: `Bearer ${localStorage.getItem('token')}` },
+      params: { include: 'patient.user,doctor.user,queue,department,bookedBy' },
+    });
+    console.log('Appointments response:', response.data);
+    return response.data;
+  } catch (error) {
+    console.error('Error fetching appointments:', error);
+    throw new Error(error.response?.data?.message || 'Failed to fetch appointments');
+  }
+}
+
+export async function createAppointment(data) {
+  try {
+    const response = await axios.post(`${BASE_URL}${API_ROUTES.APPOINTMENT}`, data, {
+      headers: { Authorization: `Bearer ${localStorage.getItem('token')}` },
+      params: { include: 'patient.user,doctor.user,queue,department,bookedBy' },
+    });
+    console.log('Created appointment:', response.data);
+    return response.data;
+  } catch (error) {
+    console.error('Error creating appointment:', error);
+    throw error;
+  }
+}
+
+export async function updateAppointment(id, data) {
+  try {
+    const response = await axios.put(`${BASE_URL}${API_ROUTES.APPOINTMENT}/${id}`, data, {
+      headers: { Authorization: `Bearer ${localStorage.getItem('token')}` },
+      params: { include: 'patient.user,doctor.user,queue,department,bookedBy' },
+    });
+    console.log('Updated appointment:', response.data);
+    return response.data;
+  } catch (error) {
+    console.error('Error updating appointment:', error);
+    throw error;
+  }
+}
+
+export async function getAvailability(params) {
+  try {
+    const response = await axios.get(`${BASE_URL}/api/availability`, {
+      params,
+      headers: { Authorization: `Bearer ${localStorage.getItem('token')}` },
+    });
+    return response.data;
+  } catch (error) {
+    console.error('Error fetching availability:', error);
+    throw error;
+  }
+}
+
+export async function createAvailability(data) {
+  try {
+    const response = await axios.post(`${BASE_URL}/api/availability`, data, {
+      headers: { Authorization: `Bearer ${localStorage.getItem('token')}` },
+    });
+    return response.data;
+  } catch (error) {
+    console.error('Error creating availability:', error);
+    throw error;
+  }
+}
+
+export async function getQueue(params) {
+  try {
+    const response = await axios.get(`${BASE_URL}/api/queue`, {
+      params,
+      headers: { Authorization: `Bearer ${localStorage.getItem('token')}` },
+    });
+    return response.data;
+  } catch (error) {
+    console.error('Error fetching queue:', error);
+    throw error;
+  }
+}
+
+export async function updateQueue(id, data) {
+  try {
+    const response = await axios.put(`${BASE_URL}/api/queue`, { id, ...data }, {
+      headers: { Authorization: `Bearer ${localStorage.getItem('token')}` },
+    });
+    return response.data;
+  } catch (error) {
+    console.error('Error updating queue:', error);
+    throw error;
+  }
+}
+
+export async function getDepartments() {
+  try {
+    const response = await axios.get(`${BASE_URL}/api/department`, {
+      headers: { Authorization: `Bearer ${localStorage.getItem('token')}` },
+    });
+    return response.data;
+  } catch (error) {
+    console.error('Error fetching departments:', error);
+    throw error;
+  }
+}
+
+export async function getDoctors() {
+  try {
+    const response = await axios.get(`${BASE_URL}${API_ROUTES.DOCTOR}`, {
+      headers: { Authorization: `Bearer ${localStorage.getItem('token')}` },
+      params: { include: 'user,department' },
+    });
+    console.log('Doctors response:', response.data);
+    return response.data;
+  } catch (error) {
+    console.error('Error fetching doctors:', error);
+    throw error;
+  }
+}
+
+export async function getPatients() {
+  try {
+    const response = await axios.get(`${BASE_URL}${API_ROUTES.PATIENT}`, {
+      headers: { Authorization: `Bearer ${localStorage.getItem('token')}` },
+      params: { include: 'user' },
+    });
+    console.log('Patients response:', response.data);
+    return response.data;
+  } catch (error) {
+    console.error('Error fetching patients:', error);
+    throw error;
+  }
+}
+
+import axios from 'axios';
+import { BASE_URL, API_ROUTES } from '../api';
+
+export const getDepartments = async () => {
+  try {
+    const response = await axios.get(`${BASE_URL}${API_ROUTES.DEPARTMENT}`);
+    return response.data;
+  } catch (error) {
+    throw new Error(error.response?.data?.message || 'Failed to fetch departments');
+  }
+};
+
+export const createDepartment = async (data) => {
+  try {
+    const response = await axios.post(`${BASE_URL}${API_ROUTES.DEPARTMENT}`, data);
+    return response.data;
+  } catch (error) {
+    throw new Error(error.response?.data?.message || 'Failed to create department');
+  }
+};
+
+import axios from 'axios';
+import api from '../api';
+
+const { BASE_URL, API_ROUTES } = api;
+
+export async function getAppointments() {
+  try {
+    const response = await axios.get(`${BASE_URL}${API_ROUTES.APPOINTMENT}`, {
+      headers: { Authorization: `Bearer ${localStorage.getItem('token')}` },
+      params: { include: 'patient.user,doctor.user,queue,department,bookedBy' },
+    });
+    console.log('Appointments response:', response.data);
+    return response.data;
+  } catch (error) {
+    console.error('Error fetching appointments:', error);
+    throw new Error(error.response?.data?.message || 'Failed to fetch appointments');
+  }
+}
+
+export async function createAppointment(data) {
+  try {
+    const response = await axios.post(`${BASE_URL}${API_ROUTES.APPOINTMENT}`, data, {
+      headers: { Authorization: `Bearer ${localStorage.getItem('token')}` },
+      params: { include: 'patient.user,doctor.user,queue,department,bookedBy' },
+    });
+    console.log('Created appointment:', response.data);
+    return response.data;
+  } catch (error) {
+    console.error('Error creating appointment:', error);
+    throw error;
+  }
+}
+
+export async function updateAppointment(id, data) {
+  try {
+    const response = await axios.put(`${BASE_URL}${API_ROUTES.APPOINTMENT}/${id}`, data, {
+      headers: { Authorization: `Bearer ${localStorage.getItem('token')}` },
+      params: { include: 'patient.user,doctor.user,queue,department,bookedBy' },
+    });
+    console.log('Updated appointment:', response.data);
+    return response.data;
+  } catch (error) {
+    console.error('Error updating appointment:', error);
+    throw error;
+  }
+}
+
+export async function getAvailability(params) {
+  try {
+    const response = await axios.get(`${BASE_URL}/api/availability`, {
+      params,
+      headers: { Authorization: `Bearer ${localStorage.getItem('token')}` },
+    });
+    return response.data;
+  } catch (error) {
+    console.error('Error fetching availability:', error);
+    throw error;
+  }
+}
+
+export async function createAvailability(data) {
+  try {
+    const response = await axios.post(`${BASE_URL}/api/availability`, data, {
+      headers: { Authorization: `Bearer ${localStorage.getItem('token')}` },
+    });
+    return response.data;
+  } catch (error) {
+    console.error('Error creating availability:', error);
+    throw error;
+  }
+}
+
+export async function getQueue(params) {
+  try {
+    const response = await axios.get(`${BASE_URL}/api/queue`, {
+      params,
+      headers: { Authorization: `Bearer ${localStorage.getItem('token')}` },
+    });
+    return response.data;
+  } catch (error) {
+    console.error('Error fetching queue:', error);
+    throw error;
+  }
+}
+
+export async function updateQueue(id, data) {
+  try {
+    const response = await axios.put(`${BASE_URL}/api/queue`, { id, ...data }, {
+      headers: { Authorization: `Bearer ${localStorage.getItem('token')}` },
+    });
+    return response.data;
+  } catch (error) {
+    console.error('Error updating queue:', error);
+    throw error;
+  }
+}
+
+export async function getDepartments() {
+  try {
+    const response = await axios.get(`${BASE_URL}/api/department`, {
+      headers: { Authorization: `Bearer ${localStorage.getItem('token')}` },
+    });
+    return response.data;
+  } catch (error) {
+    console.error('Error fetching departments:', error);
+    throw error;
+  }
+}
+
+export async function getDoctors() {
+  try {
+    const response = await axios.get(`${BASE_URL}${API_ROUTES.DOCTOR}`, {
+      headers: { Authorization: `Bearer ${localStorage.getItem('token')}` },
+      params: { include: 'user,department' },
+    });
+    console.log('Doctors response:', response.data);
+    return response.data;
+  } catch (error) {
+    console.error('Error fetching doctors:', error);
+    throw error;
+  }
+}
+
+export async function getPatients() {
+  try {
+    const response = await axios.get(`${BASE_URL}${API_ROUTES.PATIENT}`, {
+      headers: { Authorization: `Bearer ${localStorage.getItem('token')}` },
+      params: { include: 'user' },
+    });
+    console.log('Patients response:', response.data);
+    return response.data;
+  } catch (error) {
+    console.error('Error fetching patients:', error);
+    throw error;
+  }
+}
+
+import { PrismaClient } from '@prisma/client';
+import { NextResponse } from 'next/server';
+
+const prisma = new PrismaClient();
+
+export async function GET() {
+  try {
+    const appointments = await prisma.appointment.findMany({
+      where: {
+        patient: { userId: { not: null } },
+        doctor: { userId: { not: null } },
+      },
+      include: {
+        patient: { include: { user: true } },
+        doctor: { include: { user: true } },
+        department: true,
+        bookedBy: true,
+        queue: true,
+      },
+    });
+    console.log('Appointments fetched from API:', JSON.stringify(appointments, null, 2));
+    return NextResponse.json(appointments);
+  } catch (error) {
+    console.error('GET /api/appointment error:', error);
+    return NextResponse.json({ error: 'Failed to fetch appointments', details: error.message }, { status: 500 });
+  } finally {
+    await prisma.$disconnect();
+  }
+}
+
+export async function POST(request) {
+  try {
+    const data = await request.json();
+    if (!data.patientId || !data.doctorId || !data.date || !data.reason) {
+      return NextResponse.json({ error: 'Missing required fields' }, { status: 400 });
+    }
+
+    const patient = await prisma.patient.findUnique({
+      where: { id: parseInt(data.patientId) },
+      include: { user: true },
+    });
+    const doctor = await prisma.doctor.findUnique({
+      where: { id: parseInt(data.doctorId) },
+      include: { user: true },
+    });
+
+    if (!patient?.user || !doctor?.user) {
+      return NextResponse.json({ error: 'Invalid patient or doctor: missing user data' }, { status: 400 });
+    }
+
+    const existingAppointment = await prisma.appointment.findFirst({
+      where: {
+        doctorId: parseInt(data.doctorId),
+        date: new Date(data.date),
+        status: { not: 'CANCELLED' },
+      },
+    });
+
+    if (existingAppointment) {
+      return NextResponse.json({ error: 'Doctor already booked at this time' }, { status: 409 });
+    }
+
+    const appointment = await prisma.appointment.create({
+      data: {
+        patient: { connect: { id: parseInt(data.patientId) } },
+        doctor: { connect: { id: parseInt(data.doctorId) } },
+        department: data.departmentId ? { connect: { id: parseInt(data.departmentId) } } : undefined,
+        bookedBy: data.bookedById ? { connect: { id: parseInt(data.bookedById) } } : undefined,
+        date: new Date(data.date),
+        status: data.status || 'SCHEDULED',
+        type: data.type || 'REGULAR',
+        reason: data.reason,
+        notes: data.notes || null,
+        reminderSent: data.reminderSent || false,
+      },
+      include: {
+        patient: { include: { user: true } },
+        doctor: { include: { user: true } },
+        department: true,
+        bookedBy: true,
+        queue: true,
+      },
+    });
+
+    if (data.type === 'REGULAR' || data.type === 'EMERGENCY') {
+      const lastQueue = await prisma.queue.findFirst({
+        where: { appointment: { doctorId: parseInt(data.doctorId) } },
+        orderBy: { queueNumber: 'desc' },
+      });
+      await prisma.queue.create({
+        data: {
+          appointment: { connect: { id: appointment.id } },
+          queueNumber: lastQueue ? lastQueue.queueNumber + 1 : 1,
+          status: 'WAITING',
+        },
+      });
+    }
+
+    const updatedAppointment = await prisma.appointment.findUnique({
+      where: { id: appointment.id },
+      include: {
+        patient: { include: { user: true } },
+        doctor: { include: { user: true } },
+        department: true,
+        bookedBy: true,
+        queue: true,
+      },
+    });
+
+    return NextResponse.json(updatedAppointment, { status: 201 });
+  } catch (error) {
+    console.error('POST /api/appointment error:', error);
+    return NextResponse.json({ error: 'Failed to create appointment', details: error.message }, { status: 500 });
+  } finally {
+    await prisma.$disconnect();
+  }
+}
+
+export async function PUT(request, { params }) {
+  const id = parseInt(params.id, 10);
+  if (isNaN(id)) {
+    return NextResponse.json({ error: 'Invalid appointment ID' }, { status: 400 });
+  }
+
+  try {
+    const data = await request.json();
+    if (data.patientId || data.doctorId) {
+      const patient = data.patientId ? await prisma.patient.findUnique({
+        where: { id: parseInt(data.patientId) },
+        include: { user: true },
+      }) : null;
+      const doctor = data.doctorId ? await prisma.doctor.findUnique({
+        where: { id: parseInt(data.doctorId) },
+        include: { user: true },
+      }) : null;
+
+      if ((data.patientId && !patient?.user) || (data.doctorId && !doctor?.user)) {
+        return NextResponse.json({ error: 'Invalid patient or doctor: missing user data' }, { status: 400 });
+      }
+    }
+
+    const existingAppointment = await prisma.appointment.findFirst({
+      where: {
+        doctorId: data.doctorId ? parseInt(data.doctorId) : undefined,
+        date: data.date ? new Date(data.date) : undefined,
+        status: { not: 'CANCELLED' },
+        NOT: { id },
+      },
+    });
+
+    if (existingAppointment) {
+      return NextResponse.json({ error: 'Doctor already booked at this time' }, { status: 409 });
+    }
+
+    const updatedAppointment = await prisma.appointment.update({
+      where: { id },
+      data: {
+        patient: data.patientId ? { connect: { id: parseInt(data.patientId) } } : undefined,
+        doctor: data.doctorId ? { connect: { id: parseInt(data.doctorId) } } : undefined,
+        department: data.departmentId ? { connect: { id: parseInt(data.departmentId) } } : undefined,
+        bookedBy: data.bookedById ? { connect: { id: parseInt(data.bookedById) } } : undefined,
+        date: data.date ? new Date(data.date) : undefined,
+        status: data.status || undefined,
+        type: data.type || undefined,
+        reason: data.reason || undefined,
+        notes: data.notes || undefined,
+        checkInTime: data.checkInTime ? new Date(data.checkInTime) : undefined,
+        checkOutTime: data.checkOutTime ? new Date(data.checkOutTime) : undefined,
+        reminderSent: data.reminderSent !== undefined ? data.reminderSent : undefined,
+      },
+      include: {
+        patient: { include: { user: true } },
+        doctor: { include: { user: true } },
+        department: true,
+        bookedBy: true,
+        queue: true,
+      },
+    });
+
+    if (data.status === 'CHECKED_IN' && !updatedAppointment.queue) {
+      const lastQueue = await prisma.queue.findFirst({
+        where: { appointment: { doctorId: updatedAppointment.doctorId } },
+        orderBy: { queueNumber: 'desc' },
+      });
+      await prisma.queue.create({
+        data: {
+          appointment: { connect: { id: updatedAppointment.id } },
+          queueNumber: lastQueue ? lastQueue.queueNumber + 1 : 1,
+          status: 'WAITING',
+        },
+      });
+    }
+
+    if (data.status === 'COMPLETED' || data.status === 'CANCELLED' || data.status === 'NO_SHOW') {
+      const queue = await prisma.queue.findUnique({
+        where: { appointmentId: id },
+      });
+      if (queue) {
+        await prisma.queue.update({
+          where: { appointmentId: id },
+          data: { status: 'COMPLETED' },
+        });
+      }
+    }
+
+    const finalAppointment = await prisma.appointment.findUnique({
+      where: { id },
+      include: {
+        patient: { include: { user: true } },
+        doctor: { include: { user: true } },
+        department: true,
+        bookedBy: true,
+        queue: true,
+      },
+    });
+
+    return NextResponse.json(finalAppointment);
+  } catch (error) {
+    console.error('PUT /api/appointment/[id] error:', error);
+    return NextResponse.json({ error: 'Failed to update appointment', details: error.message }, { status: 500 });
+  } finally {
+    await prisma.$disconnect();
+  }
+}
+
+export async function DELETE(_request, { params }) {
+  const id = parseInt(params.id, 10);
+  if (isNaN(id)) {
+    return NextResponse.json({ error: 'Invalid appointment ID' }, { status: 400 });
+  }
+
+  try {
+    await prisma.appointment.delete({
+      where: { id },
+    });
+
+    return NextResponse.json({ message: 'Appointment deleted successfully' });
+  } catch (error) {
+    console.error('DELETE /api/appointment/[id] error:', error);
+    return NextResponse.json({ error: 'Failed to delete appointment', details: error.message }, { status: 500 });
+  } finally {
+    await prisma.$disconnect();
+  }
+}
+
+import { PrismaClient } from '@prisma/client';
+import { NextResponse } from 'next/server';
+
+const prisma = new PrismaClient();
+
+export async function GET(_request, { params }) {
+  const id = parseInt(params.id, 10);
+  if (isNaN(id)) {
+    return NextResponse.json({ error: 'Invalid appointment ID' }, { status: 400 });
+  }
+
+  try {
+    const appointment = await prisma.appointment.findUnique({
+      where: { id },
+      include: {
+        patient: { include: { user: true } },
+        doctor: { include: { user: true } },
+        department: true,
+        bookedBy: true,
+        queue: true,
+      },
+    });
+
+    if (!appointment) {
+      return NextResponse.json({ error: 'Appointment not found' }, { status: 404 });
+    }
+
+    return NextResponse.json(appointment);
+  } catch (error) {
+    console.error('GET /api/appointment/[id] error:', error);
+    return NextResponse.json({ error: 'Failed to fetch appointment', details: error.message }, { status: 500 });
+  } finally {
+    await prisma.$disconnect();
+  }
+}
+
+export async function PUT(request, { params }) {
+  const id = parseInt(params.id, 10);
+  if (isNaN(id)) {
+    return NextResponse.json({ error: 'Invalid appointment ID' }, { status: 400 });
+  }
+
+  try {
+    const data = await request.json();
+    const existingAppointment = await prisma.appointment.findFirst({
+      where: {
+        doctorId: data.doctorId || undefined,
+        date: data.date ? new Date(data.date) : undefined,
+        status: { not: 'CANCELLED' },
+        NOT: { id },
+      },
+    });
+
+    if (existingAppointment) {
+      return NextResponse.json({ error: 'Doctor already booked at this time' }, { status: 409 });
+    }
+
+    const updatedAppointment = await prisma.appointment.update({
+      where: { id },
+      data: {
+        patient: data.patientId ? { connect: { id: parseInt(data.patientId) } } : undefined,
+        doctor: data.doctorId ? { connect: { id: parseInt(data.doctorId) } } : undefined,
+        department: data.departmentId ? { connect: { id: parseInt(data.departmentId) } } : undefined,
+        bookedBy: data.bookedById ? { connect: { id: parseInt(data.bookedById) } } : undefined,
+        date: data.date ? new Date(data.date) : undefined,
+        status: data.status || undefined,
+        type: data.type || undefined,
+        reason: data.reason || undefined,
+        notes: data.notes || undefined,
+        checkInTime: data.checkInTime ? new Date(data.checkInTime) : undefined,
+        checkOutTime: data.checkOutTime ? new Date(data.checkOutTime) : undefined,
+        reminderSent: data.reminderSent !== undefined ? data.reminderSent : undefined,
+      },
+      include: {
+        patient: { include: { user: true } },
+        doctor: { include: { user: true } },
+        department: true,
+        bookedBy: true,
+      },
+    });
+
+    if (data.status === 'CHECKED_IN' && !updatedAppointment.queue) {
+      const lastQueue = await prisma.queue.findFirst({
+        where: { appointment: { doctorId: updatedAppointment.doctorId } },
+        orderBy: { queueNumber: 'desc' },
+      });
+      await prisma.queue.create({
+        data: {
+          appointment: { connect: { id: updatedAppointment.id } },
+          queueNumber: lastQueue ? lastQueue.queueNumber + 1 : 1,
+          status: 'WAITING',
+        },
+      });
+    }
+
+    if (data.status === 'COMPLETED' || data.status === 'CANCELLED' || data.status === 'NO_SHOW') {
+      await prisma.queue.update({
+        where: { appointmentId: id },
+        data: { status: 'COMPLETED' },
+      });
+    }
+
+    return NextResponse.json(updatedAppointment);
+  } catch (error) {
+    console.error('PUT /api/appointment/[id] error:', error);
+    return NextResponse.json({ error: 'Failed to update appointment', details: error.message }, { status: 500 });
+  } finally {
+    await prisma.$disconnect();
+  }
+}
+
+export async function DELETE(_request, { params }) {
+  const id = parseInt(params.id, 10);
+  if (isNaN(id)) {
+    return NextResponse.json({ error: 'Invalid appointment ID' }, { status: 400 });
+  }
+
+  try {
+    await prisma.appointment.delete({
+      where: { id },
+    });
+
+    return NextResponse.json({ message: 'Appointment deleted successfully' });
+  } catch (error) {
+    console.error('DELETE /api/appointment/[id] error:', error);
+    return NextResponse.json({ error: 'Failed to delete appointment', details: error.message }, { status: 500 });
+  } finally {
+    await prisma.$disconnect();
+  }
+}
+
+
+import { PrismaClient } from '@prisma/client';
+import { NextResponse } from 'next/server';
+import bcrypt from 'bcryptjs';
+import { v4 as uuidv4 } from 'uuid';
+
+const prisma = new PrismaClient();
+
+export async function GET(request) {
+  try {
+    const { searchParams } = new URL(request.url);
+    const include = searchParams.get('include')?.split(',').reduce((acc, curr) => {
+      if (curr === 'user') acc.user = true;
+      if (curr === 'department') acc.department = true;
+      return acc;
+    }, {}) || { user: true };
+
+    const doctors = await prisma.doctor.findMany({
+      include,
+    });
+    return NextResponse.json(doctors);
+  } catch (error) {
+    console.error('GET /api/doctor error:', error);
+    return NextResponse.json({ error: 'Failed to fetch doctors', details: error.message }, { status: 500 });
+  } finally {
+    await prisma.$disconnect();
+  }
+}
+
+export async function POST(request) {
+  try {
+    const data = await request.json();
+    if (!data.email || !data.name || !data.specialty || !data.licenseNumber || !data.password) {
+      return NextResponse.json({ error: 'Missing required fields: email, name, specialty, licenseNumber, password' }, { status: 400 });
+    }
+
+    const existingUser = await prisma.user.findUnique({
+      where: { email: data.email },
+    });
+    if (existingUser) {
+      return NextResponse.json({ error: 'Email already exists' }, { status: 400 });
+    }
+
+    const hashedPassword = await bcrypt.hash(data.password, 10);
+
+    const doctor = await prisma.$transaction(async (prisma) => {
+      const user = await prisma.user.create({
+        data: {
+          email: data.email,
+          name: data.name,
+          role: 'DOCTOR',
+          password: hashedPassword,
+        },
+      });
+
+      return await prisma.doctor.create({
+        data: {
+          doctorId: data.doctorId || `D-${uuidv4().slice(0, 8)}`,
+          specialty: data.specialty,
+          licenseNumber: data.licenseNumber,
+          phone: data.phone || null,
+          office: data.office || null,
+          department: data.departmentId ? { connect: { id: parseInt(data.departmentId) } } : undefined,
+          user: { connect: { id: user.id } },
+        },
+        include: { user: true, department: true },
+      });
+    });
+
+    return NextResponse.json(doctor, { status: 201 });
+  } catch (error) {
+    console.error('POST /api/doctor error:', error);
+    return NextResponse.json({ error: 'Failed to create doctor', details: error.message }, { status: 500 });
+  } finally {
+    await prisma.$disconnect();
+  }
+}
+
+import { PrismaClient } from '@prisma/client';
+import { NextResponse } from 'next/server';
+
+const prisma = new PrismaClient();
+
+export async function GET(request, { params }) {
+  try {
+    const doctor = await prisma.doctor.findUnique({
+      where: { id: parseInt(params.id) },
+      include: { user: true },
+    });
+    if (!doctor) {
+      return NextResponse.json({ error: 'Doctor not found' }, { status: 404 });
+    }
+    return NextResponse.json(doctor);
+  } catch (error) {
+    console.error('GET /api/doctor/[id] error:', error);
+    return NextResponse.json({ error: 'Failed to fetch doctor', details: error.message }, { status: 500 });
+  } finally {
+    await prisma.$disconnect();
+  }
+}
+
+export async function PUT(request, { params }) {
+  try {
+    const data = await request.json();
+    const doctor = await prisma.doctor.update({
+      where: { id: parseInt(params.id) },
+      data: {
+        specialty: data.specialty || null,
+        licenseNumber: data.licenseNumber || null,
+        phone: data.phone || null,
+        office: data.office || null,
+        user: data.name || data.email ? {
+          update: {
+            name: data.name || null,
+            email: data.email || null,
+          },
+        } : null,
+      },
+      include: { user: true },
+    });
+    return NextResponse.json(doctor);
+  } catch (error) {
+    console.error('PUT /api/doctor/[id] error:', error);
+    return NextResponse.json({ error: 'Failed to update doctor', details: error.message }, { status: 500 });
+  } finally {
+    await prisma.$disconnect();
+  }
+}
+
+export async function DELETE(request, { params }) {
+  try {
+    const doctor = await prisma.doctor.findUnique({
+      where: { id: parseInt(params.id) },
+      include: { user: true },
+    });
+    if (!doctor) {
+      return NextResponse.json({ error: 'Doctor not found' }, { status: 404 });
+    }
+    await prisma.$transaction([
+      prisma.doctor.delete({ where: { id: parseInt(params.id) } }),
+      prisma.user.delete({ where: { id: doctor.user.id } }),
+    ]);
+    return NextResponse.json({ message: 'Doctor deleted' });
+  } catch (error) {
+    console.error('DELETE /api/doctor/[id] error:', error);
+    return NextResponse.json({ error: 'Failed to delete doctor', details: error.message }, { status: 500 });
+  } finally {
+    await prisma.$disconnect();
+  }
+}
+
+import { PrismaClient } from '@prisma/client';
+import { NextResponse } from 'next/server';
+import bcrypt from 'bcryptjs';
+import { v4 as uuidv4 } from 'uuid';
+
+const prisma = new PrismaClient();
+
+export async function GET() {
+  try {
+    const patients = await prisma.patient.findMany({
+      include: { user: true },
+    });
+    return NextResponse.json(patients);
+  } catch (error) {
+    console.error('GET /api/patient error:', error);
+    return NextResponse.json({ error: 'Failed to fetch patients', details: error.message }, { status: 500 });
+  } finally {
+    await prisma.$disconnect();
+  }
+}
+
+export async function POST(request) {
+  try {
+    const data = await request.json();
+    if (!data.email || !data.name) {
+      return NextResponse.json({ error: 'Missing required fields: email, name' }, { status: 400 });
+    }
+
+    const hashedPassword = data.password ? await bcrypt.hash(data.password, 10) : null;
+
+    const patient = await prisma.$transaction(async (prisma) => {
+      const user = await prisma.user.create({
+        data: {
+          email: data.email,
+          name: data.name,
+          role: 'PATIENT',
+          password: hashedPassword,
+        },
+      });
+
+      return await prisma.patient.create({
+        data: {
+          patientId: data.patientId || `P-${uuidv4().slice(0, 8)}`,
+          dateOfBirth: data.dateOfBirth ? new Date(data.dateOfBirth) : null,
+          gender: data.gender || null,
+          phone: data.phone || null,
+          address: data.address || null,
+          emergencyContact: data.emergencyContact || null,
+          emergencyContactPhone: data.emergencyContactPhone || null,
+          insuranceProvider: data.insuranceProvider || null,
+          insurancePolicy: data.insurancePolicy || null,
+          bloodType: data.bloodType || null,
+          allergies: data.allergies || null,
+          medicalHistory: data.medicalHistory || null,
+          user: { connect: { id: user.id } },
+        },
+        include: { user: true },
+      });
+    });
+
+    return NextResponse.json(patient, { status: 201 });
+  } catch (error) {
+    console.error('POST /api/patient error:', error);
+    return NextResponse.json({ error: 'Failed to create patient', details: error.message }, { status: 500 });
+  } finally {
+    await prisma.$disconnect();
+  }
+}
+
+import { PrismaClient } from '@prisma/client';
+import { NextResponse } from 'next/server';
+
+const prisma = new PrismaClient();
+
+export async function GET(request, { params }) {
+  try {
+    const patient = await prisma.patient.findUnique({
+      where: { id: parseInt(params.id) },
+      include: { user: true },
+    });
+    if (!patient) {
+      return NextResponse.json({ error: 'Patient not found' }, { status: 404 });
+    }
+    return NextResponse.json(patient);
+  } catch (error) {
+    console.error('GET /api/patient/[id] error:', error);
+    return NextResponse.json({ error: 'Failed to fetch patient', details: error.message }, { status: 500 });
+  } finally {
+    await prisma.$disconnect();
+  }
+}
+
+export async function PUT(request, { params }) {
+  try {
+    const data = await request.json();
+    const patient = await prisma.patient.update({
+      where: { id: parseInt(params.id) },
+      data: {
+        dateOfBirth: data.dateOfBirth ? new Date(data.dateOfBirth) : null,
+        gender: data.gender || null,
+        phone: data.phone || null,
+        address: data.address || null,
+        emergencyContact: data.emergencyContact || null,
+        emergencyContactPhone: data.emergencyContactPhone || null,
+        insuranceProvider: data.insuranceProvider || null,
+        insurancePolicy: data.insurancePolicy || null,
+        bloodType: data.bloodType || null,
+        allergies: data.allergies || null,
+        medicalHistory: data.medicalHistory || null,
+        user: data.name || data.email ? {
+          update: {
+            name: data.name || undefined,
+            email: data.email || undefined,
+          },
+        } : undefined,
+      },
+      include: { user: true },
+    });
+    return NextResponse.json(patient);
+  } catch (error) {
+    console.error('PUT /api/patient/[id] error:', error);
+    return NextResponse.json({ error: 'Failed to update patient', details: error.message }, { status: 500 });
+  } finally {
+    await prisma.$disconnect();
+  }
+}
+
+export async function DELETE(request, { params }) {
+  try {
+    const patient = await prisma.patient.findUnique({
+      where: { id: parseInt(params.id) },
+      include: { user: true },
+    });
+    if (!patient) {
+      return NextResponse.json({ error: 'Patient not found' }, { status: 404 });
+    }
+    await prisma.$transaction([
+      prisma.patient.delete({ where: { id: parseInt(params.id) } }),
+      prisma.user.delete({ where: { id: patient.user.id } }),
+    ]);
+    return NextResponse.json({ message: 'Patient deleted' });
+  } catch (error) {
+    console.error('DELETE /api/patient/[id] error:', error);
+    return NextResponse.json({ error: 'Failed to delete patient', details: error.message }, { status: 500 });
+  } finally {
+    await prisma.$disconnect();
+  }
+}
+
+import { PrismaClient } from '@prisma/client';
+import { NextResponse } from 'next/server';
+
+const prisma = new PrismaClient();
+
+export async function GET(request) {
+  const { searchParams } = new URL(request.url);
+  const doctorId = parseInt(searchParams.get('doctorId'), 10);
+  const date = searchParams.get('date');
+
+  try {
+    const where = {
+      appointment: {
+        status: { notIn: ['CANCELLED', 'COMPLETED', 'NO_SHOW'] },
+      },
+    };
+    if (doctorId) where.appointment = { ...where.appointment, doctorId };
+    if (date) {
+      const startOfDay = new Date(date);
+      startOfDay.setHours(0, 0, 0, 0);
+      const endOfDay = new Date(date);
+      endOfDay.setHours(23, 59, 59, 999);
+      where.appointment = { ...where.appointment, date: { gte: startOfDay, lte: endOfDay } };
+    }
+
+    const queues = await prisma.queue.findMany({
+      where,
+      include: {
+        appointment: {
+          include: {
+            patient: { include: { user: true } },
+            doctor: { include: { user: true } },
+          },
+        },
+      },
+      orderBy: { queueNumber: 'asc' },
+    });
+
+    return NextResponse.json(queues);
+  } catch (error) {
+    console.error('GET /api/queue error:', error);
+    return NextResponse.json({ error: 'Failed to fetch queue', details: error.message }, { status: 500 });
+  } finally {
+    await prisma.$disconnect();
+  }
+}
+
+export async function PUT(request) {
+  try {
+    const data = await request.json();
+    const queue = await prisma.queue.update({
+      where: { id: parseInt(data.id) },
+      data: {
+        queueNumber: data.queueNumber || undefined,
+        status: data.status || undefined,
+      },
+      include: {
+        appointment: {
+          include: {
+            patient: { include: { user: true } },
+            doctor: { include: { user: true } },
+          },
+        },
+      },
+    });
+
+    return NextResponse.json(queue);
+  } catch (error) {
+    console.error('PUT /api/queue error:', error);
+    return NextResponse.json({ error: 'Failed to update queue', details: error.message }, { status: 500 });
+  } finally {
+    await prisma.$disconnect();
+  }
+}
+
+
+import { PrismaClient } from '@prisma/client';
+import { NextResponse } from 'next/server';
+
+const prisma = new PrismaClient();
+
+export async function GET() {
+  try {
+    const departments = await prisma.department.findMany();
+    return NextResponse.json(departments);
+  } catch (error) {
+    console.error('GET /api/department error:', error);
+    return NextResponse.json({ error: 'Failed to fetch departments', details: error.message }, { status: 500 });
+  } finally {
+    await prisma.$disconnect();
+  }
+}
+
+export async function POST(request) {
+  try {
+    const data = await request.json();
+    if (!data.name) {
+      return NextResponse.json({ error: 'Missing required field: name' }, { status: 400 });
+    }
+
+    const department = await prisma.department.create({
+      data: {
+        name: data.name,
+        description: data.description || null,
+      },
+    });
+
+    return NextResponse.json(department, { status: 201 });
+  } catch (error) {
+    console.error('POST /api/department error:', error);
+    return NextResponse.json({ error: 'Failed to create department', details: error.message }, { status: 500 });
+  } finally {
+    await prisma.$disconnect();
+  }
+}
+
+
+export const API_ROUTES = {
+  ACCOUNTING: '/api/accounting',
+  ADT: '/api/adt',
+  APPOINTMENT: '/api/appointment',
+  AUTH: '/api/auth',
+  BILLING: '/api/billing',
+  CLAIM_MGMT: '/api/claim-mgmt',
+  CLINICAL: '/api/clinical',
+  CLINICAL_SETTINGS: '/api/clinical-settings',
+  CSSD: '/api/cssd',
+  DASHBOARD: '/api/dashboard',
+  DEPARTMENT: '/api/department',
+  DISPENSARY: '/api/dispensary',
+  DOCTOR: '/api/doctor',
+  DYNAMIC_REPORT: '/api/dynamic-report',
+  EMERGENCY: '/api/emergency',
+  FIXED_ASSETS: '/api/fixed-assets',
+  HELPDESK: '/api/helpdesk',
+  INCENTIVE: '/api/incentive',
+  INVENTORY: '/api/inventory',
+  LABORATORY: '/api/laboratory',
+  MATERNITY: '/api/maternity',
+  MEDICAL_RECORDS: '/api/medical-records',
+  MKT_REFERRAL: '/api/mkt-referral',
+  NHIF: '/api/nhif',
+  NURSING: '/api/nursing',
+  OPERATION_THEATRE: '/api/operation-theatre',
+  PATIENT: '/api/patient',
+  PHARMACY: '/api/pharmacy',
+  PROCUREMENT: '/api/procurement',
+  QUEUE_MNGMT: '/api/queue-mngmt',
+  RADIOLOGY: '/api/radiology',
+  REPORTS: '/api/reports',
+  SETTINGS: '/api/settings',
+  SOCIAL_SERVICE: '/api/social-service',
+  SUBSTORE: '/api/substore',
+  SYSTEM_ADMIN: '/api/system-admin',
+  UTILITIES: '/api/utilities',
+  VACCINATION: '/api/vaccination',
+  VERIFICATION: '/api/verification',
+  WARD: '/api/wards',
+  TRANSACTION: '/api/transaction',
+  PAYROLL: '/api/payroll',
+  DISCHARGE: '/api/discharge',
+  AVAILABILITY: '/api/availability',
+  QUEUE: '/api/queue',
+};
+
+export const BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000';
+
+const api = {
+  API_ROUTES,
+  BASE_URL,
+};
+
+export default api;
+
+
 generator client {
   provider = "prisma-client-js"
 }
@@ -10,14 +2611,14 @@ datasource db {
 model User {
   id            Int              @id @default(autoincrement())
   email         String           @unique
-  name          String           @default("")
+  name          String
   password      String
   role          String           @default("PATIENT") // PATIENT, DOCTOR, ADMIN, NURSE
   createdAt     DateTime         @default(now())
   updatedAt     DateTime         @updatedAt
-  doctor        Doctor?          @relation("DoctorUser", fields: [doctorId], references: [id])
+  doctor        Doctor?          @relation(fields: [doctorId], references: [id])
   doctorId      Int?             @unique
-  patient       Patient?         @relation("PatientUser", fields: [patientId], references: [id])
+  patient       Patient?         @relation(fields: [patientId], references: [id])
   patientId     Int?             @unique
   payrolls      Payroll[]
   cssdLogs      CSSDLog[]        @relation("LoggedBy")
@@ -26,29 +2627,27 @@ model User {
 }
 
 model Doctor {
-  id            Int              @id @default(autoincrement())
-  userId        Int              @unique
-  user          User             @relation("DoctorUser", fields: [userId], references: [id], onDelete: Cascade)
-  doctorId      String           @unique
-  specialty     String           @default("")
-  licenseNumber String           @unique
+  id            Int         @id @default(autoincrement())
+  user          User?       @relation
+  doctorId      String      @unique
+  specialty     String
+  licenseNumber String      @unique
   phone         String?
   office        String?
   departmentId  Int?
-  department    Department?      @relation(fields: [departmentId], references: [id])
-  createdAt     DateTime         @default(now())
-  updatedAt     DateTime         @updatedAt
-  admissions    Admission[]      @relation("DoctorAdmissions")
-  discharges    Discharge[]      @relation("DischargingDoctor")
-  appointments  Appointment[]    @relation("DoctorAppointments")
+  department    Department? @relation(fields: [departmentId], references: [id])
+  createdAt     DateTime    @default(now())
+  updatedAt     DateTime    @updatedAt
+  admissions    Admission[] @relation("DoctorAdmissions")
+  discharges    Discharge[] @relation("DischargingDoctor")
+  appointments  Appointment[] @relation("DoctorAppointments")
   availability  DoctorAvailability[]
 }
 
 model Patient {
-  id                Int              @id @default(autoincrement())
-  userId            Int              @unique
-  user              User             @relation("PatientUser", fields: [userId], references: [id], onDelete: Cascade)
-  patientId         String           @unique
+  id                Int           @id @default(autoincrement())
+  user              User?         @relation
+  patientId         String        @unique
   dateOfBirth       DateTime?
   gender            String?
   phone             String?
@@ -61,11 +2660,11 @@ model Patient {
   allergies         String?
   medicalHistory    String?
   admissions        Admission[]
-  discharges        Discharge[]      @relation("DischargedPatient")
-  transactions      Transaction[]    @relation("PatientTransactions")
-  appointments      Appointment[]    @relation("PatientAppointments")
-  createdAt         DateTime         @default(now())
-  updatedAt         DateTime         @updatedAt
+  discharges        Discharge[]   @relation("DischargedPatient")
+  transactions      Transaction[] @relation("PatientTransactions")
+  appointments      Appointment[] @relation("PatientAppointments")
+  createdAt         DateTime      @default(now())
+  updatedAt         DateTime      @updatedAt
 }
 
 model Department {
@@ -81,9 +2680,9 @@ model Department {
 model Appointment {
   id            Int         @id @default(autoincrement())
   patientId     Int
-  patient       Patient     @relation("PatientAppointments", fields: [patientId], references: [id], onDelete: Restrict)
+  patient       Patient     @relation("PatientAppointments", fields: [patientId], references: [id])
   doctorId      Int
-  doctor        Doctor      @relation("DoctorAppointments", fields: [doctorId], references: [id], onDelete: Restrict)
+  doctor        Doctor      @relation("DoctorAppointments", fields: [doctorId], references: [id])
   departmentId  Int?
   department    Department? @relation(fields: [departmentId], references: [id])
   bookedById    Int?
@@ -104,7 +2703,7 @@ model Appointment {
 model DoctorAvailability {
   id            Int         @id @default(autoincrement())
   doctorId      Int
-  doctor        Doctor      @relation(fields: [doctorId], references: [id], onDelete: Cascade)
+  doctor        Doctor      @relation(fields: [doctorId], references: [id])
   startTime     DateTime
   endTime       DateTime
   status        String      @default("AVAILABLE") // AVAILABLE, UNAVAILABLE
@@ -115,7 +2714,7 @@ model DoctorAvailability {
 model Queue {
   id            Int         @id @default(autoincrement())
   appointmentId Int         @unique
-  appointment   Appointment @relation(fields: [appointmentId], references: [id], onDelete: Cascade)
+  appointment   Appointment @relation(fields: [appointmentId], references: [id])
   queueNumber   Int
   status        String      @default("WAITING") // WAITING, IN_PROGRESS, COMPLETED
   createdAt     DateTime    @default(now())
@@ -125,7 +2724,7 @@ model Queue {
 model Admission {
   id                Int       @id @default(autoincrement())
   patientId         Int
-  patient           Patient   @relation(fields: [patientId], references: [id], onDelete: Restrict)
+  patient           Patient   @relation(fields: [patientId], references: [id])
   doctorId          Int?
   doctor            Doctor?   @relation("DoctorAdmissions", fields: [doctorId], references: [id])
   wardId            Int?
@@ -147,9 +2746,9 @@ model Admission {
 model Discharge {
   id                Int       @id @default(autoincrement())
   patientId         Int
-  patient           Patient   @relation("DischargedPatient", fields: [patientId], references: [id], onDelete: Restrict)
+  patient           Patient   @relation("DischargedPatient", fields: [patientId], references: [id])
   doctorId          Int
-  doctor            Doctor    @relation("DischargingDoctor", fields: [doctorId], references: [id], onDelete: Restrict)
+  doctor            Doctor    @relation("DischargingDoctor", fields: [doctorId], references: [id])
   dischargeDate     DateTime  @default(now())
   dischargeNotes    String?
   followUpInstructions String?
@@ -191,7 +2790,7 @@ model Transaction {
 model Payroll {
   id        Int       @id @default(autoincrement())
   userId    Int
-  user      User      @relation(fields: [userId], references: [id], onDelete: Restrict)
+  user      User      @relation(fields: [userId], references: [id])
   salary    Float
   taxes     Float
   benefits  Float
@@ -242,7 +2841,7 @@ model CSSDInstrument {
 model CSSDRecord {
   id                 Int       @id @default(autoincrement())
   instrumentId       Int
-  instrument         CSSDInstrument @relation(fields: [instrumentId], references: [id], onDelete: Cascade)
+  instrument         CSSDInstrument @relation(fields: [instrumentId], references: [id])
   sterilizationDate   DateTime?
   sterilizationMethod String?
   cycleNumber        String?
@@ -257,10 +2856,10 @@ model CSSDRecord {
 model CSSDRequisition {
   id              Int       @id @default(autoincrement())
   instrumentId    Int
-  instrument      CSSDInstrument @relation("RequisitionInstrument", fields: [instrumentId], references: [id], onDelete: Restrict)
+  instrument      CSSDInstrument @relation("RequisitionInstrument", fields: [instrumentId], references: [id])
   department      String
   requestedBy     Int
-  user            User      @relation("RequisitionRequestedBy", fields: [requestedBy], references: [id], onDelete: Restrict)
+  user            User      @relation("RequisitionRequestedBy", fields: [requestedBy], references: [id])
   quantity        Int
   requestDate     DateTime  @default(now())
   dispatchDate    DateTime?
@@ -280,8 +2879,160 @@ model CSSDLog {
   requisitionId   Int?
   requisition     CSSDRequisition? @relation("RequisitionLogs", fields: [requisitionId], references: [id])
   userId          Int
-  user            User           @relation("LoggedBy", fields: [userId], references: [id], onDelete: Restrict)
+  user            User           @relation("LoggedBy", fields: [userId], references: [id])
   action          String
   details         String?
   createdAt       DateTime       @default(now())
+}
+
+"use client";
+
+import React, { useState, useEffect } from 'react';
+import { Container, Paper, Tabs, Tab, Box } from '@mui/material';
+import AppointmentForm from './AppointmentForm';
+import AppointmentList from './AppointmentList';
+import AppointmentHistory from './AppointmentHistory';
+import DoctorSchedule from './DoctorSchedule';
+import QueueManagement from './QueueManagement';
+import DoctorAvailability from './DoctorAvailability';
+import AvailableDoctorsList from './AvailableDoctorsList';
+import DepartmentForm from './DepartmentForm';
+import Dashboard from './Dashboard';
+import { getDepartments, getDoctors, getPatients } from './appointmentService';
+import styles from './page.module.css';
+
+export default function AppointmentPage({ userId }) {
+  const [patients, setPatients] = useState([]);
+  const [doctors, setDoctors] = useState([]);
+  const [departments, setDepartments] = useState([]);
+  const [selectedAppointment, setSelectedAppointment] = useState(null);
+  const [activeTab, setActiveTab] = useState('dashboard');
+  const [refreshKey, setRefreshKey] = useState(0);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const token = localStorage.getItem('token');
+        if (!token) throw new Error('No authentication token found');
+
+        const [patientsData, doctorsData, departmentsData] = await Promise.all([
+          getPatients(),
+          getDoctors(),
+          getDepartments(),
+        ]);
+        console.log('Fetched patients:', JSON.stringify(patientsData, null, 2));
+        console.log('Fetched doctors:', JSON.stringify(doctorsData, null, 2));
+        console.log('Fetched departments:', JSON.stringify(departmentsData, null, 2));
+        setPatients(Array.isArray(patientsData) ? patientsData.filter(p => p && p.user) : []);
+        setDoctors(Array.isArray(doctorsData) ? doctorsData.filter(d => d && d.user) : []);
+        setDepartments(Array.isArray(departmentsData) ? departmentsData : []);
+      } catch (err) {
+        console.error('Failed to fetch data:', err);
+      }
+    };
+    fetchData();
+  }, []);
+
+  const handleSuccess = () => {
+    setSelectedAppointment(null);
+    setRefreshKey((prev) => prev + 1);
+  };
+
+  const handleEdit = (appointment) => {
+    setSelectedAppointment(appointment);
+    setActiveTab('form');
+  };
+
+  const handleTabChange = (event, newValue) => {
+    setActiveTab(newValue);
+    setSelectedAppointment(null);
+  };
+
+  return (
+    <Container maxWidth="xl" sx={{ py: 4 }}>
+      <Box sx={{ p: 0, m: 0 }}>
+        <Tabs
+          value={activeTab}
+          onChange={handleTabChange}
+          variant="scrollable"
+          scrollButtons="auto"
+          sx={{ mb: 2 }}
+        >
+          <Tab label="Dashboard" value="dashboard" />
+          <Tab label="Book" value="form" />
+          <Tab label="List" value="list" />
+          <Tab label="History" value="history" />
+          <Tab label="Schedule" value="schedule" />
+          <Tab label="Queue" value="queue" />
+          <Tab label="Availability" value="availability" />
+          <Tab label="Available Doctors" value="availableDoctors" />
+          <Tab label="Departments" value="departments" />
+        </Tabs>
+        <Box>
+          {activeTab === 'dashboard' && <Dashboard />}
+          {activeTab === 'form' && (
+            <AppointmentForm
+              patients={patients}
+              doctors={doctors}
+              departments={departments}
+              onSuccess={handleSuccess}
+              appointment={selectedAppointment}
+              userId={userId}
+            />
+          )}
+          {activeTab === 'list' && (
+            <AppointmentList
+              key={refreshKey}
+              onEdit={handleEdit}
+            />
+          )}
+          {activeTab === 'history' && (
+            <AppointmentHistory patients={patients} />
+          )}
+          {activeTab === 'schedule' && (
+            <DoctorSchedule doctors={doctors} />
+          )}
+          {activeTab === 'queue' && (
+            <QueueManagement doctors={doctors} />
+          )}
+          {activeTab === 'availability' && (
+            <DoctorAvailability doctors={doctors} />
+          )}
+          {activeTab === 'availableDoctors' && (
+            <AvailableDoctorsList />
+          )}
+          {activeTab === 'departments' && <DepartmentForm />}
+        </Box>
+      </Box>
+    </Container>
+  );
+}
+
+
+
+
+Are there any repetitive  features in the components? Write as full code blocks for each file, I’m also suggesting that we add a search function wherever possible so that a user can directly search patient name in the select interface instead of having to. Scroll over 10000 patients 
+// SearchBar.jsx
+import React, { useState } from 'react';
+import styles from './SearchBar.module.css';
+
+export default function SearchBar({ onSearch }) {
+  const [query, setQuery] = useState('');
+
+  const handleChange = (e) => {
+    setQuery(e.target.value);
+    onSearch(e.target.value);
+  };
+
+  return (
+    <div className={styles.container}>
+      <input
+        type="text"
+        placeholder="Search by patient or doctor name..."
+        value={query}
+        onChange={handleChange}
+        className={styles.input}
+      />
+    </div>
+  );
 }
