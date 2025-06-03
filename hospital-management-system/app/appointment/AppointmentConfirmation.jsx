@@ -1,19 +1,15 @@
-
-
-// AppointmentConfirmation.jsx
 import React from 'react';
 import styles from './AppointmentConfirmation.module.css';
 
 export default function AppointmentConfirmation({ appointment, onClose }) {
   const handleAddToCalendar = () => {
     const event = {
-      title: `Appointment with ${appointment.doctor.name}`,
+      title: `Appointment with ${appointment.doctor.user.name}`,
       description: `Reason: ${appointment.reason}\nNotes: ${appointment.notes || 'None'}`,
       start: new Date(appointment.date).toISOString(),
       duration: [30, 'minute'],
       location: 'Hospital',
     };
-    // Placeholder for calendar integration
     console.log('Add to calendar:', event);
   };
 
@@ -21,8 +17,8 @@ export default function AppointmentConfirmation({ appointment, onClose }) {
     <div className={styles.modal}>
       <div className={styles.modalContent}>
         <h2>Appointment Confirmed</h2>
-        <p><strong>Patient:</strong> {appointment.patient.name}</p>
-        <p><strong>Doctor:</strong> {appointment.doctor.name}</p>
+        <p><strong>Patient:</strong> {appointment.patient.user.name}</p>
+        <p><strong>Doctor:</strong> {appointment.doctor.user.name}</p>
         <p><strong>Date:</strong> {new Date(appointment.date).toLocaleString()}</p>
         <p><strong>Reason:</strong> {appointment.reason}</p>
         {appointment.notes && <p><strong>Notes:</strong> {appointment.notes}</p>}
