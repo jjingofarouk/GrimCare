@@ -62,7 +62,7 @@ export default function AppointmentHistory({ patients }) {
       </Typography>
       <Box className={styles.searchContainer}>
         <SearchableSelect
-          label="Patient"
+          label=""
           options={[{ id: '', user: { name: 'All Patients' } }, ...patients]}
           value={selectedPatientId}
           onChange={setSelectedPatientId}
