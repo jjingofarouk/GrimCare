@@ -4,6 +4,7 @@ import React, { useState, useEffect } from 'react';
 import { Box, Typography, Alert, Button, TextField, FormControl, InputLabel, Select, MenuItem } from '@mui/material';
 import SearchableSelect from '../components/SearchableSelect';
 import CustomDataGrid from '../components/CustomDataGrid';
+import axios from 'axios';
 import api from '../api';
 
 export default function DoctorAvailability({ doctors }) {
@@ -15,19 +16,17 @@ export default function DoctorAvailability({ doctors }) {
 
   useEffect(() => {
     async function fetchAvailability() {
-      if (!selectedDoctorId) {
-        setAvailability([]);
-        return;
-      }
+      if (!selectedDoctorId) return;
       setLoading(true);
       try {
-        const response = await fetch(`${api.BASE_URL}${api.API_ROUTES.AVAILABILITY}?doctorId=${selectedDoctorId}`);
-        if (!response.ok) throw new Error('Failed to fetch availability');
-        const data = await response.json();
-        setAvailability(data);
+        const token = localStorage.getItem('token');
+        const response = await axios.get(`${api.BASE_URL}${api.API_ROUTES.APPOINTMENT}?resource=availability&doctorId=${selectedDoctorId}`, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        setAvailability(response.data);
         setError(null);
       } catch (err) {
-        setError(err.message);
+        setError(err.response?.data?.error || err.message);
       } finally {
         setLoading(false);
       }
@@ -38,21 +37,18 @@ export default function DoctorAvailability({ doctors }) {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      setLoading(true);
-      const response = await fetch(`${api.BASE_URL}${api.API_ROUTES.AVAILABILITY}`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ ...formData, doctorId: selectedDoctorId }),
+      const token = localStorage.getItem('token');
+      await axios.post(`${api.BASE_URL}${api.API_ROUTES.APPOINTMENT}`, { resource: 'availability', ...formData, doctorId: selectedDoctorId }, {
+        headers: { Authorization: `Bearer ${token}` },
       });
-      if (!response.ok) throw new Error('Failed to create availability');
-      const newAvailability = await response.json();
-      setAvailability([...availability, newAvailability]);
       setFormData({ startTime: '', endTime: '', status: 'AVAILABLE' });
+      const response = await axios.get(`${api.BASE_URL}${api.API_ROUTES.APPOINTMENT}?resource=availability&doctorId=${selectedDoctorId}`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      setAvailability(response.data);
       setError(null);
     } catch (err) {
-      setError('Failed to create availability: ' + err.message);
-    } finally {
-      setLoading(false);
+      setError('Failed to create availability: ' + (err.response?.data?.error || err.message));
     }
   };
 
@@ -101,12 +97,16 @@ export default function DoctorAvailability({ doctors }) {
                 <MenuItem value="UNAVAILABLE">Unavailable</MenuItem>
               </Select>
             </FormControl>
-            <Button type="submit" variant="contained" disabled={loading}>Add Availability</Button>
+            <Button type="submit" variant="contained">Add Availability</Button>
           </Box>
           {error && <Alert severity="error">{error}</Alert>}
-          <Box sx={{ height: 400, width: '100%' }}>
-            <CustomDataGrid rows={availability} columns={columns} loading={loading} />
-          </Box>
+          {loading ? (
+            <CircularProgress />
+          ) : (
+            <Box sx={{ height: 400, width: '100%' }}>
+              <CustomDataGrid rows={availability} columns={columns} />
+            </Box>
+          )}
         </>
       )}
     </Box>
