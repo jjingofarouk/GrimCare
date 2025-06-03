@@ -3,8 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import { Box, TextField, Button, MenuItem, Select, InputLabel, FormControl, Typography, Dialog, DialogTitle, DialogContent, DialogActions } from '@mui/material';
 import SearchableSelect from '../components/SearchableSelect';
-import { createAppointment, updateAppointment } from './appointmentService';
-import { formatDate } from '../utils/date';
+import api from '../utils/api';
 import styles from './form.module.css';
 
 export default function AppointmentForm({ patients, doctors, departments, onSuccess, appointment, userId }) {
@@ -71,17 +70,21 @@ export default function AppointmentForm({ patients, doctors, departments, onSucc
         date: new Date(formData.date),
         bookedById: userId,
       };
-      let response;
-      if (appointment) {
-        response = await updateAppointment(appointment.id, data);
-      } else {
-        response = await createAppointment(data);
-      }
+      const response = await fetch(
+        appointment ? `${api.BASE_URL}${api.API_ROUTES.APPOINTMENT}/${appointment.id}` : `${api.BASE_URL}${api.API_ROUTES.APPOINTMENT}`,
+        {
+          method: appointment ? 'PUT' : 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(data),
+        }
+      );
+      if (!response.ok) throw new Error('Failed to process appointment');
+      await response.json();
       onSuccess();
       setFormData({ patientId: '', doctorId: '', departmentId: '', date: '', type: 'REGULAR', reason: '', notes: '' });
       setOpenConfirm(false);
     } catch (err) {
-      setError('Failed to process appointment: ' + (err.message || 'Unknown error'));
+      setError('Failed to process appointment: ' + err.message);
       console.error('Submission error:', err);
     } finally {
       setLoading(false);
@@ -174,7 +177,7 @@ export default function AppointmentForm({ patients, doctors, departments, onSucc
           <Typography><strong>Patient:</strong> {patients.find((p) => p.id === parseInt(formData.patientId))?.user?.name || formData.patientId || 'Unknown'}</Typography>
           <Typography><strong>Doctor:</strong> {doctors.find((d) => d.id === parseInt(formData.doctorId))?.user?.name || formData.doctorId || 'Unknown'}</Typography>
           <Typography><strong>Department:</strong> {departments.find((d) => d.id === parseInt(formData.departmentId))?.name || 'N/A'}</Typography>
-          <Typography><strong>Date:</strong> {formatDate(formData.date)}</Typography>
+          <Typography><strong>Date:</strong> {new Date(formData.date).toLocaleString()}</Typography>
           <Typography><strong>Type:</strong> {formData.type}</Typography>
           <Typography><strong>Reason:</strong> {formData.reason}</Typography>
           <Typography><strong>Notes:</strong> {formData.notes || 'N/A'}</Typography>
