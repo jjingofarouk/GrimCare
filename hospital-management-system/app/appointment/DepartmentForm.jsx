@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { Box, Typography, CircularProgress, Alert, TextField, Button } from '@mui/material';
-import CustomDataGrid from '../components/CustomDataGrid';
+import { DataGrid } from '@mui/x-data-grid';
 import axios from 'axios';
 import api from '../api';
 
@@ -20,10 +20,9 @@ export default function DepartmentForm() {
         const response = await axios.get(`${api.BASE_URL}${api.API_ROUTES.APPOINTMENT}?resource=departments`, {
           headers: { Authorization: `Bearer ${token}` },
         });
-        // Ensure each department has a unique id for DataGrid
         const formattedDepartments = response.data.map((dept, index) => ({
           ...dept,
-          id: dept.id || index + 1, // Fallback to index if id is missing
+          id: dept.id || index + 1,
         }));
         setDepartments(formattedDepartments);
         setError(null);
@@ -82,10 +81,7 @@ export default function DepartmentForm() {
       field: 'createdAt',
       headerName: 'Created At',
       width: 200,
-      valueGetter: (params) => {
-        const date = params.row.createdAt;
-        return date ? new Date(date).toLocaleString() : 'N/A';
-      },
+      valueGetter: ({ row }) => (row.createdAt ? new Date(row.createdAt).toLocaleString() : 'N/A'),
     },
   ];
 
@@ -109,7 +105,7 @@ export default function DepartmentForm() {
           rows={3}
           fullWidth
         />
-        {(error) && <Alert severity="error">{error}</Alert>}
+        {error && <Alert severity="error">{error}</Alert>}
         <Button type="submit" variant="contained" disabled={loading}>
           {loading ? 'Creating...' : 'Add Department'}
         </Button>
@@ -118,7 +114,12 @@ export default function DepartmentForm() {
         <CircularProgress />
       ) : (
         <Box sx={{ height: 400, width: '100%' }}>
-          <CustomDataGrid rows={departments} columns={columns} />
+          <DataGrid
+            rows={departments}
+            columns={columns}
+            pageSizeOptions={[5, 10, 20]}
+            disableRowSelectionOnClick
+          />
         </Box>
       )}
     </Box>
