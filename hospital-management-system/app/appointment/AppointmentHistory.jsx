@@ -1,7 +1,9 @@
+"use client";
+
 import React, { useState, useEffect } from 'react';
-import { Box, Typography, Alert } from '@mui/material';
+import { Box, Typography, Alert, CircularProgress } from '@mui/material';
+import { DataGrid } from '@mui/x-data-grid';
 import SearchableSelect from '../components/SearchableSelect';
-import CustomDataGrid from '../components/CustomDataGrid';
 import axios from 'axios';
 import api from '../api';
 
@@ -20,15 +22,16 @@ export default function AppointmentHistory({ patients }) {
         const response = await axios.get(`${api.BASE_URL}${api.API_ROUTES.APPOINTMENT}?patientId=${selectedPatientId}`, {
           headers: { Authorization: `Bearer ${token}` },
         });
-        setAppointments(response.data.map(appt => ({
-          id: appt.id,
-          doctorName: appt.doctor?.user?.name || 'N/A',
+        const formattedAppointments = response.data.map((appt, index) => ({
+          id: appt.id || `appt-${index + 1}`,
+          doctorName: appt.doctor?.user?.name || appt.doctor?.doctorId || 'N/A',
           date: appt.date ? new Date(appt.date).toLocaleString() : 'N/A',
           type: appt.type || 'N/A',
           status: appt.status || 'N/A',
           reason: appt.reason || 'N/A',
           notes: appt.notes || 'N/A',
-        })));
+        }));
+        setAppointments(formattedAppointments);
         setError(null);
       } catch (err) {
         setError(err.response?.data?.error || err.message);
@@ -50,8 +53,10 @@ export default function AppointmentHistory({ patients }) {
   ];
 
   return (
-    <Box sx={{ p: 2 }}>
-      <Typography variant="h5" gutterBottom>Appointment History</Typography>
+    <Box sx={{ p: 2, maxWidth: 1000, mx: 'auto', bgcolor: '#f5f5f5', borderRadius: 2 }}>
+      <Typography variant="h5" gutterBottom sx={{ fontWeight: 700, color: '#1976d2' }}>
+        Appointment History
+      </Typography>
       <SearchableSelect
         label="Patient"
         options={patients}
@@ -60,10 +65,20 @@ export default function AppointmentHistory({ patients }) {
         getOptionLabel={(patient) => patient.user?.name || patient.patientId || 'Unknown'}
         getOptionValue={(patient) => patient.id}
       />
-      {error && <Alert severity="error">{error}</Alert>}
+      {error && <Alert severity="error" sx={{ mb: 2 }}>{error}</Alert>}
       {selectedPatientId && (
-        <Box sx={{ height: 400, width: '100%' }}>
-          <CustomDataGrid rows={appointments} columns={columns} />
+        <Box sx={{ height: 400, width: '100%', mt: 2, bgcolor: 'white', borderRadius: 2 }}>
+          {loading ? (
+            <CircularProgress />
+          ) : (
+            <DataGrid
+              rows={appointments}
+              columns={columns}
+              pageSizeOptions={[5, 10, 20]}
+              disableRowSelectionOnClick
+              getRowId={(row) => row.id}
+            />
+          )}
         </Box>
       )}
     </Box>
