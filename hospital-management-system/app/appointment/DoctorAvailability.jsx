@@ -17,20 +17,22 @@ export default function DoctorAvailability({ doctors }) {
   const [error, setError] = useState(null);
   const [loading, setLoading] = useState(false);
 
+  // Fetch all availability data on component mount
   useEffect(() => {
     async function fetchAllAvailability() {
       setLoading(true);
       try {
         const token = localStorage.getItem('token');
-        const response = await axios.get(`${api.BASE_URL}/availability`, {
+        const response = await axios.get(`${api.BASE_URL}${api.API_ROUTES.APPOINTMENT}?resource=availability`, {
           headers: { Authorization: `Bearer ${token}` },
         });
         const formattedAvailability = response.data.map((item, index) => ({
           ...item,
           id: item.id || index + 1,
+          doctorName: getDoctorName(item.doctorId),
         }));
         setAvailability(formattedAvailability);
-        applyFilters(formattedAvailability, filter);
+        applyFilters(formattedAvailability, filter, selectedDoctorId);
         setError(null);
       } catch (err) {
         setError(err.response?.data?.error || err.message);
@@ -41,36 +43,26 @@ export default function DoctorAvailability({ doctors }) {
     fetchAllAvailability();
   }, []);
 
-  useEffect(() => {
-    async function fetchDoctorAvailability() {
-      if (!selectedDoctorId) return;
-      setLoading(true);
-      try {
-        const token = localStorage.getItem('token');
-        const response = await axios.get(`${api.BASE_URL}/availability?doctorId=${selectedDoctorId}`, {
-          headers: { Authorization: `Bearer ${token}` },
-        });
-        const formattedAvailability = response.data.map((item, index) => ({
-          ...item,
-          id: item.id || index + 1,
-        }));
-        setAvailability(formattedAvailability);
-        applyFilters(formattedAvailability, filter);
-        setError(null);
-      } catch (err) {
-        setError(err.response?.data?.error || err.message);
-      } finally {
-        setLoading(false);
-      }
-    }
-    fetchDoctorAvailability();
-  }, [selectedDoctorId]);
+  // Helper function to get doctor name by ID
+  const getDoctorName = (doctorId) => {
+    const doctor = doctors?.find(d => d.id === doctorId);
+    return doctor ? `${doctor.user?.name || doctor.doctorId || 'Unknown'} (${doctor.specialty || 'N/A'})` : 'Unknown Doctor';
+  };
 
-  const applyFilters = (data, currentFilter) => {
+  const applyFilters = (data, currentFilter, doctorFilter = '') => {
     let filtered = [...data];
+    
+    // Filter by selected doctor
+    if (doctorFilter) {
+      filtered = filtered.filter(item => item.doctorId === doctorFilter);
+    }
+    
+    // Filter by status
     if (currentFilter.status) {
       filtered = filtered.filter(item => item.status === currentFilter.status);
     }
+    
+    // Filter by date
     if (currentFilter.date) {
       const filterDate = new Date(currentFilter.date).toDateString();
       filtered = filtered.filter(item => {
@@ -78,39 +70,45 @@ export default function DoctorAvailability({ doctors }) {
         return itemDate === filterDate;
       });
     }
+    
     setFilteredAvailability(filtered);
   };
 
+  // Apply filters when filter state or selected doctor changes
   useEffect(() => {
-    applyFilters(availability, filter);
-  }, [filter, availability]);
+    applyFilters(availability, filter, selectedDoctorId);
+  }, [filter, availability, selectedDoctorId]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!formData.startTime || !formData.endTime || !selectedDoctorId) {
-      setError('Start time, End time, and Doctor selection are required.');
+    if (!selectedDoctorId) {
+      setError('Please select a doctor to add availability.');
+      return;
+    }
+    if (!formData.startTime || !formData.endTime) {
+      setError('Start and End times are required.');
       return;
     }
     try {
       const token = localStorage.getItem('token');
       await axios.post(
-        `${api.BASE_URL}/availability`,
-        { ...formData, doctorId: selectedDoctorId },
+        `${api.BASE_URL}${api.API_ROUTES.APPOINTMENT}`,
+        { resource: 'availability', ...formData, doctorId: selectedDoctorId },
         { headers: { Authorization: `Bearer ${token}` } }
       );
       setFormData({ startTime: '', endTime: '', status: 'AVAILABLE' });
-      const response = await axios.get(
-        selectedDoctorId 
-          ? `${api.BASE_URL}/availability?doctorId=${selectedDoctorId}`
-          : `${api.BASE_URL}/availability`,
-        { headers: { Authorization: `Bearer ${token}` } }
-      );
+      
+      // Refresh all availability data
+      const response = await axios.get(`${api.BASE_URL}${api.API_ROUTES.APPOINTMENT}?resource=availability`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
       const formattedAvailability = response.data.map((item, index) => ({
         ...item,
         id: item.id || index + 1,
+        doctorName: getDoctorName(item.doctorId),
       }));
       setAvailability(formattedAvailability);
-      applyFilters(formattedAvailability, filter);
+      applyFilters(formattedAvailability, filter, selectedDoctorId);
       setError(null);
     } catch (err) {
       setError('Failed to create availability: ' + (err.response?.data?.error || err.message));
@@ -121,15 +119,16 @@ export default function DoctorAvailability({ doctors }) {
     setFilter({ ...filter, [e.target.name]: e.target.value });
   };
 
+  const handleDoctorFilterChange = (doctorId) => {
+    setSelectedDoctorId(doctorId);
+  };
+
   const columns = [
     {
-      field: 'doctorId',
+      field: 'doctorName',
       headerName: 'Doctor',
-      width: 200,
-      renderCell: (params) => {
-        const doctor = doctors.find(d => d.id === params.row.doctorId);
-        return doctor ? `${doctor.user?.name || doctor.doctorId || 'Unknown'} (${doctor.specialty || 'N/A'})` : 'N/A';
-      },
+      width: 250,
+      renderCell: (params) => params.row.doctorName || 'Unknown Doctor',
     },
     {
       field: 'startTime',
@@ -151,24 +150,50 @@ export default function DoctorAvailability({ doctors }) {
       <Typography variant="h5" gutterBottom className={styles.title}>
         Doctor Availability
       </Typography>
-      <SearchableSelect
-        label="Doctor (Optional)"
-        options={doctors}
-        value={selectedDoctorId}
-        onChange={setSelectedDoctorId}
-        getOptionLabel={(doctor) => `${doctor.user?.name || doctor.doctorId || 'Unknown'} (${doctor.specialty || 'N/A'})`}
-        getOptionValue={(doctor) => doctor.id}
-      />
+      
+      {/* Doctor Filter Section */}
+      <Box className={styles.filterContainer}>
+        <SearchableSelect
+          label="Filter by Doctor (Optional)"
+          options={doctors}
+          value={selectedDoctorId}
+          onChange={handleDoctorFilterChange}
+          getOptionLabel={(doctor) => `${doctor.user?.name || doctor.doctorId || 'Unknown'} (${doctor.specialty || 'N/A'})`}
+          getOptionValue={(doctor) => doctor.id}
+          allowClear={true}
+        />
+        <TextField
+          label="Filter by Date"
+          type="date"
+          name="date"
+          value={filter.date}
+          onChange={handleFilterChange}
+          InputLabelProps={{ shrink: true }}
+          className={styles.filterInput}
+        />
+        <FormControl className={styles.filterInput}>
+          <InputLabel>Filter by Status</InputLabel>
+          <Select
+            name="status"
+            value={filter.status}
+            onChange={handleFilterChange}
+          >
+            <MenuItem value="">All</MenuItem>
+            <MenuItem value="AVAILABLE">Available</MenuItem>
+            <MenuItem value="UNAVAILABLE">Unavailable</MenuItem>
+          </Select>
+        </FormControl>
+      </Box>
+
+      {/* Add Availability Form */}
       <Box component="form" onSubmit={handleSubmit} className={styles.form}>
         <SearchableSelect
-          label="Doctor"
+          label="Select Doctor (Required for adding availability)"
           options={doctors}
           value={selectedDoctorId}
           onChange={setSelectedDoctorId}
           getOptionLabel={(doctor) => `${doctor.user?.name || doctor.doctorId || 'Unknown'} (${doctor.specialty || 'N/A'})`}
           getOptionValue={(doctor) => doctor.id}
-          required
-          className={styles.input}
         />
         <TextField
           label="Start Time"
@@ -205,30 +230,9 @@ export default function DoctorAvailability({ doctors }) {
           Add Availability
         </Button>
       </Box>
-      <Box className={styles.filterContainer}>
-        <TextField
-          label="Filter by Date"
-          type="date"
-          name="date"
-          value={filter.date}
-          onChange={handleFilterChange}
-          InputLabelProps={{ shrink: true }}
-          className={styles.filterInput}
-        />
-        <FormControl className={styles.filterInput}>
-          <InputLabel>Filter by Status</InputLabel>
-          <Select
-            name="status"
-            value={filter.status}
-            onChange={handleFilterChange}
-          >
-            <MenuItem value="">All</MenuItem>
-            <MenuItem value="AVAILABLE">Available</MenuItem>
-            <MenuItem value="UNAVAILABLE">Unavailable</MenuItem>
-          </Select>
-        </FormControl>
-      </Box>
+
       {error && <Alert severity="error" className={styles.alert}>{error}</Alert>}
+      
       {loading ? (
         <CircularProgress className={styles.loader} />
       ) : (
