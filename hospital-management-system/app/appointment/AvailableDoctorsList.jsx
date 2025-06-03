@@ -26,18 +26,17 @@ export default function AvailableDoctorsList() {
               `${api.BASE_URL}${api.API_ROUTES.APPOINTMENT}?resource=availability&doctorId=${doctor.id}`,
               { headers: { Authorization: `Bearer ${token}` } }
             );
-            const availableSlots = availabilityResponse.data.filter(
+            const availableSlots = (availabilityResponse.data || []).filter(
               (item) => item?.startTime && item?.endTime && item.status === 'AVAILABLE'
             );
             return {
               id: doctor.id,
-              user: doctor.user || { name: 'N/A' },
+              name: doctor.user?.name || 'N/A',
               specialty: doctor.specialty || 'N/A',
               availability: availableSlots,
             };
           })
         );
-        // Only include doctors with available slots
         setDoctors(doctorsData.filter(doctor => doctor.availability.length > 0));
         setError(null);
       } catch (err) {
@@ -76,23 +75,21 @@ export default function AvailableDoctorsList() {
 
   const columns = [
     { 
-      field: 'doctorName', 
+      field: 'name', 
       headerName: 'Doctor Name', 
-      width: 200, 
-      valueGetter: ({ row }) => row.user?.name || 'N/A'
+      width: 200,
     },
     { 
       field: 'specialty', 
       headerName: 'Specialty', 
       width: 150,
-      valueGetter: ({ row }) => row.specialty || 'N/A'
     },
     {
       field: 'availableSlots',
       headerName: 'Available Time Slots',
       width: 400,
-      valueGetter: ({ row }) => {
-        const slots = row.availability || [];
+      valueGetter: (params) => {
+        const slots = params.row.availability || [];
         return slots.length > 0
           ? slots
               .map((slot) => `${new Date(slot.startTime).toLocaleString()} - ${new Date(slot.endTime).toLocaleString()}`)
