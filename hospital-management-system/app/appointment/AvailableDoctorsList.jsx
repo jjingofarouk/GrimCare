@@ -1,6 +1,8 @@
+"use client";
+
 import React, { useState, useEffect } from 'react';
-import { Box, Typography, CircularProgress, Alert, TextField, Button, styled } from '@mui/material';
-import CustomDataGrid from '../components/CustomDataGrid';
+import { Box, Typography, CircularProgress, Alert, TextField, Button } from '@mui/material';
+import { DataGrid } from '@mui/x-data-grid';
 import axios from 'axios';
 import api from '../api';
 
@@ -24,17 +26,19 @@ export default function AvailableDoctorsList() {
               `${api.BASE_URL}${api.API_ROUTES.APPOINTMENT}?resource=availability&doctorId=${doctor.id}`,
               { headers: { Authorization: `Bearer ${token}` } }
             );
+            const availableSlots = availabilityResponse.data.filter(
+              (item) => item?.startTime && item?.endTime && item.status === 'AVAILABLE'
+            );
             return {
-              id: doctor.id, // Ensure unique id for DataGrid
-              user: doctor.user || { name: 'N/A' }, // Fallback for user
-              specialty: doctor.specialty || 'N/A', // Fallback for specialty
-              availability: availabilityResponse.data.filter(
-                (item) => item && item.startTime && item.endTime && item.status === 'AVAILABLE'
-              ) || [],
+              id: doctor.id,
+              user: doctor.user || { name: 'N/A' },
+              specialty: doctor.specialty || 'N/A',
+              availability: availableSlots,
             };
           })
         );
-        setDoctors(doctorsData);
+        // Only include doctors with available slots
+        setDoctors(doctorsData.filter(doctor => doctor.availability.length > 0));
         setError(null);
       } catch (err) {
         setError(err.response?.data?.error || err.message);
@@ -62,37 +66,33 @@ export default function AvailableDoctorsList() {
     availability: dateFilter.startDate && dateFilter.endDate
       ? doctor.availability.filter(
           (slot) =>
+            slot.startTime &&
+            slot.endTime &&
             new Date(slot.startTime) >= new Date(dateFilter.startDate) &&
             new Date(slot.endTime) <= new Date(dateFilter.endDate)
         )
       : doctor.availability,
-  }));
+  })).filter(doctor => doctor.availability.length > 0);
 
   const columns = [
     { 
       field: 'doctorName', 
       headerName: 'Doctor Name', 
       width: 200, 
-      valueGetter: (params) => params.row.user?.name || 'N/A' 
+      valueGetter: ({ row }) => row.user?.name || 'N/A'
     },
     { 
       field: 'specialty', 
       headerName: 'Specialty', 
       width: 150,
-      valueGetter: (params) => params.row.specialty || 'N/A'
-    },
-    {
-      field: 'availabilityStatus',
-      headerName: 'Availability',
-      width: 150,
-      valueGetter: (params) => (params.row.availability?.length > 0 ? 'Available' : 'Not Available'),
+      valueGetter: ({ row }) => row.specialty || 'N/A'
     },
     {
       field: 'availableSlots',
       headerName: 'Available Time Slots',
       width: 400,
-      valueGetter: (params) => {
-        const slots = params.row.availability || [];
+      valueGetter: ({ row }) => {
+        const slots = row.availability || [];
         return slots.length > 0
           ? slots
               .map((slot) => `${new Date(slot.startTime).toLocaleString()} - ${new Date(slot.endTime).toLocaleString()}`)
@@ -102,132 +102,48 @@ export default function AvailableDoctorsList() {
     },
   ];
 
-  const ModernBox = styled(Box)(({ theme }) => ({
-    width: '100vw',
-    minHeight: '100vh',
-    padding: '2rem',
-    background: 'linear-gradient(135deg, #1a1a2e 0%, #16213e 100%)',
-    color: '#ffffff',
-    display: 'flex',
-    flexDirection: 'column',
-    alignItems: 'center',
-    boxSizing: 'border-box',
-  }));
-
-  const ModernTypography = styled(Typography)(({ theme }) => ({
-    fontSize: '2.5rem',
-    fontWeight: 700,
-    marginBottom: '2rem',
-    textAlign: 'center',
-    background: 'linear-gradient(45deg, #00b0ff, #80d8ff)',
-    WebkitBackgroundClip: 'text',
-    WebkitTextFillColor: 'transparent',
-    textShadow: '0 2px 4px rgba(0, 123, 255, 0.3)',
-  }));
-
-  const ModernFilterContainer = styled(Box)(({ theme }) => ({
-    display: 'flex',
-    gap: '1rem',
-    marginBottom: '2rem',
-    flexWrap: 'wrap',
-    justifyContent: 'center',
-    width: '100%',
-    maxWidth: '1200px',
-  }));
-
-  const ModernTextField = styled(TextField)(({ theme }) => ({
-    minWidth: '200px',
-    '& .MuiOutlinedInput-root': {
-      borderRadius: '12px',
-      background: 'rgba(255, 255, 255, 0.1)',
-      backdropFilter: 'blur(10px)',
-      border: '1px solid rgba(255, 255, 255, 0.2)',
-      transition: 'all 0.3s ease',
-      '&:hover': {
-        background: 'rgba(255, 255, 255, 0.15)',
-      },
-      '&.Mui-focused': {
-        background: 'rgba(255, 255, 255, 0.2)',
-        boxShadow: '0 0 15px rgba(0, 123, 255, 0.3)',
-      },
-      '& input': {
-        color: '#fff',
-      },
-    },
-    '& .MuiInputLabel-root': {
-      color: 'rgba(255, 255, 255, 0.7)',
-      '&.Mui-focused': {
-        color: '#00b0ff',
-      },
-    },
-  }));
-
-  const ModernButton = styled(Button)(({ theme }) => ({
-    borderRadius: '12px',
-    padding: '10px 24px',
-    background: 'linear-gradient(45deg, #00b0ff, #0052cc)',
-    color: '#fff',
-    fontWeight: 600,
-    textTransform: 'none',
-    boxShadow: '0 4px 15px rgba(0, 123, 255, 0.4)',
-    transition: 'all 0.3s ease',
-    '&:hover': {
-      background: 'linear-gradient(45deg, #00d4ff, #0073e6)',
-      boxShadow: '0 6px 20px rgba(0, 123, 255, 0.6)',
-      transform: 'translateY(-2px)',
-    },
-  }));
-
-  const ModernAlert = styled(Alert)(({ theme }) => ({
-    marginBottom: '1rem',
-    borderRadius: '12px',
-    background: 'rgba(255, 75, 75, 0.1)',
-    backdropFilter: 'blur(10px)',
-    color: '#ff6b6b',
-    width: '100%',
-    maxWidth: '1200px',
-  }));
-
-  const ModernGridContainer = styled(Box)(({ theme }) => ({
-    width: '100%',
-    maxWidth: '1200px',
-    background: 'rgba(255, 255, 255, 0.05)',
-    borderRadius: '16px',
-    padding: '1rem',
-    backdropFilter: 'blur(10px)',
-    boxShadow: '0 8px 32px rgba(0, 0, 0, 0.2)',
-  }));
-
   return (
-    <ModernBox>
-      <ModernTypography variant="h5">Available Doctors</ModernTypography>
-      <ModernFilterContainer>
-        <ModernTextField
+    <Box sx={{ p: 2, maxWidth: 1200, mx: 'auto', bgcolor: '#f5f5f5', borderRadius: 2 }}>
+      <Typography variant="h5" gutterBottom sx={{ fontWeight: 700, color: '#1976d2' }}>
+        Available Doctors
+      </Typography>
+      <Box sx={{ display: 'flex', gap: 2, mb: 2, flexWrap: 'wrap' }}>
+        <TextField
           label="Start Date"
           type="date"
           name="startDate"
           value={dateFilter.startDate}
           onChange={handleDateChange}
           InputLabelProps={{ shrink: true }}
+          sx={{ minWidth: 200 }}
         />
-        <ModernTextField
+        <TextField
           label="End Date"
           type="date"
           name="endDate"
           value={dateFilter.endDate}
           onChange={handleDateChange}
           InputLabelProps={{ shrink: true }}
+          sx={{ minWidth: 200 }}
         />
-        <ModernButton onClick={handleFilter}>Filter</ModernButton>
-      </ModernFilterContainer>
-      {error && <ModernAlert severity="error">{error}</ModernAlert>}
+        <Button onClick={handleFilter} variant="contained" sx={{ bgcolor: '#1976d2' }}>
+          Filter
+        </Button>
+      </Box>
+      {error && <Alert severity="error" sx={{ mb: 2 }}>{error}</Alert>}
       {loading ? (
         <CircularProgress />
       ) : (
-        <ModernGridContainer>
-          <CustomDataGrid rows={filteredDoctors} columns={columns} getRowId={(row) => row.id} />
-        </ModernGridContainer>
+        <Box sx={{ height: 400, width: '100%', bgcolor: 'white', borderRadius: 2 }}>
+          <DataGrid
+            rows={filteredDoctors}
+            columns={columns}
+            pageSizeOptions={[5, 10, 20]}
+            disableRowSelectionOnClick
+            getRowId={(row) => row.id}
+          />
+        </Box>
       )}
-    </ModernBox>
+    </Box>
   );
 }
