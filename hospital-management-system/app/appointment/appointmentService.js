@@ -1,3 +1,4 @@
+// appointmentService.js
 import { PrismaClient } from '@prisma/client';
 
 const prisma = new PrismaClient();
@@ -35,13 +36,14 @@ export async function getAppointment(id) {
 
 export async function createAppointment(data) {
   const { patientId, doctorId, departmentId, date, type, reason, notes, bookedById } = data;
+  const parsedDate = new Date(date);
   const queueNumber = await prisma.queue.count({
     where: {
       appointment: {
         doctorId: parseInt(doctorId),
         date: {
-          gte: new Date(date.getFullYear(), date.getMonth(), date.getDate()),
-          lte: new Date(date.getFullYear(), date.getMonth(), date.getDate(), 23, 59, 59),
+          gte: new Date(parsedDate.getFullYear(), parsedDate.getMonth(), parsedDate.getDate()),
+          lte: new Date(parsedDate.getFullYear(), parsedDate.getMonth(), parsedDate.getDate(), 23, 59, 59),
         },
       },
     },
@@ -53,7 +55,7 @@ export async function createAppointment(data) {
         patientId: parseInt(patientId),
         doctorId: parseInt(doctorId),
         departmentId: departmentId ? parseInt(departmentId) : null,
-        date: new Date(date),
+        date: parsedDate,
         type: type || 'REGULAR',
         reason,
         notes,
@@ -80,13 +82,14 @@ export async function createAppointment(data) {
 }
 
 export async function updateAppointment(id, data) {
+  const parsedDate = data.date ? new Date(data.date) : undefined;
   return prisma.appointment.update({
     where: { id: parseInt(id) },
     data: {
       patientId: data.patientId ? parseInt(data.patientId) : undefined,
       doctorId: data.doctorId ? parseInt(data.doctorId) : undefined,
       departmentId: data.departmentId ? parseInt(data.departmentId) : null,
-      date: data.date ? new Date(data.date) : undefined,
+      date: parsedDate,
       type: data.type,
       reason: data.reason,
       notes: data.notes,
