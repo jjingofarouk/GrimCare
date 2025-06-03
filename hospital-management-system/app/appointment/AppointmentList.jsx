@@ -1,8 +1,9 @@
 "use client";
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Box, Typography, Alert, Button, CircularProgress } from '@mui/material';
 import { DataGrid } from '@mui/x-data-grid';
+import { ExpandMore } from '@mui/icons-material';
 import AppointmentFilter from './AppointmentFilter';
 import axios from 'axios';
 import api from '../api';
@@ -15,6 +16,8 @@ export default function AppointmentList({ onEdit }) {
   const [error, setError] = useState(null);
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState({ status: 'ALL', dateFrom: '', dateTo: '', doctorId: '', patientId: '', type: 'ALL' });
+  const [openDropdown, setOpenDropdown] = useState(null);
+  const dropdownRefs = useRef({});
 
   useEffect(() => {
     async function fetchData() {
@@ -53,6 +56,17 @@ export default function AppointmentList({ onEdit }) {
     fetchData();
   }, []);
 
+  // Close dropdown when clicking outside
+  useEffect(() => {
+    function handleClickOutside(event) {
+      if (openDropdown && !dropdownRefs.current[openDropdown]?.contains(event.target)) {
+        setOpenDropdown(null);
+      }
+    }
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, [openDropdown]);
+
   const handleCancel = async (id) => {
     try {
       const token = localStorage.getItem('token');
@@ -63,6 +77,7 @@ export default function AppointmentList({ onEdit }) {
         appt.id === id ? { ...appt, status: 'CANCELLED' } : appt
       ));
       setError(null);
+      setOpenDropdown(null);
     } catch (err) {
       setError('Failed to cancel appointment: ' + (err.response?.data?.error || err.message));
     }
@@ -79,6 +94,7 @@ export default function AppointmentList({ onEdit }) {
         appt.id === id ? { ...appt, status: 'CHECKED_IN', checkInTime: checkInTime.toLocaleString('en-US', { dateStyle: 'medium', timeStyle: 'short' }) } : appt
       ));
       setError(null);
+      setOpenDropdown(null);
     } catch (err) {
       setError('Failed to check in appointment: ' + (err.response?.data?.error || err.message));
     }
@@ -95,9 +111,19 @@ export default function AppointmentList({ onEdit }) {
         appt.id === id ? { ...appt, status: 'CHECKED_OUT', checkOutTime: checkOutTime.toLocaleString('en-US', { dateStyle: 'medium', timeStyle: 'short' }) } : appt
       ));
       setError(null);
+      setOpenDropdown(null);
     } catch (err) {
       setError('Failed to check out appointment: ' + (err.response?.data?.error || err.message));
     }
+  };
+
+  const handleEdit = (row) => {
+    onEdit(row);
+    setOpenDropdown(null);
+  };
+
+  const toggleDropdown = (id) => {
+    setOpenDropdown(openDropdown === id ? null : id);
   };
 
   const filteredAppointments = appointments.filter(appt => {
@@ -134,45 +160,55 @@ export default function AppointmentList({ onEdit }) {
     {
       field: 'actions',
       headerName: 'Actions',
-      width: 320,
+      width: 120,
       renderCell: (params) => (
         <Box className={styles.actionContainer}>
-          <Button
-            variant="outlined"
-            size="small"
-            onClick={() => onEdit(params.row)}
-            disabled={params.row.status === 'CANCELLED' || params.row.status === 'CHECKED_OUT'}
-            className={`${styles.actionButton} ${styles.editButton}`}
+          <div 
+            className={styles.actionDropdown}
+            ref={(el) => dropdownRefs.current[params.row.id] = el}
           >
-            Edit
-          </Button>
-          <Button
-            variant="outlined"
-            size="small"
-            onClick={() => handleCancel(params.row.id)}
-            disabled={params.row.status === 'CANCELLED' || params.row.status === 'CHECKED_OUT'}
-            className={`${styles.actionButton} ${styles.cancelButton}`}
-          >
-            Cancel
-          </Button>
-          <Button
-            variant="outlined"
-            size="small"
-            onClick={() => handleCheckIn(params.row.id)}
-            disabled={params.row.status !== 'SCHEDULED'}
-            className={`${styles.actionButton} ${styles.checkInButton}`}
-          >
-            Check In
-          </Button>
-          <Button
-            variant="outlined"
-            size="small"
-            onClick={() => handleCheckOut(params.row.id)}
-            disabled={params.row.status !== 'CHECKED_IN'}
-            className={`${styles.actionButton} ${styles.checkOutButton}`}
-          >
-            Check Out
-          </Button>
+            <Button
+              variant="outlined"
+              size="small"
+              onClick={() => toggleDropdown(params.row.id)}
+              className={`${styles.actionButton} ${openDropdown === params.row.id ? styles.dropdownOpen : ''}`}
+              endIcon={<ExpandMore className={styles.dropdownIcon} />}
+            >
+              Actions
+            </Button>
+            {openDropdown === params.row.id && (
+              <div className={styles.dropdownMenu}>
+                <Button
+                  onClick={() => handleEdit(params.row)}
+                  disabled={params.row.status === 'CANCELLED' || params.row.status === 'CHECKED_OUT'}
+                  className={`${styles.dropdownItem} ${styles.editItem}`}
+                >
+                  Edit
+                </Button>
+                <Button
+                  onClick={() => handleCancel(params.row.id)}
+                  disabled={params.row.status === 'CANCELLED' || params.row.status === 'CHECKED_OUT'}
+                  className={`${styles.dropdownItem} ${styles.cancelItem}`}
+                >
+                  Cancel
+                </Button>
+                <Button
+                  onClick={() => handleCheckIn(params.row.id)}
+                  disabled={params.row.status !== 'SCHEDULED'}
+                  className={`${styles.dropdownItem} ${styles.checkInItem}`}
+                >
+                  Check In
+                </Button>
+                <Button
+                  onClick={() => handleCheckOut(params.row.id)}
+                  disabled={params.row.status !== 'CHECKED_IN'}
+                  className={`${styles.dropdownItem} ${styles.checkOutItem}`}
+                >
+                  Check Out
+                </Button>
+              </div>
+            )}
+          </div>
         </Box>
       ),
     },
