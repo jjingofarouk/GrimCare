@@ -22,7 +22,7 @@ export default function DoctorAvailability({ doctors }) {
       setLoading(true);
       try {
         const token = localStorage.getItem('token');
-        const response = await axios.get(`${api.BASE_URL}${api.API_ROUTES.APPOINTMENT}?resource=availability`, {
+        const response = await axios.get(`${api.BASE_URL}/availability`, {
           headers: { Authorization: `Bearer ${token}` },
         });
         const formattedAvailability = response.data.map((item, index) => ({
@@ -47,7 +47,7 @@ export default function DoctorAvailability({ doctors }) {
       setLoading(true);
       try {
         const token = localStorage.getItem('token');
-        const response = await axios.get(`${api.BASE_URL}${api.API_ROUTES.APPOINTMENT}?resource=availability&doctorId=${selectedDoctorId}`, {
+        const response = await axios.get(`${api.BASE_URL}/availability?doctorId=${selectedDoctorId}`, {
           headers: { Authorization: `Bearer ${token}` },
         });
         const formattedAvailability = response.data.map((item, index) => ({
@@ -87,22 +87,22 @@ export default function DoctorAvailability({ doctors }) {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!formData.startTime || !formData.endTime) {
-      setError('Start and End times are required.');
+    if (!formData.startTime || !formData.endTime || !selectedDoctorId) {
+      setError('Start time, End time, and Doctor selection are required.');
       return;
     }
     try {
       const token = localStorage.getItem('token');
       await axios.post(
-        `${api.BASE_URL}${api.API_ROUTES.APPOINTMENT}`,
-        { resource: 'availability', ...formData, doctorId: selectedDoctorId },
+        `${api.BASE_URL}/availability`,
+        { ...formData, doctorId: selectedDoctorId },
         { headers: { Authorization: `Bearer ${token}` } }
       );
       setFormData({ startTime: '', endTime: '', status: 'AVAILABLE' });
       const response = await axios.get(
         selectedDoctorId 
-          ? `${api.BASE_URL}${api.API_ROUTES.APPOINTMENT}?resource=availability&doctorId=${selectedDoctorId}`
-          : `${api.BASE_URL}${api.API_ROUTES.APPOINTMENT}?resource=availability`,
+          ? `${api.BASE_URL}/availability?doctorId=${selectedDoctorId}`
+          : `${api.BASE_URL}/availability`,
         { headers: { Authorization: `Bearer ${token}` } }
       );
       const formattedAvailability = response.data.map((item, index) => ({
@@ -160,6 +160,16 @@ export default function DoctorAvailability({ doctors }) {
         getOptionValue={(doctor) => doctor.id}
       />
       <Box component="form" onSubmit={handleSubmit} className={styles.form}>
+        <SearchableSelect
+          label="Doctor"
+          options={doctors}
+          value={selectedDoctorId}
+          onChange={setSelectedDoctorId}
+          getOptionLabel={(doctor) => `${doctor.user?.name || doctor.doctorId || 'Unknown'} (${doctor.specialty || 'N/A'})`}
+          getOptionValue={(doctor) => doctor.id}
+          required
+          className={styles.input}
+        />
         <TextField
           label="Start Time"
           type="datetime-local"
