@@ -20,7 +20,12 @@ export default function DepartmentForm() {
         const response = await axios.get(`${api.BASE_URL}${api.API_ROUTES.APPOINTMENT}?resource=departments`, {
           headers: { Authorization: `Bearer ${token}` },
         });
-        setDepartments(response.data);
+        // Ensure each department has a unique id for DataGrid
+        const formattedDepartments = response.data.map((dept, index) => ({
+          ...dept,
+          id: dept.id || index + 1, // Fallback to index if id is missing
+        }));
+        setDepartments(formattedDepartments);
         setError(null);
       } catch (err) {
         setError(err.response?.data?.error || err.message);
@@ -57,7 +62,11 @@ export default function DepartmentForm() {
       const response = await axios.get(`${api.BASE_URL}${api.API_ROUTES.APPOINTMENT}?resource=departments`, {
         headers: { Authorization: `Bearer ${token}` },
       });
-      setDepartments(response.data);
+      const formattedDepartments = response.data.map((dept, index) => ({
+        ...dept,
+        id: dept.id || index + 1,
+      }));
+      setDepartments(formattedDepartments);
       setError(null);
     } catch (err) {
       setError('Failed to create department: ' + (err.response?.data?.error || err.message));
@@ -69,7 +78,15 @@ export default function DepartmentForm() {
   const columns = [
     { field: 'name', headerName: 'Department Name', width: 200 },
     { field: 'description', headerName: 'Description', width: 300 },
-    { field: 'createdAt', headerName: 'Created At', width: 200, valueGetter: (params) => new Date(params.row.createdAt).toLocaleString() },
+    {
+      field: 'createdAt',
+      headerName: 'Created At',
+      width: 200,
+      valueGetter: (params) => {
+        const date = params.row.createdAt;
+        return date ? new Date(date).toLocaleString() : 'N/A';
+      },
+    },
   ];
 
   return (
