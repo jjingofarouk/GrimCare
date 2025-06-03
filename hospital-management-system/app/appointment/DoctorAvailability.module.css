@@ -1,9 +1,10 @@
 .container {
-  padding: 16px;
-  max-width: 1200px;
+  padding: 8px;
+  max-width: 100%;
   margin: 0 auto;
   background-color: #f5f5f5;
   border-radius: 8px;
+  min-height: 100vh;
   box-sizing: border-box;
 }
 
@@ -11,19 +12,6 @@
   font-weight: 700;
   color: #1976d2;
   margin-bottom: 16px;
-  font-size: 1.5rem;
-}
-
-.filterContainer {
-  display: flex;
-  gap: 16px;
-  margin-bottom: 16px;
-  flex-wrap: wrap;
-}
-
-.searchSelect, .filterInput {
-  width: 100%;
-  max-width: 200px;
 }
 
 .form {
@@ -33,72 +21,45 @@
   flex-wrap: wrap;
 }
 
-.textField {
+.input {
   min-width: 200px;
 }
 
-.formControl {
-  min-width: 120px;
+.button {
+  background-color: #1976d2;
+  color: white;
+  text-transform: none;
 }
 
-.submitButton {
-  background-color: #1976d2;
+.filterContainer {
+  display: flex;
+  gap: 16px;
+  margin-bottom: 16px;
+  flex-wrap: wrap;
+}
+
+.filterInput {
+  min-width: 150px;
 }
 
 .alert {
   margin-bottom: 16px;
 }
 
-.dataGridContainer {
+.loader {
+  display: block;
+  margin: 0 auto;
+}
+
+.gridContainer {
   width: 100%;
   background-color: white;
   border-radius: 8px;
-  min-height: 400px;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-}
-
-.loader {
-  margin: auto;
-}
-
-.dataGrid {
-  width: 100%;
+  height: 400px;
 }
 
 @media (max-width: 600px) {
-  .container {
-    padding: 8px;
-  }
-
-  .title {
-    font-size: 1.25rem;
-  }
-
-  .searchSelect, .filterInput, .textField, .formControl {
-    max-width: 100%;
-  }
-
-  .filterContainer, .form {
-    flex-direction: column;
-  }
-
-  .dataGridContainer {
-    min-height: 300px;
-  }
-}
-
-@media (min-width: 601px) and (max-width: 900px) {
-  .container {
-    padding: 12px;
-  }
-
-  .title {
-    font-size: 1.375rem;
-  }
-
-  .searchSelect, .filterInput, .textField, .formControl {
-    max-width: 150px;
+  .input, .filterInput {
+    min-width: 100%;
   }
 }
