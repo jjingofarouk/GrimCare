@@ -59,7 +59,7 @@ export default function DoctorSchedule({ doctors }) {
         Doctor Schedule
       </Typography>
       <SearchableSelect
-        label="Filter by Doctor"
+        label=" "
         options={doctors}
         value={selectedDoctorId}
         onChange={setSelectedDoctorId}
