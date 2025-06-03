@@ -20,14 +20,17 @@ export default function AvailableDoctorsList() {
         });
         const doctorsData = await Promise.all(
           response.data.map(async (doctor) => {
-            const availabilityResponse = await axios.get(`${api.BASE_URL}${api.API_ROUTES.APPOINTMENT}?resource=availability&doctorId=${doctor.id}`, {
-              headers: { Authorization: `Bearer ${token}` },
-            });
+            const availabilityResponse = await axios.get(
+              `${api.BASE_URL}${api.API_ROUTES.APPOINTMENT}?resource=availability&doctorId=${doctor.id}`,
+              { headers: { Authorization: `Bearer ${token}` } }
+            );
             return {
-              ...doctor,
+              id: doctor.id, // Ensure unique id for DataGrid
+              user: doctor.user || { name: 'N/A' }, // Fallback for user
+              specialty: doctor.specialty || 'N/A', // Fallback for specialty
               availability: availabilityResponse.data.filter(
                 (item) => item && item.startTime && item.endTime && item.status === 'AVAILABLE'
-              ),
+              ) || [],
             };
           })
         );
@@ -66,20 +69,30 @@ export default function AvailableDoctorsList() {
   }));
 
   const columns = [
-    { field: 'doctorName', headerName: 'Doctor Name', width: 200, valueGetter: (params) => params.row.user?.name || 'N/A' },
-    { field: 'specialty', headerName: 'Specialty', width: 150 },
+    { 
+      field: 'doctorName', 
+      headerName: 'Doctor Name', 
+      width: 200, 
+      valueGetter: (params) => params.row.user?.name || 'N/A' 
+    },
+    { 
+      field: 'specialty', 
+      headerName: 'Specialty', 
+      width: 150,
+      valueGetter: (params) => params.row.specialty || 'N/A'
+    },
     {
       field: 'availabilityStatus',
       headerName: 'Availability',
       width: 150,
-      valueGetter: (params) => (params.row?.availability?.length > 0 ? 'Available' : 'Not Available'),
+      valueGetter: (params) => (params.row.availability?.length > 0 ? 'Available' : 'Not Available'),
     },
     {
       field: 'availableSlots',
       headerName: 'Available Time Slots',
       width: 400,
       valueGetter: (params) => {
-        const slots = params.row?.availability || [];
+        const slots = params.row.availability || [];
         return slots.length > 0
           ? slots
               .map((slot) => `${new Date(slot.startTime).toLocaleString()} - ${new Date(slot.endTime).toLocaleString()}`)
@@ -212,7 +225,7 @@ export default function AvailableDoctorsList() {
         <CircularProgress />
       ) : (
         <ModernGridContainer>
-          <CustomDataGrid rows={filteredDoctors} columns={columns} />
+          <CustomDataGrid rows={filteredDoctors} columns={columns} getRowId={(row) => row.id} />
         </ModernGridContainer>
       )}
     </ModernBox>
