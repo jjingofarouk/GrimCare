@@ -18,17 +18,17 @@ export default function DoctorAvailability({ doctors }) {
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    async function fetchAvailability() {
-      if (!selectedDoctorId) return;
+    async function fetchAllAvailability() {
       setLoading(true);
       try {
         const token = localStorage.getItem('token');
-        const response = await axios.get(`${api.BASE_URL}${api.API_ROUTES.APPOINTMENT}?resource=availability&doctorId=${selectedDoctorId}`, {
+        const response = await axios.get(`${api.BASE_URL}${api.API_ROUTES.APPOINTMENT}?resource=availability`, {
           headers: { Authorization: `Bearer ${token}` },
         });
         const formattedAvailability = response.data.map((item, index) => ({
           ...item,
           id: item.id || index + 1,
+          doctorName: item.doctor?.user?.name || item.doctor?.doctorId || 'N/A',
         }));
         setAvailability(formattedAvailability);
         applyFilters(formattedAvailability, filter);
@@ -39,7 +39,34 @@ export default function DoctorAvailability({ doctors }) {
         setLoading(false);
       }
     }
-    fetchAvailability();
+    fetchAllAvailability();
+  }, []);
+
+  useEffect(() => {
+    if (selectedDoctorId) {
+      async function fetchDoctorAvailability() {
+        setLoading(true);
+        try {
+          const token = localStorage.getItem('token');
+          const response = await axios.get(`${api.BASE_URL}${api.API_ROUTES.APPOINTMENT}?resource=availability&doctorId=${selectedDoctorId}`, {
+            headers: { Authorization: `Bearer ${token}` },
+          });
+          const formattedAvailability = response.data.map((item, index) => ({
+            ...item,
+            id: item.id || index + 1,
+            doctorName: item.doctor?.user?.name || item.doctor?.doctorId || 'N/A',
+          }));
+          setAvailability(formattedAvailability);
+          applyFilters(formattedAvailability, filter);
+          setError(null);
+        } catch (err) {
+          setError(err.response?.data?.error || err.message);
+        } finally {
+          setLoading(false);
+        }
+      }
+      fetchDoctorAvailability();
+    }
   }, [selectedDoctorId]);
 
   const applyFilters = (data, currentFilter) => {
@@ -54,6 +81,9 @@ export default function DoctorAvailability({ doctors }) {
         return itemDate === filterDate;
       });
     }
+    if (currentFilter.doctorId) {
+      filtered = filtered.filter(item => item.doctorId === currentFilter.doctorId);
+    }
     setFilteredAvailability(filtered);
   };
 
@@ -63,8 +93,8 @@ export default function DoctorAvailability({ doctors }) {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!formData.startTime || !formData.endTime) {
-      setError('Start and End times are required.');
+    if (!selectedDoctorId || !formData.startTime || !formData.endTime) {
+      setError('Doctor, Start, and End times are required.');
       return;
     }
     try {
@@ -81,6 +111,7 @@ export default function DoctorAvailability({ doctors }) {
       const formattedAvailability = response.data.map((item, index) => ({
         ...item,
         id: item.id || index + 1,
+        doctorName: item.doctor?.user?.name || item.doctor?.doctorId || 'N/A',
       }));
       setAvailability(formattedAvailability);
       applyFilters(formattedAvailability, filter);
@@ -95,6 +126,7 @@ export default function DoctorAvailability({ doctors }) {
   };
 
   const columns = [
+    { field: 'doctorName', headerName: 'Doctor', width: 150 },
     {
       field: 'startTime',
       headerName: 'Start Time',
@@ -115,91 +147,97 @@ export default function DoctorAvailability({ doctors }) {
       <Typography variant="h5" gutterBottom className={styles.title}>
         Doctor Availability
       </Typography>
-      <SearchableSelect
-        label=" "
-        options={doctors}
-        value={selectedDoctorId}
-        onChange={setSelectedDoctorId}
-        getOptionLabel={(doctor) => `${doctor.user?.name || doctor.doctorId || 'Unknown'} (${doctor.specialty || 'N/A'})`}
-        getOptionValue={(doctor) => doctor.id}
-      />
-      {selectedDoctorId && (
-        <>
-          <Box component="form" onSubmit={handleSubmit} className={styles.form}>
-            <TextField
-              label="Start Time"
-              type="datetime-local"
-              name="startTime"
-              value={formData.startTime}
-              onChange={(e) => setFormData({ ...formData, [e.target.name]: e.target.value })}
-              InputLabelProps={{ shrink: true }}
-              required
-              className={styles.input}
-            />
-            <TextField
-              label="End Time"
-              type="datetime-local"
-              name="endTime"
-              value={formData.endTime}
-              onChange={(e) => setFormData({ ...formData, [e.target.name]: e.target.value })}
-              InputLabelProps={{ shrink: true }}
-              required
-              className={styles.input}
-            />
-            <FormControl className={styles.input}>
-              <InputLabel>Status</InputLabel>
-              <Select
-                name="status"
-                value={formData.status}
-                onChange={(e) => setFormData({ ...formData, [e.target.name]: e.target.value })}
-              >
-                <MenuItem value="AVAILABLE">Available</MenuItem>
-                <MenuItem value="UNAVAILABLE">Unavailable</MenuItem>
-              </Select>
-            </FormControl>
-            <Button type="submit" variant="contained" className={styles.button}>
-              Add Availability
-            </Button>
-          </Box>
-          <Box className={styles.filterContainer}>
-            <TextField
-              label="Filter by Date"
-              type="date"
-              name="date"
-              value={filter.date}
-              onChange={handleFilterChange}
-              InputLabelProps={{ shrink: true }}
-              className={styles.filterInput}
-            />
-            <FormControl className={styles.filterInput}>
-              <InputLabel>Filter by Status</InputLabel>
-              <Select
-                name="status"
-                value={filter.status}
-                onChange={handleFilterChange}
-              >
-                <MenuItem value="">All</MenuItem>
-                <MenuItem value="AVAILABLE">Available</MenuItem>
-                <MenuItem value="UNAVAILABLE">Unavailable</MenuItem>
-              </Select>
-            </FormControl>
-          </Box>
-          {error && <Alert severity="error" className={styles.alert}>{error}</Alert>}
-          {loading ? (
-            <CircularProgress className={styles.loader} />
-          ) : (
-            <Box className={styles.gridContainer}>
-              <DataGrid
-                rows={filteredAvailability}
-                columns={columns}
-                pageSizeOptions={[5, 10, 20]}
-                disableRowSelectionOnClick
-                getRowId={(row) => row.id}
-              />
-            </Box>
-          )}
-        </>
-      )}
+      <Box component="form" onSubmit={handleSubmit} className={styles.form}>
+        <SearchableSelect
+          label="Doctor"
+          options={doctors}
+          value={selectedDoctorId}
+          onChange={setSelectedDoctorId}
+          getOptionLabel={(doctor) => `${doctor.user?.name || doctor.doctorId || 'Unknown'} (${doctor.specialty || 'N/A'})`}
+          getOptionValue={(doctor) => doctor.id}
+          className={styles.input}
+        />
+        <TextField
+          label="Start Time"
+          type="datetime-local"
+          name="startTime"
+          value={formData.startTime}
+          onChange={(e) => setFormData({ ...formData, [e.target.name]: e.target.value })}
+          InputLabelProps={{ shrink: true }}
+          required
+          className={styles.input}
+        />
+        <TextField
+          label="End Time"
+          type="datetime-local"
+          name="endTime"
+          value={formData.endTime}
+          onChange={(e) => setFormData({ ...formData, [e.target.name]: e.target.value })}
+          InputLabelProps={{ shrink: true }}
+          required
+          className={styles.input}
+        />
+        <FormControl className={styles.input}>
+          <InputLabel>Status</InputLabel>
+          <Select
+            name="status"
+            value={formData.status}
+            onChange={(e) => setFormData({ ...formData, [e.target.name]: e.target.value })}
+          >
+            <MenuItem value="AVAILABLE">Available</MenuItem>
+            <MenuItem value="UNAVAILABLE">Unavailable</MenuItem>
+          </Select>
+        </FormControl>
+        <Button type="submit" variant="contained" className={styles.button}>
+          Add Availability
+        </Button>
+      </Box>
+      <Box className={styles.filterContainer}>
+        <SearchableSelect
+          label="Filter by Doctor"
+          options={[{ id: '', user: { name: 'All' }, specialty: '' }, ...doctors]}
+          value={filter.doctorId || ''}
+          onChange={(value) => setFilter({ ...filter, doctorId: value })}
+          getOptionLabel={(doctor) => `${doctor.user?.name || doctor.doctorId || 'All'} (${doctor.specialty || 'N/A'})`}
+          getOptionValue={(doctor) => doctor.id}
+          className={styles.filterInput}
+        />
+        <TextField
+          label="Filter by Date"
+          type="date"
+          name="date"
+          value={filter.date}
+          onChange={handleFilterChange}
+          InputLabelProps={{ shrink: true }}
+          className={styles.filterInput}
+        />
+        <FormControl className={styles.filterInput}>
+          <InputLabel>Filter by Status</InputLabel>
+          <Select
+            name="status"
+            value={filter.status}
+            onChange={handleFilterChange}
+          >
+            <MenuItem value="">All</MenuItem>
+            <MenuItem value="AVAILABLE">Available</MenuItem>
+            <MenuItem value="UNAVAILABLE">Unavailable</MenuItem>
+          </Select>
+        </FormControl>
+      </Box>
+      {error && <Alert severity="error" className={styles.alert}>{error}</Alert>}
+      <Box className={styles.gridContainer}>
+        {loading ? (
+          <CircularProgress className={styles.loader} />
+        ) : (
+          <DataGrid
+            rows={filteredAvailability}
+            columns={columns}
+            pageSizeOptions={[5, 10, 20]}
+            disableRowSelectionOnClick
+            getRowId={(row) => row.id}
+          />
+        )}
+      </Box>
     </Box>
   );
 }
