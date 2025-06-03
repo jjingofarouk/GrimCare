@@ -5,6 +5,7 @@ import { Box, TextField, Button, MenuItem, Select, InputLabel, FormControl, Typo
 import SearchableSelect from '../components/SearchableSelect';
 import axios from 'axios';
 import api from '../api';
+import styles from './AppointmentForm.module.css';
 
 export default function AppointmentForm({ patients, doctors, departments, onSuccess, appointment, userId }) {
   const [formData, setFormData] = useState({
@@ -90,7 +91,7 @@ export default function AppointmentForm({ patients, doctors, departments, onSucc
         patientId: parseInt(formData.patientId),
         doctorId: parseInt(formData.doctorId),
         departmentId: formData.departmentId ? parseInt(formData.departmentId) : null,
-        date: formData.date, // Pass as string, let backend handle Date conversion
+        date: formData.date,
         type: formData.type,
         reason: formData.reason,
         notes: formData.notes,
@@ -120,99 +121,109 @@ export default function AppointmentForm({ patients, doctors, departments, onSucc
   const reasons = ['Consultation', 'Follow-up', 'Emergency', 'Routine Checkup', 'Other'];
 
   return (
-    <Box component="form" onSubmit={handleSubmit} sx={{ maxWidth: 600, mx: 'auto', p: 2 }}>
-      <Typography variant="h6" gutterBottom>Create Appointment</Typography>
-      <SearchableSelect
-        label="Patient"
-        options={fetchedPatients.length > 0 ? fetchedPatients : patients}
-        value={formData.patientId}
-        onChange={(value) => setFormData({ ...formData, patientId: value })}
-        getOptionLabel={(patient) => patient.user?.name || patient.patientId || 'Unknown'}
-        getOptionValue={(patient) => patient.id}
-        required
-      />
-      <SearchableSelect
-        label="Doctor"
-        options={fetchedDoctors.length > 0 ? fetchedDoctors : doctors}
-        value={formData.doctorId}
-        onChange={(value) => setFormData({ ...formData, doctorId: value })}
-        getOptionLabel={(doctor) => `${doctor.user?.name || doctor.doctorId || 'Unknown'} (${doctor.specialty || 'N/A'})`}
-        getOptionValue={(doctor) => doctor.id}
-        required
-      />
-      <FormControl fullWidth margin="normal">
-        <InputLabel>Department</InputLabel>
-        <Select name="departmentId" value={formData.departmentId} onChange={handleChange}>
-          <MenuItem value="">Select Department</MenuItem>
-          {departments.map((dept) => (
-            <MenuItem key={dept.id} value={dept.id}>{dept.name}</MenuItem>
-          ))}
-        </Select>
-      </FormControl>
-      <TextField
-        fullWidth
-        margin="normal"
-        label="Date"
-        type="datetime-local"
-        name="date"
-        value={formData.date}
-        onChange={handleChange}
-        required
-        InputLabelProps={{ shrink: true }}
-      />
-      <FormControl fullWidth margin="normal">
-        <InputLabel>Type</InputLabel>
-        <Select name="type" value={formData.type} onChange={handleChange}>
-          <MenuItem value="REGULAR">Regular</MenuItem>
-          <MenuItem value="WALK_IN">Walk-In</MenuItem>
-          <MenuItem value="EMERGENCY">Emergency</MenuItem>
-        </Select>
-      </FormControl>
-      <FormControl fullWidth margin="normal">
-        <InputLabel>Reason</InputLabel>
-        <Select name="reason" value={formData.reason} onChange={handleChange} required>
-          <MenuItem value="">Select Reason</MenuItem>
-          {reasons.map((reason) => (
-            <MenuItem key={reason} value={reason}>{reason}</MenuItem>
-          ))}
-        </Select>
-      </FormControl>
-      <TextField
-        fullWidth
-        margin="normal"
-        label="Notes"
-        name="notes"
-        value={formData.notes}
-        onChange={handleChange}
-        multiline
-        rows={4}
-      />
-      {error && <Typography color="error">{error}</Typography>}
-      <Box mt={2} display="flex" gap={2}>
-        <Button type="submit" variant="contained" disabled={loading}>
-          {loading ? 'Processing...' : appointment ? 'Update Appointment' : 'Create Appointment'}
-        </Button>
-        <Button variant="outlined" onClick={() => setFormData({ patientId: '', doctorId: '', departmentId: '', date: '', type: 'REGULAR', reason: '', notes: '' })}>
-          Clear
-        </Button>
-      </Box>
+    <Box className={styles.container}>
+      <Box component="form" onSubmit={handleSubmit} className={`${styles.formBox} ${styles.fadeIn}`}>
+        <Typography variant="h6" className={styles.title}>Create Appointment</Typography>
+        <SearchableSelect
+          label="Patient"
+          options={fetchedPatients.length > 0 ? fetchedPatients : patients}
+          value={formData.patientId}
+          onChange={(value) => setFormData({ ...formData, patientId: value })}
+          getOptionLabel={(patient) => patient.user?.name || patient.patientId || 'Unknown'}
+          getOptionValue={(patient) => patient.id}
+          required
+          className={styles.formControl}
+        />
+        <SearchableSelect
+          label="Doctor"
+          options={fetchedDoctors.length > 0 ? fetchedDoctors : doctors}
+          value={formData.doctorId}
+          onChange={(value) => setFormData({ ...formData, doctorId: value })}
+          getOptionLabel={(doctor) => `${doctor.user?.name || doctor.doctorId || 'Unknown'} (${doctor.specialty || 'N/A'})`}
+          getOptionValue={(doctor) => doctor.id}
+          required
+          className={styles.formControl}
+        />
+        <FormControl fullWidth className={styles.formControl}>
+          <InputLabel className={styles.inputLabel}>Department</InputLabel>
+          <Select name="departmentId" value={formData.departmentId} onChange={handleChange} className={styles.select}>
+            <MenuItem value="">Select Department</MenuItem>
+            {departments.map((dept) => (
+              <MenuItem key={dept.id} value={dept.id}>{dept.name}</MenuItem>
+            ))}
+          </Select>
+        </FormControl>
+        <TextField
+          fullWidth
+          className={styles.formControl}
+          label="Date"
+          type="datetime-local"
+          name="date"
+          value={formData.date}
+          onChange={handleChange}
+          required
+          InputLabelProps={{ shrink: true }}
+          className={styles.textField}
+        />
+        <FormControl fullWidth className={styles.formControl}>
+          <InputLabel className={styles.inputLabel}>Type</InputLabel>
+          <Select name="type" value={formData.type} onChange={handleChange} className={styles.select}>
+            <MenuItem value="REGULAR">Regular</MenuItem>
+            <MenuItem value="WALK_IN">Walk-In</MenuItem>
+            <MenuItem value="EMERGENCY">Emergency</MenuItem>
+          </Select>
+        </FormControl>
+        <FormControl fullWidth className={styles.formControl}>
+          <InputLabel className={styles.inputLabel}>Reason</InputLabel>
+          <Select name="reason" value={formData.reason} onChange={handleChange} required className={styles.select}>
+            <MenuItem value="">Select Reason</MenuItem>
+            {reasons.map((reason) => (
+              <MenuItem key={reason} value={reason}>{reason}</MenuItem>
+            ))}
+          </Select>
+        </FormControl>
+        <TextField
+          fullWidth
+          className={styles.formControl}
+          label="Notes"
+          name="notes"
+          value={formData.notes}
+          onChange={handleChange}
+          multiline
+          rows={4}
+          className={styles.textField}
+        />
+        {error && <Typography className={styles.errorText}>{error}</Typography>}
+        <Box mt={2} display="flex" gap={2} justifyContent="center">
+          <Button type="submit" variant="contained" disabled={loading} className={styles.submitButton}>
+            {loading ? 'Processing...' : appointment ? 'Update Appointment' : 'Create Appointment'}
+          </Button>
+          <Button
+            variant="outlined"
+            onClick={() => setFormData({ patientId: '', doctorId: '', departmentId: '', date: '', type: 'REGULAR', reason: '', notes: '' })}
+            className={styles.clearButton}
+          >
+            Clear
+          </Button>
+        </Box>
 
-      <Dialog open={openConfirm} onClose={() => setOpenConfirm(false)}>
-        <DialogTitle>Confirm Appointment</DialogTitle>
-        <DialogContent>
-          <Typography><strong>Patient:</strong> {(fetchedPatients.length > 0 ? fetchedPatients : patients).find((p) => p.id === parseInt(formData.patientId))?.user?.name || 'Unknown'}</Typography>
-          <Typography><strong>Doctor:</strong> {(fetchedDoctors.length > 0 ? fetchedDoctors : doctors).find((d) => d.id === parseInt(formData.doctorId))?.user?.name || 'Unknown'}</Typography>
-          <Typography><strong>Department:</strong> {departments.find((d) => d.id === parseInt(formData.departmentId))?.name || 'N/A'}</Typography>
-          <Typography><strong>Date:</strong> {formData.date ? new Date(formData.date).toLocaleString() : 'N/A'}</Typography>
-          <Typography><strong>Type:</strong> {formData.type}</Typography>
-          <Typography><strong>Reason:</strong> {formData.reason}</Typography>
-          <Typography><strong>Notes:</strong> {formData.notes || 'N/A'}</Typography>
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={confirmSubmission} variant="contained" disabled={loading}>Confirm</Button>
-          <Button onClick={() => setOpenConfirm(false)} variant="outlined">Cancel</Button>
-        </DialogActions>
-      </Dialog>
+        <Dialog open={openConfirm} onClose={() => setOpenConfirm(false)} className={styles.dialog}>
+          <DialogTitle className={styles.dialogTitle}>Confirm Appointment</DialogTitle>
+          <DialogContent className={styles.dialogContent}>
+            <Typography><strong>Patient:</strong> {(fetchedPatients.length > 0 ? fetchedPatients : patients).find((p) => p.id === parseInt(formData.patientId))?.user?.name || 'Unknown'}</Typography>
+            <Typography><strong>Doctor:</strong> {(fetchedDoctors.length > 0 ? fetchedDoctors : doctors).find((d) => d.id === parseInt(formData.doctorId))?.user?.name || 'Unknown'}</Typography>
+            <Typography><strong>Department:</strong> {departments.find((d) => d.id === parseInt(formData.departmentId))?.name || 'N/A'}</Typography>
+            <Typography><strong>Date:</strong> {formData.date ? new Date(formData.date).toLocaleString() : 'N/A'}</Typography>
+            <Typography><strong>Type:</strong> {formData.type}</Typography>
+            <Typography><strong>Reason:</strong> {formData.reason}</Typography>
+            <Typography><strong>Notes:</strong> {formData.notes || 'N/A'}</Typography>
+          </DialogContent>
+          <DialogActions className={styles.dialogActions}>
+            <Button onClick={confirmSubmission} variant="contained" disabled={loading} className={styles.dialogButton}>Confirm</Button>
+            <Button onClick={() => setOpenConfirm(false)} variant="outlined" className={styles.dialogCancelButton}>Cancel</Button>
+          </DialogActions>
+        </Dialog>
+      </Box>
     </Box>
   );
 }
