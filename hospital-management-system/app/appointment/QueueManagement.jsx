@@ -22,35 +22,51 @@ export default function QueueManagement({ doctors }) {
       setLoading(true);
       try {
         const token = localStorage.getItem('token');
-        // Fetch queue data for all doctors by making individual requests
+        if (!token) {
+          throw new Error('No authentication token found');
+        }
+
         const allQueueItems = [];
 
-        for (const doctor of doctors) {
+        // Fetch queue data for all doctors
+        for (const doctor of doctors || []) {
           try {
-            const response = await axios.get(`${api.BASE_URL}${api.API_ROUTES.APPOINTMENT}?resource=queue&doctorId=${doctor.id}`, {
-              headers: { Authorization: `Bearer ${token}` },
-            });
-            const doctorQueueItems = response.data.map((item, index) => ({
+            const response = await axios.get(
+              `${api.BASE_URL}${api.API_ROUTES.APPOINTMENT}?resource=queue&doctorId=${doctor.id}`,
+              {
+                headers: { Authorization: `Bearer ${token}` },
+              }
+            );
+
+            const doctorQueueItems = (response.data || []).map((item, index) => ({
               id: item.id || `${doctor.id}-queue-${index + 1}`,
-              patientName: item.appointment?.patient?.user?.name || item.appointment?.patient?.patientId || 'N/A',
+              patientName:
+                item.appointment?.patient?.user?.name ||
+                item.appointment?.patient?.patientId ||
+                'N/A',
               doctorName: doctor.user?.name || doctor.doctorId || 'Unknown Doctor',
               doctorId: doctor.id,
               queueNumber: item.queueNumber || 'N/A',
               status: item.status || 'WAITING',
-              appointmentDate: item.appointment?.date ? new Date(item.appointment.date).toLocaleString() : 'N/A',
+              appointmentDate: item.appointment?.date
+                ? new Date(item.appointment.date).toLocaleString()
+                : 'N/A',
             }));
             allQueueItems.push(...doctorQueueItems);
           } catch (doctorErr) {
-            // Skip doctors with no queue items or errors
             console.warn(`Failed to fetch queue for doctor ${doctor.id}:`, doctorErr.message);
           }
         }
 
-        setQueueItems(allQueueItems);
-        applyFilters(allQueueItems, filter, selectedDoctorId);
-        setError(null);
+        if (allQueueItems.length === 0) {
+          setError('No queue items found for any doctors.');
+        } else {
+          setQueueItems(allQueueItems);
+          applyFilters(allQueueItems, filter, selectedDoctorId);
+          setError(null);
+        }
       } catch (err) {
-        setError(err.response?.data?.error || err.message);
+        setError(err.response?.data?.error || err.message || 'Failed to fetch queue data');
       } finally {
         setLoading(false);
       }
@@ -58,12 +74,15 @@ export default function QueueManagement({ doctors }) {
 
     if (doctors && doctors.length > 0) {
       fetchAllQueues();
+    } else {
+      setError('No doctors available to fetch queue data');
+      setLoading(false);
     }
   }, [doctors]);
 
   // Apply filters when doctor selection or other filters change
   const applyFilters = (data, currentFilter, doctorId) => {
-    let filtered = [...data];
+    let filtered = [...(data || [])];
 
     // Filter by selected doctor
     if (doctorId) {
@@ -94,12 +113,21 @@ export default function QueueManagement({ doctors }) {
   const handleStatusUpdate = async (id, newStatus) => {
     try {
       const token = localStorage.getItem('token');
-      await axios.put(`${api.BASE_URL}${api.API_ROUTES.APPOINTMENT}/${id}`, {
-        resource: 'queue',
-        status: newStatus,
-      }, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
+      if (!token) {
+        throw new Error('No authentication token found');
+      }
+
+      await axios.put(
+        `${api.BASE_URL}${api.API_ROUTES.APPOINTMENT}/${id}`,
+        {
+          resource: 'queue',
+          status: newStatus,
+        },
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        }
+      );
+
       const updatedQueueItems = queueItems.map(item =>
         item.id === id ? { ...item, status: newStatus } : item
       );
@@ -109,6 +137,10 @@ export default function QueueManagement({ doctors }) {
     } catch (err) {
       setError('Failed to update queue status: ' + (err.response?.data?.error || err.message));
     }
+  };
+
+  const handleFilterChange = (e) => {
+    setFilter({ ...filter, [e.target.name]: e.target.value });
   };
 
   const columns = [
@@ -144,3 +176,62 @@ export default function QueueManagement({ doctors }) {
           </Button>
         </Box>
       ),
+    },
+  ];
+
+  return (
+    <Box className={styles.container}>
+      <Typography variant="h5" gutterBottom className={styles.title}>
+        Queue Management
+      </Typography>
+      <Box className={styles.filterContainer}>
+        <SearchableSelect
+          label="Filter by Doctor"
+          options={doctors || []}
+          value={selectedDoctorId}
+          onChange={setSelectedDoctorId}
+          getOptionLabel={(doctor) => `${doctor.user?.name || doctor.doctorId || 'Unknown'} (${doctor.specialty || 'N/A'})`}
+          getOptionValue={(doctor) => doctor.id}
+          className={styles.filterInput}
+        />
+        <TextField
+          label="Filter by Date"
+          type="date"
+          name="date"
+          value={filter.date}
+          onChange={handleFilterChange}
+          InputLabelProps={{ shrink: true }}
+          className={styles.filterInput}
+        />
+        <FormControl className={styles.filterInput}>
+          <InputLabel>Filter by Status</InputLabel>
+          <Select
+            name="status"
+            value={filter.status}
+            onChange={handleFilterChange}
+          >
+            <MenuItem value="">All</MenuItem>
+            <MenuItem value="WAITING">Waiting</MenuItem>
+            <MenuItem value="IN_PROGRESS">In Progress</MenuItem>
+            <MenuItem value="COMPLETED">Completed</MenuItem>
+          </Select>
+        </FormControl>
+      </Box>
+      {error && <Alert severity="error" className={styles.alert}>{error}</Alert>}
+      <Box className={styles.gridContainer}>
+        {loading ? (
+          <CircularProgress className={styles.loader} />
+        ) : (
+          <DataGrid
+            rows={filteredQueueItems}
+            columns={columns}
+            pageSizeOptions={[5, 10, 20]}
+            disableRowSelectionOnClick
+            getRowId={(row) => row.id}
+            className={styles.dataGrid}
+          />
+        )}
+      </Box>
+    </Box>
+  );
+}
