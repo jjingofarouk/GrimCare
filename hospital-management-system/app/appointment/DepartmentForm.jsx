@@ -1,16 +1,33 @@
 "use client";
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Box, Typography, Alert, Button, TextField } from '@mui/material';
 import CustomDataGrid from '../components/CustomDataGrid';
-import { useApiData } from '../utils/api';
-import { createDepartment, getDepartments } from './departmentService';
+import api from '../utils/api';
 
 export default function DepartmentForm() {
   const [formData, setFormData] = useState({ name: '', description: '' });
+  const [departments, setDepartments] = useState([]);
   const [error, setError] = useState(null);
   const [loading, setLoading] = useState(false);
-  const { data: departments, error: departmentsError } = useApiData(getDepartments);
+
+  useEffect(() => {
+    async function fetchDepartments() {
+      try {
+        setLoading(true);
+        const response = await fetch(`${api.BASE_URL}${api.API_ROUTES.DEPARTMENT}`);
+        if (!response.ok) throw new Error('Failed to fetch departments');
+        const data = await response.json();
+        setDepartments(data);
+        setError(null);
+      } catch (err) {
+        setError(err.message);
+      } finally {
+        setLoading(false);
+      }
+    }
+    fetchDepartments();
+  }, []);
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -30,8 +47,16 @@ export default function DepartmentForm() {
     if (!validateForm()) return;
     setLoading(true);
     try {
-      await createDepartment(formData);
+      const response = await fetch(`${api.BASE_URL}${api.API_ROUTES.DEPARTMENT}`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(formData),
+      });
+      if (!response.ok) throw new Error('Failed to create department');
+      const newDepartment = await response.json();
+      setDepartments([...departments, newDepartment]);
       setFormData({ name: '', description: '' });
+      setError(null);
     } catch (err) {
       setError('Failed to create department: ' + err.message);
     } finally {
@@ -42,7 +67,7 @@ export default function DepartmentForm() {
   const columns = [
     { field: 'name', headerName: 'Department Name', width: 200 },
     { field: 'description', headerName: 'Description', width: 300 },
-    { field: 'createdAt', headerName: 'Created At', width: 200 },
+    { field: 'createdAt', headerName: 'Created At', width: 200, valueGetter: (params) => new Date(params.row.createdAt).toLocaleString() },
   ];
 
   return (
@@ -66,13 +91,13 @@ export default function DepartmentForm() {
           rows={3}
           fullWidth
         />
-        {(error || departmentsError) && <Alert severity="error">{error || departmentsError}</Alert>}
+        {error && <Alert severity="error">{error}</Alert>}
         <Button type="submit" variant="contained" disabled={loading}>
           {loading ? 'Creating...' : 'Add Department'}
         </Button>
       </Box>
       <Box sx={{ height: 400, width: '100%' }}>
-        <CustomDataGrid rows={departments} columns={columns} />
+        <CustomDataGrid rows={departments} columns={columns} loading={loading} />
       </Box>
     </Box>
   );
