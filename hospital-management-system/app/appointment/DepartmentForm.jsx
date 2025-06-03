@@ -77,12 +77,6 @@ export default function DepartmentForm() {
   const columns = [
     { field: 'name', headerName: 'Department Name', width: 200 },
     { field: 'description', headerName: 'Description', width: 300 },
-    {
-      field: 'createdAt',
-      headerName: 'Created At',
-      width: 200,
-      valueGetter: ({ row }) => (row.createdAt ? new Date(row.createdAt).toLocaleString() : 'N/A'),
-    },
   ];
 
   return (
