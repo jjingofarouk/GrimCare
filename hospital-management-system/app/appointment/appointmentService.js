@@ -119,22 +119,11 @@ export async function getDepartments() {
 
 export async function getDoctors() {
   try {
-    const response = await axios.get(`${BASE_URL}${API_ROUTES.DOCTOR}`, {
-      headers: { Authorization: `Bearer ${localStorage.getItem('token')}` },
-      params: { include: 'user,department' },
-    });
-    if (!Array.isArray(response.data)) {
-      throw new Error('Invalid response format: Expected array');
-    }
-    const doctors = response.data;
-    const invalidDoctors = doctors.filter((doc) => !doc.user);
-    if (invalidDoctors.length > 0) {
-      console.warn('Doctors with missing user data:', JSON.stringify(invalidDoctors, null, 2));
-    }
-    return doctors;
+    const response = await axios.get(`${BASE_URL}${API_ROUTES.DOCTOR}`);
+    return response.data;
   } catch (error) {
     console.error('Error fetching doctors:', error);
-    throw new Error(error.response?.data?.message || 'Failed to fetch doctors');
+    throw error;
   }
 }
 
