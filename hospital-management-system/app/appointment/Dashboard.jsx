@@ -1,8 +1,8 @@
 "use client";
 
-import React from "react";
-import { Box, Typography, Alert, Card, CardContent, Grid } from "@mui/material";
-import { Bar } from "react-chartjs-2"; // Import Bar component from react-chartjs-2
+import React, { useState, useEffect } from 'react';
+import { Box, Typography, Alert, Card, CardContent, Grid } from '@mui/material';
+import { Bar } from 'react-chartjs-2';
 import {
   Chart as ChartJS,
   CategoryScale,
@@ -11,16 +11,33 @@ import {
   Title,
   Tooltip,
   Legend,
-} from "chart.js"; // Import required Chart.js components
-import { useApiData } from "../utils/api";
-import { getAppointments } from "./appointmentService";
-import { formatDate } from "../utils/date";
+} from 'chart.js';
+import api from '../api';
 
-// Register Chart.js components
 ChartJS.register(CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend);
 
 export default function Dashboard() {
-  const { data: appointments = [], error: appointmentsError } = useApiData(getAppointments);
+  const [appointments, setAppointments] = useState([]);
+  const [error, setError] = useState(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    async function fetchAppointments() {
+      try {
+        setLoading(true);
+        const response = await fetch(`${api.BASE_URL}${api.API_ROUTES.APPOINTMENT}`);
+        if (!response.ok) throw new Error('Failed to fetch appointments');
+        const data = await response.json();
+        setAppointments(data);
+        setError(null);
+      } catch (err) {
+        setError(err.message);
+      } finally {
+        setLoading(false);
+      }
+    }
+    fetchAppointments();
+  }, []);
 
   const todayAppointments = appointments.filter((appt) => {
     const date = new Date(appt.date);
@@ -34,30 +51,29 @@ export default function Dashboard() {
 
   const stats = {
     total: todayAppointments.length,
-    scheduled: todayAppointments.filter((appt) => appt.status === "SCHEDULED").length,
-    checkedIn: todayAppointments.filter((appt) => appt.status === "CHECKED_IN").length,
-    completed: todayAppointments.filter((appt) => appt.status === "COMPLETED").length,
-    cancelled: todayAppointments.filter((appt) => appt.status === "CANCELLED").length,
+    scheduled: todayAppointments.filter((appt) => appt.status === 'SCHEDULED').length,
+    checkedIn: todayAppointments.filter((appt) => appt.status === 'CHECKED_IN').length,
+    completed: todayAppointments.filter((appt) => appt.status === 'COMPLETED').length,
+    cancelled: todayAppointments.filter((appt) => appt.status === 'CANCELLED').length,
   };
 
-  // Chart.js data and options
   const chartData = {
-    labels: ["Scheduled", "Checked In", "Completed", "Cancelled"],
+    labels: ['Scheduled', 'Checked In', 'Completed', 'Cancelled'],
     datasets: [
       {
-        label: "Appointments",
+        label: 'Appointments',
         data: [stats.scheduled, stats.checkedIn, stats.completed, stats.cancelled],
         backgroundColor: [
-          "rgba(75, 192, 192, 0.6)",
-          "rgba(255, 99, 132, 0.6)",
-          "rgba(54, 162, 235, 0.6)",
-          "rgba(255, 206, 86, 0.6)",
+          'rgba(75, 192, 192, 0.6)',
+          'rgba(255, 99, 132, 0.6)',
+          'rgba(54, 162, 235, 0.6)',
+          'rgba(255, 206, 86, 0.6)',
         ],
         borderColor: [
-          "rgba(75, 192, 192, 1)",
-          "rgba(255, 99, 132, 1)",
-          "rgba(54, 162, 235, 1)",
-          "rgba(255, 206, 86, 1)",
+          'rgba(75, 192, 192, 1)',
+          'rgba(255, 99, 132, 1)',
+          'rgba(54, 162, 235, 1)',
+          'rgba(255, 206, 86, 1)',
         ],
         borderWidth: 1,
       },
@@ -69,12 +85,12 @@ export default function Dashboard() {
     plugins: {
       title: {
         display: true,
-        text: "Appointment Status Distribution",
-        color: "#ffffff",
+        text: 'Appointment Status Distribution',
+        color: '#ffffff',
       },
       legend: {
         labels: {
-          color: "#ffffff",
+          color: '#ffffff',
         },
       },
     },
@@ -82,12 +98,12 @@ export default function Dashboard() {
       y: {
         beginAtZero: true,
         ticks: {
-          color: "#ffffff",
+          color: '#ffffff',
         },
       },
       x: {
         ticks: {
-          color: "#ffffff",
+          color: '#ffffff',
         },
       },
     },
@@ -98,64 +114,69 @@ export default function Dashboard() {
       <Typography variant="h5" gutterBottom>
         Daily Appointment Dashboard
       </Typography>
-      {appointmentsError && <Alert severity="error">{appointmentsError}</Alert>}
-
-      <Box sx={{ mt: 2, height: 400 }}>
-        <Bar data={chartData} options={chartOptions} />
-      </Box>
-
-      <Grid container spacing={2}>
-        <Grid item xs={12} md={4}>
-          <Card>
-            <CardContent>
-              <Typography variant="h6">Total Appointments</Typography>
-              <Typography variant="h4">{stats.total}</Typography>
-            </CardContent>
-          </Card>
-        </Grid>
-        <Grid item xs={12} md={4}>
-          <Card>
-            <CardContent>
-              <Typography variant="h6">Scheduled</Typography>
-              <Typography variant="h4">{stats.scheduled}</Typography>
-            </CardContent>
-          </Card>
-        </Grid>
-        <Grid item xs={12} md={4}>
-          <Card>
-            <CardContent>
-              <Typography variant="h6">Checked In</Typography>
-              <Typography variant="h4">{stats.checkedIn}</Typography>
-            </CardContent>
-          </Card>
-        </Grid>
-      </Grid>
-
-      <Box sx={{ mt: 4 }}>
-        <Typography variant="h6" gutterBottom>
-          Today's Appointments
-        </Typography>
-        {todayAppointments.map((appt) => (
-          <Card key={appt.id} sx={{ mb: 2 }}>
-            <CardContent>
-              <Typography>
-                <strong>Patient:</strong>{" "}
-                {appt.patient?.user?.name || appt.patient?.patientId || "N/A"}
-              </Typography>
-              <Typography>
-                <strong>Doctor:</strong>{" "}
-                {appt.doctor?.user?.name || appt.doctor?.doctorId || "N/A"}
-              </Typography>
-              <Typography>
-                <strong>Time:</strong> {formatDate(appt.date)}
-              </Typography>
-              <Typography>
-                <strong>Status:</strong> {appt.status}
-              </Typography>
-            </CardContent>
-          </Card>
-        ))}
-      </Box>
+      {error && <Alert severity="error">{error}</Alert>}
+      {loading ? (
+        <Box sx={{ display: 'flex', justifyContent: 'center', mt: 4 }}>
+          <CircularProgress />
+        </Box>
+      ) : (
+        <>
+          <Box sx={{ mt: 2, height: 400 }}>
+            <Bar data={chartData} options={chartOptions} />
+          </Box>
+          <Grid container spacing={2}>
+            <Grid item xs={12} md={4}>
+              <Card>
+                <CardContent>
+                  <Typography variant="h6">Total Appointments</Typography>
+                  <Typography variant="h4">{stats.total}</Typography>
+                </CardContent>
+              </Card>
+            </Grid>
+            <Grid item xs={12} md={4}>
+              <Card>
+                <CardContent>
+                  <Typography variant="h6">Scheduled</Typography>
+                  <Typography variant="h4">{stats.scheduled}</Typography>
+                </CardContent>
+              </Card>
+            </Grid>
+            <Grid item xs={12} md={4}>
+              <Card>
+                <CardContent>
+                  <Typography variant="h6">Checked In</Typography>
+                  <Typography variant="h4">{stats.checkedIn}</Typography>
+                </CardContent>
+              </Card>
+            </Grid>
+          </Grid>
+          <Box sx={{ mt: 4 }}>
+            <Typography variant="h6" gutterBottom>
+              Today's Appointments
+            </Typography>
+            {todayAppointments.map((appt) => (
+              <Card key={appt.id} sx={{ mb: 2 }}>
+                <CardContent>
+                  <Typography>
+                    <strong>Patient:</strong>{' '}
+                    {appt.patient?.user?.name || appt.patient?.patientId || 'N/A'}
+                  </Typography>
+                  <Typography>
+                    <strong>Doctor:</strong>{' '}
+                    {appt.doctor?.user?.name || appt.doctor?.doctorId || 'N/A'}
+                  </Typography>
+                  <Typography>
+                    <strong>Time:</strong> {new Date(appt.date).toLocaleString()}
+                  </Typography>
+                  <Typography>
+                    <strong>Status:</strong> {appt.status}
+                  </Typography>
+                </CardContent>
+              </Card>
+            ))}
+          </Box>
+        </>
+      )}
     </Box>
   );
 }
