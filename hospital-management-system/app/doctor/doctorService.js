@@ -1,195 +1,214 @@
-import { API_ROUTES, BASE_URL } from '@/api';
+import axios from 'axios';
+import api from '../api';
+
+const { BASE_URL, API_ROUTES } = api;
+
+export async function getAdmissions() {
+  try {
+    const response = await axios.get(`${BASE_URL}${API_ROUTES.ADT}`);
+    return response.data;
+  } catch (error) {
+    console.error('Error fetching admissions:', error);
+    throw error;
+  }
+}
+
+export async function createAdmission(data) {
+  try {
+    const response = await axios.post(`${BASE_URL}${API_ROUTES.ADT}`, data);
+    return response.data;
+  } catch (error) {
+    console.error('Error creating admission:', error);
+    throw error;
+  }
+}
+
+export async function getAdmission(id) {
+  try {
+    const response = await axios.get(`${BASE_URL}${API_ROUTES.ADT}/${id}`);
+    return response.data;
+  } catch (error) {
+    console.error('Error fetching admission:', error);
+    throw error;
+  }
+}
+
+export async function updateAdmission(id, data) {
+  try {
+    const response = await axios.put(`${BASE_URL}${API_ROUTES.ADT}/${id}`, data);
+    return response.data;
+  } catch (error) {
+    console.error('Error updating admission:', error);
+    throw error;
+  }
+}
+
+export async function deleteAdmission(id) {
+  try {
+    const response = await axios.delete(`${BASE_URL}${API_ROUTES.ADT}/${id}`);
+    return response.data;
+  } catch (error) {
+    console.error('Error deleting admission:', error);
+    throw error;
+  }
+}
+
+export async function getDischarges() {
+  try {
+    const response = await axios.get(`${BASE_URL}${API_ROUTES.DISCHARGE}`);
+    return response.data;
+  } catch (error) {
+    console.error('Error fetching discharges:', error);
+    throw error;
+  }
+}
+
+export async function createDischarge(data) {
+  try {
+    const response = await axios.post(`${BASE_URL}${API_ROUTES.DISCHARGE}`, data);
+    return response.data;
+  } catch (error) {
+    console.error('Error creating discharge:', error);
+    throw error;
+  }
+}
+
+export async function getDischarge(id) {
+  try {
+    const response = await axios.get(`${BASE_URL}${API_ROUTES.DISCHARGE}/${id}`);
+    return response.data;
+  } catch (error) {
+    console.error('Error fetching discharge:', error);
+    throw error;
+  }
+}
+
+export async function updateDischarge(id, data) {
+  try {
+    const response = await axios.put(`${BASE_URL}${API_ROUTES.DISCHARGE}/${id}`, data);
+    return response.data;
+  } catch (error) {
+    console.error('Error updating discharge:', error);
+    throw error;
+  }
+}
+
+export async function deleteDischarge(id) {
+  try {
+    const response = await axios.delete(`${BASE_URL}${API_ROUTES.DISCHARGE}/${id}`);
+    return response.data;
+  } catch (error) {
+    console.error('Error deleting discharge:', error);
+    throw error;
+  }
+}
+
+export async function getPatients() {
+  try {
+    const response = await axios.get(`${BASE_URL}${API_ROUTES.PATIENT}`);
+    return response.data;
+  } catch (error) {
+    console.error('Error fetching patients:', error);
+    throw error;
+  }
+}
+
+export async function updatePatient(id, data) {
+  try {
+    const response = await axios.put(`${BASE_URL}${API_ROUTES.PATIENT}/${id}`, data);
+    return response.data;
+  } catch (error) {
+    console.error('Error updating patient:', error);
+    throw error;
+  }
+}
+
+export async function deletePatient(id) {
+  try {
+    const response = await axios.delete(`${BASE_URL}${API_ROUTES.PATIENT}/${id}`);
+    return response.data;
+  } catch (error) {
+    console.error('Error deleting patient:', error);
+    throw error;
+  }
+}
 
 export async function getDoctors() {
-  const response = await fetch(`${BASE_URL}${API_ROUTES.DOCTOR}`, {
-    headers: { Authorization: `Bearer ${localStorage.getItem('token')}` },
-  });
-  if (!response.ok) throw new Error('Failed to fetch doctors');
-  return await response.json();
-}
-
-export async function getDoctorById(id) {
-  const response = await fetch(`${BASE_URL}${API_ROUTES.DOCTOR}/${id}`, {
-    headers: { Authorization: `Bearer ${localStorage.getItem('token')}` },
-  });
-  if (!response.ok) throw new Error('Failed to fetch doctor');
-  return await response.json();
-}
-
-export async function createDoctor(data) {
-  const response = await fetch(`${BASE_URL}${API_ROUTES.DOCTOR}`, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      Authorization: `Bearer ${localStorage.getItem('token')}`,
-    },
-    body: JSON.stringify(data),
-  });
-  if (!response.ok) throw new Error('Failed to create doctor');
-  return await response.json();
+  try {
+    const response = await axios.get(`${BASE_URL}${API_ROUTES.DOCTOR}`);
+    return response.data;
+  } catch (error) {
+    console.error('Error fetching doctors:', error);
+    throw error;
+  }
 }
 
 export async function updateDoctor(id, data) {
-  const response = await fetch(`${BASE_URL}${API_ROUTES.DOCTOR}/${id}`, {
-    method: 'PUT',
-    headers: {
-      'Content-Type': 'application/json',
-      Authorization: `Bearer ${localStorage.getItem('token')}`,
-    },
-    body: JSON.stringify(data),
-  });
-  if (!response.ok) throw new Error('Failed to update doctor');
-  return await response.json();
+  try {
+    const response = await axios.put(`${BASE_URL}${API_ROUTES.DOCTOR}/${id}`, data);
+    return response.data;
+  } catch (error) {
+    console.error('Error updating doctor:', error);
+    throw error;
+  }
 }
 
 export async function deleteDoctor(id) {
-  const response = await fetch(`${BASE_URL}${API_ROUTES.DOCTOR}/${id}`, {
-    method: 'DELETE',
-    headers: { Authorization: `Bearer ${localStorage.getItem('token')}` },
-  });
-  if (!response.ok) throw new Error('Failed to delete doctor');
-  return await response.json();
+  try {
+    const response = await axios.delete(`${BASE_URL}${API_ROUTES.DOCTOR}/${id}`);
+    return response.data;
+  } catch (error) {
+    console.error('Error deleting doctor:', error);
+    throw error;
+  }
 }
 
-export async function getDoctorSchedule(doctorId) {
-  const response = await fetch(`${BASE_URL}${API_ROUTES.DOCTOR}/${doctorId}/schedule`, {
-    headers: { Authorization: `Bearer ${localStorage.getItem('token')}` },
-  });
-  if (!response.ok) throw new Error('Failed to fetch schedule');
-  return await response.json();
+export async function getWards() {
+  try {
+    const response = await axios.get(`${BASE_URL}${API_ROUTES.WARD}`);
+    return response.data;
+  } catch (error) {
+    console.error('Error fetching wards:', error);
+    throw error;
+  }
 }
 
-export async function createSchedule(data) {
-  const response = await fetch(`${BASE_URL}${API_ROUTES.DOCTOR}/${data.doctorId}/schedule`, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      Authorization: `Bearer ${localStorage.getItem('token')}`,
-    },
-    body: JSON.stringify(data),
-  });
-  if (!response.ok) throw new Error('Failed to create schedule');
-  return await response.json();
+export async function updateWard(id, data) {
+  try {
+    const response = await axios.put(`${BASE_URL}${API_ROUTES.WARD}/${id}`, data);
+    return response.data;
+  } catch (error) {
+    console.error('Error updating ward:', error);
+    throw error;
+  }
 }
 
-export async function getAssignedPatients(doctorId) {
-  const response = await fetch(`${BASE_URL}${API_ROUTES.DOCTOR}/${doctorId}/patients`, {
-    headers: { Authorization: `Bearer ${localStorage.getItem('token')}` },
-  });
-  if (!response.ok) throw new Error('Failed to fetch patients');
-  return await response.json();
+export async function deleteWard(id) {
+  try {
+    const response = await axios.delete(`${BASE_URL}${API_ROUTES.WARD}/${id}`);
+    return response.data;
+  } catch (error) {
+    console.error('Error deleting ward:', error);
+    throw error;
+  }
 }
 
-export async function getAppointments(doctorId) {
-  const response = await fetch(`${BASE_URL}${API_ROUTES.DOCTOR}/${doctorId}/appointments`, {
-    headers: { Authorization: `Bearer ${localStorage.getItem('token')}` },
-  });
-  if (!response.ok) throw new Error('Failed to fetch appointments');
-  return await response.json();
+export async function getTransactions() {
+  try {
+    const response = await axios.get(`${BASE_URL}${API_ROUTES.TRANSACTION}`);
+    return response.data;
+  } catch (error) {
+    console.error('Error fetching transactions:', error);
+    throw error;
+  }
 }
 
-export async function updateAppointmentStatus(appointmentId, status) {
-  const response = await fetch(`${BASE_URL}${API_ROUTES.DOCTOR}/appointments`, {
-    method: 'PATCH',
-    headers: {
-      'Content-Type': 'application/json',
-      Authorization: `Bearer ${localStorage.getItem('token')}`,
-    },
-    body: JSON.stringify({ appointmentId, status }),
-  });
-  if (!response.ok) throw new Error('Failed to update appointment');
-  return await response.json();
-}
-
-export async function createPrescription(data) {
-  const response = await fetch(`${BASE_URL}${API_ROUTES.DOCTOR}/${data.doctorId}/prescriptions`, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      Authorization: `Bearer ${localStorage.getItem('token')}`,
-    },
-    body: JSON.stringify(data),
-  });
-  if (!response.ok) throw new Error('Failed to create prescription');
-  return await response.json();
-}
-
-export async function getPrescriptions(doctorId) {
-  const response = await fetch(`${BASE_URL}${API_ROUTES.DOCTOR}/${doctorId}/prescriptions`, {
-    headers: { Authorization: `Bearer ${localStorage.getItem('token')}` },
-  });
-  if (!response.ok) throw new Error('Failed to fetch prescriptions');
-  return await response.json();
-}
-
-export async function createCaseNote(data) {
-  const response = await fetch(`${BASE_URL}${API_ROUTES.DOCTOR}/${data.doctorId}/case-notes`, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      Authorization: `Bearer ${localStorage.getItem('token')}`,
-    },
-    body: JSON.stringify(data),
-  });
-  if (!response.ok) throw new Error('Failed to create case note');
-  return await response.json();
-}
-
-export async function getCaseNotes(doctorId) {
-  const response = await fetch(`${BASE_URL}${API_ROUTES.DOCTOR}/${doctorId}/case-notes`, {
-    headers: { Authorization: `Bearer ${localStorage.getItem('token')}` },
-  });
-  if (!response.ok) throw new Error('Failed to fetch case notes');
-  return await response.json();
-}
-
-export async function createDiagnosticOrder(data) {
-  const response = await fetch(`${BASE_URL}${API_ROUTES.DOCTOR}/${data.doctorId}/diagnostic-orders`, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      Authorization: `Bearer ${localStorage.getItem('token')}`,
-    },
-    body: JSON.stringify(data),
-  });
-  if (!response.ok) throw new Error('Failed to create diagnostic order');
-  return await response.json();
-}
-
-export async function getDiagnosticOrders(doctorId) {
-  const response = await fetch(`${BASE_URL}${API_ROUTES.DOCTOR}/${doctorId}/diagnostic-orders`, {
-    headers: { Authorization: `Bearer ${localStorage.getItem('token')}` },
-  });
-  if (!response.ok) throw new Error('Failed to fetch diagnostic orders');
-  return await response.json();
-}
-
-export async function createLeaveRequest(data) {
-  const response = await fetch(`${BASE_URL}${API_ROUTES.DOCTOR}/${data.doctorId}/leave-requests`, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      Authorization: `Bearer ${localStorage.getItem('token')}`,
-    },
-    body: JSON.stringify(data),
-  });
-  if (!response.ok) throw new Error('Failed to create leave request');
-  return await response.json();
-}
-
-export async function getLeaveRequests(doctorId) {
-  const response = await fetch(`${BASE_URL}${API_ROUTES.DOCTOR}/${doctorId}/leave-requests`, {
-    headers: { Authorization: `Bearer ${localStorage.getItem('token')}` },
-  });
-  if (!response.ok) throw new Error('Failed to fetch leave requests');
-  return await response.json();
-}
-
-export async function getPerformanceSummary(doctorId, filters) {
-  const query = new URLSearchParams(filters).toString();
-  const response = await fetch(`${BASE_URL}${API_ROUTES.DOCTOR}/${doctorId}/performance?${query}`, {
-    headers: { Authorization: `Bearer ${localStorage.getItem('token')}` },
-  });
-  if (!response.ok) throw new Error('Failed to fetch performance summary');
-  return await response.json();
+export async function getPayrolls() {
+  try {
+    const response = await axios.get(`${BASE_URL}${API_ROUTES.PAYROLL}`);
+    return response.data;
+  } catch (error) {
+    console.error('Error fetching payrolls:', error);
+    throw error;
+  }
 }
