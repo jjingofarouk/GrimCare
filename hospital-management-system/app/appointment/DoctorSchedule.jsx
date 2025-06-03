@@ -6,20 +6,23 @@ import { DataGrid } from '@mui/x-data-grid';
 import SearchableSelect from '../components/SearchableSelect';
 import axios from 'axios';
 import api from '../api';
+import styles from './DoctorSchedule.module.css';
 
 export default function DoctorSchedule({ doctors }) {
   const [selectedDoctorId, setSelectedDoctorId] = useState('');
   const [appointments, setAppointments] = useState([]);
   const [error, setError] = useState(null);
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    async function fetchAppointments() {
-      if (!selectedDoctorId) return;
+    async function fetchAppointments(doctorId = '') {
       setLoading(true);
       try {
         const token = localStorage.getItem('token');
-        const response = await axios.get(`${api.BASE_URL}${api.API_ROUTES.APPOINTMENT}?doctorId=${selectedDoctorId}&status=SCHEDULED`, {
+        const url = doctorId
+          ? `${api.BASE_URL}${api.API_ROUTES.APPOINTMENT}?doctorId=${doctorId}&status=SCHEDULED`
+          : `${api.BASE_URL}${api.API_ROUTES.APPOINTMENT}?status=SCHEDULED`;
+        const response = await axios.get(url, {
           headers: { Authorization: `Bearer ${token}` },
         });
         const formattedAppointments = response.data.map((appt, index) => ({
@@ -38,7 +41,7 @@ export default function DoctorSchedule({ doctors }) {
         setLoading(false);
       }
     }
-    fetchAppointments();
+    fetchAppointments(selectedDoctorId);
   }, [selectedDoctorId]);
 
   const columns = [
@@ -51,34 +54,34 @@ export default function DoctorSchedule({ doctors }) {
   ];
 
   return (
-    <Box sx={{ p: 2, maxWidth: 1000, mx: 'auto', bgcolor: '#f5f5f5', borderRadius: 2 }}>
-      <Typography variant="h5" gutterBottom sx={{ fontWeight: 700, color: '#1976d2' }}>
+    <Box className={styles.container}>
+      <Typography variant="h5" className={styles.title}>
         Doctor Schedule
       </Typography>
       <SearchableSelect
-        label="Doctor"
+        label="Filter by Doctor"
         options={doctors}
         value={selectedDoctorId}
         onChange={setSelectedDoctorId}
         getOptionLabel={(doctor) => `${doctor.user?.name || doctor.doctorId || 'Unknown'} (${doctor.specialty || 'N/A'})`}
         getOptionValue={(doctor) => doctor.id}
+        className={styles.searchSelect}
       />
-      {error && <Alert severity="error" sx={{ mb: 2 }}>{error}</Alert>}
-      {selectedDoctorId && (
-        <Box sx={{ height: 400, width: '100%', mt: 2, bgcolor: 'white', borderRadius: 2 }}>
-          {loading ? (
-            <CircularProgress />
-          ) : (
-            <DataGrid
-              rows={appointments}
-              columns={columns}
-              pageSizeOptions={[5, 10, 20]}
-              disableRowSelectionOnClick
-              getRowId={(row) => row.id}
-            />
-          )}
-        </Box>
-      )}
+      {error && <Alert severity="error" className={styles.alert}>{error}</Alert>}
+      <Box className={styles.dataGridContainer}>
+        {loading ? (
+          <CircularProgress className={styles.loader} />
+        ) : (
+          <DataGrid
+            rows={appointments}
+            columns={columns}
+            pageSizeOptions={[5, 10, 20]}
+            disableRowSelectionOnClick
+            getRowId={(row) => row.id}
+            className={styles.dataGrid}
+          />
+        )}
+      </Box>
     </Box>
   );
 }
