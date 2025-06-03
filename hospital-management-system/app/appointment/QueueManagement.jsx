@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from 'react';
-import { Box, Typography, Alert, Button, CircularProgress, TextField, FormControl, InputLabel, Select, MenuItem } from '@mui/material';
+import { Box, Typography, Alert, Button, Skeleton, TextField, FormControl, InputLabel, Select, MenuItem } from '@mui/material';
 import { DataGrid } from '@mui/x-data-grid';
 import SearchableSelect from '../components/SearchableSelect';
 import axios from 'axios';
@@ -16,7 +16,6 @@ export default function QueueManagement({ doctors }) {
   const [error, setError] = useState(null);
   const [loading, setLoading] = useState(true);
 
-  // Fetch all queue data on component mount
   useEffect(() => {
     async function fetchAllQueues() {
       setLoading(true);
@@ -28,7 +27,6 @@ export default function QueueManagement({ doctors }) {
 
         const allQueueItems = [];
 
-        // Fetch queue data for all doctors
         for (const doctor of doctors || []) {
           try {
             const response = await axios.get(
@@ -80,21 +78,17 @@ export default function QueueManagement({ doctors }) {
     }
   }, [doctors]);
 
-  // Apply filters when doctor selection or other filters change
   const applyFilters = (data, currentFilter, doctorId) => {
     let filtered = [...(data || [])];
 
-    // Filter by selected doctor
     if (doctorId) {
       filtered = filtered.filter(item => item.doctorId === parseInt(doctorId));
     }
 
-    // Filter by status
     if (currentFilter.status) {
       filtered = filtered.filter(item => item.status === currentFilter.status);
     }
 
-    // Filter by date
     if (currentFilter.date) {
       const filterDate = new Date(currentFilter.date).toDateString();
       filtered = filtered.filter(item => {
@@ -220,7 +214,11 @@ export default function QueueManagement({ doctors }) {
       {error && <Alert severity="error" className={styles.alert}>{error}</Alert>}
       <Box className={styles.gridContainer}>
         {loading ? (
-          <CircularProgress className={styles.loader} />
+          <Box className={styles.loader}>
+            <Skeleton variant="rectangular" width="100%" height={400} />
+            <Skeleton variant="text" width="60%" />
+            <Skeleton variant="text" width="80%" />
+          </Box>
         ) : (
           <DataGrid
             rows={filteredQueueItems}
