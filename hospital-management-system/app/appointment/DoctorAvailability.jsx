@@ -287,25 +287,8 @@ export default function DoctorAvailability({ doctors }) {
         </Button>
       </Box>
 
-      <Box className={styles.filterContainer}>
-        <SearchableSelect
-          label="Filter by Doctor"
-          options={doctors || []}
-          value={selectedDoctorId}
-          onChange={setSelectedDoctorId}
-          getOptionLabel={(doctor) => `${doctor.user?.name || doctor.doctorId || 'Unknown'} (${doctor.specialty || 'N/A'})`}
-          getOptionValue={(doctor) => doctor.id}
-          className={styles.filterInput}
-        />
-        <TextField
-          label="Filter by Date"
-          type="date"
-          name="date"
-          value={filter.date}
-          onChange={handleFilterChange}
-          InputLabelProps={{ shrink: true }}
-          className={styles.filterInput}
-        />
+
+ 
         <FormControl className={styles.filterInput}>
           <InputLabel>Filter by Status</InputLabel>
           <Select
