@@ -1,9 +1,10 @@
 "use client";
+
 import React, { useState, useEffect } from 'react';
 import { Box, Typography, Alert, Button, CircularProgress } from '@mui/material';
 import { DataGrid } from '@mui/x-data-grid';
-import { getAppointments, getPatients, getDoctors, updateAppointment } from './appointmentService';
 import AppointmentFilter from './AppointmentFilter';
+import api from '../utils/api';
 import styles from './AppointmentList.module.css';
 
 export default function AppointmentList({ onEdit }) {
@@ -18,13 +19,18 @@ export default function AppointmentList({ onEdit }) {
     async function fetchData() {
       try {
         setLoading(true);
-        const [appointmentsData, patientsData, doctorsData] = await Promise.all([
-          getAppointments(),
-          getPatients(),
-          getDoctors(),
+        const [appointmentsRes, patientsRes, doctorsRes] = await Promise.all([
+          fetch(`${api.BASE_URL}${api.API_ROUTES.APPOINTMENT}`),
+          fetch(`${api.BASE_URL}${api.API_ROUTES.PATIENT}`),
+          fetch(`${api.BASE_URL}${api.API_ROUTES.DOCTOR}`),
         ]);
+        if (!appointmentsRes.ok || !patientsRes.ok || !doctorsRes.ok) {
+          throw new Error('Failed to fetch data');
+        }
+        const appointmentsData = await appointmentsRes.json();
+        const patientsData = await patientsRes.json();
+        const doctorsData = await doctorsRes.json();
 
-        // Map appointments to include patientName and doctorName
         const mappedAppointments = appointmentsData.map(appt => ({
           id: appt.id,
           patientId: appt.patientId,
@@ -35,7 +41,7 @@ export default function AppointmentList({ onEdit }) {
           type: appt.type || 'N/A',
           status: appt.status || 'N/A',
           reason: appt.reason || 'N/A',
-          queueNumber: appt.queue?.queueNumber || 'N/A',
+          queueNumber: appt.queueNumber || 'N/A',
           checkInTime: appt.checkInTime ? new Date(appt.checkInTime).toLocaleString() : null,
           checkOutTime: appt.checkOutTime ? new Date(appt.checkOutTime).toLocaleString() : null,
         }));
@@ -56,7 +62,12 @@ export default function AppointmentList({ onEdit }) {
 
   const handleCancel = async (id) => {
     try {
-      await updateAppointment(id, { status: 'CANCELLED' });
+      const response = await fetch(`${api.BASE_URL}${api.API_ROUTES.APPOINTMENT}/${id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ status: 'CANCELLED' }),
+      });
+      if (!response.ok) throw new Error('Failed to cancel appointment');
       setAppointments(appointments.map(appt =>
         appt.id === id ? { ...appt, status: 'CANCELLED' } : appt
       ));
@@ -70,7 +81,12 @@ export default function AppointmentList({ onEdit }) {
   const handleCheckIn = async (id) => {
     try {
       const checkInTime = new Date();
-      await updateAppointment(id, { status: 'CHECKED_IN', checkInTime });
+      const response = await fetch(`${api.BASE_URL}${api.API_ROUTES.APPOINTMENT}/${id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ status: 'CHECKED_IN', checkInTime }),
+      });
+      if (!response.ok) throw new Error('Failed to check in appointment');
       setAppointments(appointments.map(appt =>
         appt.id === id ? { ...appt, status: 'CHECKED_IN', checkInTime: checkInTime.toLocaleString() } : appt
       ));
@@ -84,7 +100,12 @@ export default function AppointmentList({ onEdit }) {
   const handleCheckOut = async (id) => {
     try {
       const checkOutTime = new Date();
-      await updateAppointment(id, { status: 'CHECKED_OUT', checkOutTime });
+      const response = await fetch(`${api.BASE_URL}${api.API_ROUTES.APPOINTMENT}/${id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ status: 'CHECKED_OUT', checkOutTime }),
+      });
+      if (!response.ok) throw new Error('Failed to check out appointment');
       setAppointments(appointments.map(appt =>
         appt.id === id ? { ...appt, status: 'CHECKED_OUT', checkOutTime: checkOutTime.toLocaleString() } : appt
       ));
