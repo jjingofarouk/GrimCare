@@ -90,7 +90,7 @@ export default function AppointmentForm({ patients, doctors, departments, onSucc
         patientId: parseInt(formData.patientId),
         doctorId: parseInt(formData.doctorId),
         departmentId: formData.departmentId ? parseInt(formData.departmentId) : null,
-        date: new Date(formData.date),
+        date: formData.date, // Pass as string, let backend handle Date conversion
         type: formData.type,
         reason: formData.reason,
         notes: formData.notes,
@@ -203,7 +203,7 @@ export default function AppointmentForm({ patients, doctors, departments, onSucc
           <Typography><strong>Patient:</strong> {(fetchedPatients.length > 0 ? fetchedPatients : patients).find((p) => p.id === parseInt(formData.patientId))?.user?.name || 'Unknown'}</Typography>
           <Typography><strong>Doctor:</strong> {(fetchedDoctors.length > 0 ? fetchedDoctors : doctors).find((d) => d.id === parseInt(formData.doctorId))?.user?.name || 'Unknown'}</Typography>
           <Typography><strong>Department:</strong> {departments.find((d) => d.id === parseInt(formData.departmentId))?.name || 'N/A'}</Typography>
-          <Typography><strong>Date:</strong> {new Date(formData.date).toLocaleString()}</Typography>
+          <Typography><strong>Date:</strong> {formData.date ? new Date(formData.date).toLocaleString() : 'N/A'}</Typography>
           <Typography><strong>Type:</strong> {formData.type}</Typography>
           <Typography><strong>Reason:</strong> {formData.reason}</Typography>
           <Typography><strong>Notes:</strong> {formData.notes || 'N/A'}</Typography>
