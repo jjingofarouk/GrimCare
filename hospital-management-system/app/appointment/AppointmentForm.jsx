@@ -3,8 +3,8 @@
 import React, { useState, useEffect } from 'react';
 import { Box, TextField, Button, MenuItem, Select, InputLabel, FormControl, Typography, Dialog, DialogTitle, DialogContent, DialogActions } from '@mui/material';
 import SearchableSelect from '../components/SearchableSelect';
+import axios from 'axios';
 import api from '../api';
-import styles from './form.module.css';
 
 export default function AppointmentForm({ patients, doctors, departments, onSuccess, appointment, userId }) {
   const [formData, setFormData] = useState({
@@ -63,29 +63,32 @@ export default function AppointmentForm({ patients, doctors, departments, onSucc
     setLoading(true);
     try {
       const data = {
-        ...formData,
+        resource: 'appointment',
         patientId: parseInt(formData.patientId),
         doctorId: parseInt(formData.doctorId),
         departmentId: formData.departmentId ? parseInt(formData.departmentId) : null,
         date: new Date(formData.date),
+        type: formData.type,
+        reason: formData.reason,
+        notes: formData.notes,
         bookedById: userId,
       };
-      const response = await fetch(
-        appointment ? `${api.BASE_URL}${api.API_ROUTES.APPOINTMENT}/${appointment.id}` : `${api.BASE_URL}${api.API_ROUTES.APPOINTMENT}`,
-        {
-          method: appointment ? 'PUT' : 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(data),
-        }
-      );
-      if (!response.ok) throw new Error('Failed to process appointment');
-      await response.json();
+      const token = localStorage.getItem('token');
+      let response;
+      if (appointment) {
+        response = await axios.put(`${api.BASE_URL}${api.API_ROUTES.APPOINTMENT}/${appointment.id}`, data, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+      } else {
+        response = await axios.post(`${api.BASE_URL}${api.API_ROUTES.APPOINTMENT}`, data, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+      }
       onSuccess();
       setFormData({ patientId: '', doctorId: '', departmentId: '', date: '', type: 'REGULAR', reason: '', notes: '' });
       setOpenConfirm(false);
     } catch (err) {
-      setError('Failed to process appointment: ' + err.message);
-      console.error('Submission error:', err);
+      setError('Failed to process appointment: ' + (err.response?.data?.error || err.message));
     } finally {
       setLoading(false);
     }
@@ -174,8 +177,8 @@ export default function AppointmentForm({ patients, doctors, departments, onSucc
       <Dialog open={openConfirm} onClose={() => setOpenConfirm(false)}>
         <DialogTitle>Confirm Appointment</DialogTitle>
         <DialogContent>
-          <Typography><strong>Patient:</strong> {patients.find((p) => p.id === parseInt(formData.patientId))?.user?.name || formData.patientId || 'Unknown'}</Typography>
-          <Typography><strong>Doctor:</strong> {doctors.find((d) => d.id === parseInt(formData.doctorId))?.user?.name || formData.doctorId || 'Unknown'}</Typography>
+          <Typography><strong>Patient:</strong> {patients.find((p) => p.id === parseInt(formData.patientId))?.user?.name || 'Unknown'}</Typography>
+          <Typography><strong>Doctor:</strong> {doctors.find((d) => d.id === parseInt(formData.doctorId))?.user?.name || 'Unknown'}</Typography>
           <Typography><strong>Department:</strong> {departments.find((d) => d.id === parseInt(formData.departmentId))?.name || 'N/A'}</Typography>
           <Typography><strong>Date:</strong> {new Date(formData.date).toLocaleString()}</Typography>
           <Typography><strong>Type:</strong> {formData.type}</Typography>
