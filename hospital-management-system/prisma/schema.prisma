@@ -10,7 +10,7 @@ datasource db {
 model User {
   id            Int              @id @default(autoincrement())
   email         String           @unique
-  name          String
+  name          String           // Changed to non-nullable
   password      String
   role          String           @default("PATIENT") // PATIENT, DOCTOR, ADMIN, NURSE
   createdAt     DateTime         @default(now())
@@ -94,9 +94,10 @@ model Appointment {
   checkInTime   DateTime?
   checkOutTime  DateTime?
   reminderSent  Boolean     @default(false)
+  queueNumber   Int?        // Added queueNumber directly
+  queueStatus   String?     @default("WAITING") // WAITING, IN_PROGRESS, COMPLETED
   createdAt     DateTime    @default(now())
   updatedAt     DateTime    @updatedAt
-  queue         Queue?
 }
 
 model DoctorAvailability {
@@ -105,17 +106,8 @@ model DoctorAvailability {
   doctor        Doctor      @relation(fields: [doctorId], references: [id])
   startTime     DateTime
   endTime       DateTime
+  dayOfWeek     String?     // Added for recurring patterns (e.g., "MONDAY")
   status        String      @default("AVAILABLE") // AVAILABLE, UNAVAILABLE
-  createdAt     DateTime    @default(now())
-  updatedAt     DateTime    @updatedAt
-}
-
-model Queue {
-  id            Int         @id @default(autoincrement())
-  appointmentId Int         @unique
-  appointment   Appointment @relation(fields: [appointmentId], references: [id])
-  queueNumber   Int
-  status        String      @default("WAITING") // WAITING, IN_PROGRESS, COMPLETED
   createdAt     DateTime    @default(now())
   updatedAt     DateTime    @updatedAt
 }
