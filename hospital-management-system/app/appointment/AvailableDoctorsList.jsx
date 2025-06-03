@@ -30,8 +30,8 @@ export default function AvailableDoctorsList() {
               (item) => item?.startTime && item?.endTime && item.status === 'AVAILABLE'
             );
             return {
-              id: doctor.id,
-              name: doctor.user?.name || 'N/A',
+              id: doctor.id || `doctor-${Math.random()}`, // Fallback ID
+              name: doctor.user?.name || doctor.doctorId || 'N/A',
               specialty: doctor.specialty || 'N/A',
               availability: availableSlots,
             };
@@ -57,6 +57,10 @@ export default function AvailableDoctorsList() {
       setError('Please select a date range');
       return;
     }
+    if (new Date(dateFilter.startDate) > new Date(dateFilter.endDate)) {
+      setError('End date must be after start date');
+      return;
+    }
     setError(null);
   };
 
@@ -74,22 +78,14 @@ export default function AvailableDoctorsList() {
   })).filter(doctor => doctor.availability.length > 0);
 
   const columns = [
-    { 
-      field: 'name', 
-      headerName: 'Doctor Name', 
-      width: 200,
-    },
-    { 
-      field: 'specialty', 
-      headerName: 'Specialty', 
-      width: 150,
-    },
+    { field: 'name', headerName: 'Doctor Name', width: 200 },
+    { field: 'specialty', headerName: 'Specialty', width: 150 },
     {
       field: 'availableSlots',
       headerName: 'Available Time Slots',
       width: 400,
-      valueGetter: (params) => {
-        const slots = params.row.availability || [];
+      renderCell: (params) => {
+        const slots = params.row?.availability || [];
         return slots.length > 0
           ? slots
               .map((slot) => `${new Date(slot.startTime).toLocaleString()} - ${new Date(slot.endTime).toLocaleString()}`)
