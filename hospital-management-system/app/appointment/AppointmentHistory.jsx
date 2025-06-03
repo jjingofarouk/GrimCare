@@ -12,15 +12,15 @@ export default function AppointmentHistory({ patients }) {
   const [selectedPatientId, setSelectedPatientId] = useState('');
   const [appointments, setAppointments] = useState([]);
   const [error, setError] = useState(null);
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const fetchAppointments = async () => {
+    const fetchAppointments = async (patientId = '') => {
       setLoading(true);
       try {
         const token = localStorage.getItem('token');
-        const url = selectedPatientId 
-          ? `${api.BASE_URL}${api.API_ROUTES.APPOINTMENT}?patientId=${selectedPatientId}`
+        const url = patientId
+          ? `${api.BASE_URL}${api.API_ROUTES.APPOINTMENT}?patientId=${patientId}`
           : `${api.BASE_URL}${api.API_ROUTES.APPOINTMENT}`;
         const response = await axios.get(url, {
           headers: { Authorization: `Bearer ${token}` },
@@ -42,7 +42,7 @@ export default function AppointmentHistory({ patients }) {
         setLoading(false);
       }
     };
-    fetchAppointments();
+    fetchAppointments(selectedPatientId);
   }, [selectedPatientId]);
 
   const columns = [
@@ -57,26 +57,22 @@ export default function AppointmentHistory({ patients }) {
 
   return (
     <Box className={styles.container}>
-      <Typography className={styles.title}>
+      <Typography variant="h5" className={styles.title}>
         Appointment History
       </Typography>
-      <Box className={styles.searchContainer}>
-        <SearchableSelect
-          label=""
-          options={[{ id: '', user: { name: 'All Patients' } }, ...patients]}
-          value={selectedPatientId}
-          onChange={setSelectedPatientId}
-          getOptionLabel={(patient) => patient.user?.name || patient.patientId || 'All Patients'}
-          getOptionValue={(patient) => patient.id}
-          className={styles.searchInput}
-        />
-      </Box>
-      {error && <Alert className={styles.alert} severity="error">{error}</Alert>}
-      <Box className={styles.tableContainer}>
+      <SearchableSelect
+        label="Filter by Patient"
+        options={patients}
+        value={selectedPatientId}
+        onChange={setSelectedPatientId}
+        getOptionLabel={(patient) => patient.user?.name || patient.patientId || 'Unknown'}
+        getOptionValue={(patient) => patient.id}
+        className={styles.searchSelect}
+      />
+      {error && <Alert severity="error" className={styles.alert}>{error}</Alert>}
+      <Box className={styles.dataGridContainer}>
         {loading ? (
-          <Box className={styles.loader}>
-            <CircularProgress />
-          </Box>
+          <CircularProgress className={styles.loader} />
         ) : (
           <DataGrid
             rows={appointments}
@@ -84,6 +80,7 @@ export default function AppointmentHistory({ patients }) {
             pageSizeOptions={[5, 10, 20]}
             disableRowSelectionOnClick
             getRowId={(row) => row.id}
+            className={styles.dataGrid}
           />
         )}
       </Box>
