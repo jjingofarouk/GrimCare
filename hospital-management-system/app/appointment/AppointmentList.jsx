@@ -25,24 +25,20 @@ export default function AppointmentList({ onEdit }) {
         ]);
 
         // Map appointments to include patientName and doctorName
-        const mappedAppointments = appointmentsData.map(appt => {
-          const patient = patientsData.find(p => p.id === appt.patientId);
-          const doctor = doctorsData.find(d => d.id === appt.doctorId);
-          return {
-            id: appt.id,
-            patientId: appt.patientId,
-            patientName: patient?.user?.name || appt.patient?.user?.name || 'Unknown',
-            doctorId: appt.doctorId,
-            doctorName: doctor?.user?.name || appt.doctor?.user?.name || 'Unknown',
-            date: appt.date ? new Date(appt.date).toLocaleString() : 'N/A',
-            type: appt.type || 'N/A',
-            status: appt.status || 'N/A',
-            reason: appt.reason || 'N/A',
-            queueNumber: appt.queue?.queueNumber || 'N/A',
-            checkInTime: appt.checkInTime ? new Date(appt.checkInTime).toLocaleString() : null,
-            checkOutTime: appt.checkOutTime ? new Date(appt.checkOutTime).toLocaleString() : null,
-          };
-        });
+        const mappedAppointments = appointmentsData.map(appt => ({
+          id: appt.id,
+          patientId: appt.patientId,
+          patientName: appt.patient?.user?.name || 'N/A',
+          doctorId: appt.doctorId,
+          doctorName: appt.doctor?.user?.name || 'N/A',
+          date: appt.date ? new Date(appt.date).toLocaleString() : 'N/A',
+          type: appt.type || 'N/A',
+          status: appt.status || 'N/A',
+          reason: appt.reason || 'N/A',
+          queueNumber: appt.queue?.queueNumber || 'N/A',
+          checkInTime: appt.checkInTime ? new Date(appt.checkInTime).toLocaleString() : null,
+          checkOutTime: appt.checkOutTime ? new Date(appt.checkOutTime).toLocaleString() : null,
+        }));
 
         setAppointments(mappedAppointments);
         setPatients(patientsData);
