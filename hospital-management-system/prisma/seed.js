@@ -34,8 +34,8 @@ const specialties = [
 ];
 
 const departments = [
-  'Emergency', 'Surgery', 'Pediatrics', 'Maternity', 'Internal Medicine', 'Cardiology',
-  'Neurology', 'Orthopedics', 'Radiology', 'Laboratory', 'Pharmacy', 'Outpatient',
+  'Emergency', 'Maternity', 'Internal Medicine', 'Cardiology',
+  'Neurology', 'Radiology', 'Laboratory', 'Pharmacy', 'Outpatient',
   'ICU', 'CCU', 'NICU', 'Dialysis', 'Physiotherapy', 'Dental'
 ];
 
