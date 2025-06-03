@@ -89,22 +89,22 @@ async function main() {
   await prisma.doctor.createMany({
     data: [
       {
+        userId: drJohn.id,
         doctorId: 'DOC001',
         specialty: 'Cardiology',
         licenseNumber: 'LIC001',
         phone: '555-0101',
         office: 'Room 101',
         departmentId: cardiology.id,
-        userId: drJohn.id,
       },
       {
+        userId: drJane.id,
         doctorId: 'DOC002',
         specialty: 'Orthopedics',
         licenseNumber: 'LIC002',
         phone: '555-0102',
         office: 'Room 102',
         departmentId: orthopedics.id,
-        userId: drJane.id,
       },
     ],
   });
@@ -113,6 +113,7 @@ async function main() {
   await prisma.patient.createMany({
     data: [
       {
+        userId: alice.id,
         patientId: 'PAT001',
         dateOfBirth: new Date('1985-05-15'),
         gender: 'Female',
@@ -125,9 +126,9 @@ async function main() {
         bloodType: 'A+',
         allergies: 'Penicillin',
         medicalHistory: 'Hypertension',
-        userId: alice.id,
       },
       {
+        userId: bob.id,
         patientId: 'PAT002',
         dateOfBirth: new Date('1990-08-22'),
         gender: 'Male',
@@ -140,7 +141,6 @@ async function main() {
         bloodType: 'O-',
         allergies: 'None',
         medicalHistory: 'Asthma',
-        userId: bob.id,
       },
     ],
   });
