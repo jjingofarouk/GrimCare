@@ -12,7 +12,7 @@ import AvailableDoctorsList from './AvailableDoctorsList';
 import DepartmentForm from './DepartmentForm';
 import Dashboard from './Dashboard';
 import axios from 'axios';
-import api from '../../api';
+import api from '../api';
 import styles from './page.module.css';
 
 export default function AppointmentPage({ user }) {
