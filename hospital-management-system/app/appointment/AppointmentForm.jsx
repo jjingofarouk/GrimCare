@@ -4,7 +4,7 @@ import React, { useState, useEffect } from 'react';
 import { Box, TextField, Button, MenuItem, Select, InputLabel, FormControl, Typography, Dialog, DialogTitle, DialogContent, DialogActions } from '@mui/material';
 import SearchableSelect from '../components/SearchableSelect';
 import axios from 'axios';
-import api from '../api';
+import api from '../../api';
 
 export default function AppointmentForm({ patients, doctors, departments, onSuccess, appointment, userId }) {
   const [formData, setFormData] = useState({
@@ -19,6 +19,29 @@ export default function AppointmentForm({ patients, doctors, departments, onSucc
   const [error, setError] = useState(null);
   const [loading, setLoading] = useState(false);
   const [openConfirm, setOpenConfirm] = useState(false);
+  const [fetchedPatients, setFetchedPatients] = useState([]);
+  const [fetchedDoctors, setFetchedDoctors] = useState([]);
+
+  useEffect(() => {
+    async function fetchData() {
+      try {
+        const token = localStorage.getItem('token');
+        const [patientsRes, doctorsRes] = await Promise.all([
+          axios.get(`${api.BASE_URL}${api.API_ROUTES.PATIENT}`, {
+            headers: { Authorization: `Bearer ${token}` },
+          }),
+          axios.get(`${api.BASE_URL}${api.API_ROUTES.DOCTOR}`, {
+            headers: { Authorization: `Bearer ${token}` },
+          }),
+        ]);
+        setFetchedPatients(patientsRes.data);
+        setFetchedDoctors(doctorsRes.data);
+      } catch (err) {
+        setError('Failed to fetch patients or doctors: ' + (err.response?.data?.error || err.message));
+      }
+    }
+    fetchData();
+  }, []);
 
   useEffect(() => {
     if (appointment) {
@@ -101,7 +124,7 @@ export default function AppointmentForm({ patients, doctors, departments, onSucc
       <Typography variant="h6" gutterBottom>Create Appointment</Typography>
       <SearchableSelect
         label="Patient"
-        options={patients}
+        options={fetchedPatients.length > 0 ? fetchedPatients : patients}
         value={formData.patientId}
         onChange={(value) => setFormData({ ...formData, patientId: value })}
         getOptionLabel={(patient) => patient.user?.name || patient.patientId || 'Unknown'}
@@ -110,7 +133,7 @@ export default function AppointmentForm({ patients, doctors, departments, onSucc
       />
       <SearchableSelect
         label="Doctor"
-        options={doctors}
+        options={fetchedDoctors.length > 0 ? fetchedDoctors : doctors}
         value={formData.doctorId}
         onChange={(value) => setFormData({ ...formData, doctorId: value })}
         getOptionLabel={(doctor) => `${doctor.user?.name || doctor.doctorId || 'Unknown'} (${doctor.specialty || 'N/A'})`}
@@ -177,8 +200,8 @@ export default function AppointmentForm({ patients, doctors, departments, onSucc
       <Dialog open={openConfirm} onClose={() => setOpenConfirm(false)}>
         <DialogTitle>Confirm Appointment</DialogTitle>
         <DialogContent>
-          <Typography><strong>Patient:</strong> {patients.find((p) => p.id === parseInt(formData.patientId))?.user?.name || 'Unknown'}</Typography>
-          <Typography><strong>Doctor:</strong> {doctors.find((d) => d.id === parseInt(formData.doctorId))?.user?.name || 'Unknown'}</Typography>
+          <Typography><strong>Patient:</strong> {(fetchedPatients.length > 0 ? fetchedPatients : patients).find((p) => p.id === parseInt(formData.patientId))?.user?.name || 'Unknown'}</Typography>
+          <Typography><strong>Doctor:</strong> {(fetchedDoctors.length > 0 ? fetchedDoctors : doctors).find((d) => d.id === parseInt(formData.doctorId))?.user?.name || 'Unknown'}</Typography>
           <Typography><strong>Department:</strong> {departments.find((d) => d.id === parseInt(formData.departmentId))?.name || 'N/A'}</Typography>
           <Typography><strong>Date:</strong> {new Date(formData.date).toLocaleString()}</Typography>
           <Typography><strong>Type:</strong> {formData.type}</Typography>
