@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from 'react';
-import { Box, Typography, Alert, CircularProgress } from '@mui/material';
+import { Box, Typography, Alert, CircularProgress, TextField } from '@mui/material';
 import { DataGrid } from '@mui/x-data-grid';
 import SearchableSelect from '../components/SearchableSelect';
 import axios from 'axios';
@@ -11,8 +11,10 @@ import styles from './DoctorSchedule.module.css';
 export default function DoctorSchedule({ doctors }) {
   const [selectedDoctorId, setSelectedDoctorId] = useState('');
   const [appointments, setAppointments] = useState([]);
+  const [filteredAppointments, setFilteredAppointments] = useState([]);
   const [error, setError] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [filters, setFilters] = useState({ patientName: '', type: '', date: '' });
 
   useEffect(() => {
     async function fetchAppointments(doctorId = '') {
@@ -34,6 +36,7 @@ export default function DoctorSchedule({ doctors }) {
           queueNumber: appt.queue?.queueNumber || 'N/A',
         }));
         setAppointments(formattedAppointments);
+        setFilteredAppointments(formattedAppointments);
         setError(null);
       } catch (err) {
         setError(err.response?.data?.error || err.message);
@@ -43,6 +46,27 @@ export default function DoctorSchedule({ doctors }) {
     }
     fetchAppointments(selectedDoctorId);
   }, [selectedDoctorId]);
+
+  useEffect(() => {
+    const applyFilters = () => {
+      let filtered = [...appointments];
+      if (filters.patientName) {
+        filtered = filtered.filter(appt => appt.patientName.toLowerCase().includes(filters.patientName.toLowerCase()));
+      }
+      if (filters.type) {
+        filtered = filtered.filter(appt => appt.type.toLowerCase().includes(filters.type.toLowerCase()));
+      }
+      if (filters.date) {
+        filtered = filtered.filter(appt => appt.date.includes(filters.date));
+      }
+      setFilteredAppointments(filtered);
+    };
+    applyFilters();
+  }, [filters, appointments]);
+
+  const handleFilterChange = (e) => {
+    setFilters({ ...filters, [e.target.name]: e.target.value });
+  };
 
   const columns = [
     { field: 'id', headerName: 'ID', width: 90 },
@@ -58,22 +82,45 @@ export default function DoctorSchedule({ doctors }) {
       <Typography variant="h5" className={styles.title}>
         Doctor Schedule
       </Typography>
-      <SearchableSelect
-        label=" "
-        options={doctors}
-        value={selectedDoctorId}
-        onChange={setSelectedDoctorId}
-        getOptionLabel={(doctor) => `${doctor.user?.name || doctor.doctorId || 'Unknown'} (${doctor.specialty || 'N/A'})`}
-        getOptionValue={(doctor) => doctor.id}
-        className={styles.searchSelect}
-      />
+      <Box className={styles.filterContainer}>
+        <SearchableSelect
+          label="Filter by Doctor"
+          options={doctors}
+          value={selectedDoctorId}
+          onChange={setSelectedDoctorId}
+          getOptionLabel={(doctor) => `${doctor.user?.name || doctor.doctorId || 'Unknown'} (${doctor.specialty || 'N/A'})`}
+          getOptionValue={(doctor) => doctor.id}
+          className={styles.searchSelect}
+        />
+        <TextField
+          label="Filter by Patient"
+          name="patientName"
+          value={filters.patientName}
+          onChange={handleFilterChange}
+          className={styles.filterInput}
+        />
+        <TextField
+          label="Filter by Type"
+          name="type"
+          value={filters.type}
+          onChange={handleFilterChange}
+          className={styles.filterInput}
+        />
+        <TextField
+          label="Filter by Date"
+          name="date"
+          value={filters.date}
+          onChange={handleFilterChange}
+          className={styles.filterInput}
+        />
+      </Box>
       {error && <Alert severity="error" className={styles.alert}>{error}</Alert>}
       <Box className={styles.dataGridContainer}>
         {loading ? (
           <CircularProgress className={styles.loader} />
         ) : (
           <DataGrid
-            rows={appointments}
+            rows={filteredAppointments}
             columns={columns}
             pageSizeOptions={[5, 10, 20]}
             disableRowSelectionOnClick
