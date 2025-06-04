@@ -145,3 +145,42 @@ export async function PUT(request, { params }) {
     await prisma.$disconnect();
   }
 }
+
+export async function DELETE(request, { params }) {
+  const user = authenticate(request);
+  if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+
+  try {
+    const { id } = params;
+    const { searchParams } = new URL(request.url);
+    const resource = searchParams.get('resource');
+
+    switch (resource) {
+      case 'medication':
+        await prisma.medication.delete({
+          where: { id: parseInt(id) },
+        });
+        return NextResponse.json({ message: 'Medication deleted' }, { status: 200 });
+
+      case 'supplier':
+        await prisma.supplier.delete({
+          where: { id: parseInt(id) },
+        });
+        return NextResponse.json({ message: 'Supplier deleted' }, { status: 200 });
+
+      case 'pharmacist':
+        await prisma.user.delete({
+          where: { id: parseInt(id), role: 'PHARMACIST' },
+        });
+        return NextResponse.json({ message: 'Pharmacist deleted' }, { status: 200 });
+
+      default:
+        return NextResponse.json({ error: 'Invalid resource' }, { status: 400 });
+    }
+  } catch (error) {
+    console.error('DELETE /api/pharmacy/[id] error:', error);
+    return NextResponse.json({ error: 'Failed to delete resource', details: error.message }, { status: 500 });
+  } finally {
+    await prisma.$disconnect();
+  }
+}
