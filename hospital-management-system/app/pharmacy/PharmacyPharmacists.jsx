@@ -16,37 +16,81 @@ const PharmacyPharmacists = () => {
     phone: '',
     specialty: '',
   });
+  const [error, setError] = useState(null);
+  const [success, setSuccess] = useState(null);
 
   useEffect(() => {
     fetchPharmacists();
   }, []);
 
   const fetchPharmacists = async () => {
-    const data = await getPharmacists();
-    setPharmacists(data);
+    try {
+      const data = await getPharmacists();
+      setPharmacists(data);
+      setError(null);
+    } catch (err) {
+      setError('Failed to fetch pharmacists: ' + err.message);
+    }
+  };
+
+  const validatePharmacist = () => {
+    const requiredFields = ['name', 'email', 'password', 'licenseNumber'];
+    for (const field of requiredFields) {
+      if (!newPharmacist[field]) {
+        setError(`Missing required field: ${field}`);
+        return false;
+      }
+    }
+    if (!/\S+@\S+\.\S+/.test(newPharmacist.email)) {
+      setError('Invalid email format');
+      return false;
+    }
+    return true;
   };
 
   const handleAddPharmacist = async () => {
-    await addPharmacist(newPharmacist);
-    fetchPharmacists();
-    setNewPharmacist({
-      name: '',
-      email: '',
-      password: '',
-      licenseNumber: '',
-      phone: '',
-      specialty: '',
-    });
+    if (!validatePharmacist()) return;
+    try {
+      await addPharmacist(newPharmacist);
+      await fetchPharmacists();
+      setNewPharmacist({
+        name: '',
+        email: '',
+        password: '',
+        licenseNumber: '',
+        phone: '',
+        specialty: '',
+      });
+      setSuccess('Pharmacist added successfully');
+      setError(null);
+    } catch (err) {
+      setError('Failed to add pharmacist: ' + err.message);
+      setSuccess(null);
+    }
   };
 
   const handleUpdatePharmacist = async (id, data) => {
-    await updatePharmacist(id, data);
-    fetchPharmacists();
+    try {
+      await updatePharmacist(id, data);
+      await fetchPharmacists();
+      setSuccess('Pharmacist updated successfully');
+      setError(null);
+    } catch (err) {
+      setError('Failed to update pharmacist: ' + err.message);
+      setSuccess(null);
+    }
   };
 
   const handleDeletePharmacist = async (id) => {
-    await deletePharmacist(id);
-    fetchPharmacists();
+    try {
+      await deletePharmacist(id);
+      await fetchPharmacists();
+      setSuccess('Pharmacist deleted successfully');
+      setError(null);
+    } catch (err) {
+      setError('Failed to delete pharmacist: ' + err.message);
+      setSuccess(null);
+    }
   };
 
   const columns = [
@@ -114,6 +158,8 @@ const PharmacyPharmacists = () => {
   return (
     <Box className={styles.container}>
       <Typography variant="h6" gutterBottom>Pharmacist Management</Typography>
+      {error && <Alert severity="error" sx={{ mb: 2 }}>{error}</Alert>}
+      {success && <Alert severity="success" sx={{ mb: 2 }}>{success}</Alert>}
       <Box className={styles.controls}>
         <TextField
           label="Search Pharmacists"
@@ -131,6 +177,7 @@ const PharmacyPharmacists = () => {
             onChange={(e) => setNewPharmacist({ ...newPharmacist, name: e.target.value })}
             fullWidth
             margin="normal"
+            required
           />
           <TextField
             label="Email"
@@ -139,6 +186,7 @@ const PharmacyPharmacists = () => {
             onChange={(e) => setNewPharmacist({ ...newPharmacist, email: e.target.value })}
             fullWidth
             margin="normal"
+            required
           />
           <TextField
             label="Password"
@@ -148,6 +196,7 @@ const PharmacyPharmacists = () => {
             onChange={(e) => setNewPharmacist({ ...newPharmacist, password: e.target.value })}
             fullWidth
             margin="normal"
+            required
           />
           <TextField
             label="License Number"
@@ -156,6 +205,7 @@ const PharmacyPharmacists = () => {
             onChange={(e) => setNewPharmacist({ ...newPharmacist, licenseNumber: e.target.value })}
             fullWidth
             margin="normal"
+            required
           />
           <TextField
             label="Phone"
