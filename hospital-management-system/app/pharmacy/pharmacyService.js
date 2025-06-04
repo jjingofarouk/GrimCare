@@ -294,3 +294,24 @@ export async function addPharmacist(data) {
     throw error;
   }
 }
+
+export async function updatePharmacist(id, data) {
+  try {
+    const response = await axios.put(`${BASE_URL}${API_ROUTES.PHARMACY}/${id}`, {
+      action: 'updatePharmacist',
+      payload: data,
+    });
+    return response.data;
+  } catch (error) {
+    throw error;
+  }
+}
+
+export async function deletePharmacist(id) {
+  try {
+    const response = await axios.delete(`${BASE_URL}${API_ROUTES.PHARMACY}/${id}`);
+    return response.data;
+  } catch (error) {
+    throw error;
+  }
+}
