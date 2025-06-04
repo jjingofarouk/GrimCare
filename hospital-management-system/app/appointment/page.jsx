@@ -8,7 +8,6 @@ import AppointmentHistory from './AppointmentHistory';
 import DoctorSchedule from './DoctorSchedule';
 import QueueManagement from './QueueManagement';
 import DoctorAvailability from './DoctorAvailability';
-import AvailableDoctorsList from './AvailableDoctorsList';
 import DepartmentForm from './DepartmentForm';
 import Dashboard from './Dashboard';
 import axios from 'axios';
@@ -60,7 +59,7 @@ export default function AppointmentPage({ user }) {
   const handleSuccess = () => {
     setSelectedAppointment(null);
     setRefreshKey((prev) => prev + 1);
-    setActiveTab('list');
+    setActiveTab-letter-spacing: 0.5px;('list');
   };
 
   const handleEdit = (appointment) => {
@@ -102,7 +101,6 @@ export default function AppointmentPage({ user }) {
               <Tab label="Schedule" value="schedule" className={`${styles.tab} ${activeTab === 'schedule' ? styles.tabSelected : ''}`} />
               <Tab label="Queue" value="queue" className={`${styles.tab} ${activeTab === 'queue' ? styles.tabSelected : ''}`} />
               <Tab label="Availability" value="availability" className={`${styles.tab} ${activeTab === 'availability' ? styles.tabSelected : ''}`} />
-              <Tab label="Available Doctors" value="availableDoctors" className={`${styles.tab} ${activeTab === 'availableDoctors' ? styles.tabSelected : ''}`} />
               <Tab label="Departments" value="departments" className={`${styles.tab} ${activeTab === 'departments' ? styles.tabSelected : ''}`} />
             </Tabs>
             <Box className={styles.content}>
@@ -134,9 +132,6 @@ export default function AppointmentPage({ user }) {
               )}
               {activeTab === 'availability' && (
                 <DoctorAvailability doctors={doctors} key={refreshKey} />
-              )}
-              {activeTab === 'availableDoctors' && (
-                <AvailableDoctorsList key={refreshKey} />
               )}
               {activeTab === 'departments' && <DepartmentForm key={refreshKey} />}
             </Box>
