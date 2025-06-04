@@ -1,13 +1,25 @@
+// pharmacyService.js
 import axios from 'axios';
 import api from '../api';
 
 const { BASE_URL, API_ROUTES } = api;
+
+export async function getUsers() {
+  try {
+    const response = await axios.get(`${BASE_URL}${API_ROUTES.USERS}`);
+    return response.data.users;
+  } catch (error) {
+    console.error('Error fetching users:', error);
+    throw error;
+  }
+}
 
 export async function getPrescriptions() {
   try {
     const response = await axios.get(`${BASE_URL}${API_ROUTES.PHARMACY}`);
     return response.data.prescriptions;
   } catch (error) {
+    console.error('Error fetching prescriptions:', error);
     throw error;
   }
 }
@@ -20,6 +32,7 @@ export async function createPrescription(data) {
     });
     return response.data;
   } catch (error) {
+    console.error('Error creating prescription:', error);
     throw error;
   }
 }
@@ -32,18 +45,25 @@ export async function updatePrescriptionStatus(id, status) {
     });
     return response.data;
   } catch (error) {
+    console.error('Error updating prescription status:', error);
     throw error;
   }
 }
 
 export async function checkDrugInteractions(medicationIds) {
   try {
-    const response = await axios.post(`${BASE_URL}${API_ROUTES.PHARMACY}`, {
-      action: 'checkDrugInteractions',
-      payload: { medicationIds },
+    const interactions = await prisma.drugInteraction.findMany({
+      where: {
+        OR: [
+          { medicationId1: { in: medicationIdse } },
+          { medicationId2: { in: medicationIds } },
+        ],
+      },
+      include: { medication1: true, medication2: true },
     });
-    return response.data;
+    return interactions;
   } catch (error) {
+    console.error('Error checking drug interactions:', error);
     throw error;
   }
 }
@@ -56,6 +76,7 @@ export async function createInvoice(data) {
     });
     return response.data;
   } catch (error) {
+    console.error('Error creating invoice:', error);
     throw error;
   }
 }
@@ -68,6 +89,7 @@ export async function processRefund(data) {
     });
     return response.data;
   } catch (error) {
+    console.error('Error processing refund:', error);
     throw error;
   }
 }
@@ -80,6 +102,7 @@ export async function dispenseMedication(data) {
     });
     return response.data;
   } catch (error) {
+    console.error('Error dispensing medication:', error);
     throw error;
   }
 }
@@ -92,6 +115,7 @@ export async function addMedication(data) {
     });
     return response.data;
   } catch (error) {
+    console.error('Error adding medication:', error);
     throw error;
   }
 }
@@ -101,6 +125,7 @@ export async function getInventory() {
     const response = await axios.get(`${BASE_URL}${API_ROUTES.PHARMACY}`);
     return response.data.inventory;
   } catch (error) {
+    console.error('Error fetching inventory:', error);
     throw error;
   }
 }
@@ -113,6 +138,7 @@ export async function updateStock(id, stockQuantity) {
     });
     return response.data;
   } catch (error) {
+    console.error('Error updating stock:', error);
     throw error;
   }
 }
@@ -122,6 +148,7 @@ export async function deleteMedication(id) {
     const response = await axios.delete(`${BASE_URL}${API_ROUTES.PHARMACY}/${id}`);
     return response.data;
   } catch (error) {
+    console.error('Error deleting medication:', error);
     throw error;
   }
 }
@@ -131,6 +158,7 @@ export async function getStockAlerts() {
     const response = await axios.get(`${BASE_URL}${API_ROUTES.PHARMACY}`);
     return response.data.inventory.filter(item => item.stockQuantity <= item.minStockThreshold);
   } catch (error) {
+    console.error('Error fetching stock alerts:', error);
     throw error;
   }
 }
@@ -141,6 +169,7 @@ export async function scanBarcode(barcode) {
     const medication = response.data.inventory.find(item => item.barcode === barcode);
     return medication || null;
   } catch (error) {
+    console.error('Error scanning barcode:', error);
     throw error;
   }
 }
@@ -150,6 +179,7 @@ export async function getFormularies() {
     const response = await axios.get(`${BASE_URL}${API_ROUTES.PHARMACY}`);
     return response.data.formularies;
   } catch (error) {
+    console.error('Error fetching formularies:', error);
     throw error;
   }
 }
@@ -162,6 +192,7 @@ export async function addFormulary(data) {
     });
     return response.data;
   } catch (error) {
+    console.error('Error adding formulary:', error);
     throw error;
   }
 }
@@ -171,6 +202,7 @@ export async function getOrders() {
     const response = await axios.get(`${BASE_URL}${API_ROUTES.PHARMACY}`);
     return response.data.orders;
   } catch (error) {
+    console.error('Error fetching orders:', error);
     throw error;
   }
 }
@@ -183,6 +215,7 @@ export async function createOrder(data) {
     });
     return response.data;
   } catch (error) {
+    console.error('Error creating order:', error);
     throw error;
   }
 }
@@ -195,6 +228,7 @@ export async function updateOrderStatus(id, status) {
     });
     return response.data;
   } catch (error) {
+    console.error('Error updating order status:', error);
     throw error;
   }
 }
@@ -204,6 +238,7 @@ export async function getSuppliers() {
     const response = await axios.get(`${BASE_URL}${API_ROUTES.PHARMACY}`);
     return response.data.suppliers;
   } catch (error) {
+    console.error('Error fetching suppliers:', error);
     throw error;
   }
 }
@@ -216,6 +251,7 @@ export async function addSupplier(data) {
     });
     return response.data;
   } catch (error) {
+    console.error('Error adding supplier:', error);
     throw error;
   }
 }
@@ -228,6 +264,7 @@ export async function updateSupplier(id, data) {
     });
     return response.data;
   } catch (error) {
+    console.error('Error updating supplier:', error);
     throw error;
   }
 }
@@ -237,6 +274,7 @@ export async function deleteSupplier(id) {
     const response = await axios.delete(`${BASE_URL}${API_ROUTES.PHARMACY}/${id}`);
     return response.data;
   } catch (error) {
+    console.error('Error deleting supplier:', error);
     throw error;
   }
 }
@@ -246,6 +284,7 @@ export async function trackNarcotic(medicationId) {
     const response = await axios.get(`${BASE_URL}${API_ROUTES.PHARMACY}/${medicationId}`);
     return response.data;
   } catch (error) {
+    console.error('Error tracking narcotic:', error);
     throw error;
   }
 }
@@ -259,6 +298,7 @@ export async function generateStockReport(timeRange) {
       stockQuantity: item.stockQuantity,
     }));
   } catch (error) {
+    console.error('Error generating stock report:', error);
     throw error;
   }
 }
@@ -270,48 +310,7 @@ export async function generateSalesReport(timeRange) {
       .filter(p => p.dispensingRecords.length > 0)
       .flatMap(p => p.dispensingRecords);
   } catch (error) {
-    throw error;
-  }
-}
-
-export async function getPharmacists() {
-  try {
-    const response = await axios.get(`${BASE_URL}${API_ROUTES.PHARMACY}`);
-    return response.data.pharmacists;
-  } catch (error) {
-    throw error;
-  }
-}
-
-export async function addPharmacist(data) {
-  try {
-    const response = await axios.post(`${BASE_URL}${API_ROUTES.PHARMACY}`, {
-      action: 'addPharmacist',
-      payload: data,
-    });
-    return response.data;
-  } catch (error) {
-    throw error;
-  }
-}
-
-export async function updatePharmacist(id, data) {
-  try {
-    const response = await axios.put(`${BASE_URL}${API_ROUTES.PHARMACY}/${id}`, {
-      action: 'updatePharmacist',
-      payload: data,
-    });
-    return response.data;
-  } catch (error) {
-    throw error;
-  }
-}
-
-export async function deletePharmacist(id) {
-  try {
-    const response = await axios.delete(`${BASE_URL}${API_ROUTES.PHARMACY}/${id}`);
-    return response.data;
-  } catch (error) {
+    console.error('Error generating sales report:', error);
     throw error;
   }
 }

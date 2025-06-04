@@ -12,15 +12,13 @@ model User {
   email             String             @unique
   name              String
   password          String
-  role              String             @default("PATIENT") // PATIENT, DOCTOR, ADMIN, NURSE, PHARMACIST
+  role              String             @default("PATIENT") // PATIENT, DOCTOR, ADMIN, NURSE
   createdAt         DateTime           @default(now())
   updatedAt         DateTime           @updatedAt
   doctor            Doctor?            @relation(fields: [doctorId], references: [id])
   doctorId          Int?               @unique
   patient           Patient?           @relation(fields: [patientId], references: [id])
   patientId         Int?               @unique
-  pharmacist        Pharmacist?        @relation(fields: [pharmacistId], references: [id])
-  pharmacistId      Int?               @unique
   payrolls          Payroll[]
   cssdLogs          CSSDLog[]          @relation("LoggedBy")
   cssdRequisitions  CSSDRequisition[]  @relation("RequisitionRequestedBy")
@@ -31,19 +29,6 @@ model User {
   processedById     Int?
   stockAdjustments  StockAdjustment[]  @relation("AdjustedBy")
   adjustedById      Int?
-}
-
-model Pharmacist {
-  id                Int                @id @default(autoincrement())
-  user              User?              @relation
-  pharmacistId      String             @unique
-  licenseNumber     String             @unique
-  phone             String?
-  specialty         String?
-  createdAt         DateTime           @default(now())
-  updatedAt         DateTime           @updatedAt
-  dispensingRecords DispensingRecord[] @relation("PharmacistDispensing")
-  prescriptions     Prescription[]     @relation("PharmacistPrescriptions")
 }
 
 model Doctor {
@@ -62,7 +47,8 @@ model Doctor {
   discharges        Discharge[]           @relation("DischargingDoctor")
   appointments      Appointment[]         @relation("DoctorAppointments")
   availability      DoctorAvailability[]
-  prescriptions     Prescription[]        @relation("DoctorPrescriptions")
+  prescriptions     Prescription[]        @relation("Prescriptions")
+  prescriberId      Int?
 }
 
 model Patient {
@@ -84,7 +70,8 @@ model Patient {
   discharges            Discharge[]       @relation("DischargedPatient")
   transactions          Transaction[]     @relation("PatientTransactions")
   appointments          Appointment[]     @relation("PatientAppointments")
-  prescriptions         Prescription[]    @relation("PatientPrescriptions")
+  prescriptions         Prescription[]    @relation("Prescriptions")
+  prescribedToId        Int?
   createdAt             DateTime          @default(now())
   updatedAt             DateTime          @updatedAt
 }
@@ -110,8 +97,8 @@ model Appointment {
   bookedById    Int?
   bookedBy      User?         @relation("BookedBy", fields: [bookedById], references: [id])
   date          DateTime
-  status        String        @default("SCHEDULED")
-  type          String        @default("REGULAR")
+  status        String        @default("SCHEDULED") // SCHEDULED, CHECKED_IN, CHECKED_OUT, COMPLETED, CANCELLED, NO_SHOW
+  type          String        @default("REGULAR") // REGULAR, WALK_IN, EMERGENCY
   reason        String
   notes         String?
   checkInTime   DateTime?
@@ -128,7 +115,7 @@ model DoctorAvailability {
   doctor        Doctor        @relation(fields: [doctorId], references: [id])
   startTime     DateTime
   endTime       DateTime
-  status        String        @default("AVAILABLE")
+  status        String        @default("AVAILABLE") // AVAILABLE, UNAVAILABLE
   createdAt     DateTime      @default(now())
   updatedAt     DateTime      @updatedAt
 }
@@ -138,7 +125,7 @@ model Queue {
   appointmentId Int           @unique
   appointment   Appointment   @relation(fields: [appointmentId], references: [id])
   queueNumber   Int
-  status        String        @default("WAITING")
+  status        String        @default("WAITING") // WAITING, IN_PROGRESS, COMPLETED
   createdAt     DateTime      @default(now())
   updatedAt     DateTime      @updatedAt
 }
@@ -158,7 +145,7 @@ model Admission {
   relayedInfo          String?
   triagePriority       String?
   triageNotes          String?
-  status               String       @default("PENDING")
+  status               String       @default("PENDING") // PENDING, ADMITTED, DISCHARGED
   dischargeDate        DateTime?
   dischargeNotes       String?
   createdAt            DateTime     @default(now())
@@ -208,6 +195,7 @@ model Transaction {
   createdAt     DateTime      @default(now())
   updatedAt     DateTime      @updatedAt
   invoices      Invoice[]     @relation("TransactionInvoices")
+  transactionId Int?
 }
 
 model Payroll {
@@ -350,12 +338,10 @@ model Supplier {
 model Prescription {
   id                Int                @id @default(autoincrement())
   patientId         Int
-  patient           Patient            @relation("PatientPrescriptions", fields: [patientId], references: [id])
+  patient           Patient            @relation("Prescriptions", fields: [patientId], references: [id])
   doctorId          Int
-  doctor            Doctor             @relation("DoctorPrescriptions", fields: [doctorId], references: [id])
-  pharmacistId      Int?
-  pharmacist        Pharmacist?        @relation("PharmacistPrescriptions", fields: [pharmacistId], references: [id])
-  status            String             @default("PENDING")
+  doctor            Doctor             @relation("Prescriptions", fields: [doctorId], references: [id])
+  status            String             @default("PENDING") // PENDING, DISPENSED, CANCELLED
   prescriptionDate  DateTime           @default(now())
   notes             String?
   createdAt         DateTime           @default(now())
@@ -385,13 +371,11 @@ model DispensingRecord {
   prescription      Prescription  @relation(fields: [prescriptionId], references: [id])
   medicationId      Int
   medication        Medication    @relation(fields: [medicationId], references: [id])
-  patientType       String
+  patientType       String        // INPATIENT, OUTPATIENT
   quantity          Int
   dispensedDate     DateTime      @default(now())
   dispensedById     Int
   dispensedBy       User          @relation("DispensedBy", fields: [dispensedById], references: [id])
-  pharmacistId      Int?
-  pharmacist        Pharmacist?   @relation("PharmacistDispensing", fields: [pharmacistId], references: [id])
   createdAt         DateTime      @default(now())
   updatedAt         DateTime      @updatedAt
   invoiceId         Int?
@@ -403,7 +387,7 @@ model Invoice {
   prescriptionId    Int               @unique
   prescription      Prescription      @relation(fields: [prescriptionId], references: [id])
   totalAmount       Float
-  status            String            @default("PENDING")
+  status            String            @default("PENDING") // PENDING, PAID, REFUNDED
   paymentMethod     String?
   transactionId     Int?
   transaction       Transaction?      @relation("TransactionInvoices", fields: [transactionId], references: [id])
@@ -431,7 +415,7 @@ model PurchaseOrder {
   supplierId    Int
   supplier      Supplier            @relation(fields: [supplierId], references: [id])
   orderDate     DateTime            @default(now())
-  status        String              @default("PENDING")
+  status        String              @default("PENDING") // PENDING, PROCESSING, DELIVERED
   totalAmount   Float
   createdAt     DateTime            @default(now())
   updatedAt     DateTime            @updatedAt
@@ -479,7 +463,7 @@ model DrugInteraction {
   medicationId2 Int
   medication2   Medication    @relation("Medication2", fields: [medicationId2], references: [id])
   interaction   String
-  severity      String
+  severity      String        // LOW, MODERATE, HIGH
   createdAt     DateTime      @default(now())
   updatedAt     DateTime      @updatedAt
 }

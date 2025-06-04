@@ -1,8 +1,7 @@
-/* AuthPage.module.css - Modern Grayscale Authentication Page Styling */
+/* AuthPage.module.css - Simplified Grayscale Authentication Page Styling */
 
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap');
 
-/* Main authentication container */
 .authContainer {
   min-height: 100vh;
   width: 100vw;
@@ -12,233 +11,86 @@
   justify-content: center;
   background: #0a0a0a;
   padding: 2rem 1rem;
-  position: relative;
-  overflow: hidden;
-  margin: 0;
-  box-sizing: border-box;
 }
 
-/* Animated background effects */
-.authContainer::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: 
-    radial-gradient(circle at 25% 75%, rgba(64, 64, 64, 0.25) 0%, transparent 45%),
-    radial-gradient(circle at 75% 25%, rgba(96, 96, 96, 0.2) 0%, transparent 45%),
-    radial-gradient(circle at 50% 50%, rgba(128, 128, 128, 0.15) 0%, transparent 50%);
-  animation: ambientGlow 30s ease infinite;
-  z-index: 0;
-}
-
-.authContainer::after {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: 
-    linear-gradient(45deg, transparent 30%, rgba(40, 40, 40, 0.1) 50%, transparent 70%),
-    linear-gradient(-45deg, transparent 30%, rgba(60, 60, 60, 0.08) 50%, transparent 70%);
-  animation: shimmerEffect 25s linear infinite;
-  z-index: 0;
-}
-
-@keyframes ambientGlow {
-  0%, 100% { 
-    opacity: 1; 
-    transform: rotate(0deg) scale(1);
-  }
-  25% { 
-    opacity: 0.8; 
-    transform: rotate(90deg) scale(1.1);
-  }
-  50% { 
-    opacity: 0.9; 
-    transform: rotate(180deg) scale(0.95);
-  }
-  75% { 
-    opacity: 0.85; 
-    transform: rotate(270deg) scale(1.05);
-  }
-}
-
-@keyframes shimmerEffect {
-  0% { transform: translateX(-100%) translateY(-100%); }
-  100% { transform: translateX(100%) translateY(100%); }
-}
-
-/* Main title styling */
 .authTitle {
-  font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
-  font-size: 3rem;
-  font-weight: 900;
+  font-family: 'Inter', sans-serif;
+  font-size: 2.5rem;
+  font-weight: 700;
   color: #f8fafc;
   text-align: center;
-  margin-bottom: 3rem;
-  text-shadow: 
-    0 4px 12px rgba(0, 0, 0, 0.6),
-    0 2px 4px rgba(0, 0, 0, 0.4);
-  z-index: 2;
-  position: relative;
-  letter-spacing: -0.02em;
-  background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 50%, #cbd5e1 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
+  margin-bottom: 2rem;
 }
 
-.authTitle::before {
-  content: '';
-  position: absolute;
-  top: -10px;
-  left: -10px;
-  right: -10px;
-  bottom: -10px;
-  background: radial-gradient(circle, rgba(248, 250, 252, 0.1) 0%, transparent 70%);
-  border-radius: 20px;
-  z-index: -1;
-  animation: titleGlow 4s ease-in-out infinite alternate;
-}
-
-@keyframes titleGlow {
-  0% { opacity: 0.3; transform: scale(0.98); }
-  100% { opacity: 0.6; transform: scale(1.02); }
-}
-
-/* Form container wrapper */
 .formWrapper {
-  z-index: 2;
-  position: relative;
   width: 100%;
   max-width: 500px;
-  transform: translateY(0);
-  transition: all 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+  transition: transform 0.3s ease;
 }
 
 .formWrapper:hover {
   transform: translateY(-4px);
 }
 
-/* Toggle link styling */
 .toggleLink {
   font-family: 'Inter', sans-serif;
   font-size: 1rem;
   color: #94a3b8;
   text-align: center;
-  margin-top: 2.5rem;
-  margin-bottom: 0;
-  z-index: 2;
-  position: relative;
-  font-weight: 500;
-  letter-spacing: 0.01em;
-  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+  margin-top: 1.5rem;
 }
 
-/* Toggle button styling */
 .toggleButton {
   background: none;
-  border: 2px solid transparent;
+  border: 1px solid rgba(100, 100, 100, 0.4);
   color: #f1f5f9;
   font-family: 'Inter', sans-serif;
-  font-weight: 700;
+  font-weight: 600;
   font-size: 1rem;
   cursor: pointer;
-  text-decoration: none;
-  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
   padding: 0.5rem 1rem;
-  margin-left: 0.5rem;
-  border-radius: 12px;
-  position: relative;
-  overflow: hidden;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-  background: rgba(30, 30, 30, 0.6);
-  backdrop-filter: blur(10px);
-}
-
-.toggleButton::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: -100%;
-  width: 100%;
-  height: 100%;
-  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent);
-  transition: left 0.6s;
+  border-radius: 8px;
+  transition: background 0.3s ease, transform 0.3s ease;
 }
 
 .toggleButton:hover {
-  color: #ffffff;
-  border-color: rgba(100, 100, 100, 0.4);
   background: rgba(45, 45, 45, 0.8);
-  transform: translateY(-2px) scale(1.05);
-  box-shadow: 
-    0 8px 20px rgba(0, 0, 0, 0.4),
-    0 4px 8px rgba(0, 0, 0, 0.2);
+  transform: translateY(-2px);
 }
 
-.toggleButton:hover::before {
-  left: 100%;
-}
-
-.toggleButton:active {
-  transform: translateY(-1px) scale(1.02);
-}
-
-/* Enhanced responsive design */
+/* Responsive Design */
 @media (max-width: 768px) {
   .authContainer {
-    padding: 1.5rem 1rem;
-    width: 100vw;
+    padding: 1rem;
   }
   
   .authTitle {
-    font-size: 2.25rem;
-    margin-bottom: 2.5rem;
+    font-size: 2rem;
   }
   
   .toggleLink {
     font-size: 0.95rem;
-    margin-top: 2rem;
-  }
-  
-  .toggleButton {
-    font-size: 0.95rem;
-    padding: 0.4rem 0.8rem;
   }
 }
 
 @media (max-width: 480px) {
   .authContainer {
-    padding: 1rem 0.75rem;
+    padding: 1rem 0.5rem;
   }
   
   .authTitle {
-    font-size: 1.875rem;
-    margin-bottom: 2rem;
-  }
-  
-  .toggleLink {
-    font-size: 0.9rem;
-    margin-top: 1.5rem;
+    font-size: 1.75rem;
   }
   
   .toggleButton {
-    font-size: 0.9rem;
-    padding: 0.35rem 0.7rem;
-    margin-left: 0.25rem;
+    padding: 0.4rem 0.8rem;
   }
 }
 
 /* Ultra-wide screen optimization */
 @media (min-width: 1920px) {
   .authTitle {
-    font-size: 3.5rem;
+    font-size: 3rem;
   }
   
   .formWrapper {
@@ -246,22 +98,17 @@
   }
 }
 
-/* Dark mode specific enhancements */
+/* Dark mode */
 @media (prefers-color-scheme: dark) {
   .authContainer {
     background: #050505;
   }
-  
-  .authTitle {
-    color: #ffffff;
-  }
 }
 
-/* High contrast mode support */
+/* High contrast mode */
 @media (prefers-contrast: high) {
   .authTitle {
     color: #ffffff;
-    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.8);
   }
   
   .toggleButton {
@@ -269,13 +116,10 @@
   }
 }
 
-/* Reduced motion support */
+/* Reduced motion */
 @media (prefers-reduced-motion: reduce) {
-  .authContainer::before,
-  .authContainer::after,
-  .authTitle::before {
-    animation: none;
+  .formWrapper,
+  .toggleButton {
+    transition: none;
   }
-  
-
 }

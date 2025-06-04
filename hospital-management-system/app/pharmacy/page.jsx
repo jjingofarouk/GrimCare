@@ -1,4 +1,9 @@
-'use client';
+
+
+// pharmacy/PharmacyPage.jsx
+// Main pharmacy module dashboard with all features
+
+"use client";
 
 import React, { useState } from 'react';
 import { Container, Paper, Tabs, Tab, Box, Typography } from '@mui/material';
@@ -12,7 +17,6 @@ import PharmacyDispensing from './PharmacyDispensing';
 import PharmacyBilling from './PharmacyBilling';
 import PharmacyFormulary from './PharmacyFormulary';
 import PharmacyNarcotics from './PharmacyNarcotics';
-import PharmacyPharmacists from './PharmacyPharmacists';
 import styles from './page.module.css';
 
 const PharmacyPage = () => {
@@ -55,7 +59,6 @@ const PharmacyPage = () => {
             <Tab label="Narcotics" />
             <Tab label="Reports" />
             <Tab label="Add Medication" />
-            <Tab label="Pharmacists" />
           </Tabs>
         </Box>
         <Box className={styles.tabContent}>
@@ -69,7 +72,6 @@ const PharmacyPage = () => {
           {activeTab === 7 && <PharmacyNarcotics />}
           {activeTab === 8 && <PharmacyReports />}
           {activeTab === 9 && <PharmacyForm />}
-          {activeTab === 10 && <PharmacyPharmacists />}
         </Box>
       </Paper>
     </Container>
