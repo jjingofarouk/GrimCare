@@ -1,220 +1,265 @@
+import axios from 'axios';
 import api from '../api';
 
 const { BASE_URL, API_ROUTES } = api;
 const PHARMACY_BASE = `${BASE_URL}${API_ROUTES.PHARMACY}`;
 
-export const getInventory = async () => {
-  const response = await fetch(`${PHARMACY_BASE}/inventory`);
-  if (!response.ok) throw new Error('Failed to fetch inventory');
-  return await response.json();
-};
+export async function getInventory() {
+  try {
+    const response = await axios.get(`${PHARMACY_BASE}/inventory`);
+    return response.data;
+  } catch (error) {
+    console.error('Error fetching inventory:', error);
+    throw error;
+  }
+}
 
-export const addMedication = async (data) => {
-  const response = await fetch(`${PHARMACY_BASE}/medications`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(data),
-  });
-  if (!response.ok) throw new Error('Failed to add medication');
-  return await response.json();
-};
+export async function addMedication(data) {
+  try {
+    const response = await axios.post(`${PHARMACY_BASE}/medications`, data);
+    return response.data;
+  } catch (error) {
+    console.error('Error adding medication:', error);
+    throw error;
+  }
+}
 
-export const updateStock = async (id, stockQuantity) => {
-  const response = await fetch(`${PHARMACY_BASE}/medications/${id}/stock`, {
-    method: 'PUT',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ stockQuantity }),
-  });
-  if (!response.ok) throw new Error('Failed to update stock');
-  return await response.json();
-};
+export async function updateStock(id, stockQuantity) {
+  try {
+    const response = await axios.put(`${PHARMACY_BASE}/medications/${id}/stock`, { stockQuantity });
+    return response.data;
+  } catch (error) {
+    console.error('Error updating stock:', error);
+    throw error;
+  }
+}
 
-export const deleteMedication = async (id) => {
-  const response = await fetch(`${PHARMACY_BASE}/medications/${id}`, {
-    method: 'DELETE',
-  });
-  if (!response.ok) throw new Error('Failed to delete medication');
-  return await response.json();
-};
+export async function deleteMedication(id) {
+  try {
+    const response = await axios.delete(`${PHARMACY_BASE}/medications/${id}`);
+    return response.data;
+  } catch (error) {
+    console.error('Error deleting medication:', error);
+    throw error;
+  }
+}
 
-export const getPrescriptions = async () => {
-  const response = await fetch(`${PHARMACY_BASE}/prescriptions`);
-  if (!response.ok) throw new Error('Failed to fetch prescriptions');
-  return await response.json();
-};
+export async function getPrescriptions() {
+  try {
+    const response = await axios.get(`${PHARMACY_BASE}/prescriptions`);
+    return response.data;
+  } catch (error) {
+    console.error('Error fetching prescriptions:', error);
+    throw error;
+  }
+}
 
-export const createPrescription = async (data) => {
-  const response = await fetch(`${PHARMACY_BASE}/prescriptions`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(data),
-  });
-  if (!response.ok) throw new Error('Failed to create prescription');
-  return await response.json();
-};
+export async function createPrescription(data) {
+  try {
+    const response = await axios.post(`${PHARMACY_BASE}/prescriptions`, data);
+    return response.data;
+  } catch (error) {
+    console.error('Error creating prescription:', error);
+    throw error;
+  }
+}
 
-export const updatePrescriptionStatus = async (id, status) => {
-  const response = await fetch(`${PHARMACY_BASE}/prescriptions/${id}/status`, {
-    method: 'PUT',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ status }),
-  });
-  if (!response.ok) throw new Error('Failed to update prescription status');
-  return await response.json();
-};
+export async function updatePrescriptionStatus(id, status) {
+  try {
+    const response = await axios.put(`${PHARMACY_BASE}/prescriptions/${id}/status`, { status });
+    return response.data;
+  } catch (error) {
+    console.error('Error updating prescription status:', error);
+    throw error;
+  }
+}
 
-export const getOrders = async () => {
-  const response = await fetch(`${PHARMACY_BASE}/orders`);
-  if (!response.ok) throw new Error('Failed to fetch orders');
-  return await response.json();
-};
+export async function getOrders() {
+  try {
+    const response = await axios.get(`${PHARMACY_BASE}/orders`);
+    return response.data;
+  }  catch (error) {
+    console.error('Error fetching orders:', error);
+    throw error;
+  }
+}
 
-export const createOrder = async (data) => {
-  const response = await fetch(`${PHARMACY_BASE}/orders`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(data),
-  });
-  if (!response.ok) throw new Error('Failed to create order');
-  return await response.json();
-};
+export async function createOrder(data) {
+  try {
+    const response = await axios.post(`${PHARMACY_BASE}/orders`, data);
+    return response.data;
+  } catch (error) {
+    console.error('Error creating order:', error);
+    throw error;
+  }
+}
 
-export const updateOrderStatus = async (id, status) => {
-  const response = await fetch(`${PHARMACY_BASE}/orders/${id}/status`, {
-    method: 'PUT',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ status }),
-  });
-  if (!response.ok) throw new Error('Failed to update order status');
-  return await response.json();
-};
+export async function updateOrderStatus(id, status) {
+  try {
+    const response = await axios.put(`${PHARMACY_BASE}/orders}/${id}/status`, { status });
+    return response.data;
+  } catch (error) {
+    console.error('Error updating order status:', error);
+    throw error;
+  }
+}
 
-export const getSuppliers = async () => {
-  const response = await fetch(`${PHARMACY_BASE}/suppliers`);
-  if (!response.ok) throw new Error('Failed to fetch suppliers');
-  return await response.json();
-};
+export async function getSuppliers() {
+  try {
+    const response = await axios.get(`${PHARMACY_BASE}/suppliers`);
+    return response.data;
+  } catch (error) {
+    console.error('Error fetching suppliers:', error);
+    throw error;
+  }
+}
 
-export const addSupplier = async (data) => {
-  const response = await fetch(`${PHARMACY_BASE}/suppliers`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(data),
-  });
-  if (!response.ok) throw new Error('Failed to add supplier');
-  return await response.json();
-};
+export async function addSupplier(data) {
+  try {
+    const response = await axios.post(`${PHARMACY_BASE}/suppliers`, data);
+    return response.data;
+  } catch (error) {
+    console.error('Error adding supplier:', error);
+    throw error;
+  }
+}
 
-export const updateSupplier = async (id, data) => {
-  const response = await fetch(`${PHARMACY_BASE}/suppliers/${id}`, {
-    method: 'PUT',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(data),
-  });
-  if (!response.ok) throw new Error('Failed to update supplier');
-  return await response.json();
-};
+export async function updateSupplier(id, data) {
+  try {
+    const response = await axios.put(`${PHARMACY_BASE}/suppliers/${id}`, data);
+    return response.data;
+  } catch (error) {
+    console.error('Error updating supplier:', error);
+    throw error;
+  }
+}
 
-export const deleteSupplier = async (id) => {
-  const response = await fetch(`${PHARMACY_BASE}/suppliers/${id}`, {
-    method: 'DELETE',
-  });
-  if (!response.ok) throw new Error('Failed to delete supplier');
-  return await response.json();
-};
+export async function deleteSupplier(id) {
+  try {
+    const response = await axios.delete(`${PHARMACY_BASE}/suppliers/${id}`);
+    return response.data;
+  } catch (error) {
+    console.error('Error deleting supplier:', error);
+    throw error;
+  }
+}
 
-export const generateStockReport = async (timeRange) => {
-  const response = await fetch(`${PHARMACY_BASE}/reports/stock?timeRange=${timeRange}`);
-  if (!response.ok) throw new Error('Failed to generate stock report');
-  return await response.json();
-};
+export async function generateStockReport(timeRange) {
+  try {
+    const response = await axios.get(`${PHARMACY_BASE}/reports/stock?timeRange=${timeRange}`);
+    return response.data;
+  } catch (error) {
+    console.error('Error generating stock report:', error);
+    throw error;
+  }
+}
 
-export const generateSalesReport = async (timeRange) => {
-  const response = await fetch(`${PHARMACY_BASE}/reports/sales?timeRange=${timeRange}`);
-  if (!response.ok) throw new Error('Failed to generate sales report');
-  return await response.json();
-};
+export async function generateSalesReport(timeRange) {
+  try {
+    const response = await axios.get(`${PHARMACY_BASE}/reports/sales?timeRange=${timeRange}`);
+    return response.data;
+  } catch (error) {
+    console.error('Error generating sales report:', error);
+    throw error;
+  }
+}
 
-export const dispenseMedication = async (data) => {
-  const response = await fetch(`${PHARMACY_BASE}/dispense`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(data),
-  });
-  if (!response.ok) throw new Error('Failed to dispense medication');
-  return await response.json();
-};
+export async function dispenseMedication(data) {
+  try {
+    const response = await axios.post(`${PHARMACY_BASE}/dispense`, data);
+    return response.data;
+  } catch (error) {
+    console.error('Error dispensing medication:', error);
+    throw error;
+  }
+}
 
-export const processRefund = async (data) => {
-  const response = await fetch(`${PHARMACY_BASE}/refunds`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(data),
-  });
-  if (!response.ok) throw new Error('Failed to process refund');
-  return await response.json();
-};
+export async function processRefund(data) {
+  try {
+    const response = await axios.post(`${PHARMACY_BASE}/refunds`, data);
+    return response.data;
+  } catch (error) {
+    console.error('Error processing refund:', error);
+    throw error;
+  }
+}
 
-export const createInvoice = async (data) => {
-  const response = await fetch(`${PHARMACY_BASE}/invoices`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(data),
-  });
-  if (!response.ok) throw new Error('Failed to create invoice');
-  return await response.json();
-};
+export async function createInvoice(data) {
+  try {
+    const response = await axios.post(`${PHARMACY_BASE}/invoices`, data);
+    return response.data;
+  } catch (error) {
+    console.error('Error creating invoice:', error);
+    throw error;
+  }
+}
 
-export const getStockAlerts = async () => {
-  const response = await fetch(`${PHARMACY_BASE}/stock-alerts`);
-  if (!response.ok) throw new Error('Failed to fetch stock alerts');
-  return await response.json();
-};
+export async function getStockAlerts() {
+  try {
+    const response = await axios.get(`${PHARMACY_BASE}/stock-alerts`);
+    return response.data;
+  } catch (error) {
+    console.error('Error fetching stock alerts:', error);
+    throw error;
+  }
+}
 
-export const addStockAdjustment = async (data) => {
-  const response = await fetch(`${PHARMACY_BASE}/stock-adjustments`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(data),
-  });
-  if (!response.ok) throw new Error('Failed to add stock adjustment');
-  return await response.json();
-};
+export async function addStockAdjustment(data) {
+  try {
+    const response = await axios.post(`${PHARMACY_BASE}/stock-adjustments`, data);
+    return response.data;
+  } catch (error) {
+    console.error('Error adding stock adjustment:', error);
+    throw error;
+  }
+}
 
-export const getFormularies = async () => {
-  const response = await fetch(`${PHARMACY_BASE}/formularies`);
-  if (!response.ok) throw new Error('Failed to fetch formularies');
-  return await response.json();
-};
+export async function getFormularies() {
+  try {
+    const response = await axios.get(`${PHARMACY_BASE}/formularies`);
+    return response.data;
+  } catch (error) {
+    console.error('Error fetching formularies:', error);
+    throw error;
+  }
+}
 
-export const addFormulary = async (data) => {
-  const response = await fetch(`${PHARMACY_BASE}/formularies`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(data),
-  });
-  if (!response.ok) throw new Error('Failed to add formulary');
-  return await response.json();
-};
+export async function addFormulary(data) {
+  try {
+    const response = await axios.post(`${PHARMACY_BASE}/formularies`, data);
+    return response.data;
+  } catch (error) {
+    console.error('Error adding formulary:', error);
+    throw error;
+  }
+}
 
-export const checkDrugInteractions = async (medicationIds) => {
-  const response = await fetch(`${PHARMACY_BASE}/drug-interactions`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ medicationIds }),
-  });
-  if (!response.ok) throw new Error('Failed to check drug interactions');
-  return await response.json();
-};
+export async function checkDrugInteractions(medicationIds) {
+  try {
+    const response = await axios.post(`${PHARMACY_BASE}/drug-interactions`, { medicationIds });
+    return response.data;
+  } catch (error) {
+    console.error('Error checking drug interactions:', error);
+    throw error;
+  }
+}
 
-export const trackNarcotic = async (medicationId) => {
-  const response = await fetch(`${PHARMACY_BASE}/narcotics/${medicationId}`);
-  if (!response.ok) throw new Error('Failed to track narcotic');
-  return await response.json();
-};
+export async function trackNarcotic(medicationId) {
+  try {
+    const response = await axios.get(`${PHARMACY_BASE}/narcotics/${medicationId}`);
+    return response.data;
+  } catch (error) {
+    console.error('Error tracking narcotic:', error);
+    throw error;
+  }
+}
 
-export const scanBarcode = async (barcode) => {
-  const response = await fetch(`${PHARMACY_BASE}/barcode?barcode=${barcode}`);
-  if (!response.ok) throw new Error('Failed to scan barcode');
-  return await response.json();
-};
+export async function scanBarcode(barcode) {
+  try {
+    const response = await axios.get(`${PHARMACY_BASE}/barcode?barcode=${barcode}`);
+    return response.data;
+  } catch (error) {
+    console.error('Error scanning barcode:', error);
+    throw error;
+  }
+}
