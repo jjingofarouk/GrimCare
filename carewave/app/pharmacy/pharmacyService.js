@@ -19,16 +19,10 @@ export async function getUsers() {
 export async function getPharmacists() {
   try {
     const token = localStorage.getItem('token');
-    const response = await axios.get(`${BASE_URL}${API_ROUTES.USERS}?role=PHARMACIST`, {
+    const response = await axios.get(`${BASE_URL}${API_ROUTES.PHARMACY}?resource=pharmacists`, {
       headers: { Authorization: `Bearer ${token}` },
     });
-    return response.data.users.map(u => ({
-      id: u.id,
-      user: { name: u.name, email: u.email },
-      licenseNumber: u.pharmacist?.licenseNumber || '',
-      phone: u.pharmacist?.phone || '',
-      specialty: u.pharmacist?.specialty || '',
-    }));
+    return response.data.pharmacists;
   } catch (error) {
     console.error('Error fetching pharmacists:', error);
     throw new Error(error.response?.data?.error || 'Failed to fetch pharmacists');
@@ -38,14 +32,16 @@ export async function getPharmacists() {
 export async function addPharmacist(data) {
   try {
     const token = localStorage.getItem('token');
-    const response = await axios.post(`${BASE_URL}${API_ROUTES.USERS}`, {
-      name: data.name,
-      email: data.email,
-      role: 'PHARMACIST',
-      password: data.password,
-      licenseNumber: data.licenseNumber,
-      phone: data.phone,
-      specialty: data.specialty,
+    const response = await axios.post(`${BASE_URL}${API_ROUTES.PHARMACY}`, {
+      action: 'addPharmacist',
+      payload: {
+        name: data.name,
+        email: data.email,
+        password: data.password,
+        licenseNumber: data.licenseNumber,
+        phone: data.phone,
+        specialty: data.specialty,
+      },
     }, {
       headers: { Authorization: `Bearer ${token}` },
     });
@@ -110,7 +106,6 @@ export async function createPrescription(data) {
         patientId: parseInt(data.patientId),
         doctorId: parseInt(data.doctorId),
         notes: data.notes,
-        status: 'PENDING',
         items: data.items.map(item => ({
           medicationId: parseInt(item.medicationId),
           quantity: parseInt(item.quantity),
@@ -126,6 +121,22 @@ export async function createPrescription(data) {
   } catch (error) {
     console.error('Error creating prescription:', error);
     throw new Error(error.response?.data?.error || 'Failed to create prescription');
+  }
+}
+
+export async function updatePrescriptionStatus(id, status) {
+  try {
+    const token = localStorage.getItem('token');
+    const response = await axios.put(`${BASE_URL}${API_ROUTES.PHARMACY}/${id}`, {
+      action: 'updatePrescriptionStatus',
+      payload: { status },
+    }, {
+      headers: { Authorization: `Bearer ${token}` },
+    });
+    return response.data;
+  } catch (error) {
+    console.error('Error updating prescription status:', error);
+    throw new Error(error.response?.data?.error || 'Failed to update prescription status');
   }
 }
 
@@ -224,6 +235,39 @@ export async function updateMedication(id, data) {
   }
 }
 
+export async function updateStock(id, stockQuantity, reason, adjustedById) {
+  try {
+    const token = localStorage.getItem('token');
+    const response = await axios.put(`${BASE_URL}${API_ROUTES.PHARMACY}/${id}`, {
+      action: 'updateStock',
+      payload: {
+        stockQuantity: parseInt(stockQuantity),
+        reason: reason || 'Manual adjustment',
+        adjustedById: parseInt(adjustedById),
+      },
+    }, {
+      headers: { Authorization: `Bearer ${token}` },
+    });
+    return response.data;
+  } catch (error) {
+    console.error('Error updating stock:', error);
+    throw new Error(error.response?.data?.error || 'Failed to update stock');
+  }
+}
+
+export async function deleteMedication(id) {
+  try {
+    const token = localStorage.getItem('token');
+    const response = await axios.delete(`${BASE_URL}${API_ROUTES.PHARMACY}/${id}?resource=medication`, {
+      headers: { Authorization: `Bearer ${token}` },
+    });
+    return response.data;
+  } catch (error) {
+    console.error('Error deleting medication:', error);
+    throw new Error(error.response?.data?.error || 'Failed to delete medication');
+  }
+}
+
 export async function getFormularies() {
   try {
     const token = localStorage.getItem('token');
@@ -287,5 +331,196 @@ export async function addSupplier(data) {
   } catch (error) {
     console.error('Error adding supplier:', error);
     throw new Error(error.response?.data?.error || 'Failed to add supplier');
+  }
+}
+
+export async function updateSupplier(id, data) {
+  try {
+    const token = localStorage.getItem('token');
+    const response = await axios.put(`${BASE_URL}${API_ROUTES.PHARMACY}/${id}`, {
+      action: 'updateSupplier',
+      payload: {
+        name: data.name,
+        contact: data.contact,
+        email: data.email,
+        address: data.address,
+      },
+    }, {
+      headers: { Authorization: `Bearer ${token}` },
+    });
+    return response.data;
+  } catch (error) {
+    console.error('Error updating supplier:', error);
+    throw new Error(error.response?.data?.error || 'Failed to update supplier');
+  }
+}
+
+export async function deleteSupplier(id) {
+  try {
+    const token = localStorage.getItem('token');
+    const response = await axios.delete(`${BASE_URL}${API_ROUTES.PHARMACY}/${id}?resource=supplier`, {
+      headers: { Authorization: `Bearer ${token}` },
+    });
+    return response.data;
+  } catch (error) {
+    console.error('Error deleting supplier:', error);
+    throw new Error(error.response?.data?.error || 'Failed to delete supplier');
+  }
+}
+
+export async function createInvoice(data) {
+  try {
+    const token = localStorage.getItem('token');
+    const response = await axios.post(`${BASE_URL}${API_ROUTES.PHARMACY}`, {
+      action: 'createInvoice',
+      payload: {
+        prescriptionId: parseInt(data.prescriptionId),
+        totalAmount: parseFloat(data.totalAmount),
+      },
+    }, {
+      headers: { Authorization: `Bearer ${token}` },
+    });
+    return response.data;
+  } catch (error) {
+    console.error('Error creating invoice:', error);
+    throw new Error(error.response?.data?.error || 'Failed to create invoice');
+  }
+}
+
+export async function processRefund(data) {
+  try {
+    const token = localStorage.getItem('token');
+    const response = await axios.post(`${BASE_URL}${API_ROUTES.PHARMACY}`, {
+      action: 'processRefund',
+      payload: {
+        invoiceId: parseInt(data.invoiceId),
+        reason: data.reason,
+        amount: parseFloat(data.amount),
+        processedById: parseInt(data.processedById),
+      },
+    }, {
+      headers: { Authorization: `Bearer ${token}` },
+    });
+    return response.data;
+  } catch (error) {
+    console.error('Error processing refund:', error);
+    throw new Error(error.response?.data?.error || 'Failed to process refund');
+  }
+}
+
+export async function getStockAlerts() {
+  try {
+    const token = localStorage.getItem('token');
+    const response = await axios.get(`${BASE_URL}${API_ROUTES.PHARMACY}?resource=stockAlerts`, {
+      headers: { Authorization: `Bearer ${token}` },
+    });
+    return response.data.stockAlerts;
+  } catch (error) {
+    console.error('Error fetching stock alerts:', error);
+    throw new Error(error.response?.data?.error || 'Failed to fetch stock alerts');
+  }
+}
+
+export async function getOrders() {
+  try {
+    const token = localStorage.getItem('token');
+    const response = await axios.get(`${BASE_URL}${API_ROUTES.PHARMACY}?resource=orders`, {
+      headers: { Authorization: `Bearer ${token}` },
+    });
+    return response.data.orders;
+  } catch (error) {
+    console.error('Error fetching orders:', error);
+    throw new Error(error.response?.data?.error || 'Failed to fetch orders');
+  }
+}
+
+export async function createOrder(data) {
+  try {
+    const token = localStorage.getItem('token');
+    const response = await axios.post(`${BASE_URL}${API_ROUTES.PHARMACY}`, {
+      action: 'createOrder',
+      payload: {
+        supplierId: parseInt(data.supplierId),
+        items: data.items.map(item => ({
+          medicationId: parseInt(item.medicationId),
+          quantity: parseInt(item.quantity),
+          unitPrice: parseFloat(item.unitPrice),
+        })),
+      },
+    }, {
+      headers: { Authorization: `Bearer ${token}` },
+    });
+    return response.data;
+  } catch (error) {
+    console.error('Error creating order:', error);
+    throw new Error(error.response?.data?.error || 'Failed to create order');
+  }
+}
+
+export async function updateOrderStatus(id, status) {
+  try {
+    const token = localStorage.getItem('token');
+    const response = await axios.put(`${BASE_URL}${API_ROUTES.PHARMACY}/${id}`, {
+      action: 'updateOrderStatus',
+      payload: { status },
+    }, {
+      headers: { Authorization: `Bearer ${token}` },
+    });
+    return response.data;
+  } catch (error) {
+    console.error('Error updating order status:', error);
+    throw new Error(error.response?.data?.error || 'Failed to update order status');
+  }
+}
+
+export async function scanBarcode(barcode) {
+  try {
+    const token = localStorage.getItem('token');
+    const response = await axios.get(`${BASE_URL}${API_ROUTES.PHARMACY}?resource=inventory&barcode=${barcode}`, {
+      headers: { Authorization: `Bearer ${token}` },
+    });
+    return response.data.inventory[0];
+  } catch (error) {
+    console.error('Error scanning barcode:', error);
+    throw new Error(error.response?.data?.error || 'Failed to scan barcode');
+  }
+}
+
+export async function generateStockReport(timeRange) {
+  try {
+    const token = localStorage.getItem('token');
+    const response = await axios.get(`${BASE_URL}${API_ROUTES.PHARMACY}?resource=inventory`, {
+      headers: { Authorization: `Bearer ${token}` },
+    });
+    return response.data.inventory;
+  } catch (error) {
+    console.error('Error generating stock report:', error);
+    throw new Error(error.response?.data?.error || 'Failed to generate stock report');
+  }
+}
+
+export async function generateSalesReport(timeRange) {
+  try {
+    const token = localStorage.getItem('token');
+    const response = await axios.get(`${BASE_URL}${API_ROUTES.PHARMACY}?resource=prescriptions`, {
+      headers: { Authorization: `Bearer ${token}` },
+    });
+    return response.data.prescriptions.flatMap(p => p.dispensingRecords);
+  } catch (error) {
+    console.error('Error generating sales report:', error);
+    throw new Error(error.response?.data?.error || 'Failed to generate sales report');
+  }
+}
+
+export async function checkDrugInteractions(medicationIds) {
+  try {
+    const token = localStorage.getItem('token');
+    const response = await axios.get(`${BASE_URL}${API_ROUTES.PHARMACY}?resource=drugInteractions&medicationIds=${medicationIds.join(',')}`, {
+      headers: { Authorization: `Bearer ${token}` },
+    });
+    return response.data.interactions;
+  } catch (error) {
+    console.error('Error checking drug interactions:', error);
+    throw new Error(error.response?.data?.error || 'Failed to check drug interactions');
   }
 }
