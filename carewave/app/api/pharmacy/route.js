@@ -1,7 +1,7 @@
 import { PrismaClient } from '@prisma/client';
 import { NextResponse } from 'next/server';
 import jwt from 'jsonwebtoken';
-import bcrypt from 'bcryptjs';
+import bcrypt from 'bcrypt';
 
 const prisma = new PrismaClient();
 
@@ -89,7 +89,7 @@ export async function GET(request) {
         return NextResponse.json({ orders });
 
       default:
-        const [prescriptions, inventory, suppliers, formularies, pharmacists, stockAlerts, orders] = await Promise.all([
+        const [allPrescriptions, allInventory, allSuppliers, allFormularies, allPharmacists, allStockAlerts, allOrders] = await Promise.all([
           prisma.prescription.findMany({
             include: {
               patient: { include: { user: { select: { id: true, name: true, email: true } } } },
@@ -126,19 +126,19 @@ export async function GET(request) {
           }),
         ]);
         return NextResponse.json({
-          prescriptions,
-          inventory,
-          suppliers,
-          formularies,
-          pharmacists: pharmacists.map(u => ({
+          prescriptions: allPrescriptions,
+          inventory: allInventory,
+          suppliers: allSuppliers,
+          formularies: allFormularies,
+          pharmacists: allPharmacists.map(u => ({
             id: u.id,
             user: { name: u.name, email: u.email },
             licenseNumber: u.doctor?.licenseNumber || '',
             phone: u.doctor?.phone || '',
             specialty: u.doctor?.specialty || '',
           })),
-          stockAlerts,
-          orders,
+          stockAlerts: allStockAlerts,
+          orders: allOrders,
         });
     }
   } catch (error) {
