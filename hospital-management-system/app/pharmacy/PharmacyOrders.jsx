@@ -1,4 +1,6 @@
 // pharmacy/PharmacyOrders.jsx
+// Purchase order management component
+
 import React, { useState, useEffect } from 'react';
 import { DataGrid } from '@mui/x-data-grid';
 import { TextField, Button, Box, Typography, MenuItem, Select } from '@mui/material';
@@ -26,16 +28,16 @@ const PharmacyOrders = () => {
   };
 
   const handleCreateOrder = async () => {
-    await createOrder({ /* order details */ });
+    await createOrder({ supplierId: 0, items: [] });
     fetchOrders();
   };
 
   const columns = [
     { field: 'id', headerName: 'Order ID', width: 100 },
-    { field: 'medication', headerName: 'Medication', width: 200 },
-    { field: 'quantity', headerName: 'Quantity', width: 120 },
-    { field: 'supplier', headerName: 'Supplier', width: 150 },
-    { field: 'date', headerName: 'Order Date', width: 150 },
+    { field: 'medication', headerName: 'Medications', width: 200, valueGetter: ({ row }) => row.items.map(item => item.medication.name).join(', ') },
+    { field: 'quantity', headerName: 'Quantity', width: 120, valueGetter: ({ row }) => row.items.reduce((sum, item) => sum + item.quantity, 0) },
+    { field: 'supplier', headerName: 'Supplier', width: 150, valueGetter: ({ row }) => row.supplier.name },
+    { field: 'orderDate', headerName: 'Order Date', width: 150, valueFormatter: ({ value }) => new Date(value).toLocaleDateString() },
     {
       field: 'status',
       headerName: 'Status',
@@ -45,17 +47,16 @@ const PharmacyOrders = () => {
           value={params.row.status}
           onChange={(e) => handleStatusChange(params.row.id, e.target.value)}
         >
-          <MenuItem value="Pending">Pending</MenuItem>
-          <MenuItem value="Processing">Processing</MenuItem>
-          <MenuItem value="Shipped">Shipped</MenuItem>
-          <MenuItem value="Delivered">Delivered</MenuItem>
+          <MenuItem value="PENDING">Pending</MenuItem>
+          <MenuItem value="PROCESSING">Processing</MenuItem>
+          <MenuItem value="DELIVERED">Delivered</MenuItem>
         </Select>
       ),
     },
   ];
 
   const filteredOrders = orders.filter(order =>
-    order.medication.toLowerCase().includes(search.toLowerCase()) &&
+    order.items.some(item => item.medication.name.toLowerCase().includes(search.toLowerCase())) &&
     (statusFilter === 'all' || order.status === statusFilter)
   );
 
@@ -77,10 +78,9 @@ const PharmacyOrders = () => {
           className={styles.filter}
         >
           <MenuItem value="all">All Statuses</MenuItem>
-          <MenuItem value="Pending">Pending</MenuItem>
-          <MenuItem value="Processing">Processing</MenuItem>
-          <MenuItem value="Shipped">Shipped</MenuItem>
-          <MenuItem value="Delivered">Delivered</MenuItem>
+          <MenuItem value="PENDING">Pending</MenuItem>
+          <MenuItem value="PROCESSING">Processing</MenuItem>
+          <MenuItem value="DELIVERED">Delivered</MenuItem>
         </Select>
         <Button variant="contained" onClick={handleCreateOrder}>
           New Order
