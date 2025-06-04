@@ -5,7 +5,7 @@ const prisma = new PrismaClient();
 
 export async function GET() {
   try {
-    const prescriptions = await prisma.prescription.findMany({
+    const prescriptions = await prisma.prescription?.findMany({
       include: {
         patient: { include: { user: true } },
         doctor: { include: { user: true } },
@@ -13,17 +13,17 @@ export async function GET() {
         invoice: { include: { transaction: true } },
         dispensingRecords: { include: { medication: true, dispensedBy: true } },
       },
-    });
-    const inventory = await prisma.medication.findMany({
+    }) || [];
+    const inventory = await prisma.medication?.findMany({
       include: { supplier: true, formulary: true, dispensingRecords: true, stockAdjustments: true },
-    });
-    const orders = await prisma.purchaseOrder.findMany({
+    }) || [];
+    const orders = await prisma.purchaseOrder?.findMany({
       include: { supplier: true, items: { include: { medication: true } } },
-    });
-    const suppliers = await prisma.supplier.findMany();
-    const formularies = await prisma.formulary.findMany({
+    }) || [];
+    const suppliers = await prisma.supplier?.findMany() || [];
+    const formularies = await prisma.formulary?.findMany({
       include: { medications: true },
-    });
+    }) || [];
     return NextResponse.json({
       prescriptions,
       inventory,
