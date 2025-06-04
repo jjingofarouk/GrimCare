@@ -23,11 +23,11 @@ model User {
   cssdLogs          CSSDLog[]          @relation("LoggedBy")
   cssdRequisitions  CSSDRequisition[]  @relation("RequisitionRequestedBy")
   appointments      Appointment[]      @relation("BookedBy")
-  dispensingRecords DispensingRecord[] @relation(fields: [dispensedById], references: [id])
+  dispensingRecords DispensingRecord[] @relation("DispensedBy")
   dispensedById     Int?
-  refunds           Refund[]           @relation(fields: [processedById], references: [id])
+  refunds           Refund[]           @relation("ProcessedBy")
   processedById     Int?
-  stockAdjustments  StockAdjustment[]  @relation(fields: [adjustedById], references: [id])
+  stockAdjustments  StockAdjustment[]  @relation("AdjustedBy")
   adjustedById      Int?
 }
 
@@ -47,7 +47,7 @@ model Doctor {
   discharges        Discharge[]           @relation("DischargingDoctor")
   appointments      Appointment[]         @relation("DoctorAppointments")
   availability      DoctorAvailability[]
-  prescriptions     Prescription[]        @relation(fields: [prescriberId], references: [id])
+  prescriptions     Prescription[]        @relation("Prescriptions")
   prescriberId      Int?
 }
 
@@ -70,7 +70,7 @@ model Patient {
   discharges            Discharge[]       @relation("DischargedPatient")
   transactions          Transaction[]     @relation("PatientTransactions")
   appointments          Appointment[]     @relation("PatientAppointments")
-  prescriptions         Prescription[]    @relation(fields: [prescribedToId], references: [id])
+  prescriptions         Prescription[]    @relation("Prescriptions")
   prescribedToId        Int?
   createdAt             DateTime          @default(now())
   updatedAt             DateTime          @updatedAt
@@ -194,7 +194,7 @@ model Transaction {
   patient       Patient?      @relation("PatientTransactions", fields: [patientId], references: [id])
   createdAt     DateTime      @default(now())
   updatedAt     DateTime      @updatedAt
-  invoices      Invoice[]     @relation(fields: [transactionId], references: [id])
+  invoices      Invoice[]     @relation("TransactionInvoices")
   transactionId Int?
 }
 
@@ -338,9 +338,9 @@ model Supplier {
 model Prescription {
   id                Int                @id @default(autoincrement())
   patientId         Int
-  patient           Patient            @relation(fields: [patientId], references: [id])
+  patient           Patient            @relation("Prescriptions", fields: [patientId], references: [id])
   doctorId          Int
-  doctor            Doctor             @relation(fields: [doctorId], references: [id])
+  doctor            Doctor             @relation("Prescriptions", fields: [doctorId], references: [id])
   status            String             @default("PENDING") // PENDING, DISPENSED, CANCELLED
   prescriptionDate  DateTime           @default(now())
   notes             String?
@@ -375,7 +375,7 @@ model DispensingRecord {
   quantity          Int
   dispensedDate     DateTime      @default(now())
   dispensedById     Int
-  dispensedBy       User          @relation(fields: [dispensedById], references: [id])
+  dispensedBy       User          @relation("DispensedBy", fields: [dispensedById], references: [id])
   createdAt         DateTime      @default(now())
   updatedAt         DateTime      @updatedAt
   invoiceId         Int?
@@ -390,7 +390,7 @@ model Invoice {
   status            String            @default("PENDING") // PENDING, PAID, REFUNDED
   paymentMethod     String?
   transactionId     Int?
-  transaction       Transaction?      @relation(fields: [transactionId], references: [id])
+  transaction       Transaction?      @relation("TransactionInvoices", fields: [transactionId], references: [id])
   createdAt         DateTime          @default(now())
   updatedAt         DateTime          @updatedAt
   dispensingRecords DispensingRecord[]
@@ -405,7 +405,7 @@ model Refund {
   amount        Float
   refundDate    DateTime  @default(now())
   processedById Int
-  processedBy   User      @relation(fields: [processedById], references: [id])
+  processedBy   User      @relation("ProcessedBy", fields: [processedById], references: [id])
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
 }
@@ -441,7 +441,7 @@ model StockAdjustment {
   quantity      Int
   reason        String
   adjustedById  Int
-  adjustedBy    User          @relation(fields: [adjustedById], references: [id])
+  adjustedBy    User          @relation("AdjustedBy", fields: [adjustedById], references: [id])
   adjustmentDate DateTime     @default(now())
   createdAt     DateTime      @default(now())
   updatedAt     DateTime      @updatedAt
