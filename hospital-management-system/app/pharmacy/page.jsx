@@ -15,7 +15,7 @@ import PharmacyDispensing from './PharmacyDispensing';
 import PharmacyBilling from './PharmacyBilling';
 import PharmacyFormulary from './PharmacyFormulary';
 import PharmacyNarcotics from './PharmacyNarcotics';
-import styles from './PharmacyPage.module.css';
+import styles from './page.module.css';
 
 const PharmacyPage = () => {
   const [activeTab, setActiveTab] = useState(0);
