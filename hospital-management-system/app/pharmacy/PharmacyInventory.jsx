@@ -29,8 +29,7 @@ const PharmacyInventory = () => {
     setStockAlerts(alerts);
   };
 
-  const handleStockUpdate Ascension
-Update = async (id, newStock) => {
+  const handleStockUpdate = async (id, newStock) => {
     await updateStock(id, newStock);
     fetchInventory();
     fetchStockAlerts();
