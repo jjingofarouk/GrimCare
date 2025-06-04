@@ -83,7 +83,8 @@ export async function GET(request) {
         return NextResponse.json({ error: 'Invalid endpoint' }, { status: 404 });
     }
   } catch (error) {
-    return NextResponse.json({ error: error.message || 'Failed to process request' }, { status: 500 });
+    console.error(`GET /api/pharmacy/${path} error:`, error);
+    return NextResponse.json({ error: 'Failed to process request', details: error.message }, { status: 500 });
   } finally {
     await prisma.$disconnect();
   }
@@ -97,7 +98,7 @@ export async function POST(request) {
     switch (path) {
       case 'medications':
         const medication = await prisma.medication.create({ data });
-        return NextResponse.json(medication);
+        return NextResponse.json(medication, { status: 201 });
 
       case 'prescriptions':
         const prescription = await prisma.prescription.create({
@@ -107,7 +108,7 @@ export async function POST(request) {
           },
           include: { items: true },
         });
-        return NextResponse.json(prescription);
+        return NextResponse.json(prescription, { status: 201 });
 
       case 'orders':
         const order = await prisma.purchaseOrder.create({
@@ -117,16 +118,18 @@ export async function POST(request) {
           },
           include: { items: true },
         });
-        return NextResponse.json(order);
+        return NextResponse.json(order, { status: 201 });
 
       case 'suppliers':
         const supplier = await prisma.supplier.create({ data });
-        return NextResponse.json(supplier);
+        return NextResponse.json(supplier, { status: 201 });
 
       case 'dispense':
         const { prescriptionId, medicationId, quantity, patientType, dispensedById } = data;
         const medicationDispense = await prisma.medication.findUnique({ where: { id: medicationId } });
-        if (medicationDispense.stockQuantity < quantity) throw new Error('Insufficient stock');
+        if (medicationDispense.stockQuantity < quantity) {
+          return NextResponse.json({ error: 'Insufficient stock' }, { status: 400 });
+        }
         const dispensingRecord = await prisma.dispensingRecord.create({
           data: {
             prescriptionId,
@@ -140,11 +143,11 @@ export async function POST(request) {
           where: { id: medicationId },
           data: { stockQuantity: medicationDispense.stockQuantity - quantity },
         });
-        return NextResponse.json(dispensingRecord);
+        return NextResponse.json(dispensingRecord, { status: 201 });
 
       case 'refunds':
         const refund = await prisma.refund.create({ data });
-        return NextResponse.json(refund);
+        return NextResponse.json(refund, { status: 201 });
 
       case 'invoices':
         const invoice = await prisma.invoice.create({
@@ -156,7 +159,7 @@ export async function POST(request) {
             transaction: data.transactionId ? { connect: { id: data.transactionId } } : undefined,
           },
         });
-        return NextResponse.json(invoice);
+        return NextResponse.json(invoice, { status: 201 });
 
       case 'stock-adjustments':
         const { medicationId, quantity, reason, adjustedById } = data;
@@ -173,11 +176,11 @@ export async function POST(request) {
           where: { id: medicationId },
           data: { stockQuantity: medicationAdjust.stockQuantity + quantity },
         });
-        return NextResponse.json(adjustment);
+        return NextResponse.json(adjustment, { status: 201 });
 
       case 'formularies':
         const formulary = await prisma.formulary.create({ data });
-        return NextResponse.json(formulary);
+        return NextResponse.json(formulary, { status: 201 });
 
       case 'drug-interactions':
         const { medicationIds } = data;
@@ -196,7 +199,8 @@ export async function POST(request) {
         return NextResponse.json({ error: 'Invalid endpoint' }, { status: 404 });
     }
   } catch (error) {
-    return NextResponse.json({ error: error.message || 'Failed to process request' }, { status: 500 });
+    console.error(`POST /api/pharmacy/${path} error:`, error);
+    return NextResponse.json({ error: 'Failed to process request', details: error.message }, { status: 500 });
   } finally {
     await prisma.$disconnect();
   }
@@ -251,7 +255,8 @@ export async function PUT(request) {
         return NextResponse.json({ error: 'Invalid endpoint' }, { status: 404 });
     }
   } catch (error) {
-    return NextResponse.json({ error: error.message || 'Failed to process request' }, { status: 500 });
+    console.error(`PUT /api/pharmacy/${path} error:`, error);
+    return NextResponse.json({ error: 'Failed to process request', details: error.message }, { status: 500 });
   } finally {
     await prisma.$disconnect();
   }
@@ -280,7 +285,8 @@ export async function DELETE(request) {
         return NextResponse.json({ error: 'Invalid endpoint' }, { status: 404 });
     }
   } catch (error) {
-    return NextResponse.json({ error: error.message || 'Failed to process request' }, { status: 500 });
+    console.error(`DELETE /api/pharmacy/${path} error:`, error);
+    return NextResponse.json({ error: 'Failed to process request', details: error.message }, { status: 500 });
   } finally {
     await prisma.$disconnect();
   }
