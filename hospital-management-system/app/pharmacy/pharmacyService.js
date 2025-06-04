@@ -1,8 +1,18 @@
-
+// pharmacyService.js
 import axios from 'axios';
 import api from '../api';
 
 const { BASE_URL, API_ROUTES } = api;
+
+export async function getUsers() {
+  try {
+    const response = await axios.get(`${BASE_URL}${API_ROUTES.USERS}`);
+    return response.data.users;
+  } catch (error) {
+    console.error('Error fetching users:', error);
+    throw error;
+  }
+}
 
 export async function getPrescriptions() {
   try {
@@ -45,7 +55,7 @@ export async function checkDrugInteractions(medicationIds) {
     const interactions = await prisma.drugInteraction.findMany({
       where: {
         OR: [
-          { medicationId1: { in: medicationIds } },
+          { medicationId1: { in: medicationIdse } },
           { medicationId2: { in: medicationIds } },
         ],
       },
