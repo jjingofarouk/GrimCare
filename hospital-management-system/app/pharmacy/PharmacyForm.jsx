@@ -1,3 +1,7 @@
+
+// pharmacy/PharmacyForm.jsx
+// Form for adding new medications
+
 import React, { useState } from 'react';
 import { Box, Typography, TextField, Button, MenuItem, Select } from '@mui/material';
 import { addMedication } from './pharmacyService';
@@ -36,7 +40,6 @@ const PharmacyForm = () => {
       genericName: '',
       category: '',
       batchNumber: '',
-      batchNumber: '',
       barcode: '',
       rfid: '',
       stockQuantity: 0,
@@ -48,45 +51,6 @@ const PharmacyForm = () => {
       narcotic: false,
     });
   };
-
-  const drugCategories = [
-    'Analgesics',
-    'Antibiotics',
-    'Antivirals',
-    'Narcotics',
-    'Antacids',
-    'Antihistamines',
-    'Antidepressants',
-    'Antipsychotics',
-    'Anticonvulsants',
-    'Antidiabetics',
-    'Antihypertensives',
-    'Anticoagulants',
-    'Antifungals',
-    'Antiparasitics',
-    'Antipyretics',
-    'Bronchodilators',
-    'Corticosteroids',
-    'Diuretics',
-    'Hormones',
-    'Immunosuppressants',
-    'Laxatives',
-    'Sedatives',
-    'Statins',
-    'Vaccines',
-    'Vitamins',
-    'Antiemetics',
-    'Antispasmodics',
-    'Anesthetics',
-    'Antirheumatics',
-    'Antitussives',
-    'Decongestants',
-    'Expectorants',
-    'Mucolytics',
-    'Proton Pump Inhibitors',
-    'Thyroid Medications',
-    'Vasodilators',
-  ];
 
   return (
     <Box className={styles.container}>
@@ -117,10 +81,10 @@ const PharmacyForm = () => {
           fullWidth
           margin="normal"
         >
-          <MenuItem value="" disabled>Select Category</MenuItem>
-          {drugCategories.map(category => (
-            <MenuItem key={category} value={category}>{category}</MenuItem>
-          ))}
+          <MenuItem value="Analgesics">Analgesics</MenuItem>
+          <MenuItem value="Antibiotics">Antibiotics</MenuItem>
+          <MenuItem value="Antivirals">Antivirals</MenuItem>
+          <MenuItem value="Narcotics">Narcotics</MenuItem>
         </TextField>
         <TextField
           label="Batch Number"
