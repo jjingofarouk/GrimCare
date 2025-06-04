@@ -1,10 +1,7 @@
-// pharmacy/PharmacyPrescriptions.jsx
-// Prescription management with drug interaction checker iframe
-
 import React, { useState, useEffect } from 'react';
-import { Box, Typography, TextField, Button, Select, MenuItem } from '@mui/material';
+import { Box, Typography, TextField, Button, Select, MenuItem, Autocomplete } from '@mui/material';
 import PharmacyCard from './PharmacyCard';
-import { getPrescriptions, createPrescription, updatePrescriptionStatus, checkDrugInteractions } from './pharmacyService';
+import { getPrescriptions, createPrescription, updatePrescriptionStatus, checkDrugInteractions, getPharmacists } from './pharmacyService';
 import styles from './PharmacyPrescriptions.module.css';
 
 const PharmacyPrescriptions = () => {
@@ -12,27 +9,43 @@ const PharmacyPrescriptions = () => {
   const [newPrescription, setNewPrescription] = useState({
     patientId: '',
     doctorId: '',
+    pharmacistId: '',
     items: [],
   });
   const [interactions, setInteractions] = useState([]);
+  const [pharmacists, setPharmacists] = useState([]);
 
   useEffect(() => {
-    fetchPrescriptions();
+    const fetchData = async () => {
+      try {
+        const [prescriptionData, pharmacistData] = await Promise.all([
+          getPrescriptions(),
+          getPharmacists(),
+        ]);
+        setPrescriptions(prescriptionData);
+        setPharmacists(pharmacistData);
+        if (pharmacistData.length > 0) {
+          setNewPrescription(prev => ({ ...prev, pharmacistId: pharmacistData[0].id }));
+        }
+      } catch (err) {
+        console.error('Error fetching data:', err);
+      }
+    };
+    fetchData();
   }, []);
-
-  const fetchPrescriptions = async () => {
-    const data = await getPrescriptions();
-    setPrescriptions(data);
-  };
 
   const handleAddPrescription = async () => {
     const prescription = await createPrescription(newPrescription);
     setPrescriptions([...prescriptions, prescription]);
-    setNewPrescription({ patientId: '', doctorId: '', items: [] });
+    setNewPrescription({ patientId: '', doctorId: '', pharmacistId: pharmacists.length > 0 ? pharmacists[0].id : '', items: [] });
     
     const medicationIds = newPrescription.items.map(item => item.medicationId);
     const interactionData = await checkDrugInteractions(medicationIds);
     setInteractions(interactionData);
+  };
+
+  const handleChange = (name, value) => {
+    setNewPrescription(prev => ({ ...prev, [name]: value }));
   };
 
   return (
@@ -42,14 +55,29 @@ const PharmacyPrescriptions = () => {
         <TextField
           label="Patient ID"
           value={newPrescription.patientId}
-          onChange={(e) => setNewPrescription({ ...newPrescription, patientId: e.target.value })}
+          onChange={(e) => handleChange('patientId', e.target.value)}
+          fullWidth
+          margin="normal"
         />
         <TextField
           label="Doctor ID"
           value={newPrescription.doctorId}
-          onChange={(e) => setNewPrescription({ ...newPrescription, doctorId: e.target.value })}
+          onChange={(e) => handleChange('doctorId', e.target.value)}
+          fullWidth
+          margin="normal"
         />
-        <Button variant="contained" onClick={handleAddPrescription}>
+        <Autocomplete
+          options={pharmacists}
+          getOptionLabel={(option) => `${option.user.name} (License: ${option.licenseNumber})`}
+          onChange={(e,
+
+ value) => handleChange('pharmacistId', value ? value.id : '')}
+          renderInput={(params) => (
+            <TextField {...params} label="Select Pharmacist" fullWidth margin="normal" />
+          )}
+          fullWidth
+        />
+        <Button variant="contained" onClick={handleAddPrescription} sx={{ mt: 2 }}>
           Create Prescription
         </Button>
       </Box>
