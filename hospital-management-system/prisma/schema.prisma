@@ -1,3 +1,5 @@
+// prisma/schema.prisma
+// Extended schema with pharmacy-related models
 generator client {
   provider = "prisma-client-js"
 }
@@ -12,7 +14,7 @@ model User {
   email         String           @unique
   name          String
   password      String
-  role          String           @default("PATIENT") // PATIENT, DOCTOR, ADMIN, NURSE
+  role          String           @default("PATIENT")
   createdAt     DateTime         @default(now())
   updatedAt     DateTime         @updatedAt
   doctor        Doctor?          @relation(fields: [doctorId], references: [id])
@@ -23,6 +25,7 @@ model User {
   cssdLogs      CSSDLog[]        @relation("LoggedBy")
   cssdRequisitions CSSDRequisition[] @relation("RequisitionRequestedBy")
   appointments  Appointment[]    @relation("BookedBy")
+  pharmacyLogs  PharmacyLog[]    @relation("LoggedBy")
 }
 
 model Doctor {
@@ -41,6 +44,7 @@ model Doctor {
   discharges    Discharge[] @relation("DischargingDoctor")
   appointments  Appointment[] @relation("DoctorAppointments")
   availability  DoctorAvailability[]
+  prescriptions Prescription[] @relation("PrescribingDoctor")
 }
 
 model Patient {
@@ -62,6 +66,7 @@ model Patient {
   discharges        Discharge[]   @relation("DischargedPatient")
   transactions      Transaction[] @relation("PatientTransactions")
   appointments      Appointment[] @relation("PatientAppointments")
+  prescriptions     Prescription[] @relation("PatientPrescriptions")
   createdAt         DateTime      @default(now())
   updatedAt         DateTime      @updatedAt
 }
@@ -87,8 +92,8 @@ model Appointment {
   bookedById    Int?
   bookedBy      User?       @relation("BookedBy", fields: [bookedById], references: [id])
   date          DateTime
-  status        String      @default("SCHEDULED") // SCHEDULED, CHECKED_IN, CHECKED_OUT, COMPLETED, CANCELLED, NO_SHOW
-  type          String      @default("REGULAR") // REGULAR, WALK_IN, EMERGENCY
+  status        String      @default("SCHEDULED")
+  type          String      @default("REGULAR")
   reason        String
   notes         String?
   checkInTime   DateTime?
@@ -97,6 +102,7 @@ model Appointment {
   createdAt     DateTime    @default(now())
   updatedAt     DateTime    @updatedAt
   queue         Queue?
+  prescriptions Prescription[]
 }
 
 model DoctorAvailability {
@@ -105,7 +111,7 @@ model DoctorAvailability {
   doctor        Doctor      @relation(fields: [doctorId], references: [id])
   startTime     DateTime
   endTime       DateTime
-  status        String      @default("AVAILABLE") // AVAILABLE, UNAVAILABLE
+  status        String      @default("AVAILABLE")
   createdAt     DateTime    @default(now())
   updatedAt     DateTime    @updatedAt
 }
@@ -115,7 +121,7 @@ model Queue {
   appointmentId Int         @unique
   appointment   Appointment @relation(fields: [appointmentId], references: [id])
   queueNumber   Int
-  status        String      @default("WAITING") // WAITING, IN_PROGRESS, COMPLETED
+  status        String      @default("WAITING")
   createdAt     DateTime    @default(now())
   updatedAt     DateTime    @updatedAt
 }
@@ -135,11 +141,12 @@ model Admission {
   relayedInfo       String?
   triagePriority    String?
   triageNotes       String?
-  status            String    @default("PENDING") // PENDING, ADMITTED, DISCHARGED
+  status            String    @default("PENDING")
   dischargeDate     DateTime?
   dischargeNotes    String?
   createdAt         DateTime  @default(now())
   updatedAt         DateTime  @updatedAt
+  dispensedMedications DispensedMedication[] @relation("AdmissionDispensing")
 }
 
 model Discharge {
@@ -147,7 +154,7 @@ model Discharge {
   patientId         Int
   patient           Patient   @relation("DischargedPatient", fields: [patientId], references: [id])
   doctorId          Int
-  doctor            Doctor    @relation("DischargingDoctor", fields: [doctorId], references: [id])
+  doctor            Doctor    @relation("DischargingDoctor", fields: [doctor ම).  @updatedAt
   dischargeDate     DateTime  @default(now())
   dischargeNotes    String?
   followUpInstructions String?
@@ -282,4 +289,194 @@ model CSSDLog {
   action          String
   details         String?
   createdAt       DateTime       @default(now())
+}
+
+model Medication {
+  id                Int       @id @default(autoincrement())
+  name              String
+  genericName       String?
+  category          String
+  description       String?
+  dosageForm        String
+  strength          String?
+  batchNumber       String
+  barcode           String?   @unique
+  rfid              String?   @unique
+  stockQuantity     Int       @default(0)
+  minStockThreshold Int       @default(10)
+  price             Float
+  expiryDate        DateTime
+  isNarcotic        Boolean   @default(false)
+  storageConditions String?
+  manufacturer      String?
+  formulary         Formulary? @relation(fields: [formularyId], references: [id])
+  formularyId       Int?
+  supplier          Supplier?  @relation(fields: [supplierId], references: [id])
+  supplierId        Int?
+  prescriptions     PrescriptionMedication[]
+  dispensedMedications DispensedMedication[]
+  purchaseOrderItems PurchaseOrderItem[]
+  stockAdjustments  StockAdjustment[]
+  pharmacyLogs      PharmacyLog[] @relation("MedicationLogs")
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @updatedAt
+}
+
+model Formulary {
+  id            Int         @id @default(autoincrement())
+  name          String
+  description   String?
+  medications   Medication[]
+  createdAt     DateTime    @default(now())
+  updatedAt     DateTime    @updatedAt
+}
+
+model Supplier {
+  id            Int         @id @default(autoincrement())
+  name          String
+  contact       String?
+  email         String?
+  address       String?
+  medications   Medication[]
+  purchaseOrders PurchaseOrder[]
+  createdAt     DateTime    @default(now())
+  updatedAt     DateTime    @updatedAt
+}
+
+model Prescription {
+  id                Int         @id @default(autoincrement())
+  patientId         Int
+  patient           Patient     @relation("PatientPrescriptions", fields: [patientId], references: [id])
+  doctorId          Int
+  doctor            Doctor      @relation("PrescribingDoctor", fields: [doctorId], references: [id])
+  appointmentId     Int?
+  appointment       Appointment? @relation(fields: [appointmentId], references: [id])
+  date              DateTime    @default(now())
+  status            String      @default("PENDING")
+  notes             String?
+  medications       PrescriptionMedication[]
+  dispensedMedications DispensedMedication[] @relation("PrescriptionDispensing")
+  createdAt         DateTime    @default(now())
+  updatedAt         DateTime    @updatedAt
+}
+
+model PrescriptionMedication {
+  id                Int         @id @default(autoincrement())
+  prescriptionId    Int
+  prescription      Prescription @relation(fields: [prescriptionId], references: [id])
+  medicationId      Int
+  medication        Medication   @relation(fields: [medicationId], references: [id])
+  dosage            String
+  frequency         String
+  duration          String
+  quantity          Int
+  instructions      String?
+  createdAt         DateTime    @default(now())
+  updatedAt         DateTime    @updatedAt
+}
+
+model DispensedMedication {
+  id                Int         @id @default(autoincrement())
+  prescriptionId    Int?
+  prescription      Prescription? @relation("PrescriptionDispensing", fields: [prescriptionId], references: [id])
+  medicationId      Int
+  medication        Medication   @relation(fields: [medicationId], references: [id])
+  patientId         Int
+  patient           Patient      @relation(fields: [patientId], references: [id])
+  admissionId       Int?
+  admission         Admission?   @relation("AdmissionDispensing", fields: [admissionId], references: [id])
+  quantity          Int
+  dispenseDate      DateTime    @default(now())
+  type              String      @default("OUTPATIENT")
+  status            String      @default("DISPENSED")
+  invoiceId         Int?
+  invoice           PharmacyInvoice? @relation(fields: [invoiceId], references: [id])
+  createdAt         DateTime    @default(now())
+  updatedAt         DateTime    @updatedAt
+}
+
+model PharmacyInvoice {
+  id                Int         @id @default(autoincrement())
+  patientId         Int
+  patient           Patient      @relation(fields: [patientId], references: [id])
+  totalAmount       Float
+  status            String      @default("PENDING")
+  date              DateTime    @default(now())
+  paymentMethod     String?
+  transactionId     Int?
+  transaction       Transaction? @relation(fields: [transactionId], references: [id])
+  dispensedMedications DispensedMedication[]
+  refunds           PharmacyRefund[]
+  createdAt         DateTime    @default(now())
+  updatedAt         DateTime    @updatedAt
+}
+
+model PharmacyRefund {
+  id                Int         @id @default(autoincrement())
+  invoiceId         Int
+  invoice           PharmacyInvoice @relation(fields: [invoiceId], references: [id])
+  reason            String
+  amount            Float
+  date              DateTime    @default(now())
+  status            String      @default("PENDING")
+  transactionId     Int?
+  transaction       Transaction? @relation(fields: [transactionId], references: [id])
+  createdAt         DateTime    @default(now())
+  updatedAt         DateTime    @updatedAt
+}
+
+model PurchaseOrder {
+  id                Int         @id @default(autoincrement())
+  supplierId        Int
+  supplier          Supplier     @relation(fields: [supplierId], references: [id])
+  orderDate         DateTime    @default(now())
+  expectedDelivery  DateTime?
+  status            String      @default("PENDING")
+  totalAmount       Float       @default(0)
+  items             PurchaseOrderItem[]
+  pharmacyLogs      PharmacyLog[] @relation("PurchaseOrderLogs")
+  createdAt         DateTime    @default(now())
+  updatedAt         DateTime    @updatedAt
+}
+
+model PurchaseOrderItem {
+  id                Int         @id @default(autoincrement())
+  purchaseOrderId   Int
+  purchaseOrder     PurchaseOrder @relation(fields: [purchaseOrderId], references: [id])
+  medicationId      Int
+  medication        Medication   @relation(fields: [medicationId], references: [id])
+  quantity          Int
+  unitPrice         Float
+  createdAt         DateTime    @default(now())
+  updatedAt         DateTime    @updatedAt
+}
+
+model StockAdjustment {
+  id                Int         @id @default(autoincrement())
+  medicationId      Int
+  medication        Medication   @relation(fields: [medicationId], references: [id])
+  quantity          Int
+  reason            String
+  adjustmentDate    DateTime    @default(now())
+  type              String      @default("ADJUSTMENT")
+  userId            Int
+  user              User        @relation(fields: [userId], references: [id])
+  pharmacyLogs      PharmacyLog[] @relation("StockAdjustmentLogs")
+  createdAt         DateTime    @default(now())
+  updatedAt         DateTime    @updatedAt
+}
+
+model PharmacyLog {
+  id                Int         @id @default(autoincrement())
+  medicationId      Int?
+  medication        Medication?  @relation("MedicationLogs", fields: [medicationId], references: [id])
+  purchaseOrderId   Int?
+  purchaseOrder     PurchaseOrder? @relation("PurchaseOrderLogs", fields: [purchaseOrderId], references: [id])
+  stockAdjustmentId Int?
+  stockAdjustment   StockAdjustment? @relation("StockAdjustmentLogs", fields: [stockAdjustmentId], references: [id])
+  userId            Int
+  user              User        @relation("LoggedBy", fields: [userId], references: [id])
+  action            String
+  details           String?
+  createdAt         DateTime    @default(now())
 }
