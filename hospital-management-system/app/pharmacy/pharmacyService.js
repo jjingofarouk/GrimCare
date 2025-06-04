@@ -1,223 +1,215 @@
-// pharmacy/pharmacyService.js
-// Comprehensive pharmacy service with backend integration
-
-import { PrismaClient } from '@prisma/client';
-import api from '../api';
-
-const prisma = new PrismaClient();
-
 export const getInventory = async () => {
-  return await prisma.medication.findMany({
-    include: { supplier: true, formulary: true },
-  });
+  const response = await fetch('/api/pharmacy/inventory');
+  if (!response.ok) throw new Error('Failed to fetch inventory');
+  return await response.json();
 };
 
 export const addMedication = async (data) => {
-  return await prisma.medication.create({ data });
+  const response = await fetch('/api/pharmacy/medications', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(data),
+  });
+  if (!response.ok) throw new Error('Failed to add medication');
+  return await response.json();
 };
 
 export const updateStock = async (id, stockQuantity) => {
-  return await prisma.medication.update({
-    where: { id },
-    data: { stockQuantity },
+  const response = await fetch(`/api/pharmacy/medications/${id}/stock`, {
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ stockQuantity }),
   });
+  if (!response.ok) throw new Error('Failed to update stock');
+  return await response.json();
 };
 
 export const deleteMedication = async (id) => {
-  return await prisma.medication.delete({ where: { id } });
+  const response = await fetch(`/api/pharmacy/medications/${id}`, {
+    method: 'DELETE',
+  });
+  if (!response.ok) throw new Error('Failed to delete medication');
+  return await response.json();
 };
 
 export const getPrescriptions = async () => {
-  return await prisma.prescription.findMany({
-    include: { patient: true, doctor: true, items: { include: { medication: true } } },
-  });
+  const response = await fetch('/api/pharmacy/prescriptions');
+  if (!response.ok) throw new Error('Failed to fetch prescriptions');
+  return await response.json();
 };
 
 export const createPrescription = async (data) => {
-  return await prisma.prescription.create({
-    data: {
-      ...data,
-      items: { create: data.items },
-    },
-    include: { items: true },
+  const response = await fetch('/api/pharmacy/prescriptions', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(data),
   });
+  if (!response.ok) throw new Error('Failed to create prescription');
+  return await response.json();
 };
 
 export const updatePrescriptionStatus = async (id, status) => {
-  return await prisma.prescription.update({
-    where: { id },
-    data: { status },
+  const response = await fetch(`/api/pharmacy/prescriptions/${id}/status`, {
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ status }),
   });
+  if (!response.ok) throw new Error('Failed to update prescription status');
+  return await response.json();
 };
 
 export const getOrders = async () => {
-  return await prisma.purchaseOrder.findMany({
-    include: { supplier: true, items: { include: { medication: true } } },
-  });
+  const response = await fetch('/api/pharmacy/orders');
+  if (!response.ok) throw new Error('Failed to fetch orders');
+  return await response.json();
 };
 
 export const createOrder = async (data) => {
-  return await prisma.purchaseOrder.create({
-    data: {
-      ...data,
-      items: { create: data.items },
-    },
-    include: { items: true },
+  const response = await fetch('/api/pharmacy/orders', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(data),
   });
+  if (!response.ok) throw new Error('Failed to create order');
+  return await response.json();
 };
 
 export const updateOrderStatus = async (id, status) => {
-  return await prisma.purchaseOrder.update({
-    where: { id },
-    data: { status },
+  const response = await fetch(`/api/pharmacy/orders/${id}/status`, {
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ status }),
   });
+  if (!response.ok) throw new Error('Failed to update order status');
+  return await response.json();
 };
 
 export const getSuppliers = async () => {
-  return await prisma.supplier.findMany();
+  const response = await fetch('/api/pharmacy/suppliers');
+  if (!response.ok) throw new Error('Failed to fetch suppliers');
+  return await response.json();
 };
 
 export const addSupplier = async (data) => {
-  return await prisma.supplier.create({ data });
+  const response = await fetch('/api/pharmacy/suppliers', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(data),
+  });
+  if (!response.ok) throw new Error('Failed to add supplier');
+  return await response.json();
 };
 
 export const updateSupplier = async (id, data) => {
-  return await prisma.supplier.update({
-    where: { id },
-    data,
+  const response = await fetch(`/api/pharmacy/suppliers/${id}`, {
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(data),
   });
+  if (!response.ok) throw new Error('Failed to update supplier');
+  return await response.json();
 };
 
 export const deleteSupplier = async (id) => {
-  return await prisma.supplier.delete({ where: { id } });
+  const response = await fetch(`/api/pharmacy/suppliers/${id}`, {
+    method: 'DELETE',
+  });
+  if (!response.ok) throw new Error('Failed to delete supplier');
+  return await response.json();
 };
 
 export const generateStockReport = async (timeRange) => {
-  const dateFilter = {
-    gte: new Date(new Date().setMonth(new Date().getMonth() - (timeRange === 'monthly' ? 1 : timeRange === 'weekly' ? 0.25 : 12))),
-  };
-  return await prisma.medication.findMany({
-    where: { updatedAt: dateFilter },
-    select: { name: true, stockQuantity: true, expiryDate: true },
-  });
+  const response = await fetch(`/api/pharmacy/reports/stock?timeRange=${timeRange}`);
+  if (!response.ok) throw new Error('Failed to generate stock report');
+  return await response.json();
 };
 
 export const generateSalesReport = async (timeRange) => {
-  const dateFilter = {
-    gte: new Date(new Date().setMonth(new Date().getMonth() - (timeRange === 'monthly' ? 1 : timeRange === 'weekly' ? 0.25 : 12))),
-  };
-  return await prisma.dispensingRecord.findMany({
-    where: { dispensedDate: dateFilter },
-    include: { medication: true },
-  });
+  const response = await fetch(`/api/pharmacy/reports/sales?timeRange=${timeRange}`);
+  if (!response.ok) throw new Error('Failed to generate sales report');
+  return await response.json();
 };
 
 export const dispenseMedication = async (data) => {
-  const { prescriptionId, medicationId, quantity, patientType, dispensedById } = data;
-  const medication = await prisma.medication.findUnique({ where: { id: medicationId } });
-  if (medication.stockQuantity < quantity) throw new Error('Insufficient stock');
-  
-  const dispensingRecord = await prisma.dispensingRecord.create({
-    data: {
-      prescriptionId,
-      medicationId,
-      quantity,
-      patientType,
-      dispensedById,
-    },
+  const response = await fetch('/api/pharmacy/dispense', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(data),
   });
-
-  await prisma.medication.update({
-    where: { id: medicationId },
-    data: { stockQuantity: medication.stockQuantity - quantity },
-  });
-
-  return dispensingRecord;
+  if (!response.ok) throw new Error('Failed to dispense medication');
+  return await response.json();
 };
 
 export const processRefund = async (data) => {
-  const { invoiceId, reason, amount, processedById } = data;
-  return await prisma.refund.create({
-    data: {
-      invoiceId,
-      reason,
-      amount,
-      processedById,
-    },
+  const response = await fetch('/api/pharmacy/refunds', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(data),
   });
+  if (!response.ok) throw new Error('Failed to process refund');
+  return await response.json();
 };
 
 export const createInvoice = async (data) => {
-  return await prisma.invoice.create({
-    data: {
-      prescriptionId: data.prescriptionId,
-      totalAmount: data.totalAmount,
-      status: data.status || 'PENDING',
-      paymentMethod: data.paymentMethod,
-      transaction: data.transactionId ? { connect: { id: data.transactionId } } : undefined,
-    },
+  const response = await fetch('/api/pharmacy/invoices', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(data),
   });
+  if (!response.ok) throw new Error('Failed to create invoice');
+  return await response.json();
 };
 
 export const getStockAlerts = async () => {
-  return await prisma.medication.findMany({
-    where: { stockQuantity: { lte: prisma.medication.fields.minStockThreshold } },
-  });
+  const response = await fetch('/api/pharmacy/stock-alerts');
+  if (!response.ok) throw new Error('Failed to fetch stock alerts');
+  return await response.json();
 };
 
 export const addStockAdjustment = async (data) => {
-  const { medicationId, quantity, reason, adjustedById } = data;
-  const medication = await prisma.medication.findUnique({ where: { id: medicationId } });
-  
-  const adjustment = await prisma.stockAdjustment.create({
-    data: {
-      medicationId,
-      quantity,
-      reason,
-      adjustedById,
-    },
+  const response = await fetch('/api/pharmacy/stock-adjustments', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(data),
   });
-
-  await prisma.medication.update({
-    where: { id: medicationId },
-    data: { stockQuantity: medication.stockQuantity + quantity },
-  });
-
-  return adjustment;
+  if (!response.ok) throw new Error('Failed to add stock adjustment');
+  return await response.json();
 };
 
 export const getFormularies = async () => {
-  return await prisma.formulary.findMany({
-    include: { medications: true },
-  });
+  const response = await fetch('/api/pharmacy/formularies');
+  if (!response.ok) throw new Error('Failed to fetch formularies');
+  return await response.json();
 };
 
 export const addFormulary = async (data) => {
-  return await prisma.formulary.create({ data });
+  const response = await fetch('/api/pharmacy/formularies', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(data),
+  });
+  if (!response.ok) throw new Error('Failed to add formulary');
+  return await response.json();
 };
 
 export const checkDrugInteractions = async (medicationIds) => {
-  return await prisma.drugInteraction.findMany({
-    where: {
-      OR: [
-        { medicationId1: { in: medicationIds } },
-        { medicationId2: { in: medicationIds } },
-      ],
-    },
-    include: { medication1: true, medication2: true },
+  const response = await fetch('/api/pharmacy/drug-interactions', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ medicationIds }),
   });
+  if (!response.ok) throw new Error('Failed to check drug interactions');
+  return await response.json();
 };
 
 export const trackNarcotic = async (medicationId) => {
-  return await prisma.medication.findFirst({
-    where: { id: medicationId, narcotic: true },
-    include: { dispensingRecords: true, stockAdjustments: true },
-  });
+  const response = await fetch(`/api/pharmacy/narcotics/${medicationId}`);
+  if (!response.ok) throw new Error('Failed to track narcotic');
+  return await response.json();
 };
 
 export const scanBarcode = async (barcode) => {
-  return await prisma.medication.findFirst({
-    where: { barcode },
-    include: { supplier: true, formulary: true },
-  });
+  const response = await fetch(`/api/pharmacy/barcode?barcode=${barcode}`);
+  if (!response.ok) throw new Error('Failed to scan barcode');
+  return await response.json();
 };
