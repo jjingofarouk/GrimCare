@@ -1,12 +1,8 @@
 import axios from 'axios';
-import api from '../api';
-
-const { BASE_URL, API_ROUTES } = api;
-const PHARMACY_BASE = `${BASE_URL}${API_ROUTES.PHARMACY}`;
 
 export async function getInventory() {
   try {
-    const response = await axios.get(`${PHARMACY_BASE}/inventory`);
+    const response = await axios.get('/api/pharmacy/inventory');
     return response.data;
   } catch (error) {
     console.error('Error fetching inventory:', error);
@@ -16,7 +12,7 @@ export async function getInventory() {
 
 export async function addMedication(data) {
   try {
-    const response = await axios.post(`${PHARMACY_BASE}/medications`, data);
+    const response = await axios.post('/api/pharmacy/medications', data);
     return response.data;
   } catch (error) {
     console.error('Error adding medication:', error);
@@ -26,7 +22,7 @@ export async function addMedication(data) {
 
 export async function updateStock(id, stockQuantity) {
   try {
-    const response = await axios.put(`${PHARMACY_BASE}/medications/${id}/stock`, { stockQuantity });
+    const response = await axios.put(`/api/pharmacy/medications/${id}/stock`, { stockQuantity });
     return response.data;
   } catch (error) {
     console.error('Error updating stock:', error);
@@ -36,7 +32,7 @@ export async function updateStock(id, stockQuantity) {
 
 export async function deleteMedication(id) {
   try {
-    const response = await axios.delete(`${PHARMACY_BASE}/medications/${id}`);
+    const response = await axios.delete(`/api/pharmacy/medications/${id}`);
     return response.data;
   } catch (error) {
     console.error('Error deleting medication:', error);
@@ -46,7 +42,7 @@ export async function deleteMedication(id) {
 
 export async function getPrescriptions() {
   try {
-    const response = await axios.get(`${PHARMACY_BASE}/prescriptions`);
+    const response = await axios.get('/api/pharmacy/prescriptions');
     return response.data;
   } catch (error) {
     console.error('Error fetching prescriptions:', error);
@@ -56,7 +52,7 @@ export async function getPrescriptions() {
 
 export async function createPrescription(data) {
   try {
-    const response = await axios.post(`${PHARMACY_BASE}/prescriptions`, data);
+    const response = await axios.post('/api/pharmacy/prescriptions', data);
     return response.data;
   } catch (error) {
     console.error('Error creating prescription:', error);
@@ -66,7 +62,7 @@ export async function createPrescription(data) {
 
 export async function updatePrescriptionStatus(id, status) {
   try {
-    const response = await axios.put(`${PHARMACY_BASE}/prescriptions/${id}/status`, { status });
+    const response = await axios.put(`/api/pharmacy/prescriptions/${id}/status`, { status });
     return response.data;
   } catch (error) {
     console.error('Error updating prescription status:', error);
@@ -76,7 +72,7 @@ export async function updatePrescriptionStatus(id, status) {
 
 export async function getOrders() {
   try {
-    const response = await axios.get(`${PHARMACY_BASE}/orders`);
+    const response = await axios.get('/api/pharmacy/orders');
     return response.data;
   } catch (error) {
     console.error('Error fetching orders:', error);
@@ -86,7 +82,7 @@ export async function getOrders() {
 
 export async function createOrder(data) {
   try {
-    const response = await axios.post(`${PHARMACY_BASE}/orders`, data);
+    const response = await axios.post('/api/pharmacy/orders', data);
     return response.data;
   } catch (error) {
     console.error('Error creating order:', error);
@@ -96,7 +92,7 @@ export async function createOrder(data) {
 
 export async function updateOrderStatus(id, status) {
   try {
-    const response = await axios.put(`${PHARMACY_BASE}/orders/${id}/status`, { status });
+    const response = await axios.put(`/api/pharmacy/orders/${id}/status`, { status });
     return response.data;
   } catch (error) {
     console.error('Error updating order status:', error);
@@ -106,7 +102,7 @@ export async function updateOrderStatus(id, status) {
 
 export async function getSuppliers() {
   try {
-    const response = await axios.get(`${PHARMACY_BASE}/suppliers`);
+    const response = await axios.get('/api/pharmacy/suppliers');
     return response.data;
   } catch (error) {
     console.error('Error fetching suppliers:', error);
@@ -116,7 +112,7 @@ export async function getSuppliers() {
 
 export async function addSupplier(data) {
   try {
-    const response = await axios.post(`${PHARMACY_BASE}/suppliers`, data);
+    const response = await axios.post('/api/pharmacy/suppliers', data);
     return response.data;
   } catch (error) {
     console.error('Error adding supplier:', error);
@@ -126,7 +122,7 @@ export async function addSupplier(data) {
 
 export async function updateSupplier(id, data) {
   try {
-    const response = await axios.put(`${PHARMACY_BASE}/suppliers/${id}`, data);
+    const response = await axios.put(`/api/pharmacy/suppliers/${id}`, data);
     return response.data;
   } catch (error) {
     console.error('Error updating supplier:', error);
@@ -136,7 +132,7 @@ export async function updateSupplier(id, data) {
 
 export async function deleteSupplier(id) {
   try {
-    const response = await axios.delete(`${PHARMACY_BASE}/suppliers/${id}`);
+    const response = await axios.delete(`/api/pharmacy/suppliers/${id}`);
     return response.data;
   } catch (error) {
     console.error('Error deleting supplier:', error);
@@ -146,7 +142,7 @@ export async function deleteSupplier(id) {
 
 export async function generateStockReport(timeRange) {
   try {
-    const response = await axios.get(`${PHARMACY_BASE}/reports/stock?timeRange=${timeRange}`);
+    const response = await axios.get(`/api/pharmacy/reports/stock?timeRange=${timeRange}`);
     return response.data;
   } catch (error) {
     console.error('Error generating stock report:', error);
@@ -156,7 +152,7 @@ export async function generateStockReport(timeRange) {
 
 export async function generateSalesReport(timeRange) {
   try {
-    const response = await axios.get(`${PHARMACY_BASE}/reports/sales?timeRange=${timeRange}`);
+    const response = await axios.get(`/api/pharmacy/reports/sales?timeRange=${timeRange}`);
     return response.data;
   } catch (error) {
     console.error('Error generating sales report:', error);
@@ -166,7 +162,7 @@ export async function generateSalesReport(timeRange) {
 
 export async function dispenseMedication(data) {
   try {
-    const response = await axios.post(`${PHARMACY_BASE}/dispense`, data);
+    const response = await axios.post('/api/pharmacy/dispense', data);
     return response.data;
   } catch (error) {
     console.error('Error dispensing medication:', error);
@@ -176,7 +172,7 @@ export async function dispenseMedication(data) {
 
 export async function processRefund(data) {
   try {
-    const response = await axios.post(`${PHARMACY_BASE}/refunds`, data);
+    const response = await axios.post('/api/pharmacy/refunds', data);
     return response.data;
   } catch (error) {
     console.error('Error processing refund:', error);
@@ -186,7 +182,7 @@ export async function processRefund(data) {
 
 export async function createInvoice(data) {
   try {
-    const response = await axios.post(`${PHARMACY_BASE}/invoices`, data);
+    const response = await axios.post('/api/pharmacy/invoices', data);
     return response.data;
   } catch (error) {
     console.error('Error creating invoice:', error);
@@ -196,7 +192,7 @@ export async function createInvoice(data) {
 
 export async function getStockAlerts() {
   try {
-    const response = await axios.get(`${PHARMACY_BASE}/stock-alerts`);
+    const response = await axios.get('/api/pharmacy/stock-alerts');
     return response.data;
   } catch (error) {
     console.error('Error fetching stock alerts:', error);
@@ -206,7 +202,7 @@ export async function getStockAlerts() {
 
 export async function addStockAdjustment(data) {
   try {
-    const response = await axios.post(`${PHARMACY_BASE}/stock-adjustments`, data);
+    const response = await axios.post('/api/pharmacy/stock-adjustments', data);
     return response.data;
   } catch (error) {
     console.error('Error adding stock adjustment:', error);
@@ -216,7 +212,7 @@ export async function addStockAdjustment(data) {
 
 export async function getFormularies() {
   try {
-    const response = await axios.get(`${PHARMACY_BASE}/formularies`);
+    const response = await axios.get('/api/pharmacy/formularies');
     return response.data;
   } catch (error) {
     console.error('Error fetching formularies:', error);
@@ -226,7 +222,7 @@ export async function getFormularies() {
 
 export async function addFormulary(data) {
   try {
-    const response = await axios.post(`${PHARMACY_BASE}/formularies`, data);
+    const response = await axios.post('/api/pharmacy/formularies', data);
     return response.data;
   } catch (error) {
     console.error('Error adding formulary:', error);
@@ -236,7 +232,7 @@ export async function addFormulary(data) {
 
 export async function checkDrugInteractions(medicationIds) {
   try {
-    const response = await axios.post(`${PHARMACY_BASE}/drug-interactions`, { medicationIds });
+    const response = await axios.post('/api/pharmacy/drug-interactions', { medicationIds });
     return response.data;
   } catch (error) {
     console.error('Error checking drug interactions:', error);
@@ -246,7 +242,7 @@ export async function checkDrugInteractions(medicationIds) {
 
 export async function trackNarcotic(medicationId) {
   try {
-    const response = await axios.get(`${PHARMACY_BASE}/narcotics/${medicationId}`);
+    const response = await axios.get(`/api/pharmacy/narcotics/${medicationId}`);
     return response.data;
   } catch (error) {
     console.error('Error tracking narcotic:', error);
@@ -256,7 +252,7 @@ export async function trackNarcotic(medicationId) {
 
 export async function scanBarcode(barcode) {
   try {
-    const response = await axios.get(`${PHARMACY_BASE}/barcode?barcode=${barcode}`);
+    const response = await axios.get(`/api/pharmacy/barcode?barcode=${barcode}`);
     return response.data;
   } catch (error) {
     console.error('Error scanning barcode:', error);
