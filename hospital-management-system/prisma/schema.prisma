@@ -86,7 +86,7 @@ model Patient {
   appointments          Appointment[]     @relation("PatientAppointments")
   prescriptions         Prescription[]    @relation("PatientPrescriptions")
   createdAt             DateTime          @default(now())
-  updatedAt         DateTime          @updatedAt
+  updatedAt             DateTime          @updatedAt
 }
 
 model Department {
