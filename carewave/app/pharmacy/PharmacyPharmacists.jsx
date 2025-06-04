@@ -26,10 +26,15 @@ const PharmacyPharmacists = () => {
   const fetchPharmacists = async () => {
     try {
       const data = await getPharmacists();
-      setPharmacists(data);
+      // Filter out invalid entries to ensure data integrity
+      const validPharmacists = data.filter(
+        (p) => p && p.id && p.user && typeof p.user.name === 'string' && typeof p.user.email === 'string'
+      );
+      setPharmacists(validPharmacists);
       setError(null);
     } catch (err) {
       setError('Failed to fetch pharmacists: ' + err.message);
+      setPharmacists([]);
     }
   };
 
@@ -69,11 +74,11 @@ const PharmacyPharmacists = () => {
   const handleUpdatePharmacist = async (id, data) => {
     try {
       await updatePharmacist(id, {
-        name: data.name,
-        email: data.email,
-        licenseNumber: data.licenseNumber,
-        phone: data.phone,
-        specialty: data.specialty,
+        name: data.name || '',
+        email: data.email || '',
+        licenseNumber: data.licenseNumber || '',
+        phone: data.phone || '',
+        specialty: data.specialty || '',
       });
       await fetchPharmacists();
       setSuccess('Pharmacist updated successfully');
@@ -102,63 +107,67 @@ const PharmacyPharmacists = () => {
       field: 'name',
       headerName: 'Name',
       width: 200,
-      valueGetter: ({ row }) => row.user?.name || '',
+      valueGetter: (params) => params?.row?.user?.name || '',
     },
     {
       field: 'email',
       headerName: 'Email',
       width: 200,
-      valueGetter: ({ row }) => row.user?.email || '',
+      valueGetter: (params) => params?.row?.user?.email || '',
     },
     {
       field: 'licenseNumber',
       headerName: 'License Number',
       width: 150,
-      valueGetter: ({ row }) => row.licenseNumber || '',
+      valueGetter: (params) => params?.row?.licenseNumber || '',
     },
     {
       field: 'phone',
       headerName: 'Phone',
       width: 150,
-      valueGetter: ({ row }) => row.phone || '',
+      valueGetter: (params) => params?.row?.phone || '',
     },
     {
       field: 'specialty',
       headerName: 'Specialty',
       width: 150,
-      valueGetter: ({ row }) => row.specialty || '',
+      valueGetter: (params) => params?.row?.specialty || '',
     },
     {
       field: 'actions',
       headerName: 'Actions',
       width: 150,
-      renderCell: ({ row }) => (
-        <>
-          <IconButton
-            onClick={() =>
-              handleUpdatePharmacist(row.id, {
-                name: row.user?.name || '',
-                email: row.user?.email || '',
-                licenseNumber: row.licenseNumber || '',
-                phone: row.phone || '',
-                specialty: row.specialty || '',
-              })
-            }
-          >
-            <Edit />
-          </IconButton>
-          <IconButton onClick={() => handleDeletePharmacist(row.id)}>
-            <Delete />
-          </IconButton>
-        </>
-      ),
+      renderCell: (params) => {
+        const row = params?.row;
+        if (!row || !row.id) return null;
+        return (
+          <>
+            <IconButton
+              onClick={() =>
+                handleUpdatePharmacist(row.id, {
+                  name: row.user?.name || '',
+                  email: row.user?.email || '',
+                  licenseNumber: row.licenseNumber || '',
+                  phone: row.phone || '',
+                  specialty: row.specialty || '',
+                })
+              }
+            >
+              <Edit />
+            </IconButton>
+            <IconButton onClick={() => handleDeletePharmacist(row.id)}>
+              <Delete />
+            </IconButton>
+          </>
+        );
+      },
     },
   ];
 
   const filteredPharmacists = pharmacists.filter(
     (pharmacist) =>
-      pharmacist.user?.name?.toLowerCase().includes(search.toLowerCase()) ||
-      pharmacist.user?.email?.toLowerCase().includes(search.toLowerCase())
+      pharmacist?.user?.name?.toLowerCase().includes(search.toLowerCase()) ||
+      pharmacist?.user?.email?.toLowerCase().includes(search.toLowerCase())
   );
 
   return (
