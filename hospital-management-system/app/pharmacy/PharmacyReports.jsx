@@ -1,3 +1,4 @@
+
 // pharmacy/PharmacyReports.jsx
 // Reporting component for stock and sales
 
