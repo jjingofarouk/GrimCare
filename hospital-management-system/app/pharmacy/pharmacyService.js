@@ -1,11 +1,16 @@
+import api from '../api';
+
+const { BASE_URL, API_ROUTES } = api;
+const PHARMACY_BASE = `${BASE_URL}${API_ROUTES.PHARMACY}`;
+
 export const getInventory = async () => {
-  const response = await fetch('/api/pharmacy/inventory');
+  const response = await fetch(`${PHARMACY_BASE}/inventory`);
   if (!response.ok) throw new Error('Failed to fetch inventory');
   return await response.json();
 };
 
 export const addMedication = async (data) => {
-  const response = await fetch('/api/pharmacy/medications', {
+  const response = await fetch(`${PHARMACY_BASE}/medications`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(data),
@@ -15,7 +20,7 @@ export const addMedication = async (data) => {
 };
 
 export const updateStock = async (id, stockQuantity) => {
-  const response = await fetch(`/api/pharmacy/medications/${id}/stock`, {
+  const response = await fetch(`${PHARMACY_BASE}/medications/${id}/stock`, {
     method: 'PUT',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ stockQuantity }),
@@ -25,7 +30,7 @@ export const updateStock = async (id, stockQuantity) => {
 };
 
 export const deleteMedication = async (id) => {
-  const response = await fetch(`/api/pharmacy/medications/${id}`, {
+  const response = await fetch(`${PHARMACY_BASE}/medications/${id}`, {
     method: 'DELETE',
   });
   if (!response.ok) throw new Error('Failed to delete medication');
@@ -33,13 +38,13 @@ export const deleteMedication = async (id) => {
 };
 
 export const getPrescriptions = async () => {
-  const response = await fetch('/api/pharmacy/prescriptions');
+  const response = await fetch(`${PHARMACY_BASE}/prescriptions`);
   if (!response.ok) throw new Error('Failed to fetch prescriptions');
   return await response.json();
 };
 
 export const createPrescription = async (data) => {
-  const response = await fetch('/api/pharmacy/prescriptions', {
+  const response = await fetch(`${PHARMACY_BASE}/prescriptions`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(data),
@@ -49,7 +54,7 @@ export const createPrescription = async (data) => {
 };
 
 export const updatePrescriptionStatus = async (id, status) => {
-  const response = await fetch(`/api/pharmacy/prescriptions/${id}/status`, {
+  const response = await fetch(`${PHARMACY_BASE}/prescriptions/${id}/status`, {
     method: 'PUT',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ status }),
@@ -59,13 +64,13 @@ export const updatePrescriptionStatus = async (id, status) => {
 };
 
 export const getOrders = async () => {
-  const response = await fetch('/api/pharmacy/orders');
+  const response = await fetch(`${PHARMACY_BASE}/orders`);
   if (!response.ok) throw new Error('Failed to fetch orders');
   return await response.json();
 };
 
 export const createOrder = async (data) => {
-  const response = await fetch('/api/pharmacy/orders', {
+  const response = await fetch(`${PHARMACY_BASE}/orders`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(data),
@@ -75,7 +80,7 @@ export const createOrder = async (data) => {
 };
 
 export const updateOrderStatus = async (id, status) => {
-  const response = await fetch(`/api/pharmacy/orders/${id}/status`, {
+  const response = await fetch(`${PHARMACY_BASE}/orders/${id}/status`, {
     method: 'PUT',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ status }),
@@ -85,13 +90,13 @@ export const updateOrderStatus = async (id, status) => {
 };
 
 export const getSuppliers = async () => {
-  const response = await fetch('/api/pharmacy/suppliers');
+  const response = await fetch(`${PHARMACY_BASE}/suppliers`);
   if (!response.ok) throw new Error('Failed to fetch suppliers');
   return await response.json();
 };
 
 export const addSupplier = async (data) => {
-  const response = await fetch('/api/pharmacy/suppliers', {
+  const response = await fetch(`${PHARMACY_BASE}/suppliers`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(data),
@@ -101,7 +106,7 @@ export const addSupplier = async (data) => {
 };
 
 export const updateSupplier = async (id, data) => {
-  const response = await fetch(`/api/pharmacy/suppliers/${id}`, {
+  const response = await fetch(`${PHARMACY_BASE}/suppliers/${id}`, {
     method: 'PUT',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(data),
@@ -111,7 +116,7 @@ export const updateSupplier = async (id, data) => {
 };
 
 export const deleteSupplier = async (id) => {
-  const response = await fetch(`/api/pharmacy/suppliers/${id}`, {
+  const response = await fetch(`${PHARMACY_BASE}/suppliers/${id}`, {
     method: 'DELETE',
   });
   if (!response.ok) throw new Error('Failed to delete supplier');
@@ -119,19 +124,19 @@ export const deleteSupplier = async (id) => {
 };
 
 export const generateStockReport = async (timeRange) => {
-  const response = await fetch(`/api/pharmacy/reports/stock?timeRange=${timeRange}`);
+  const response = await fetch(`${PHARMACY_BASE}/reports/stock?timeRange=${timeRange}`);
   if (!response.ok) throw new Error('Failed to generate stock report');
   return await response.json();
 };
 
 export const generateSalesReport = async (timeRange) => {
-  const response = await fetch(`/api/pharmacy/reports/sales?timeRange=${timeRange}`);
+  const response = await fetch(`${PHARMACY_BASE}/reports/sales?timeRange=${timeRange}`);
   if (!response.ok) throw new Error('Failed to generate sales report');
   return await response.json();
 };
 
 export const dispenseMedication = async (data) => {
-  const response = await fetch('/api/pharmacy/dispense', {
+  const response = await fetch(`${PHARMACY_BASE}/dispense`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(data),
@@ -141,7 +146,7 @@ export const dispenseMedication = async (data) => {
 };
 
 export const processRefund = async (data) => {
-  const response = await fetch('/api/pharmacy/refunds', {
+  const response = await fetch(`${PHARMACY_BASE}/refunds`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(data),
@@ -151,7 +156,7 @@ export const processRefund = async (data) => {
 };
 
 export const createInvoice = async (data) => {
-  const response = await fetch('/api/pharmacy/invoices', {
+  const response = await fetch(`${PHARMACY_BASE}/invoices`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(data),
@@ -161,13 +166,13 @@ export const createInvoice = async (data) => {
 };
 
 export const getStockAlerts = async () => {
-  const response = await fetch('/api/pharmacy/stock-alerts');
+  const response = await fetch(`${PHARMACY_BASE}/stock-alerts`);
   if (!response.ok) throw new Error('Failed to fetch stock alerts');
   return await response.json();
 };
 
 export const addStockAdjustment = async (data) => {
-  const response = await fetch('/api/pharmacy/stock-adjustments', {
+  const response = await fetch(`${PHARMACY_BASE}/stock-adjustments`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(data),
@@ -177,13 +182,13 @@ export const addStockAdjustment = async (data) => {
 };
 
 export const getFormularies = async () => {
-  const response = await fetch('/api/pharmacy/formularies');
+  const response = await fetch(`${PHARMACY_BASE}/formularies`);
   if (!response.ok) throw new Error('Failed to fetch formularies');
   return await response.json();
 };
 
 export const addFormulary = async (data) => {
-  const response = await fetch('/api/pharmacy/formularies', {
+  const response = await fetch(`${PHARMACY_BASE}/formularies`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(data),
@@ -193,7 +198,7 @@ export const addFormulary = async (data) => {
 };
 
 export const checkDrugInteractions = async (medicationIds) => {
-  const response = await fetch('/api/pharmacy/drug-interactions', {
+  const response = await fetch(`${PHARMACY_BASE}/drug-interactions`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ medicationIds }),
@@ -203,13 +208,13 @@ export const checkDrugInteractions = async (medicationIds) => {
 };
 
 export const trackNarcotic = async (medicationId) => {
-  const response = await fetch(`/api/pharmacy/narcotics/${medicationId}`);
+  const response = await fetch(`${PHARMACY_BASE}/narcotics/${medicationId}`);
   if (!response.ok) throw new Error('Failed to track narcotic');
   return await response.json();
 };
 
 export const scanBarcode = async (barcode) => {
-  const response = await fetch(`/api/pharmacy/barcode?barcode=${barcode}`);
+  const response = await fetch(`${PHARMACY_BASE}/barcode?barcode=${barcode}`);
   if (!response.ok) throw new Error('Failed to scan barcode');
   return await response.json();
 };
