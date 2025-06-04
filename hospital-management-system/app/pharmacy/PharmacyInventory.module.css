@@ -1,18 +1,19 @@
 /* pharmacy/PharmacyInventory.module.css */
+/* Styles for the inventory management component */
+
 .container {
-  padding: 20px;
+  padding: 8px;
 }
 
 .searchBar {
   margin-bottom: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
 }
 
 .grid {
-  background: #fff;
-}
-
-@media (max-width: 600px) {
-  .container {
-    padding: 10px;
-  }
+  background-color: #fff;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
