@@ -26,7 +26,6 @@ const PharmacyPharmacists = () => {
   const fetchPharmacists = async () => {
     try {
       const data = await getPharmacists();
-      // Validate and filter data to ensure only valid pharmacist objects
       const validPharmacists = Array.isArray(data)
         ? data.filter(
             (p) =>
@@ -144,7 +143,7 @@ const PharmacyPharmacists = () => {
     {
       field: 'actions',
       headerName: 'Actions',
-      width: 150',
+      width: 150,
       renderCell: (params) => {
         const row = params?.row;
         if (!row || !row.id) return null;
@@ -158,13 +157,12 @@ const PharmacyPharmacists = () => {
                   licenseNumber: row?.licenseNumber || '',
                   phone: row?.phone || '',
                   specialty: row?.specialty || '',
-                }))
+                })
               }
             >
               <Edit />
             </IconButton>
-            <IconButton
-              onClick={() => onClick={() => handleDeletePharmacist(row.id)}>
+            <IconButton onClick={() => handleDeletePharmacist(row.id)}>
               <Delete />
             </IconButton>
           </>
