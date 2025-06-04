@@ -55,12 +55,15 @@ export async function addPharmacist(data) {
 export async function updatePharmacist(id, data) {
   try {
     const token = localStorage.getItem('token');
-    const response = await axios.put(`${BASE_URL}${API_ROUTES.USERS}/${id}`, {
-      name: data.name,
-      email: data.email,
-      licenseNumber: data.licenseNumber,
-      phone: data.phone,
-      specialty: data.specialty,
+    const response = await axios.put(`${BASE_URL}${API_ROUTES.PHARMACY}/${id}`, {
+      action: 'updatePharmacist',
+      payload: {
+        name: data.name,
+        email: data.email,
+        licenseNumber: data.licenseNumber,
+        phone: data.phone,
+        specialty: data.specialty,
+      },
     }, {
       headers: { Authorization: `Bearer ${token}` },
     });
@@ -74,7 +77,7 @@ export async function updatePharmacist(id, data) {
 export async function deletePharmacist(id) {
   try {
     const token = localStorage.getItem('token');
-    const response = await axios.delete(`${BASE_URL}${API_ROUTES.USERS}/${id}`, {
+    const response = await axios.delete(`${BASE_URL}${API_ROUTES.PHARMACY}/${id}?resource=pharmacist`, {
       headers: { Authorization: `Bearer ${token}` },
     });
     return response.data;
