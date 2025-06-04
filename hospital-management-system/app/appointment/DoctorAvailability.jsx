@@ -287,8 +287,7 @@ export default function DoctorAvailability({ doctors }) {
         </Button>
       </Box>
 
-
- 
+      <Box className={styles.filterContainer}>
         <FormControl className={styles.filterInput}>
           <InputLabel>Filter by Status</InputLabel>
           <Select
