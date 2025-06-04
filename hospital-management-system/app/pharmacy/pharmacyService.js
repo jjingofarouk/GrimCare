@@ -1,18 +1,12 @@
-import { PrismaClient } from '@prisma/client';
+import axios from 'axios';
+import api from '../api';
 
-const prisma = new PrismaClient();
+const { BASE_URL, API_ROUTES } = api;
 
 export async function getUsers() {
   try {
-    return await prisma.user.findMany({
-      where: { role: { in: ['PHARMACIST', 'ADMIN'] } },
-      select: {
-        id: true,
-        name: true,
-        email: true,
-        role: true,
-      },
-    });
+    const response = await axios.get(`${BASE_URL}${API_ROUTES.USERS}`);
+    return response.data.users.filter(user => ['PHARMACIST', 'ADMIN'].includes(user.role));
   } catch (error) {
     console.error('Error fetching users:', error);
     throw new Error('Failed to fetch users');
@@ -21,17 +15,8 @@ export async function getUsers() {
 
 export async function getPrescriptions() {
   try {
-    return await prisma.prescription.findMany({
-      where: { status: 'PENDING' },
-      include: {
-        patient: {
-          include: { user: { select: { name: true } } },
-        },
-        doctor: {
-          include: { user: { select: { name: true } } },
-        },
-      },
-    });
+    const response = await axios.get(`${BASE_URL}${API_ROUTES.PHARMACY}`);
+    return response.data.prescriptions.filter(p => p.status === 'PENDING');
   } catch (error) {
     console.error('Error fetching prescriptions:', error);
     throw new Error('Failed to fetch prescriptions');
@@ -40,20 +25,16 @@ export async function getPrescriptions() {
 
 export async function createPrescription(data) {
   try {
-    return await prisma.prescription.create({
-      data: {
-        patientId: data.patientId,
-        doctorId: data.doctorId,
+    const response = await axios.post(`${BASE_URL}${API_ROUTES.PHARMACY}`, {
+      action: 'createPrescription',
+      payload: {
+        patientId: parseInt(data.patientId),
+        doctorId: parseInt(data.doctorId),
         notes: data.notes,
         status: 'PENDING',
-        prescriptionDate: new Date(),
-      },
-      include: {
-        patient: {
-          include: { user: { select: { name: true } } },
-        },
       },
     });
+    return response.data;
   } catch (error) {
     console.error('Error creating prescription:', error);
     throw new Error('Failed to create prescription');
@@ -62,20 +43,13 @@ export async function createPrescription(data) {
 
 export async function createUser(data) {
   try {
-    return await prisma.user.create({
-      data: {
-        name: data.name,
-        email: data.email,
-        role: data.role || 'PHARMACIST',
-        password: data.password,
-      },
-      select: {
-        id: true,
-        name: true,
-        email: true,
-        role: true,
-      },
+    const response = await axios.post(`${BASE_URL}${API_ROUTES.USERS}`, {
+      name: data.name,
+      email: data.email,
+      role: data.role || 'PHARMACIST',
+      password: data.password,
     });
+    return response.data;
   } catch (error) {
     console.error('Error creating user:', error);
     throw new Error('Failed to create user');
@@ -84,40 +58,17 @@ export async function createUser(data) {
 
 export async function dispenseMedication(data) {
   try {
-    const medication = await prisma.medication.findUnique({
-      where: { id: data.medicationId },
-    });
-
-    if (!medication) {
-      throw new Error('Medication not found');
-    }
-
-    if (medication.stockQuantity < data.quantity) {
-      throw new Error('Insufficient stock');
-    }
-
-    const dispensingRecord = await prisma.dispensingRecord.create({
-      data: {
-        prescriptionId: data.prescriptionId,
-        medicationId: data.medicationId,
-        quantity: data.quantity,
+    const response = await axios.post(`${BASE_URL}${API_ROUTES.PHARMACY}`, {
+      action: 'dispenseMedication',
+      payload: {
+        prescriptionId: parseInt(data.prescriptionId),
+        medicationId: parseInt(data.medicationId),
+        quantity: parseInt(data.quantity),
         patientType: data.patientType,
-        dispensedById: data.dispensedById,
-        dispensedDate: new Date(),
+        dispensedById: parseInt(data.dispensedById),
       },
     });
-
-    await prisma.medication.update({
-      where: { id: data.medicationId },
-      data: { stockQuantity: { decrement: data.quantity } },
-    });
-
-    await prisma.prescription.update({
-      where: { id: data.prescriptionId },
-      data: { status: 'DISPENSED' },
-    });
-
-    return dispensingRecord;
+    return response.data;
   } catch (error) {
     console.error('Error dispensing medication:', error);
     throw new Error(`Failed to dispense medication: ${error.message}`);
@@ -126,19 +77,8 @@ export async function dispenseMedication(data) {
 
 export async function getInventory() {
   try {
-    return await prisma.medication.findMany({
-      select: {
-        id: true,
-        name: true,
-        stockQuantity: true,
-        minStockThreshold: true,
-        price: true,
-        expiryDate: true,
-        batchNumber: true,
-        barcode: true,
-        narcotic: true,
-      },
-    });
+    const response = await axios.get(`${BASE_URL}${API_ROUTES.PHARMACY}`);
+    return response.data.inventory;
   } catch (error) {
     console.error('Error fetching inventory:', error);
     throw new Error('Failed to fetch inventory');
@@ -147,18 +87,13 @@ export async function getInventory() {
 
 export async function checkDrugInteractions(medicationIds) {
   try {
-    return await prisma.drugInteraction.findMany({
-      where: {
-        OR: [
-          { medicationId1: { in: medicationIds } },
-          { medicationId2: { in: medicationIds } },
-        ],
-      },
-      include: {
-        medication1: { select: { name: true } },
-        medication2: { select: { name: true } },
-      },
-    });
+    const response = await axios.get(`${BASE_URL}${API_ROUTES.PHARMACY}`);
+    const interactions = response.data.inventory
+      .filter(item => medicationIds.includes(item.id))
+      .flatMap(item => item.drugInteractions1 || []).concat(
+        response.data.inventory.flatMap(item => item.drugInteractions2 || [])
+      );
+    return interactions;
   } catch (error) {
     console.error('Error checking drug interactions:', error);
     throw new Error('Failed to check drug interactions');
@@ -167,14 +102,15 @@ export async function checkDrugInteractions(medicationIds) {
 
 export async function createInvoice(data) {
   try {
-    return await prisma.invoice.create({
-      data: {
-        prescriptionId: data.prescriptionId,
-        totalAmount: data.totalAmount,
-        status: 'PENDING',
+    const response = await axios.post(`${BASE_URL}${API_ROUTES.PHARMACY}`, {
+      action: 'createInvoice',
+      payload: {
+        prescriptionId: parseInt(data.prescriptionId),
+        totalAmount: parseFloat(data.totalAmount),
         paymentMethod: data.paymentMethod,
       },
     });
+    return response.data;
   } catch (error) {
     console.error('Error creating invoice:', error);
     throw new Error('Failed to create invoice');
@@ -183,15 +119,16 @@ export async function createInvoice(data) {
 
 export async function processRefund(data) {
   try {
-    return await prisma.refund.create({
-      data: {
-        invoiceId: data.invoiceId,
+    const response = await axios.post(`${BASE_URL}${API_ROUTES.PHARMACY}`, {
+      action: 'processRefund',
+      payload: {
+        invoiceId: parseInt(data.invoiceId),
         reason: data.reason,
-        amount: data.amount,
-        processedById: data.processedById,
-        refundDate: new Date(),
+        amount: parseFloat(data.amount),
+        processedById: parseInt(data.processedById),
       },
     });
+    return response.data;
   } catch (error) {
     console.error('Error processing refund:', error);
     throw new Error('Failed to process refund');
@@ -200,23 +137,25 @@ export async function processRefund(data) {
 
 export async function addMedication(data) {
   try {
-    return await prisma.medication.create({
-      data: {
+    const response = await axios.post(`${BASE_URL}${API_ROUTES.PHARMACY}`, {
+      action: 'addMedication',
+      payload: {
         name: data.name,
         genericName: data.genericName,
         category: data.category,
         batchNumber: data.batchNumber,
         barcode: data.barcode,
         rfid: data.rfid,
-        stockQuantity: data.stockQuantity,
-        minStockThreshold: data.minStockThreshold || 10,
-        price: data.price,
-        expiryDate: new Date(data.expiryDate),
-        supplierId: data.supplierId,
-        formularyId: data.formularyId,
+        stockQuantity: parseInt(data.stockQuantity),
+        minStockThreshold: parseInt(data.minStockThreshold) || 10,
+        price: parseFloat(data.price),
+        expiryDate: data.expiryDate,
+        supplierId: data.supplierId ? parseInt(data.supplierId) : undefined,
+        formularyId: data.formularyId ? parseInt(data.formularyId) : undefined,
         narcotic: data.narcotic || false,
       },
     });
+    return response.data;
   } catch (error) {
     console.error('Error adding medication:', error);
     throw new Error('Failed to add medication');
@@ -225,10 +164,11 @@ export async function addMedication(data) {
 
 export async function updateStock(id, stockQuantity) {
   try {
-    return await prisma.medication.update({
-      where: { id },
-      data: { stockQuantity },
+    const response = await axios.put(`${BASE_URL}${API_ROUTES.PHARMACY}/${id}`, {
+      action: 'updateStock',
+      payload: { stockQuantity: parseInt(stockQuantity) },
     });
+    return response.data;
   } catch (error) {
     console.error('Error updating stock:', error);
     throw new Error('Failed to update stock');
@@ -237,9 +177,8 @@ export async function updateStock(id, stockQuantity) {
 
 export async function deleteMedication(id) {
   try {
-    return await prisma.medication.delete({
-      where: { id },
-    });
+    const response = await axios.delete(`${BASE_URL}${API_ROUTES.PHARMACY}/${id}`);
+    return response.data;
   } catch (error) {
     console.error('Error deleting medication:', error);
     throw new Error('Failed to delete medication');
@@ -248,17 +187,8 @@ export async function deleteMedication(id) {
 
 export async function getStockAlerts() {
   try {
-    return await prisma.medication.findMany({
-      where: {
-        stockQuantity: { lte: prisma.medication.fields.minStockThreshold },
-      },
-      select: {
-        id: true,
-        name: true,
-        stockQuantity: true,
-        minStockThreshold: true,
-      },
-    });
+    const response = await axios.get(`${BASE_URL}${API_ROUTES.PHARMACY}`);
+    return response.data.inventory.filter(item => item.stockQuantity <= item.minStockThreshold);
   } catch (error) {
     console.error('Error fetching stock alerts:', error);
     throw new Error('Failed to fetch stock alerts');
@@ -267,15 +197,9 @@ export async function getStockAlerts() {
 
 export async function scanBarcode(barcode) {
   try {
-    return await prisma.medication.findFirst({
-      where: { barcode },
-      select: {
-        id: true,
-        name: true,
-        stockQuantity: true,
-        price: true,
-      },
-    });
+    const response = await axios.get(`${BASE_URL}${API_ROUTES.PHARMACY}`);
+    const medication = response.data.inventory.find(item => item.barcode === barcode);
+    return medication || null;
   } catch (error) {
     console.error('Error scanning barcode:', error);
     throw new Error('Failed to scan barcode');
@@ -284,13 +208,8 @@ export async function scanBarcode(barcode) {
 
 export async function getFormularies() {
   try {
-    return await prisma.formulary.findMany({
-      select: {
-        id: true,
-        name: true,
-        description: true,
-      },
-    });
+    const response = await axios.get(`${BASE_URL}${API_ROUTES.PHARMACY}`);
+    return response.data.formularies;
   } catch (error) {
     console.error('Error fetching formularies:', error);
     throw new Error('Failed to fetch formularies');
@@ -299,12 +218,14 @@ export async function getFormularies() {
 
 export async function addFormulary(data) {
   try {
-    return await prisma.formulary.create({
-      data: {
+    const response = await axios.post(`${BASE_URL}${API_ROUTES.PHARMACY}`, {
+      action: 'addFormulary',
+      payload: {
         name: data.name,
         description: data.description,
       },
     });
+    return response.data;
   } catch (error) {
     console.error('Error adding formulary:', error);
     throw new Error('Failed to add formulary');
@@ -313,14 +234,8 @@ export async function addFormulary(data) {
 
 export async function getOrders() {
   try {
-    return await prisma.purchaseOrder.findMany({
-      include: {
-        supplier: { select: { name: true } },
-        items: {
-          include: { medication: { select: { name: true } } },
-        },
-      },
-    });
+    const response = await axios.get(`${BASE_URL}${API_ROUTES.PHARMACY}`);
+    return response.data.orders;
   } catch (error) {
     console.error('Error fetching orders:', error);
     throw new Error('Failed to fetch orders');
@@ -329,21 +244,18 @@ export async function getOrders() {
 
 export async function createOrder(data) {
   try {
-    return await prisma.purchaseOrder.create({
-      data: {
-        supplierId: data.supplierId,
-        orderDate: new Date(),
-        status: 'PENDING',
-        totalAmount: data.totalAmount,
-        items: {
-          create: data.items.map(item => ({
-            medicationId: item.medicationId,
-            quantity: item.quantity,
-            unitPrice: item.unitPrice,
-          })),
-        },
+    const response = await axios.post(`${BASE_URL}${API_ROUTES.PHARMACY}`, {
+      action: 'createOrder',
+      payload: {
+        supplierId: parseInt(data.supplierId),
+        items: data.items.map(item => ({
+          medicationId: parseInt(item.medicationId),
+          quantity: parseInt(item.quantity),
+          unitPrice: parseFloat(item.unitPrice),
+        })),
       },
     });
+    return response.data;
   } catch (error) {
     console.error('Error creating order:', error);
     throw new Error('Failed to create order');
@@ -352,10 +264,11 @@ export async function createOrder(data) {
 
 export async function updateOrderStatus(id, status) {
   try {
-    return await prisma.purchaseOrder.update({
-      where: { id },
-      data: { status },
+    const response = await axios.put(`${BASE_URL}${API_ROUTES.PHARMACY}/${id}`, {
+      action: 'updateOrderStatus',
+      payload: { status },
     });
+    return response.data;
   } catch (error) {
     console.error('Error updating order status:', error);
     throw new Error('Failed to update order status');
@@ -364,15 +277,8 @@ export async function updateOrderStatus(id, status) {
 
 export async function getSuppliers() {
   try {
-    return await prisma.supplier.findMany({
-      select: {
-        id: true,
-        name: true,
-        contact: true,
-        email: true,
-        address: true,
-      },
-    });
+    const response = await axios.get(`${BASE_URL}${API_ROUTES.PHARMACY}`);
+    return response.data.suppliers;
   } catch (error) {
     console.error('Error fetching suppliers:', error);
     throw new Error('Failed to fetch suppliers');
@@ -381,14 +287,16 @@ export async function getSuppliers() {
 
 export async function addSupplier(data) {
   try {
-    return await prisma.supplier.create({
-      data: {
+    const response = await axios.post(`${BASE_URL}${API_ROUTES.PHARMACY}`, {
+      action: 'addSupplier',
+      payload: {
         name: data.name,
         contact: data.contact,
         email: data.email,
         address: data.address,
       },
     });
+    return response.data;
   } catch (error) {
     console.error('Error adding supplier:', error);
     throw new Error('Failed to add supplier');
@@ -397,15 +305,16 @@ export async function addSupplier(data) {
 
 export async function updateSupplier(id, data) {
   try {
-    return await prisma.supplier.update({
-      where: { id },
-      data: {
+    const response = await axios.put(`${BASE_URL}${API_ROUTES.PHARMACY}/${id}`, {
+      action: 'updateSupplier',
+      payload: {
         name: data.name,
         contact: data.contact,
         email: data.email,
         address: data.address,
       },
     });
+    return response.data;
   } catch (error) {
     console.error('Error updating supplier:', error);
     throw new Error('Failed to update supplier');
@@ -414,9 +323,8 @@ export async function updateSupplier(id, data) {
 
 export async function deleteSupplier(id) {
   try {
-    return await prisma.supplier.delete({
-      where: { id },
-    });
+    const response = await axios.delete(`${BASE_URL}${API_ROUTES.PHARMACY}/${id}`);
+    return response.data;
   } catch (error) {
     console.error('Error deleting supplier:', error);
     throw new Error('Failed to delete supplier');
@@ -425,16 +333,8 @@ export async function deleteSupplier(id) {
 
 export async function trackNarcotic(medicationId) {
   try {
-    return await prisma.dispensingRecord.findMany({
-      where: {
-        medicationId,
-        medication: { narcotic: true },
-      },
-      include: {
-        medication: { select: { name: true } },
-        dispensedBy: { select: { name: true } },
-      },
-    });
+    const response = await axios.get(`${BASE_URL}${API_ROUTES.PHARMACY}/${medicationId}`);
+    return response.data.dispensingRecords || [];
   } catch (error) {
     console.error('Error tracking narcotic:', error);
     throw new Error('Failed to track narcotic');
@@ -443,24 +343,27 @@ export async function trackNarcotic(medicationId) {
 
 export async function generateStockReport(timeRange) {
   try {
-    const where = timeRange
-      ? {
-          updatedAt: {
-            gte: new Date(timeRange.start),
-            lte: new Date(timeRange.end),
-          },
-        }
-      : {};
-
-    return await prisma.medication.findMany({
-      where,
-      select: {
-        name: true,
-        stockQuantity: true,
-        minStockThreshold: true,
-        expiryDate: true,
-      },
-    });
+    const response = await axios.get(`${BASE_URL}${API_ROUTES.PHARMACY}`);
+    const inventory = response.data.inventory;
+    if (timeRange) {
+      return inventory
+        .filter(item => {
+          const updatedAt = new Date(item.updatedAt);
+          return updatedAt >= new Date(timeRange.start) && updatedAt <= new Date(timeRange.end);
+        })
+        .map(item => ({
+          name: item.name,
+          stockQuantity: item.stockQuantity,
+          minStockThreshold: item.minStockThreshold,
+          expiryDate: item.expiryDate,
+        }));
+    }
+    return inventory.map(item => ({
+      name: item.name,
+      stockQuantity: item.stockQuantity,
+      minStockThreshold: item.minStockThreshold,
+      expiryDate: item.expiryDate,
+    }));
   } catch (error) {
     console.error('Error generating stock report:', error);
     throw new Error('Failed to generate stock report');
@@ -469,22 +372,17 @@ export async function generateStockReport(timeRange) {
 
 export async function generateSalesReport(timeRange) {
   try {
-    const where = timeRange
-      ? {
-          dispensedDate: {
-            gte: new Date(timeRange.start),
-            lte: new Date(timeRange.end),
-          },
-        }
-      : {};
-
-    return await prisma.dispensingRecord.findMany({
-      where,
-      include: {
-        medication: { select: { name: true, price: true } },
-        prescription: { include: { patient: { include: { user: { select: { name: true } } } } } },
-      },
-    });
+    const response = await axios.get(`${BASE_URL}${API_ROUTES.PHARMACY}`);
+    const dispensingRecords = response.data.prescriptions
+      .filter(p => p.dispensingRecords.length > 0)
+      .flatMap(p => p.dispensingRecords);
+    if (timeRange) {
+      return dispensingRecords.filter(record => {
+        const dispensedDate = new Date(record.dispensedDate);
+        return dispensedDate >= new Date(timeRange.start) && dispensedDate <= new Date(timeRange.end);
+      });
+    }
+    return dispensingRecords;
   } catch (error) {
     console.error('Error generating sales report:', error);
     throw new Error('Failed to generate sales report');
