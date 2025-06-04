@@ -104,6 +104,37 @@ export async function PUT(request, { params }) {
         return NextResponse.json(prescription);
       }
 
+      case 'updatePharmacist': {
+        const { name, email, licenseNumber, phone, specialty } = payload;
+        if (!name || !email || !licenseNumber) {
+          return NextResponse.json({ error: 'Missing required fields: name, email, licenseNumber' }, { status: 400 });
+        }
+        const pharmacist = await prisma.user.update({
+          where: { id: parseInt(id) },
+          data: {
+            name,
+            email,
+            doctor: {
+              update: {
+                licenseNumber,
+                phone,
+                specialty: specialty || 'Pharmacy',
+              },
+            },
+          },
+          include: {
+            doctor: { select: { licenseNumber: true, phone: true, specialty: true } },
+          },
+        });
+        return NextResponse.json({
+          id: pharmacist.id,
+          user: { name: pharmacist.name, email: pharmacist.email },
+          licenseNumber: pharmacist.doctor?.licenseNumber || '',
+          phone: pharmacist.doctor?.phone || '',
+          specialty: pharmacist.doctor?.specialty || '',
+        });
+      }
+
       default:
         return NextResponse.json({ error: 'Invalid action' }, { status: 400 });
     }
