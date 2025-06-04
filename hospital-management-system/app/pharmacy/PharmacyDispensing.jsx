@@ -1,6 +1,6 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Box, Typography, TextField, Button, Select, MenuItem } from '@mui/material';
-import { dispenseMedication } from './pharmacyService';
+import { dispenseMedication, getPrescriptions, getInventory, getUsers } from './pharmacyService';
 import styles from './PharmacyDispensing.module.css';
 
 const PharmacyDispensing = () => {
@@ -11,11 +11,40 @@ const PharmacyDispensing = () => {
     patientType: 'OUTPATIENT',
     dispensedById: '',
   });
+  const [prescriptions, setPrescriptions] = useState([]);
+  const [medications, setMedications] = useState([]);
+  const [users, setUsers] = useState([]);
   const [error, setError] = useState(null);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const [prescriptionData, medicationData, userData] = await Promise.all([
+          getPrescriptions(),
+          getInventory(),
+          getUsers(),
+        ]);
+        setPrescriptions(prescriptionData.filter(p => p.status === 'PENDING'));
+        setMedications(medicationData);
+        setUsers(userData.filter(u => u.role === 'PHARMACIST' || u.role === 'ADMIN'));
+        if (prescriptionData.length > 0) {
+          setDispensingData(prev => ({ ...prev, prescriptionId: prescriptionData[0].id }));
+        }
+        if (medicationData.length > 0) {
+          setDispensingData(prev => ({ ...prev, medicationId: medicationData[0].id }));
+        }
+        if (userData.length > 0) {
+          setDispensingData(prev => ({ ...prev, dispensedById: userData[0].id }));
+        }
+      } catch (err) {
+        setError('Failed to fetch data: ' + err.message);
+      }
+    };
+    fetchData();
+  }, []);
 
   const handleDispense = async () => {
     try {
-      // Validate inputs
       if (
         !dispensingData.prescriptionId ||
         !dispensingData.medicationId ||
@@ -26,7 +55,6 @@ const PharmacyDispensing = () => {
         return;
       }
 
-      // Convert string IDs and quantity to integers
       const payload = {
         prescriptionId: parseInt(dispensingData.prescriptionId),
         medicationId: parseInt(dispensingData.medicationId),
@@ -37,11 +65,11 @@ const PharmacyDispensing = () => {
 
       await dispenseMedication(payload);
       setDispensingData({
-        prescriptionId: '',
-        medicationId: '',
+        prescriptionId: prescriptions.length > 0 ? prescriptions[0].id : '',
+        medicationId: medications.length > 0 ? medications[0].id : '',
         quantity: 0,
         patientType: 'OUTPATIENT',
-        dispensedById: '',
+        dispensedById: users.length > 0 ? users[0].id : '',
       });
       setError(null);
     } catch (err) {
@@ -64,24 +92,36 @@ const PharmacyDispensing = () => {
         </Box>
       )}
       <Box className={styles.form}>
-        <TextField
-          label="Prescription ID"
+        <Select
           name="prescriptionId"
           value={dispensingData.prescriptionId}
           onChange={handleChange}
           fullWidth
-          type="number"
           margin="normal"
-        />
-        <TextField
-          label="Medication ID"
+          displayEmpty
+        >
+          <MenuItem value="" disabled>Select Prescription</MenuItem>
+          {prescriptions.map(prescription => (
+            <MenuItem key={prescription.id} value={prescription.id}>
+              {`ID: ${prescription.id} - Patient: ${prescription.patient?.user?.name || 'Unknown'}`}
+            </MenuItem>
+          ))}
+        </Select>
+        <Select
           name="medicationId"
           value={dispensingData.medicationId}
           onChange={handleChange}
           fullWidth
-          type="number"
           margin="normal"
-        />
+          displayEmpty
+        >
+          <MenuItem value="" disabled>Select Medication</MenuItem>
+          {medications.map(medication => (
+            <MenuItem key={medication.id} value={medication.id}>
+              {`${medication.name} (Stock: ${medication.stockQuantity})`}
+            </MenuItem>
+          ))}
+        </Select>
         <TextField
           label="Quantity"
           name="quantity"
@@ -101,15 +141,21 @@ const PharmacyDispensing = () => {
           <MenuItem value="INPATIENT">Inpatient</MenuItem>
           <MenuItem value="OUTPATIENT">Outpatient</MenuItem>
         </Select>
-        <TextField
-          label="Dispensed By ID"
+        <Select
           name="dispensedById"
           value={dispensingData.dispensedById}
           onChange={handleChange}
           fullWidth
-          type="number"
           margin="normal"
-        />
+          displayEmpty
+        >
+          <MenuItem value="" disabled>Select Pharmacist</MenuItem>
+          {users.map(user => (
+            <MenuItem key={user.id} value={user.id}>
+              {user.name}
+            </MenuItem>
+          ))}
+        </Select>
         <Button
           variant="contained"
           onClick={handleDispense}
