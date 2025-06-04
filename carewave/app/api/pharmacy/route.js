@@ -1,6 +1,7 @@
 import { PrismaClient } from '@prisma/client';
 import { NextResponse } from 'next/server';
 import jwt from 'jsonwebtoken';
+import bcrypt from 'bcrypt';
 
 const prisma = new PrismaClient();
 
@@ -49,8 +50,25 @@ export async function GET(request) {
         const formularyData = await prisma.formulary.findMany();
         return NextResponse.json({ formularies: formularyData });
 
+      case 'pharmacists':
+        const pharmacistData = await prisma.user.findMany({
+          where: { role: 'PHARMACIST' },
+          include: {
+            doctor: { select: { licenseNumber: true, phone: true, specialty: true } },
+          },
+        });
+        return NextResponse.json({
+          pharmacists: pharmacistData.map(u => ({
+            id: u.id,
+            user: { name: u.name, email: u.email },
+            licenseNumber: u.doctor?.licenseNumber || '',
+            phone: u.doctor?.phone || '',
+            specialty: u.doctor?.specialty || '',
+          })),
+        });
+
       default:
-        const [prescriptionData, inventoryData, supplierData, formularyData] = await Promise.all([
+        const [prescriptionData, inventoryData, supplierData, formularyData, pharmacistData] = await Promise.all([
           prisma.prescription.findMany({
             include: {
               patient: { include: { user: { select: { id: true, name: true, email: true } } } },
@@ -64,12 +82,25 @@ export async function GET(request) {
           }),
           prisma.supplier.findMany(),
           prisma.formulary.findMany(),
+          prisma.user.findMany({
+            where: { role: 'PHARMACIST' },
+            include: {
+              doctor: { select: { licenseNumber: true, phone: true, specialty: true } },
+            },
+          }),
         ]);
         return NextResponse.json({
           prescriptions: prescriptionData,
           inventory: inventoryData,
           suppliers: supplierData,
           formularies: formularyData,
+          pharmacists: pharmacistData.map(u => ({
+            id: u.id,
+            user: { name: u.name, email: u.email },
+            licenseNumber: u.doctor?.licenseNumber || '',
+            phone: u.doctor?.phone || '',
+            specialty: u.doctor?.specialty || '',
+          })),
         });
     }
   } catch (error) {
@@ -172,8 +203,12 @@ export async function POST(request) {
           where: { id: parseInt(medicationId) },
           data: { stockQuantity: { decrement: parseInt(quantity) } },
         });
+        const totalDispensed = await prisma.dispensingRecord.aggregate({
+          _sum: { quantity: true },
+          where: { prescriptionId: parseInt(prescriptionId), medicationId: parseInt(medicationId) },
+        });
         const allItemsDispensed = prescriptionData.items.every(i => {
-          const dispensed = dispensingRecord.quantity;
+          const dispensed = totalDispensed._sum.quantity || 0;
           return dispensed >= i.quantity;
         });
         if (allItemsDispensed) {
@@ -232,6 +267,40 @@ export async function POST(request) {
           data: { name, contact, email, address },
         });
         return NextResponse.json(supplierData, { status: 201 });
+      }
+
+      case 'addPharmacist': {
+        const { name, email, password, licenseNumber, phone, specialty } = payload;
+        if (!name || !email || !password || !licenseNumber) {
+          return NextResponse.json({ error: 'Missing required fields: name, email, password, or licenseNumber' }, { status: 400 });
+        }
+        const hashedPassword = await bcrypt.hash(password, 10);
+        const pharmacistData = await prisma.user.create({
+          data: {
+            name,
+            email,
+            role: 'PHARMACIST',
+            password: hashedPassword,
+            doctor: {
+              create: {
+                doctorId: `PHARM-${Date.now()}`,
+                licenseNumber,
+                phone,
+                specialty: specialty || 'Pharmacy',
+              },
+            },
+          },
+          include: {
+            doctor: { select: { licenseNumber: true, phone: true, specialty: true } },
+          },
+        });
+        return NextResponse.json({
+          id: pharmacistData.id,
+          user: { name: pharmacistData.name, email: pharmacistData.email },
+          licenseNumber: pharmacistData.doctor?.licenseNumber || '',
+          phone: pharmacistData.doctor?.phone || '',
+          specialty: pharmacistData.doctor?.specialty || '',
+        }, { status: 201 });
       }
 
       default:
