@@ -1,3 +1,6 @@
+// pharmacy/PharmacyPage.jsx
+// Main pharmacy module dashboard with all features
+
 "use client";
 
 import React, { useState } from 'react';
@@ -6,8 +9,12 @@ import PharmacyInventory from './PharmacyInventory';
 import PharmacyOrders from './PharmacyOrders';
 import PharmacySuppliers from './PharmacySuppliers';
 import PharmacyReports from './PharmacyReports';
-import PharmacySettings from './PharmacySettings';
 import PharmacyForm from './PharmacyForm';
+import PharmacyPrescriptions from './PharmacyPrescriptions';
+import PharmacyDispensing from './PharmacyDispensing';
+import PharmacyBilling from './PharmacyBilling';
+import PharmacyFormulary from './PharmacyFormulary';
+import PharmacyNarcotics from './PharmacyNarcotics';
 import styles from './PharmacyPage.module.css';
 
 const PharmacyPage = () => {
@@ -32,29 +39,37 @@ const PharmacyPage = () => {
             className={styles.tabs}
             sx={{
               '& .MuiTabs-flexContainer': {
-                flexWrap: 'nowrap', // Prevent tabs from wrapping
+                flexWrap: 'nowrap',
               },
               '& .MuiTab-root': {
-                minWidth: { xs: 100, sm: 120 }, // Smaller tabs on mobile
-                fontSize: { xs: '0.8rem', sm: '0.875rem' }, // Responsive font size
+                minWidth: { xs: 100, sm: 120 },
+                fontSize: { xs: '0.8rem', sm: '0.875rem' },
               },
             }}
           >
             <Tab label="Inventory" />
+            <Tab label="Prescriptions" />
+            <Tab label="Dispensing" />
             <Tab label="Orders" />
             <Tab label="Suppliers" />
+            <Tab label="Billing" />
+            <Tab label="Formulary" />
+            <Tab label="Narcotics" />
             <Tab label="Reports" />
-            <Tab label="Settings" />
             <Tab label="Add Medication" />
           </Tabs>
         </Box>
         <Box className={styles.tabContent}>
           {activeTab === 0 && <PharmacyInventory />}
-          {activeTab === 1 && <PharmacyOrders />}
-          {activeTab === 2 && <PharmacySuppliers />}
-          {activeTab === 3 && <PharmacyReports />}
-          {activeTab === 4 && <PharmacySettings />}
-          {activeTab === 5 && <PharmacyForm />}
+          {activeTab === 1 && <PharmacyPrescriptions />}
+          {activeTab === 2 && <PharmacyDispensing />}
+          {activeTab === 3 && <PharmacyOrders />}
+          {activeTab === 4 && <PharmacySuppliers />}
+          {activeTab === 5 && <PharmacyBilling />}
+          {activeTab === 6 && <PharmacyFormulary />}
+          {activeTab === 7 && <PharmacyNarcotics />}
+          {activeTab === 8 && <PharmacyReports />}
+          {activeTab === 9 && <PharmacyForm />}
         </Box>
       </Paper>
     </Container>
