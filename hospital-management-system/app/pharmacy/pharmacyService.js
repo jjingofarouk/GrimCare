@@ -1,79 +1,223 @@
 // pharmacy/pharmacyService.js
+// Comprehensive pharmacy service with backend integration
+
+import { PrismaClient } from '@prisma/client';
+import api from '../api';
+
+const prisma = new PrismaClient();
+
 export const getInventory = async () => {
-  // Simulate API call
-  return [
-    { id: 1, name: 'Paracetamol', category: 'Analgesics', stock: 500, price: 5.99, expiry: '2026-05-01' },
-    { id: 2, name: 'Ibuprofen', category: 'Analgesics', stock: 300, price: 7.99, expiry: '2025-12-01' },
-  ];
+  return await prisma.medication.findMany({
+    include: { supplier: true, formulary: true },
+  });
 };
 
-export const updateStock = async (id, newStock) => {
-  // Simulate API call
-  console.log(`Updating stock for medication ${id} to ${newStock}`);
+export const addMedication = async (data) => {
+  return await prisma.medication.create({ data });
+};
+
+export const updateStock = async (id, stockQuantity) => {
+  return await prisma.medication.update({
+    where: { id },
+    data: { stockQuantity },
+  });
 };
 
 export const deleteMedication = async (id) => {
-  // Simulate API call
-  console.log(`Deleting medication ${id}`);
+  return await prisma.medication.delete({ where: { id } });
+};
+
+export const getPrescriptions = async () => {
+  return await prisma.prescription.findMany({
+    include: { patient: true, doctor: true, items: { include: { medication: true } } },
+  });
+};
+
+export const createPrescription = async (data) => {
+  return await prisma.prescription.create({
+    data: {
+      ...data,
+      items: { create: data.items },
+    },
+    include: { items: true },
+  });
+};
+
+export const updatePrescriptionStatus = async (id, status) => {
+  return await prisma.prescription.update({
+    where: { id },
+    data: { status },
+  });
 };
 
 export const getOrders = async () => {
-  // Simulate API call
-  return [
-    { id: 1, medication: 'Paracetamol', quantity: 1000, supplier: 'MediCorp', date: '2025-05-20', status: 'Pending' },
-    { id: 2, medication: 'Ibuprofen', quantity: 500, supplier: 'PharmaInc', date: '2025-05-15', status: 'Delivered' },
-  ];
+  return await prisma.purchaseOrder.findMany({
+    include: { supplier: true, items: { include: { medication: true } } },
+  });
+};
+
+export const createOrder = async (data) => {
+  return await prisma.purchaseOrder.create({
+    data: {
+      ...data,
+      items: { create: data.items },
+    },
+    include: { items: true },
+  });
 };
 
 export const updateOrderStatus = async (id, status) => {
-  // Simulate API call
-  console.log(`Updating order ${id} status to ${status}`);
-};
-
-export const createOrder = async (order) => {
-  // Simulate API call
-  console.log('Creating new order:', order);
+  return await prisma.purchaseOrder.update({
+    where: { id },
+    data: { status },
+  });
 };
 
 export const getSuppliers = async () => {
-  // Simulate API call
-  return [
-    { id: 1, name: 'MediCorp', contact: '123-456-7890', email: 'contact@medicorp.com', address: '123 Medi St' },
-    { id: 2, name: 'PharmaInc', contact: '987-654-3210', email: 'info@pharmainc.com', address: '456 Pharma Rd' },
-  ];
+  return await prisma.supplier.findMany();
 };
 
-export const addSupplier = async (supplier) => {
-  // Simulate API call
-  console.log('Adding supplier:', supplier);
+export const addSupplier = async (data) => {
+  return await prisma.supplier.create({ data });
 };
 
 export const updateSupplier = async (id, data) => {
-  // Simulate API call
-  console.log(`Updating supplier ${id}:`, data);
+  return await prisma.supplier.update({
+    where: { id },
+    data,
+  });
 };
 
 export const deleteSupplier = async (id) => {
-  // Simulate API call
-  console.log(`Deleting supplier ${id}`);
+  return await prisma.supplier.delete({ where: { id } });
 };
 
 export const generateStockReport = async (timeRange) => {
-  // Simulate API call
-  console.log(`Generating stock report for ${timeRange}`);
+  const dateFilter = {
+    gte: new Date(new Date().setMonth(new Date().getMonth() - (timeRange === 'monthly' ? 1 : timeRange === 'weekly' ? 0.25 : 12))),
+  };
+  return await prisma.medication.findMany({
+    where: { updatedAt: dateFilter },
+    select: { name: true, stockQuantity: true, expiryDate: true },
+  });
 };
 
 export const generateSalesReport = async (timeRange) => {
-  // Simulate API call
-  console.log(`Generating sales report for ${timeRange}`);
+  const dateFilter = {
+    gte: new Date(new Date().setMonth(new Date().getMonth() - (timeRange === 'monthly' ? 1 : timeRange === 'weekly' ? 0.25 : 12))),
+  };
+  return await prisma.dispensingRecord.findMany({
+    where: { dispensedDate: dateFilter },
+    include: { medication: true },
+  });
 };
 
-export const updateSettings = async (settings) => {
-  // Simulate API call
-  console.log('Updating settings:', settings);
+export const dispenseMedication = async (data) => {
+  const { prescriptionId, medicationId, quantity, patientType, dispensedById } = data;
+  const medication = await prisma.medication.findUnique({ where: { id: medicationId } });
+  if (medication.stockQuantity < quantity) throw new Error('Insufficient stock');
+  
+  const dispensingRecord = await prisma.dispensingRecord.create({
+    data: {
+      prescriptionId,
+      medicationId,
+      quantity,
+      patientType,
+      dispensedById,
+    },
+  });
+
+  await prisma.medication.update({
+    where: { id: medicationId },
+    data: { stockQuantity: medication.stockQuantity - quantity },
+  });
+
+  return dispensingRecord;
 };
 
-export const addMedication = async (medication) => {
-  // Simulate API call
-  console.log('Adding medication:', medication);
+export const processRefund = async (data) => {
+  const { invoiceId, reason, amount, processedById } = data;
+  return await prisma.refund.create({
+    data: {
+      invoiceId,
+      reason,
+      amount,
+      processedById,
+    },
+  });
+};
+
+export const createInvoice = async (data) => {
+  return await prisma.invoice.create({
+    data: {
+      prescriptionId: data.prescriptionId,
+      totalAmount: data.totalAmount,
+      status: data.status || 'PENDING',
+      paymentMethod: data.paymentMethod,
+      transaction: data.transactionId ? { connect: { id: data.transactionId } } : undefined,
+    },
+  });
+};
+
+export const getStockAlerts = async () => {
+  return await prisma.medication.findMany({
+    where: { stockQuantity: { lte: prisma.medication.fields.minStockThreshold } },
+  });
+};
+
+export const addStockAdjustment = async (data) => {
+  const { medicationId, quantity, reason, adjustedById } = data;
+  const medication = await prisma.medication.findUnique({ where: { id: medicationId } });
+  
+  const adjustment = await prisma.stockAdjustment.create({
+    data: {
+      medicationId,
+      quantity,
+      reason,
+      adjustedById,
+    },
+  });
+
+  await prisma.medication.update({
+    where: { id: medicationId },
+    data: { stockQuantity: medication.stockQuantity + quantity },
+  });
+
+  return adjustment;
+};
+
+export const getFormularies = async () => {
+  return await prisma.formulary.findMany({
+    include: { medications: true },
+  });
+};
+
+export const addFormulary = async (data) => {
+  return await prisma.formulary.create({ data });
+};
+
+export const checkDrugInteractions = async (medicationIds) => {
+  return await prisma.drugInteraction.findMany({
+    where: {
+      OR: [
+        { medicationId1: { in: medicationIds } },
+        { medicationId2: { in: medicationIds } },
+      ],
+    },
+    include: { medication1: true, medication2: true },
+  });
+};
+
+export const trackNarcotic = async (medicationId) => {
+  return await prisma.medication.findFirst({
+    where: { id: medicationId, narcotic: true },
+    include: { dispensingRecords: true, stockAdjustments: true },
+  });
+};
+
+export const scanBarcode = async (barcode) => {
+  return await prisma.medication.findFirst({
+    where: { barcode },
+    include: { supplier: true, formulary: true },
+  });
 };
