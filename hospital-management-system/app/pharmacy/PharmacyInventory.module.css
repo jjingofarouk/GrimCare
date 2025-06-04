@@ -25,6 +25,25 @@
   overflow: auto;
 }
 
+/* Style MUI components by wrapping them in local class */
+.container .MuiTypography-h6 {
+  margin: 0 0 8px 0;
+  font-size: 1.2rem;
+}
+
+.container .MuiAlert-root {
+  padding: 4px 8px;
+  margin-bottom: 8px;
+}
+
+.container .MuiTextField-root {
+  margin: 0;
+}
+
+.container .MuiIconButton-root {
+  padding: 4px;
+}
+
 /* Responsive adjustments for smaller screens */
 @media (max-width: 768px) {
   .container {
@@ -49,25 +68,18 @@
       padding: 4px;
     }
   }
-}
 
-/* Ensure MUI components respect our minimal padding */
-:global(.MuiTypography-h6) {
-  margin: 0 0 8px 0;
-  font-size: 1.2rem;
-}
+  .container .MuiTypography-h6 {
+    font-size: 1.1rem;
+  }
 
-:global(.MuiAlert-root) {
-  padding: 4px 8px;
-  margin-bottom: 8px;
-}
+  .container .MuiTextField-root {
+    font-size: 14px;
+  }
 
-:global(.MuiTextField-root) {
-  margin: 0;
-}
-
-:global(.MuiIconButton-root) {
-  padding: 4px;
+  .container .MuiIconButton-root {
+    padding: 3px;
+  }
 }
 
 /* Handle very small screens */
@@ -76,15 +88,15 @@
     padding: 2px;
   }
 
-  :global(.MuiTypography-h6) {
+  .container .MuiTypography-h6 {
     font-size: 1rem;
   }
 
-  :global(.MuiTextField-root) {
-    font-size: 14px;
+  .container .MuiTextField-root {
+    font-size: 13px;
   }
 
-  :global(.MuiIconButton-root) {
+  .container .MuiIconButton-root {
     padding: 2px;
   }
 }
