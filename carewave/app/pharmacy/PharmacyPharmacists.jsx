@@ -34,12 +34,9 @@ const PharmacyPharmacists = () => {
   };
 
   const validatePharmacist = () => {
-    const requiredFields = ['name', 'email', 'password', 'licenseNumber'];
-    for (const field of requiredFields) {
-      if (!newPharmacist[field]) {
-        setError(`Missing required field: ${field}`);
-        return false;
-      }
+    if (!newPharmacist.name || !newPharmacist.email || !newPharmacist.password || !newPharmacist.licenseNumber) {
+      setError('Missing required fields: name, email, password, licenseNumber');
+      return false;
     }
     if (!/\S+@\S+\.\S+/.test(newPharmacist.email)) {
       setError('Invalid email format');
@@ -71,7 +68,13 @@ const PharmacyPharmacists = () => {
 
   const handleUpdatePharmacist = async (id, data) => {
     try {
-      await updatePharmacist(id, data);
+      await updatePharmacist(id, {
+        name: data.name,
+        email: data.email,
+        licenseNumber: data.licenseNumber,
+        phone: data.phone,
+        specialty: data.specialty,
+      });
       await fetchPharmacists();
       setSuccess('Pharmacist updated successfully');
       setError(null);
@@ -95,54 +98,56 @@ const PharmacyPharmacists = () => {
 
   const columns = [
     { field: 'id', headerName: 'ID', width: 90 },
-    { 
-      field: 'name', 
-      headerName: 'Name', 
-      width: 200, 
-      editable: true,
-      valueGetter: ({ row }) => row.user.name,
+    {
+      field: 'name',
+      headerName: 'Name',
+      width: 200,
+      valueGetter: ({ row }) => row.user?.name || '',
     },
-    { 
-      field: 'email', 
-      headerName: 'Email', 
-      width: 200, 
-      editable: true,
-      valueGetter: ({ row }) => row.user.email,
+    {
+      field: 'email',
+      headerName: 'Email',
+      width: 200,
+      valueGetter: ({ row }) => row.user?.email || '',
     },
-    { 
-      field: 'licenseNumber', 
-      headerName: 'License Number', 
-      width: 150, 
-      editable: true,
+    {
+      field: 'licenseNumber',
+      headerName: 'License Number',
+      width: 150,
+      valueGetter: ({ row }) => row.licenseNumber || '',
     },
-    { 
-      field: 'phone', 
-      headerName: 'Phone', 
-      width: 150, 
-      editable: true,
+    {
+      field: 'phone',
+      headerName: 'Phone',
+      width: 150,
+      valueGetter: ({ row }) => row.phone || '',
     },
-    { 
-      field: 'specialty', 
-      headerName: 'Specialty', 
-      width: 150, 
-      editable: true,
+    {
+      field: 'specialty',
+      headerName: 'Specialty',
+      width: 150,
+      valueGetter: ({ row }) => row.specialty || '',
     },
     {
       field: 'actions',
       headerName: 'Actions',
       width: 150,
-      renderCell: (params) => (
+      renderCell: ({ row }) => (
         <>
-          <IconButton onClick={() => handleUpdatePharmacist(params.row.id, {
-            name: params.row.user.name,
-            email: params.row.user.email,
-            licenseNumber: params.row.licenseNumber,
-            phone: params.row.phone,
-            specialty: params.row.specialty,
-          })}>
+          <IconButton
+            onClick={() =>
+              handleUpdatePharmacist(row.id, {
+                name: row.user?.name || '',
+                email: row.user?.email || '',
+                licenseNumber: row.licenseNumber || '',
+                phone: row.phone || '',
+                specialty: row.specialty || '',
+              })
+            }
+          >
             <Edit />
           </IconButton>
-          <IconButton onClick={() => handleDeletePharmacist(params.row.id)}>
+          <IconButton onClick={() => handleDeletePharmacist(row.id)}>
             <Delete />
           </IconButton>
         </>
@@ -150,9 +155,10 @@ const PharmacyPharmacists = () => {
     },
   ];
 
-  const filteredPharmacists = pharmacists.filter(pharmacist =>
-    pharmacist.user.name.toLowerCase().includes(search.toLowerCase()) ||
-    pharmacist.user.email.toLowerCase().includes(search.toLowerCase())
+  const filteredPharmacists = pharmacists.filter(
+    (pharmacist) =>
+      pharmacist.user?.name?.toLowerCase().includes(search.toLowerCase()) ||
+      pharmacist.user?.email?.toLowerCase().includes(search.toLowerCase())
   );
 
   return (
@@ -234,18 +240,6 @@ const PharmacyPharmacists = () => {
         pageSizeOptions={[10, 25, 50]}
         className={styles.grid}
         autoHeight
-        onCellEditStop={(params, event) => {
-          if (params.reason === 'enterKeyDown' || params.reason === 'cellFocusOut') {
-            const updatedData = {
-              name: params.field === 'name' ? params.value : params.row.user.name,
-              email: params.field === 'email' ? params.value : params.row.user.email,
-              licenseNumber: params.field === 'licenseNumber' ? params.value : params.row.licenseNumber,
-              phone: params.field === 'phone' ? params.value : params.row.phone,
-              specialty: params.field === 'specialty' ? params.value : params.row.specialty,
-            };
-            handleUpdatePharmacist(params.row.id, updatedData);
-          }
-        }}
       />
     </Box>
   );
