@@ -37,7 +37,7 @@ export async function createPrescription(data) {
     return response.data;
   } catch (error) {
     console.error('Error creating prescription:', error);
-    throw new Error('Failed to create prescription');
+    throw new Error(error.response?.data?.details || 'Failed to create prescription');
   }
 }
 
@@ -52,7 +52,7 @@ export async function createUser(data) {
     return response.data;
   } catch (error) {
     console.error('Error creating user:', error);
-    throw new Error('Failed to create user');
+    throw new Error(error.response?.data?.details || 'Failed to create user');
   }
 }
 
@@ -71,7 +71,7 @@ export async function dispenseMedication(data) {
     return response.data;
   } catch (error) {
     console.error('Error dispensing medication:', error);
-    throw new Error(`Failed to dispense medication: ${error.message}`);
+    throw new Error(error.response?.data?.details || 'Failed to dispense medication');
   }
 }
 
@@ -113,7 +113,7 @@ export async function createInvoice(data) {
     return response.data;
   } catch (error) {
     console.error('Error creating invoice:', error);
-    throw new Error('Failed to create invoice');
+    throw new Error(error.response?.data?.details || 'Failed to create invoice');
   }
 }
 
@@ -131,7 +131,7 @@ export async function processRefund(data) {
     return response.data;
   } catch (error) {
     console.error('Error processing refund:', error);
-    throw new Error('Failed to process refund');
+    throw new Error(error.response?.data?.details || 'Failed to process refund');
   }
 }
 
@@ -141,11 +141,11 @@ export async function addMedication(data) {
       action: 'addMedication',
       payload: {
         name: data.name,
-        genericName: data.genericName,
+        genericName: data.genericName || undefined,
         category: data.category,
         batchNumber: data.batchNumber,
-        barcode: data.barcode,
-        rfid: data.rfid,
+        barcode: data.barcode || undefined,
+        rfid: data.rfid || undefined,
         stockQuantity: parseInt(data.stockQuantity),
         minStockThreshold: parseInt(data.minStockThreshold) || 10,
         price: parseFloat(data.price),
@@ -158,7 +158,7 @@ export async function addMedication(data) {
     return response.data;
   } catch (error) {
     console.error('Error adding medication:', error);
-    throw new Error('Failed to add medication');
+    throw new Error(error.response?.data?.details || 'Failed to add medication');
   }
 }
 
@@ -171,7 +171,7 @@ export async function updateStock(id, stockQuantity) {
     return response.data;
   } catch (error) {
     console.error('Error updating stock:', error);
-    throw new Error('Failed to update stock');
+    throw new Error(error.response?.data?.details || 'Failed to update stock');
   }
 }
 
@@ -181,7 +181,7 @@ export async function deleteMedication(id) {
     return response.data;
   } catch (error) {
     console.error('Error deleting medication:', error);
-    throw new Error('Failed to delete medication');
+    throw new Error(error.response?.data?.details || 'Failed to delete medication');
   }
 }
 
@@ -228,7 +228,7 @@ export async function addFormulary(data) {
     return response.data;
   } catch (error) {
     console.error('Error adding formulary:', error);
-    throw new Error('Failed to add formulary');
+    throw new Error(error.response?.data?.details || 'Failed to add formulary');
   }
 }
 
@@ -258,7 +258,7 @@ export async function createOrder(data) {
     return response.data;
   } catch (error) {
     console.error('Error creating order:', error);
-    throw new Error('Failed to create order');
+    throw new Error(error.response?.data?.details || 'Failed to create order');
   }
 }
 
@@ -271,7 +271,7 @@ export async function updateOrderStatus(id, status) {
     return response.data;
   } catch (error) {
     console.error('Error updating order status:', error);
-    throw new Error('Failed to update order status');
+    throw new Error(error.response?.data?.details || 'Failed to update order status');
   }
 }
 
@@ -299,7 +299,7 @@ export async function addSupplier(data) {
     return response.data;
   } catch (error) {
     console.error('Error adding supplier:', error);
-    throw new Error('Failed to add supplier');
+    throw new Error(error.response?.data?.details || 'Failed to add supplier');
   }
 }
 
@@ -317,7 +317,7 @@ export async function updateSupplier(id, data) {
     return response.data;
   } catch (error) {
     console.error('Error updating supplier:', error);
-    throw new Error('Failed to update supplier');
+    throw new Error(error.response?.data?.details || 'Failed to update supplier');
   }
 }
 
@@ -327,7 +327,7 @@ export async function deleteSupplier(id) {
     return response.data;
   } catch (error) {
     console.error('Error deleting supplier:', error);
-    throw new Error('Failed to delete supplier');
+    throw new Error(error.response?.data?.details || 'Failed to delete supplier');
   }
 }
 
@@ -337,7 +337,7 @@ export async function trackNarcotic(medicationId) {
     return response.data.dispensingRecords || [];
   } catch (error) {
     console.error('Error tracking narcotic:', error);
-    throw new Error('Failed to track narcotic');
+    throw new Error(error.response?.data?.details || 'Failed to track narcotic');
   }
 }
 
@@ -366,7 +366,7 @@ export async function generateStockReport(timeRange) {
     }));
   } catch (error) {
     console.error('Error generating stock report:', error);
-    throw new Error('Failed to generate stock report');
+    throw new Error(error.response?.data?.details || 'Failed to generate stock report');
   }
 }
 
@@ -385,6 +385,6 @@ export async function generateSalesReport(timeRange) {
     return dispensingRecords;
   } catch (error) {
     console.error('Error generating sales report:', error);
-    throw new Error('Failed to generate sales report');
+    throw new Error(error.response?.data?.details || 'Failed to generate sales report');
   }
 }
