@@ -1,6 +1,3 @@
-// pharmacy/PharmacyInventory.jsx
-// Inventory management with stock alerts and barcode scanning
-
 import React, { useState, useEffect } from 'react';
 import { DataGrid } from '@mui/x-data-grid';
 import { TextField, Box, Typography, IconButton, Alert } from '@mui/material';
@@ -20,31 +17,52 @@ const PharmacyInventory = () => {
   }, []);
 
   const fetchInventory = async () => {
-    const data = await getInventory();
-    setInventory(data);
+    try {
+      const data = await getInventory();
+      setInventory(data);
+    } catch (error) {
+      console.error('Failed to fetch inventory:', error);
+    }
   };
 
   const fetchStockAlerts = async () => {
-    const alerts = await getStockAlerts();
-    setStockAlerts(alerts);
+    try {
+      const alerts = await getStockAlerts();
+      setStockAlerts(alerts);
+    } catch (error) {
+      console.error('Failed to fetch stock alerts:', error);
+    }
   };
 
   const handleStockUpdate = async (id, newStock) => {
-    await updateStock(id, newStock);
-    fetchInventory();
-    fetchStockAlerts();
+    try {
+      await updateStock(id, parseInt(newStock));
+      await fetchInventory();
+      await fetchStockAlerts();
+    } catch (error) {
+      console.error('Failed to update stock:', error);
+    }
   };
 
   const handleDelete = async (id) => {
-    await deleteMedication(id);
-    fetchInventory();
+    try {
+      await deleteMedication(id);
+      await fetchInventory();
+      await fetchStockAlerts();
+    } catch (error) {
+      console.error('Failed to delete medication:', error);
+    }
   };
 
   const handleBarcodeScan = async () => {
-    const medication = await scanBarcode(barcode);
-    if (medication) {
-      setInventory([medication, ...inventory.filter(item => item.id !== medication.id)]);
-      setBarcode('');
+    try {
+      const medication = await scanBarcode(barcode);
+      if (medication) {
+        setInventory([medication, ...inventory.filter(item => item.id !== medication.id)]);
+        setBarcode('');
+      }
+    } catch (error) {
+      console.error('Failed to scan barcode:', error);
     }
   };
 
@@ -52,9 +70,20 @@ const PharmacyInventory = () => {
     { field: 'id', headerName: 'ID', width: 90 },
     { field: 'name', headerName: 'Medication', width: 200 },
     { field: 'category', headerName: 'Category', width: 150 },
-    { field: 'stockQuantity', headerName: 'Stock', width: 120, editable: true },
+    { 
+      field: 'stockQuantity', 
+      headerName: 'Stock', 
+      width: 120, 
+      editable: true,
+      type: 'number',
+    },
     { field: 'price', headerName: 'Price', width: 120 },
-    { field: 'expiryDate', headerName: 'Expiry Date', width: 150, valueFormatter: ({ value }) => new Date(value).toLocaleDateString() },
+    { 
+      field: 'expiryDate', 
+      headerName: 'Expiry Date', 
+      width: 150, 
+      valueFormatter: ({ value }) => new Date(value).toLocaleDateString() 
+    },
     { field: 'barcode', headerName: 'Barcode', width: 150 },
     {
       field: 'actions',
@@ -108,11 +137,14 @@ const PharmacyInventory = () => {
       <DataGrid
         rows={filteredInventory}
         columns={columns}
-        pageSize={10}
-        rowsPerPageOptions={[10, 25, 50]}
+        pageSizeOptions={[10, 25, 50]}
         className={styles.grid}
         autoHeight
-        onCellEditCommit={(params) => handleStockUpdate(params.id, params.value)}
+        onCellEditStop={(params, event) => {
+          if (params.reason === 'enterKeyDown' || params.reason === 'cellFocusOut') {
+            handleStockUpdate(params.row.id, params.value);
+          }
+        }}
       />
     </Box>
   );
