@@ -26,7 +26,19 @@ const PharmacyPharmacists = () => {
   const fetchPharmacists = async () => {
     try {
       const data = await getPharmacists();
-      setPharmacists(data || []);
+      // Validate and filter data to ensure only valid pharmacist objects
+      const validPharmacists = Array.isArray(data)
+        ? data.filter(
+            (p) =>
+              p &&
+              typeof p === 'object' &&
+              p.id &&
+              p.user &&
+              typeof p.user.name === 'string' &&
+              typeof p.user.email === 'string'
+          )
+        : [];
+      setPharmacists(validPharmacists);
       setError(null);
     } catch (err) {
       setError('Failed to fetch pharmacists: ' + err.message);
@@ -103,63 +115,69 @@ const PharmacyPharmacists = () => {
       field: 'name',
       headerName: 'Name',
       width: 200,
-      valueGetter: (params) => params.row?.user?.name || '',
+      valueGetter: (params) => params?.row?.user?.name || '',
     },
     {
       field: 'email',
       headerName: 'Email',
       width: 200,
-      valueGetter: (params) => params.row?.user?.email || '',
+      valueGetter: (params) => params?.row?.user?.email || '',
     },
     {
       field: 'licenseNumber',
       headerName: 'License Number',
       width: 150,
-      valueGetter: (params) => params.row?.licenseNumber || '',
+      valueGetter: (params) => params?.row?.licenseNumber || '',
     },
     {
       field: 'phone',
       headerName: 'Phone',
       width: 150,
-      valueGetter: (params) => params.row?.phone || '',
+      valueGetter: (params) => params?.row?.phone || '',
     },
     {
       field: 'specialty',
       headerName: 'Specialty',
       width: 150,
-      valueGetter: (params) => params.row?.specialty || '',
+      valueGetter: (params) => params?.row?.specialty || '',
     },
     {
       field: 'actions',
       headerName: 'Actions',
-      width: 150,
-      renderCell: (params) => (
-        <>
-          <IconButton
-            onClick={() =>
-              handleUpdatePharmacist(params.row.id, {
-                name: params.row.user?.name || '',
-                email: params.row.user?.email || '',
-                licenseNumber: params.row?.licenseNumber || '',
-                phone: params.row?.phone || '',
-                specialty: params.row?.specialty || '',
-              })
-            }
-          >
-            <Edit />
-          </IconButton>
-          <IconButton onClick={() => handleDeletePharmacist(params.row.id)}>
-            <Delete />
-          </IconButton>
-        </>
-      ),
+      width: 150',
+      renderCell: (params) => {
+        const row = params?.row;
+        if (!row || !row.id) return null;
+        return (
+          <>
+            <IconButton
+              onClick={() =>
+                handleUpdatePharmacist(row.id, {
+                  name: row.user?.name || '',
+                  email: row.user?.email || '',
+                  licenseNumber: row?.licenseNumber || '',
+                  phone: row?.phone || '',
+                  specialty: row?.specialty || '',
+                }))
+              }
+            >
+              <Edit />
+            </IconButton>
+            <IconButton
+              onClick={() => onClick={() => handleDeletePharmacist(row.id)}>
+              <Delete />
+            </IconButton>
+          </>
+        );
+      },
     },
   ];
 
   const filteredPharmacists = pharmacists.filter(
     (pharmacist) =>
-      (pharmacist?.user?.name?.toLowerCase() || '').includes(search.toLowerCase()) ||
-      (pharmacist?.user?.email?.toLowerCase() || '').includes(search.toLowerCase())
+      pharmacist &&
+      ((pharmacist.user?.name?.toLowerCase() || '').includes(search.toLowerCase()) ||
+        (pharmacist.user?.email?.toLowerCase() || '').includes(search.toLowerCase()))
   );
 
   return (
