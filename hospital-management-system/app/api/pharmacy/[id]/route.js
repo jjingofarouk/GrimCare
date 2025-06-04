@@ -12,9 +12,10 @@ export async function GET(request, { params }) {
       include: {
         patient: { include: { user: true } },
         doctor: { include: { user: true } },
+        pharmacist: { include: { user: true } },
         items: { include: { medication: true } },
         invoice: { include: { transaction: true } },
-        dispensingRecords: { include: { medication: true, dispensedBy: true } },
+        dispensingRecords: { include: { medication: true, dispensedBy: true, pharmacist: true } },
       },
     });
 
@@ -57,6 +58,15 @@ export async function GET(request, { params }) {
       return NextResponse.json(formulary);
     }
 
+    const pharmacist = await prisma.pharmacist.findUnique({
+      where: { id: parseInt(id) },
+      include: { user: true },
+    });
+
+    if (pharmacist) {
+      return NextResponse.json(pharmacist);
+    }
+
     return NextResponse.json({ error: 'Resource not found' }, { status: 404 });
   } catch (error) {
     console.error('GET /api/pharmacy/[id] error:', error);
@@ -84,10 +94,11 @@ export async function PUT(request, { params }) {
           include: {
             patient: { include: { user: true } },
             doctor: { include: { user: true } },
+            pharmacist: { include: { user: true } },
             items: { include: { medication: true } },
           },
         });
-        return Nextakawa.json(prescription);
+        return NextResponse.json(prescription);
       }
 
       case 'updateStock': {
@@ -105,7 +116,7 @@ export async function PUT(request, { params }) {
             medication: { connect: { id: parseInt(id) } },
             quantity: stockQuantity,
             reason: 'Manual stock update',
-            adjustedBy: { connect: { id: 1 } }, // Assuming admin user ID
+            adjustedBy: { connect: { id: 1 } },
           },
         });
         return NextResponse.json(medication);
@@ -134,6 +145,24 @@ export async function PUT(request, { params }) {
           data: { name, contact, email, address },
         });
         return NextResponse.json(supplier);
+      }
+
+      case 'updatePharmacist': {
+        const { name, licenseNumber, phone, specialty } = payload;
+        if (!name || !licenseNumber) {
+          return NextResponse.json({ error: 'Missing required fields' }, { status: 400 });
+        }
+        const pharmacist = await prisma.pharmacist.update({
+          where: { id: parseInt(id) },
+          data: { 
+            user: { update: { name } },
+            licenseNumber,
+            phone,
+            specialty,
+          },
+          include: { user: true },
+        });
+        return NextResponse.json(pharmacist);
       }
 
       default:
@@ -169,6 +198,16 @@ export async function DELETE(request, { params }) {
         where: { id: parseInt(id) },
       });
       return NextResponse.json({ message: 'Supplier deleted' });
+    }
+
+    const pharmacist = await prisma.pharmacist.findUnique({
+      where: { id: parseInt(id) },
+    });
+    if (pharmacist) {
+      await prisma.pharmacist.delete({
+        where: { id: parseInt(id) },
+      });
+      return NextResponse.json({ message: 'Pharmacist deleted' });
     }
 
     return NextResponse.json({ error: 'Resource not found' }, { status: 404 });
