@@ -1,6 +1,7 @@
+
 import React, { useState, useEffect } from 'react';
-import { Box, Typography, TextField, Button, Select, MenuItem, Autocomplete } from '@mui/material';
-import { dispenseMedication, getPrescriptions, getInventory, getPharmacists } from './pharmacyService';
+import { Box, Typography, TextField, Button, Select, MenuItem } from '@mui/material';
+import { dispenseMedication, getPrescriptions, getInventory, getUsers } from './pharmacyService';
 import styles from './PharmacyDispensing.module.css';
 
 const PharmacyDispensing = () => {
@@ -9,32 +10,32 @@ const PharmacyDispensing = () => {
     medicationId: '',
     quantity: 0,
     patientType: 'OUTPATIENT',
-    pharmacistId: '',
+    dispensedById: '',
   });
   const [prescriptions, setPrescriptions] = useState([]);
   const [medications, setMedications] = useState([]);
-  const [pharmacists, setPharmacists] = useState([]);
+  const [users, setUsers] = useState([]);
   const [error, setError] = useState(null);
 
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const [prescriptionData, medicationData, pharmacistData] = await Promise.all([
+        const [prescriptionData, medicationData, userData] = await Promise.all([
           getPrescriptions(),
           getInventory(),
-          getPharmacists(),
+          getUsers(),
         ]);
         setPrescriptions(prescriptionData.filter(p => p.status === 'PENDING'));
         setMedications(medicationData);
-        setPharmacists(pharmacistData);
+        setUsers(userData.filter(u => u.role === 'PHARMACIST' || u.role === 'ADMIN'));
         if (prescriptionData.length > 0) {
           setDispensingData(prev => ({ ...prev, prescriptionId: prescriptionData[0].id }));
         }
         if (medicationData.length > 0) {
           setDispensingData(prev => ({ ...prev, medicationId: medicationData[0].id }));
         }
-        if (pharmacistData.length > 0) {
-          setDispensingData(prev => ({ ...prev, pharmacistId: pharmacistData[0].id }));
+        if (userData.length > 0) {
+          setDispensingData(prev => ({ ...prev, dispensedById: userData[0].id }));
         }
       } catch (err) {
         setError('Failed to fetch data: ' + err.message);
@@ -49,7 +50,7 @@ const PharmacyDispensing = () => {
         !dispensingData.prescriptionId ||
         !dispensingData.medicationId ||
         !dispensingData.quantity ||
-        !dispensingData.pharmacistId
+        !dispensingData.dispensedById
       ) {
         setError('All fields are required');
         return;
@@ -60,7 +61,7 @@ const PharmacyDispensing = () => {
         medicationId: parseInt(dispensingData.medicationId),
         quantity: parseInt(dispensingData.quantity),
         patientType: dispensingData.patientType,
-        pharmacistId: parseInt(dispensingData.pharmacistId),
+        dispensedById: parseInt(dispensingData.dispensedById),
       };
 
       await dispenseMedication(payload);
@@ -69,7 +70,7 @@ const PharmacyDispensing = () => {
         medicationId: medications.length > 0 ? medications[0].id : '',
         quantity: 0,
         patientType: 'OUTPATIENT',
-        pharmacistId: pharmacists.length > 0 ? pharmacists[0].id : '',
+        dispensedById: users.length > 0 ? users[0].id : '',
       });
       setError(null);
     } catch (err) {
@@ -77,7 +78,8 @@ const PharmacyDispensing = () => {
     }
   };
 
-  const handleChange = (name, value) => {
+  const handleChange = (e) => {
+    const { name, value } = e.target;
     setDispensingData(prev => ({ ...prev, [name]: value }));
     setError(null);
   };
@@ -91,52 +93,70 @@ const PharmacyDispensing = () => {
         </Box>
       )}
       <Box className={styles.form}>
-        <Autocomplete
-          options={prescriptions}
-          getOptionLabel={(option) => `ID: ${option.id} - Patient: ${option.patient?.user?.name || 'Unknown'}`}
-          onChange={(e, value) => handleChange('prescriptionId', value ? value.id : '')}
-          renderInput={(params) => (
-            <TextField {...params} label="Select Prescription" fullWidth margin="normal" />
-          )}
+        <Select
+          name="prescriptionId"
+          value={dispensingData.prescriptionId}
+          onChange={handleChange}
           fullWidth
-        />
-        <Autocomplete
-          options={medications}
-          getOptionLabel={(option) => `${option.name} (Stock: ${option.stockQuantity})`}
-          onChange={(e, value) => handleChange('medicationId', value ? value.id : '')}
-          renderInput={(params) => (
-            <TextField {...params} label="Select Medication" fullWidth margin="normal" />
-          )}
+          margin="normal"
+          displayEmpty
+        >
+          <MenuItem value="" disabled>Select Prescription</MenuItem>
+          {prescriptions.map(prescription => (
+            <MenuItem key={prescription.id} value={prescription.id}>
+              {`ID: ${prescription.id} - Patient: ${prescription.patient?.user?.name || 'Unknown'}`}
+            </MenuItem>
+          ))}
+        </Select>
+        <Select
+          name="medicationId"
+          value={dispensingData.medicationId}
+          onChange={handleChange}
           fullWidth
-        />
+          margin="normal"
+          displayEmpty
+        >
+          <MenuItem value="" disabled>Select Medication</MenuItem>
+          {medications.map(medication => (
+            <MenuItem key={medication.id} value={medication.id}>
+              {`${medication.name} (Stock: ${medication.stockQuantity})`}
+            </MenuItem>
+          ))}
+        </Select>
         <TextField
           label="Quantity"
           name="quantity"
           type="number"
           value={dispensingData.quantity}
-          onChange={(e) => handleChange('quantity', e.target.value)}
+          onChange={handleChange}
           fullWidth
           margin="normal"
         />
         <Select
           name="patientType"
           value={dispensingData.patientType}
-          onChange={(e) => handleChange('patientType', e.target.value)}
+          onChange={handleChange}
           fullWidth
           margin="normal"
         >
           <MenuItem value="INPATIENT">Inpatient</MenuItem>
           <MenuItem value="OUTPATIENT">Outpatient</MenuItem>
         </Select>
-        <Autocomplete
-          options={pharmacists}
-          getOptionLabel={(option) => `${option.user.name} (License: ${option.licenseNumber})`}
-          onChange={(e, value) => handleChange('pharmacistId', value ? value.id : '')}
-          renderInput={(params) => (
-            <TextField {...params} label="Select Pharmacist" fullWidth margin="normal" />
-          )}
+        <Select
+          name="dispensedById"
+          value={dispensingData.dispensedById}
+          onChange={handleChange}
           fullWidth
-        />
+          margin="normal"
+          displayEmpty
+        >
+          <MenuItem value="" disabled>Select Pharmacist</MenuItem>
+          {users.map(user => (
+            <MenuItem key={user.id} value={user.id}>
+              {user.name}
+            </MenuItem>
+          ))}
+        </Select>
         <Button
           variant="contained"
           onClick={handleDispense}
