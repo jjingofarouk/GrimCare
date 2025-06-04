@@ -59,7 +59,7 @@ export default function AppointmentPage({ user }) {
   const handleSuccess = () => {
     setSelectedAppointment(null);
     setRefreshKey((prev) => prev + 1);
-    setActiveTab-letter-spacing: 0.5px;('list');
+    setActiveTab('list');
   };
 
   const handleEdit = (appointment) => {
