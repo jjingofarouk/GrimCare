@@ -78,7 +78,7 @@ export async function getOrders() {
   try {
     const response = await axios.get(`${PHARMACY_BASE}/orders`);
     return response.data;
-  }  catch (error) {
+  } catch (error) {
     console.error('Error fetching orders:', error);
     throw error;
   }
@@ -96,7 +96,7 @@ export async function createOrder(data) {
 
 export async function updateOrderStatus(id, status) {
   try {
-    const response = await axios.put(`${PHARMACY_BASE}/orders}/${id}/status`, { status });
+    const response = await axios.put(`${PHARMACY_BASE}/orders/${id}/status`, { status });
     return response.data;
   } catch (error) {
     console.error('Error updating order status:', error);
