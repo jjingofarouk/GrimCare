@@ -1,8 +1,7 @@
-/* RegisterForm.module.css - Modern Grayscale Registration Form Styling */
+/* RegisterForm.module.css - Simplified Grayscale Registration Form Styling */
 
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap');
 
-/* Extend base styles from LoginForm with registration-specific enhancements */
 .container {
   min-height: 100vh;
   width: 100vw;
@@ -11,351 +10,159 @@
   justify-content: center;
   background: #0f0f0f;
   padding: 2rem 1rem;
-  position: relative;
-  overflow: hidden;
-}
-
-.container::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: 
-    radial-gradient(circle at 30% 70%, rgba(80, 80, 80, 0.3) 0%, transparent 50%),
-    radial-gradient(circle at 70% 30%, rgba(96, 96, 96, 0.25) 0%, transparent 50%),
-    radial-gradient(circle at 50% 50%, rgba(128, 128, 128, 0.15) 0%, transparent 50%);
-  animation: registrationGlow 25s ease infinite;
-}
-
-@keyframes registrationGlow {
-  0%, 100% { 
-    opacity: 1; 
-    transform: rotate(0deg) scale(1);
-  }
-  33% { 
-    opacity: 0.8; 
-    transform: rotate(120deg) scale(1.1);
-  }
-  66% { 
-    opacity: 0.9; 
-    transform: rotate(240deg) scale(0.95);
-  }
 }
 
 .form {
-  background: rgba(26, 26, 26, 0.96);
-  backdrop-filter: blur(24px);
-  border-radius: 28px;
-  padding: 3.5rem 3rem;
+  background: rgba(26, 26, 26, 0.95);
+  border-radius: 16px;
+  padding: 2rem;
   width: 100%;
   max-width: 480px;
-  box-shadow: 
-    0 40px 80px rgba(0, 0, 0, 0.4),
-    0 20px 40px rgba(0, 0, 0, 0.3),
-    inset 0 2px 0 rgba(255, 255, 255, 0.1),
-    inset 0 -1px 0 rgba(0, 0, 0, 0.2);
-  border: 1px solid rgba(64, 64, 64, 0.4);
-  position: relative;
-  z-index: 1;
-  transform: translateY(0);
-  transition: all 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+  border: 1px solid rgba(64, 64, 64, 0.3);
+  box-shadow: 0 16px 32px rgba(0, 0, 0, 0.2);
+  transition: transform 0.3s ease;
 }
 
 .form:hover {
-  transform: translateY(-12px) scale(1.02);
-  box-shadow: 
-    0 60px 120px rgba(0, 0, 0, 0.5),
-    0 30px 60px rgba(0, 0, 0, 0.4),
-    inset 0 2px 0 rgba(255, 255, 255, 0.15);
+  transform: translateY(-4px);
 }
 
 .formTitle {
-  font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
-  font-size: 2.5rem;
-  font-weight: 800;
+  font-family: 'Inter', sans-serif;
+  font-size: 2rem;
+  font-weight: 700;
   color: #f5f5f5;
   text-align: center;
-  margin: 0 0 3rem 0;
-  position: relative;
-  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
-}
-
-.formTitle::after {
-  content: '';
-  position: absolute;
-  bottom: -16px;
-  left: 50%;
-  transform: translateX(-50%);
-  width: 80px;
-  height: 5px;
-  background: #6b7280;
-  border-radius: 3px;
-  box-shadow: 0 2px 8px rgba(107, 114, 128, 0.3);
+  margin-bottom: 2rem;
 }
 
 .formField {
-  margin-bottom: 2.25rem;
-  position: relative;
-}
-
-.formField:last-of-type {
-  margin-bottom: 2rem;
+  margin-bottom: 1.5rem;
 }
 
 .formLabel {
   font-family: 'Inter', sans-serif;
-  font-size: 0.9rem;
-  font-weight: 700;
+  font-size: 0.875rem;
+  font-weight: 600;
   color: #d1d5db;
   display: block;
-  margin-bottom: 0.875rem;
-  text-transform: uppercase;
-  letter-spacing: 0.8px;
-  position: relative;
-}
-
-.formLabel::before {
-  content: '';
-  position: absolute;
-  left: -12px;
-  top: 50%;
-  transform: translateY(-50%);
-  width: 4px;
-  height: 4px;
-  background: #6b7280;
-  border-radius: 50%;
+  margin-bottom: 0.5rem;
 }
 
 .formInput {
   width: 100%;
-  padding: 1.25rem 1.5rem;
+  padding: 0.75rem 1rem;
   font-family: 'Inter', sans-serif;
   font-size: 1rem;
-  font-weight: 400;
   color: #f9fafb;
-  background: rgba(17, 17, 17, 0.9);
-  border: 2px solid rgba(75, 75, 75, 0.6);
-  border-radius: 18px;
-  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-  outline: none;
-  backdrop-filter: blur(12px);
-  box-sizing: border-box;
-  position: relative;
+  background: rgba(17, 17, 17, 0.8);
+  border: 1px solid rgba(75, 75, 75, 0.5);
+  border-radius: 8px;
+  transition: border-color 0.3s ease;
 }
 
 .formInput:focus {
   border-color: #9ca3af;
-  background: rgba(31, 31, 31, 0.98);
-  box-shadow: 
-    0 0 0 4px rgba(156, 163, 175, 0.12),
-    0 12px 32px rgba(0, 0, 0, 0.25),
-    inset 0 1px 0 rgba(255, 255, 255, 0.08);
-  transform: translateY(-3px) scale(1.02);
+  outline: none;
 }
 
 .formInput::placeholder {
   color: #6b7280;
-  font-weight: 300;
 }
 
-/* Enhanced select styling for role dropdown */
+/* Select dropdown styling for role field */
 .formInput select {
   appearance: none;
-  background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%239ca3af' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpath d='M6 9l6 6 6-6'/%3e%3c/svg%3e");
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%239ca3af' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><path d='M6 9l6 6 6-6'/></svg>");
   background-repeat: no-repeat;
   background-position: right 1rem center;
   background-size: 1.25rem;
-  padding-right: 3rem;
+  padding-right: 2.5rem;
   cursor: pointer;
 }
 
 .formInput select:hover {
   border-color: #6b7280;
-  background-color: rgba(31, 31, 31, 0.95);
-}
-
-.formInput select option {
-  padding: 0.75rem;
-  font-weight: 500;
-  background: #1f1f1f;
-  color: #f9fafb;
-}
-
-.formInput select option:hover {
-  background: rgba(75, 75, 75, 0.3);
 }
 
 .formButton {
   width: 100%;
-  padding: 1.5rem 2.5rem;
+  padding: 1rem;
   font-family: 'Inter', sans-serif;
-  font-size: 1.125rem;
-  font-weight: 700;
+  font-size: 1rem;
+  font-weight: 600;
   color: #f9fafb;
   background: #374151;
-  border: 2px solid #4b5563;
-  border-radius: 20px;
+  border: 1px solid #4b5563;
+  border-radius: 8px;
   cursor: pointer;
-  transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
-  text-transform: uppercase;
-  letter-spacing: 1.2px;
-  position: relative;
-  overflow: hidden;
-  margin-top: 1.5rem;
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
-}
-
-.formButton::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: -100%;
-  width: 100%;
-  height: 100%;
-  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent);
-  transition: left 0.8s;
-}
-
-.formButton::after {
-  content: '';
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  width: 0;
-  height: 0;
-  background: rgba(255, 255, 255, 0.1);
-  border-radius: 50%;
-  transition: all 0.6s ease;
+  transition: background 0.3s ease, transform 0.3s ease;
+  margin-top: 1rem;
 }
 
 .formButton:hover {
-  transform: translateY(-4px) scale(1.02);
   background: #4b5563;
-  border-color: #6b7280;
-  box-shadow: 
-    0 24px 48px rgba(0, 0, 0, 0.4),
-    0 12px 24px rgba(0, 0, 0, 0.3),
-    0 6px 12px rgba(0, 0, 0, 0.2);
-}
-
-.formButton:hover::before {
-  left: 100%;
-}
-
-.formButton:hover::after {
-  width: 300px;
-  height: 300px;
-}
-
-.formButton:active {
-  transform: translateY(-2px) scale(1.01);
+  transform: translateY(-2px);
 }
 
 .formError {
   color: #fca5a5;
   font-family: 'Inter', sans-serif;
-  font-size: 0.9rem;
-  font-weight: 600;
-  margin: 1.25rem 0;
-  padding: 1rem 1.25rem;
-  background: rgba(45, 12, 12, 0.9);
-  border: 1px solid rgba(127, 29, 29, 0.6);
-  border-radius: 16px;
-  backdrop-filter: blur(12px);
+  font-size: 0.875rem;
+  margin: 1rem 0;
+  padding: 0.5rem;
+  background: rgba(45, 12, 12, 0.8);
+  border-radius: 8px;
   text-align: center;
-  box-shadow: 0 4px 12px rgba(127, 29, 29, 0.2);
 }
 
 .registerLink {
   font-family: 'Inter', sans-serif;
-  font-size: 0.95rem;
+  font-size: 0.925rem;
   color: #9ca3af;
   text-align: center;
-  margin-top: 2.5rem;
-  margin-bottom: 0;
-  font-weight: 500;
+  margin-top: 1.5rem;
 }
 
 .registerLink a {
   color: #d1d5db;
   text-decoration: none;
-  font-weight: 700;
-  transition: all 0.4s ease;
-  position: relative;
-  padding: 0.25rem 0.5rem;
-  border-radius: 8px;
-}
-
-.registerLink a::after {
-  content: '';
-  position: absolute;
-  width: 0;
-  height: 3px;
-  bottom: -4px;
-  left: 50%;
-  transform: translateX(-50%);
-  background: #6b7280;
-  transition: width 0.4s ease;
-  border-radius: 2px;
+  font-weight: 600;
+  transition: color 0.3s ease;
 }
 
 .registerLink a:hover {
   color: #f9fafb;
-  background: rgba(75, 75, 75, 0.2);
-}
-
-.registerLink a:hover::after {
-  width: 100%;
 }
 
 /* Role field special styling */
 .formField:nth-child(5) .formLabel {
   color: #f9fafb;
-  font-weight: 800;
+  font-weight: 700;
 }
 
 /* Responsive Design */
 @media (max-width: 768px) {
   .container {
     padding: 1rem;
-    width: 100vw;
   }
   
   .form {
-    padding: 2.5rem 2rem;
-    border-radius: 24px;
+    padding: 1.5rem;
     max-width: 100%;
-  }
-  
-  .formTitle {
-    font-size: 2rem;
-    margin-bottom: 2.5rem;
-  }
-  
-  .formButton {
-    padding: 1.25rem 2rem;
-    font-size: 1rem;
-  }
-  
-  .formField {
-    margin-bottom: 2rem;
-  }
-}
-
-@media (max-width: 480px) {
-  .form {
-    padding: 2rem 1.5rem;
-    border-radius: 20px;
   }
   
   .formTitle {
     font-size: 1.75rem;
   }
+}
+
+@media (max-width: 480px) {
+  .form {
+    padding: 1rem;
+  }
   
-  .formInput {
-    padding: 1rem 1.25rem;
+  .formTitle {
+    font-size: 1.5rem;
   }
 }
