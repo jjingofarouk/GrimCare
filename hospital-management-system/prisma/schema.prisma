@@ -47,8 +47,8 @@ model Doctor {
   discharges        Discharge[]           @relation("DischargingDoctor")
   appointments      Appointment[]         @relation("DoctorAppointments")
   availability      DoctorAvailability[]
-  prescriptions     Prescription[]        @relation(fields: [doctorId], references: [id])
-  doctorId          Int?
+  prescriptions     Prescription[]        @relation(fields: [prescriberId], references: [id])
+  prescriberId      Int?
 }
 
 model Patient {
@@ -70,8 +70,8 @@ model Patient {
   discharges            Discharge[]       @relation("DischargedPatient")
   transactions          Transaction[]     @relation("PatientTransactions")
   appointments          Appointment[]     @relation("PatientAppointments")
-  prescriptions         Prescription[]    @relation(fields: [patientId], references: [id])
-  patientId             Int?
+  prescriptions         Prescription[]    @relation(fields: [prescribedToId], references: [id])
+  prescribedToId        Int?
   createdAt             DateTime          @default(now())
   updatedAt             DateTime          @updatedAt
 }
