@@ -1,0 +1,32 @@
+model Appointment {
+  id            Int           @id @default(autoincrement())
+  patientId     Int
+  patient       Patient       @relation("PatientAppointments", fields: [patientId], references: [id])
+  doctorId      Int
+  doctor        Doctor        @relation("DoctorAppointments", fields: [doctorId], references: [id])
+  departmentId  Int?
+  department    Department?   @relation(fields: [departmentId], references: [id])
+  bookedById    Int?
+  bookedBy      User?         @relation("BookedBy", fields: [bookedById], references: [id])
+  date          DateTime
+  status        String        @default("SCHEDULED") // SCHEDULED, CHECKED_IN, CHECKED_OUT, COMPLETED, CANCELLED, NO_SHOW
+  type          String        @default("REGULAR") // REGULAR, WALK_IN, EMERGENCY
+  reason        String
+  notes         String?
+  checkInTime   DateTime?
+  checkOutTime  DateTime?
+  reminderSent  Boolean       @default(false)
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
+  queue         Queue?
+}
+
+model Queue {
+  id            Int           @id @default(autoincrement())
+  appointmentId Int           @unique
+  appointment   Appointment   @relation(fields: [appointmentId], references: [id])
+  queueNumber   Int
+  status        String        @default("WAITING") // WAITING, IN_PROGRESS, COMPLETED
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
+}
