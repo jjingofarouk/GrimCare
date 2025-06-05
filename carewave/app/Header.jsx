@@ -1,3 +1,4 @@
+// Header.jsx
 "use client";
 
 import React, { useState } from 'react';
@@ -9,7 +10,7 @@ import {
   Typography,
   Box,
   Avatar,
-  Menu,
+  Menu as MuiMenu,
   MenuItem,
   IconButton,
   Chip,
@@ -19,7 +20,7 @@ import {
   alpha,
 } from '@mui/material';
 import {
-  Menu,
+  Menu as MenuIcon,
   Bell,
   User,
   Settings,
@@ -190,7 +191,7 @@ export default function Header() {
         <Toolbar>
           <Box sx={logoContainerStyles} onClick={toggleSidebar}>
             <IconButton sx={{ p: 0, color: '#f1f5f9', '&:hover': { backgroundColor: 'transparent' } }}>
-              <Menu size={20} />
+              <MenuIcon size={20} />
             </IconButton>
             <img src="/logo.png" alt="CareWave Logo" style={logoImageStyles} />
             <Typography sx={headerTitleStyles}>CareWave</Typography>
@@ -235,7 +236,7 @@ export default function Header() {
         </Toolbar>
       </AppBar>
 
-      <Menu
+      <MuiMenu
         anchorEl={anchorEl}
         open={Boolean(anchorEl)}
         onClose={handleMenuClose}
@@ -277,10 +278,10 @@ export default function Header() {
             </Box>
           </MenuItem>
         ))}
-      </Menu>
+      </MuiMenu>
 
       {user && (
-        <Menu
+        <MuiMenu
           anchorEl={notificationAnchor}
           open={Boolean(notificationAnchor)}
           onClose={handleNotificationClose}
@@ -320,10 +321,11 @@ export default function Header() {
               View all notifications
             </Typography>
           </MenuItem>
-        </Menu>
+        </MuiMenu>
       )}
 
       <Sidebar isOpen={sidebarOpen} toggleSidebar={toggleSidebar} />
     </>
   );
 }
+</xaiArtifact>
