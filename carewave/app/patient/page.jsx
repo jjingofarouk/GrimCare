@@ -66,7 +66,7 @@ export default function PatientPage() {
               },
             }}
           >
-            <Tab label="Patient List" />
+            <Tab label="All Patients" />
             <Tab label={selectedPatient ? 'Edit Patient' : 'Add Patient'} />
           </Tabs>
         </Box>
