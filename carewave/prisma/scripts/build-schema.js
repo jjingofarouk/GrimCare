@@ -25,6 +25,7 @@ const MODULE_FILES = [
   'maternity.prisma',
   'vaccination.prisma',
   'pharmacy.prisma',
+  'departments.prisma',
   'dispensary.prisma',
   'billing.prisma',
   'accounting.prisma',
