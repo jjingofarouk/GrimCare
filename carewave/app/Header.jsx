@@ -28,7 +28,7 @@ import {
 } from 'lucide-react';
 import Sidebar from './Sidebar';
 import useAuth from './useAuth';
-import './hospital-header-styles.css';
+import './Header.module.css';
 
 const roleColors = {
   PATIENT: 'patient',
