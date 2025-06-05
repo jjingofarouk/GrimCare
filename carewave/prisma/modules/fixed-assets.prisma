@@ -1,0 +1,11 @@
+model FixedAsset {
+  id            Int       @id @default(autoincrement())
+  name          String
+  purchaseDate  DateTime
+  purchaseCost  Float
+  depreciation  Float
+  currentValue  Float
+  status        String
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+}
