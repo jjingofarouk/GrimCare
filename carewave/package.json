@@ -1,18 +1,33 @@
 {
   "name": "hospital-management-system",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "private": true,
   "scripts": {
     "dev": "next dev",
-    "build": "prisma generate && next build",
+    "build": "npm run schema:build && prisma generate && next build",
     "start": "next start",
     "lint": "next lint",
     "test": "jest",
     "test:watch": "jest --watch",
-    "migrate:dev": "prisma migrate dev",
-    "migrate:deploy": "prisma migrate deploy",
-    "prisma:generate": "prisma generate",
-    "seed": "npx prisma db seed -- --seed-file prisma/seed.js",
+    
+    "schema:build": "node prisma/scripts/build-schema.js",
+    "schema:watch": "node prisma/scripts/watch-schema.js",
+    "schema:validate": "npm run schema:build && prisma validate",
+    
+    "migrate:dev": "npm run schema:build && prisma migrate dev",
+    "migrate:deploy": "npm run schema:build && prisma migrate deploy",
+    "migrate:reset": "npm run schema:build && prisma migrate reset",
+    
+    "prisma:generate": "npm run schema:build && prisma generate",
+    "prisma:studio": "npm run schema:build && prisma studio",
+    "prisma:format": "npm run schema:build && prisma format",
+    "prisma:push": "npm run schema:build && prisma db push",
+    
+    "db:seed": "npm run schema:build && npx prisma db seed -- --seed-file prisma/seed.js",
+    "db:reset": "npm run schema:build && prisma migrate reset --force",
+    
+    "dev:full": "concurrently \"npm run schema:watch\" \"next dev\"",
+    
     "prepare": "husky install",
     "send:reminders": "node scripts/sendReminders.js"
   },
@@ -44,6 +59,7 @@
     "@testing-library/jest-dom": "^6.6.2",
     "@testing-library/react": "^16.0.1",
     "autoprefixer": "^10.4.20",
+    "concurrently": "^8.2.2",
     "eslint": "^8.57.1",
     "eslint-config-next": "^14.2.15",
     "husky": "^9.1.6",
