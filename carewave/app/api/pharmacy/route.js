@@ -1,3 +1,4 @@
+// api/pharmacy/route.js
 import { PrismaClient } from '@prisma/client';
 import { NextResponse } from 'next/server';
 import jwt from 'jsonwebtoken';
@@ -5,6 +6,7 @@ import bcrypt from 'bcryptjs';
 
 const prisma = new PrismaClient();
 
+// Authenticate requests using JWT
 const authenticate = (request) => {
   const authHeader = request.headers.get('authorization');
   if (!authHeader) return null;
@@ -16,6 +18,7 @@ const authenticate = (request) => {
   }
 };
 
+// GET handler for fetching pharmacy resources
 export async function GET(request) {
   const user = authenticate(request);
   if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
@@ -30,7 +33,7 @@ export async function GET(request) {
           include: {
             patient: { include: { user: { select: { id: true, name: true, email: true } } } },
             doctor: { include: { user: { select: { id: true, name: true, email: true } } } },
-            items: { include: { medication: true } },
+            items: { include: { medication: { select: { id: true, name: true, price: true } } } },
             dispensingRecords: { include: { medication: true, dispensedBy: { select: { id: true, name: true } } } },
             invoice: true,
           },
@@ -39,21 +42,36 @@ export async function GET(request) {
 
       case 'inventory':
         const inventory = await prisma.medication.findMany({
-          include: { supplier: true, formulary: true, dispensingRecords: true, stockAdjustments: true },
+          include: { 
+            supplier: { select: { id: true, name: true } }, 
+            formulary: { select: { id: true, name: true } },
+            dispensingRecords: true,
+            stockAdjustments: true,
+          },
         });
         return NextResponse.json({ inventory });
 
       case 'suppliers':
         const suppliers = await prisma.supplier.findMany({
-          include: { medications: true, purchaseOrders: true },
+          include: { 
+            medications: { select: { id: true, name: true } }, 
+            purchaseOrders: true,
+          },
         });
         return NextResponse.json({ suppliers });
 
       case 'formularies':
         const formularies = await prisma.formulary.findMany({
-          include: { medications: true },
+          include: {
+            medications: { select: { id: true, name: true } },
+          },
         });
-        return NextResponse.json({ formularies });
+        return NextResponse.json({
+          formularies: formularies.map(formulary => ({
+            ...formulary,
+            medications: Array.isArray(formulary.medications) ? formulary.medications : [],
+          })),
+        });
 
       case 'pharmacists':
         const pharmacists = await prisma.user.findMany({
@@ -75,18 +93,34 @@ export async function GET(request) {
       case 'stockAlerts':
         const stockAlerts = await prisma.medication.findMany({
           where: { stockQuantity: { lte: prisma.medication.fields.minStockThreshold } },
-          include: { supplier: true },
+          include: { supplier: { select: { id: true, name: true } } },
         });
         return NextResponse.json({ stockAlerts });
 
       case 'orders':
         const orders = await prisma.purchaseOrder.findMany({
           include: {
-            supplier: true,
-            items: { include: { medication: true } },
+            supplier: { select: { id: true, name: true } },
+            items: { include: { medication: { select: { id: true, name: true } } } },
           },
         });
         return NextResponse.json({ orders });
+
+      case 'drugInteractions':
+        const medicationIds = searchParams.get('medicationIds')?.split(',').map(Number) || [];
+        const interactions = await prisma.drugInteraction.findMany({
+          where: {
+            OR: [
+              { medicationId1: { in: medicationIds } },
+              { medicationId2: { in: medicationIds } },
+            ],
+          },
+          include: {
+            medication1: { select: { id: true, name: true } },
+            medication2: { select: { id: true, name: true } },
+          },
+        });
+        return NextResponse.json({ interactions });
 
       default:
         const [allPrescriptions, allInventory, allSuppliers, allFormularies, allPharmacists, allStockAlerts, allOrders] = await Promise.all([
@@ -94,34 +128,40 @@ export async function GET(request) {
             include: {
               patient: { include: { user: { select: { id: true, name: true, email: true } } } },
               doctor: { include: { user: { select: { id: true, name: true, email: true } } } },
-              items: { include: { medication: true } },
+              items: { include: { medication: { select: { id: true, name: true, price: true } } } },
               dispensingRecords: { include: { medication: true, dispensedBy: { select: { id: true, name: true } } } },
               invoice: true,
             },
           }),
           prisma.medication.findMany({
-            include: { supplier: true, formulary: true, dispensingRecords: true, stockAdjustments: true },
+            include: { 
+              supplier: { select: { id: true, name: true } }, 
+              formulary: { select: { id: true, name: true } },
+              dispensingRecords: true,
+              stockAdjustments: true,
+            },
           }),
           prisma.supplier.findMany({
-            include: { medications: true, purchaseOrders: true },
+            include: { 
+              medications: { select: { id: true, name: true } }, 
+              purchaseOrders: true,
+            },
           }),
           prisma.formulary.findMany({
-            include: { medications: true },
+            include: { medications: { select: { id: true, name: true } } },
           }),
           prisma.user.findMany({
             where: { role: 'PHARMACIST' },
-            include: {
-              doctor: { select: { licenseNumber: true, phone: true, specialty: true } },
-            },
+            include: { doctor: { select: { licenseNumber: true, phone: true, specialty: true } } },
           }),
           prisma.medication.findMany({
             where: { stockQuantity: { lte: prisma.medication.fields.minStockThreshold } },
-            include: { supplier: true },
+            include: { supplier: { select: { id: true, name: true } } },
           }),
           prisma.purchaseOrder.findMany({
             include: {
-              supplier: true,
-              items: { include: { medication: true } },
+              supplier: { select: { id: true, name: true } },
+              items: { include: { medication: { select: { id: true, name: true } } } },
             },
           }),
         ]);
@@ -129,7 +169,10 @@ export async function GET(request) {
           prescriptions: allPrescriptions,
           inventory: allInventory,
           suppliers: allSuppliers,
-          formularies: allFormularies,
+          formularies: allFormularies.map(formulary => ({
+            ...formulary,
+            medications: Array.isArray(formulary.medications) ? formulary.medications : [],
+          })),
           pharmacists: allPharmacists.map(u => ({
             id: u.id,
             user: { name: u.name, email: u.email },
@@ -137,7 +180,7 @@ export async function GET(request) {
             phone: u.doctor?.phone || '',
             specialty: u.doctor?.specialty || '',
           })),
-          stockAlerts: allStockAlerts,
+          stockAlerts: allStock706Alerts,
           orders: allOrders,
         });
     }
@@ -149,6 +192,7 @@ export async function GET(request) {
   }
 }
 
+// POST handler for creating pharmacy resources
 export async function POST(request) {
   const user = authenticate(request);
   if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
@@ -183,7 +227,7 @@ export async function POST(request) {
           include: {
             patient: { include: { user: { select: { id: true, name: true, email: true } } } },
             doctor: { include: { user: { select: { id: true, name: true, email: true } } } },
-            items: { include: { medication: true } },
+            items: { include: { medication: { select: { id: true, name: true, price: true } } } },
           },
         });
         await prisma.invoice.create({
@@ -197,12 +241,13 @@ export async function POST(request) {
       }
 
       case 'dispenseMedication': {
-        const { prescriptionId, medicationId, quantity, patientType, dispensedById } = payload;
+        const { prescriptionId, medicationId, quantity, patientType, dispensedById } = payload;
         if (!prescriptionId || !medicationId || !quantity || !patientType || !dispensedById) {
           return NextResponse.json({ error: 'Missing required fields' }, { status: 400 });
         }
         const medication = await prisma.medication.findUnique({
           where: { id: parseInt(medicationId) },
+          select: { id: true, stockQuantity: true, price: true },
         });
         if (!medication) {
           return NextResponse.json({ error: 'Medication not found' }, { status: 404 });
@@ -212,7 +257,7 @@ export async function POST(request) {
         }
         const prescription = await prisma.prescription.findUnique({
           where: { id: parseInt(prescriptionId) },
-          include: { items: { include: { medication: true } } },
+          include: { items: { include: { medication: { select: { id: true, name: true } } } } },
         });
         if (!prescription) {
           return NextResponse.json({ error: 'Prescription not found' }, { status: 404 });
@@ -232,7 +277,7 @@ export async function POST(request) {
             invoice: { connect: { prescriptionId: parseInt(prescriptionId) } },
           },
           include: {
-            medication: true,
+            medication: { select: { id: true, name: true } },
             dispensedBy: { select: { id: true, name: true } },
             prescription: { include: { patient: { include: { user: { select: { id: true, name: true } } } } } },
           },
@@ -278,21 +323,33 @@ export async function POST(request) {
             formulary: formularyId ? { connect: { id: parseInt(formularyId) } } : undefined,
             narcotic: narcotic || false,
           },
-          include: { supplier: true, formulary: true },
+          include: { 
+            supplier: { select: { id: true, name: true } }, 
+            formulary: { select: { id: true, name: true } },
+          },
         });
         return NextResponse.json(medication, { status: 201 });
       }
 
       case 'addFormulary': {
-        const { name, description } = payload;
+        const { name, description, medicationIds } = payload;
         if (!name) {
           return NextResponse.json({ error: 'Missing required field: name' }, { status: 400 });
         }
         const formulary = await prisma.formulary.create({
-          data: { name, description },
-          include: { medications: true },
+          data: {
+            name,
+            description,
+            medications: medicationIds && medicationIds.length ? {
+              connect: medicationIds.map(id => ({ id: parseInt(id) })),
+            } : undefined,
+          },
+          include: { medications: { select: { id: true, name: true } } },
         });
-        return NextResponse.json(formulary, { status: 201 });
+        return NextResponse.json({
+          ...formulary,
+          medications: Array.isArray(formulary.medications) ? formulary.medications : [],
+        }, { status: 201 });
       }
 
       case 'addSupplier': {
@@ -327,9 +384,7 @@ export async function POST(request) {
               },
             },
           },
-          include: {
-            doctor: { select: { licenseNumber: true, phone: true, specialty: true } },
-          },
+          include: { doctor: { select: { licenseNumber: true, phone: true, specialty: true } } },
         });
         return NextResponse.json({
           id: pharmacist.id,
@@ -351,7 +406,7 @@ export async function POST(request) {
             totalAmount: parseFloat(totalAmount),
             status: 'PENDING',
           },
-          include: { prescription: true },
+          include: { prescription: { select: { id: true, status: true } } },
         });
         return NextResponse.json(invoice, { status: 201 });
       }
@@ -375,7 +430,10 @@ export async function POST(request) {
             processedBy: { connect: { id: parseInt(processedById) } },
             refundDate: new Date(),
           },
-          include: { invoice: true, processedBy: { select: { id: true, name: true } } },
+          include: { 
+            invoice: { select: { id: true, status: true } }, 
+            processedBy: { select: { id: true, name: true } },
+          },
         });
         await prisma.invoice.update({
           where: { id: parseInt(invoiceId) },
@@ -404,8 +462,8 @@ export async function POST(request) {
             },
           },
           include: {
-            supplier: true,
-            items: { include: { medication: true } },
+            supplier: { select: { id: true, name: true } },
+            items: { include: { medication: { select: { id: true, name: true } } } },
           },
         });
         return NextResponse.json(order, { status: 201 });
@@ -422,6 +480,7 @@ export async function POST(request) {
   }
 }
 
+// PUT handler for updating pharmacy resources
 export async function PUT(request, { params }) {
   const user = authenticate(request);
   if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
@@ -431,11 +490,15 @@ export async function PUT(request, { params }) {
     const { action, payload } = data;
     const { id } = params;
 
+    if (!id) {
+      return NextResponse.json({ error: 'Missing resource ID' }, { status: 400 });
+    }
+
     switch (action) {
       case 'updateMedication': {
         const { name, genericName, category, batchNumber, barcode, rfid, stockQuantity, minStockThreshold, price, expiryDate, supplierId, formularyId, narcotic } = payload;
-        if (!id) {
-          return NextResponse.json({ error: 'Missing medication ID' }, { status: 400 });
+        if (!name || !category || !batchNumber || !stockQuantity || !price || !expiryDate) {
+          return NextResponse.json({ error: 'Missing required fields' }, { status: 400 });
         }
         const medication = await prisma.medication.update({
           where: { id: parseInt(id) },
@@ -454,18 +517,22 @@ export async function PUT(request, { params }) {
             formulary: formularyId ? { connect: { id: parseInt(formularyId) } } : { disconnect: true },
             narcotic: narcotic || false,
           },
-          include: { supplier: true, formulary: true },
+          include: { 
+            supplier: { select: { id: true, name: true } }, 
+            formulary: { select: { id: true, name: true } },
+          },
         });
         return NextResponse.json(medication);
       }
 
       case 'updateStock': {
         const { stockQuantity, reason, adjustedById } = payload;
-        if (!id || !stockQuantity || !reason || !adjustedById) {
+        if (!stockQuantity || !reason || !adjustedById) {
           return NextResponse.json({ error: 'Missing required fields' }, { status: 400 });
         }
         const medication = await prisma.medication.findUnique({
           where: { id: parseInt(id) },
+          select: { id: true, stockQuantity: true },
         });
         if (!medication) {
           return NextResponse.json({ error: 'Medication not found' }, { status: 404 });
@@ -482,15 +549,18 @@ export async function PUT(request, { params }) {
         const updatedMedication = await prisma.medication.update({
           where: { id: parseInt(id) },
           data: { stockQuantity: parseInt(stockQuantity) },
-          include: { supplier: true, formulary: true },
+          include: { 
+            supplier: { select: { id: true, name: true } }, 
+            formulary: { select: { id: true, name: true } },
+          },
         });
         return NextResponse.json(updatedMedication);
       }
 
       case 'updateSupplier': {
         const { name, contact, email, address } = payload;
-        if (!id || !name || !email) {
-          return NextResponse.json({ error: 'Missing required fields: id, name, or email' }, { status: 400 });
+        if (!name || !email) {
+          return NextResponse.json({ error: 'Missing required fields: name or email' }, { status: 400 });
         }
         const supplier = await prisma.supplier.update({
           where: { id: parseInt(id) },
@@ -501,15 +571,15 @@ export async function PUT(request, { params }) {
 
       case 'updateOrderStatus': {
         const { status } = payload;
-        if (!id || !status) {
-          return NextResponse.json({ error: 'Missing required fields: id or status' }, { status: 400 });
+        if (!status) {
+          return NextResponse.json({ error: 'Missing required field: status' }, { status: 400 });
         }
         const order = await prisma.purchaseOrder.update({
           where: { id: parseInt(id) },
           data: { status },
           include: {
-            supplier: true,
-            items: { include: { medication: true } },
+            supplier: { select: { id: true, name: true } },
+            items: { include: { medication: { select: { id: true, name: true } } } },
           },
         });
         return NextResponse.json(order);
@@ -517,8 +587,8 @@ export async function PUT(request, { params }) {
 
       case 'updatePrescriptionStatus': {
         const { status } = payload;
-        if (!id || !status) {
-          return NextResponse.json({ error: 'Missing required fields: id or status' }, { status: 400 });
+        if (!status) {
+          return NextResponse.json({ error: 'Missing required field: status' }, { status: 400 });
         }
         const prescription = await prisma.prescription.update({
           where: { id: parseInt(id) },
@@ -526,7 +596,7 @@ export async function PUT(request, { params }) {
           include: {
             patient: { include: { user: { select: { id: true, name: true, email: true } } } },
             doctor: { include: { user: { select: { id: true, name: true, email: true } } } },
-            items: { include: { medication: true } },
+            items: { include: { medication: { select: { id: true, name: true, price: true } } } },
             dispensingRecords: { include: { medication: true, dispensedBy: { select: { id: true, name: true } } } },
           },
         });
@@ -544,6 +614,7 @@ export async function PUT(request, { params }) {
   }
 }
 
+// DELETE handler for removing pharmacy resources
 export async function DELETE(request, { params }) {
   const user = authenticate(request);
   if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
@@ -552,6 +623,10 @@ export async function DELETE(request, { params }) {
     const { id } = params;
     const { searchParams } = new URL(request.url);
     const resource = searchParams.get('resource');
+
+    if (!id || !resource) {
+      return NextResponse.json({ error: 'Missing required fields: id or resource' }, { status: 400 });
+    }
 
     switch (resource) {
       case 'medication':
