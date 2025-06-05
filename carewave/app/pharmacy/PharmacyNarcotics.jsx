@@ -65,35 +65,6 @@ const PharmacyNarcotics = () => {
       width: 150,
       valueGetter: ({ row }) => row?.formulary?.name ?? 'Unknown',
     },
-    {
-      field: 'history',
-      headerName: 'History',
-      width: 300,
-      valueGetter: ({ row }) => {
-        // Log row data for debugging
-        console.log('Processing history for row:', row);
-        // Ensure dispensingRecords and stockAdjustments are arrays
-        const dispensingRecords = Array.isArray(row?.dispensingRecords) ? row.dispensingRecords : [];
-        const stockAdjustments = Array.isArray(row?.stockAdjustments) ? row.stockAdjustments : [];
-
-        // Log arrays for debugging
-        console.log('Dispensing Records:', dispensingRecords);
-        console.log('Stock Adjustments:', stockAdjustments);
-
-        const history = [
-          ...dispensingRecords.map(record => ({ ...record, date: record.dispensedDate })),
-          ...stockAdjustments.map(record => ({ ...record, date: record.adjustmentDate })),
-        ]
-          .filter(record => {
-            const isValid = record && record.date && !isNaN(new Date(record.date).getTime()) && typeof record.quantity === 'number';
-            if (!isValid) console.log('Invalid record filtered out:', record);
-            return isValid;
-          })
-          .map(record => `${record.quantity} units ${record.quantity > 0 ? 'added' : 'dispensed'} on ${new Date(record.date).toLocaleDateString()}`)
-          .join(', ');
-        return history || 'No history available';
-      },
-    },
   ];
 
   const filteredNarcotics = narcotics.filter(item =>
