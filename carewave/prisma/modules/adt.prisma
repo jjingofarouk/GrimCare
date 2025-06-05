@@ -1,0 +1,49 @@
+model Admission {
+  id                   Int          @id @default(autoincrement())
+  patientId            Int
+  patient              Patient      @relation(fields: [patientId], references: [id])
+  doctorId             Int?
+  doctor               Doctor?      @relation("DoctorAdmissions", fields: [doctorId], references: [id])
+  wardId               Int?
+  ward                 Ward?        @relation(fields: [wardId], references: [id])
+  admissionDate        DateTime     @default(now())
+  scheduledDate        DateTime?
+  preAdmissionNotes    String?
+  presentingComplaints String?
+  relayedInfo          String?
+  triagePriority       String?
+  triageNotes          String?
+  status               String       @default("PENDING") // PENDING, ADMITTED, DISCHARGED
+  dischargeDate        DateTime?
+  dischargeNotes       String?
+  createdAt            DateTime     @default(now())
+  updatedAt            DateTime     @updatedAt
+}
+
+model Discharge {
+  id                   Int          @id @default(autoincrement())
+  patientId            Int
+  patient              Patient      @relation("DischargedPatient", fields: [patientId], references: [id])
+  doctorId             Int
+  doctor               Doctor       @relation("DischargingDoctor", fields: [doctorId], references: [id])
+  dischargeDate        DateTime     @default(now())
+  dischargeNotes       String?
+  followUpInstructions String?
+  medications          String?
+  createdAt            DateTime     @default(now())
+  updatedAt            DateTime     @updatedAt
+}
+
+model Ward {
+  id            Int           @id @default(autoincrement())
+  name          String
+  wardNumber    String        @unique
+  totalBeds     Int
+  occupiedBeds  Int           @default(0)
+  department    String?
+  location      String?
+  nurseInCharge String?
+  admissions    Admission[]
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
+}
