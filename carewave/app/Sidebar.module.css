@@ -1,77 +1,59 @@
-/* Sidebar.module.css */
+/* Sidebar.module.css - Enhanced styles for modern sidebar */
 
+/* Custom scrollbar for sidebar */
 .sidebar {
-  width: 320px !important;
-  background: #ffffff !important;
-  border-right: 1px solid #e5e7eb !important;
-  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06) !important;
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+  scrollbar-width: thin;
+  scrollbar-color: #cbd5e1 transparent;
 }
 
-.logo {
-  padding: 1.5rem 1rem;
-  border-bottom: 1px solid #f3f4f6;
-  background: #f8fafc;
-  cursor: pointer;
-  transition: background-color 0.2s ease;
-}
-
-.logo:hover {
-  background: #f1f5f9;
-}
-
-.logoContainer {
-  display: flex;
-  align-items: center;
-  gap: 0.75rem;
-}
-
-.logoImage {
-  width: 36px;
-  height: 36px;
-  border-radius: 8px;
-  object-fit: contain;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-}
-
-.logoTitle {
-  font-size: 1.25rem !important;
-  font-weight: 700 !important;
-  color: #1e40af !important;
-  letter-spacing: -0.025em;
-  margin: 0 !important;
-}
-
-.nav {
-  padding: 0.5rem 0 !important;
-  overflow-y: auto;
-  max-height: calc(100vh - 120px);
-}
-
-.nav::-webkit-scrollbar {
+.sidebar::-webkit-scrollbar {
   width: 4px;
 }
 
-.nav::-webkit-scrollbar-track {
-  background: #f8fafc;
+.sidebar::-webkit-scrollbar-track {
+  background: transparent;
 }
 
-.nav::-webkit-scrollbar-thumb {
-  background: #cbd5e1;
+.sidebar::-webkit-scrollbar-thumb {
+  background-color: #cbd5e1;
   border-radius: 2px;
 }
 
-.nav::-webkit-scrollbar-thumb:hover {
-  background: #94a3b8;
+.sidebar::-webkit-scrollbar-thumb:hover {
+  background-color: #94a3b8;
 }
 
+/* Smooth transitions for mobile */
+@media (max-width: 768px) {
+  .sidebar {
+    transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+}
+
+/* Focus states for accessibility */
+.navLink:focus-visible {
+  outline: 2px solid #3b82f6;
+  outline-offset: 2px;
+}
+
+/* Animation for category chips */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.categoryChip {
+  animation: fadeInUp 0.3s ease-out;
+}
+
+/* Enhanced hover effects */
 .navLink {
-  margin: 0.125rem 0.75rem !important;
-  border-radius: 8px !important;
-  padding: 0.75rem 1rem !important;
-  transition: all 0.2s ease !important;
-  color: #64748b !important;
-  text-decoration: none !important;
   position: relative;
   overflow: hidden;
 }
@@ -81,200 +63,86 @@
   position: absolute;
   left: 0;
   top: 0;
-  bottom: 0;
-  width: 3px;
-  background: #3b82f6;
-  transform: scaleY(0);
-  transition: transform 0.2s ease;
-  border-radius: 0 2px 2px 0;
-}
-
-.navLink:hover {
-  background: #f1f5f9 !important;
-  color: #334155 !important;
-  transform: translateX(2px);
+  height: 100%;
+  width: 0;
+  background: linear-gradient(90deg, transparent, rgba(59, 130, 246, 0.1), transparent);
+  transition: width 0.3s ease;
 }
 
 .navLink:hover::before {
-  transform: scaleY(1);
+  width: 100%;
+}
+
+/* Active state pulse animation */
+@keyframes activePulse {
+  0% {
+    box-shadow: 0 0 0 0 rgba(59, 130, 246, 0.4);
+  }
+  70% {
+    box-shadow: 0 0 0 6px rgba(59, 130, 246, 0);
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgba(59, 130, 246, 0);
+  }
 }
 
 .navLink.active {
-  background: #eff6ff !important;
-  color: #1e40af !important;
-  font-weight: 600 !important;
-  box-shadow: 0 1px 3px rgba(59, 130, 246, 0.1);
+  animation: activePulse 2s infinite;
 }
 
-.navLink.active::before {
-  transform: scaleY(1);
-}
-
-.navLink .MuiListItemText-primary {
-  font-size: 0.875rem !important;
-  font-weight: 500 !important;
-  letter-spacing: 0.025em;
-}
-
-.icon {
-  width: 20px !important;
-  height: 20px !important;
-  color: inherit !important;
-  margin-right: 0.5rem;
+/* Logo hover effect */
+.logoContainer {
   transition: transform 0.2s ease;
 }
 
-.navLink:hover .icon {
-  transform: scale(1.05);
+.logoContainer:hover {
+  transform: scale(1.02);
 }
 
-.navLink .MuiListItemIcon-root {
-  min-width: 40px !important;
-  color: inherit !important;
+/* Micro-interactions */
+.navIcon {
+  transition: transform 0.2s ease;
 }
 
-/* Responsive Design */
-@media (max-width: 768px) {
-  .sidebar {
-    width: 280px !important;
-    max-width: 85vw !important;
-  }
-  
-  .logo {
-    padding: 1rem;
-  }
-  
-  .logoTitle {
-    font-size: 1.125rem !important;
-  }
-  
-  .logoImage {
-    width: 32px;
-    height: 32px;
-  }
-  
-  .navLink {
-    margin: 0.125rem 0.5rem !important;
-    padding: 0.875rem 0.75rem !important;
-  }
-  
-  .navLink .MuiListItemText-primary {
-    font-size: 0.9rem !important;
+.navLink:hover .navIcon {
+  transform: scale(1.1);
+}
+
+/* Glass morphism effect for modern browsers */
+@supports (backdrop-filter: blur(10px)) {
+  .glassEffect {
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.2);
   }
 }
 
-@media (max-width: 480px) {
-  .sidebar {
-    width: 260px !important;
-    max-width: 80vw !important;
-  }
-  
-  .logo {
-    padding: 0.875rem;
-  }
-  
-  .logoContainer {
-    gap: 0.5rem;
-  }
-  
-  .logoTitle {
-    font-size: 1rem !important;
-  }
-  
-  .logoImage {
-    width: 28px;
-    height: 28px;
-  }
-  
-  .navLink {
-    margin: 0.125rem 0.25rem !important;
-    padding: 1rem 0.75rem !important;
-  }
-  
-  .icon {
-    width: 18px !important;
-    height: 18px !important;
-  }
-}
-
-/* High contrast mode support */
-@media (prefers-contrast: high) {
-  .sidebar {
-    border-right: 2px solid #000 !important;
-  }
-  
-  .navLink.active {
-    background: #000 !important;
-    color: #fff !important;
-  }
-  
-  .navLink:hover {
-    background: #f0f0f0 !important;
-    color: #000 !important;
-  }
-}
-
-/* Reduced motion support */
-@media (prefers-reduced-motion: reduce) {
-  .sidebar,
-  .navLink,
-  .icon,
-  .navLink::before {
-    transition: none !important;
-  }
-  
-  .navLink:hover {
-    transform: none;
-  }
-  
-  .navLink:hover .icon {
-    transform: none;
-  }
-}
-
-/* Dark mode support (if needed) */
+/* Dark mode support */
 @media (prefers-color-scheme: dark) {
   .sidebar {
-    background: #1f2937 !important;
-    border-right: 1px solid #374151 !important;
+    background: linear-gradient(180deg, #1e293b 0%, #0f172a 100%);
+    border-right: 1px solid #334155;
   }
   
-  .logo {
-    background: #111827;
-    border-bottom: 1px solid #374151;
+  .categoryChip {
+    background-color: rgba(255, 255, 255, 0.1);
+    color: #e2e8f0;
   }
-  
-  .logo:hover {
-    background: #1f2937;
-  }
-  
-  .logoTitle {
-    color: #60a5fa !important;
-  }
-  
-  .navLink {
-    color: #9ca3af !important;
-  }
-  
-  .navLink:hover {
-    background: #374151 !important;
-    color: #f3f4f6 !important;
+}
+
+/* Reduced motion for accessibility */
+@media (prefers-reduced-motion: reduce) {
+  .navLink,
+  .logoContainer,
+  .navIcon {
+    transition: none;
   }
   
   .navLink.active {
-    background: #1e3a8a !important;
-    color: #bfdbfe !important;
+    animation: none;
   }
   
-  .nav::-webkit-scrollbar-track {
-    background: #111827;
-  }
-  
-  .nav::-webkit-scrollbar-thumb {
-    background: #4b5563;
-  }
-  
-  .nav::-webkit-scrollbar-thumb:hover {
-    background: #6b7280;
+  .categoryChip {
+    animation: none;
   }
 }
