@@ -6,7 +6,6 @@ import PharmacyOrders from './PharmacyOrders';
 import PharmacySuppliers from './PharmacySuppliers';
 import PharmacyReports from './PharmacyReports';
 import PharmacyForm from './PharmacyForm';
-import PharmacyDispensing from './PharmacyDispensing';
 import PharmacyBilling from './PharmacyBilling';
 import PharmacyFormulary from './PharmacyFormulary';
 import PharmacyNarcotics from './PharmacyNarcotics';
@@ -44,7 +43,6 @@ const PharmacyPage = () => {
             }}
           >
             <Tab label="Inventory" />
-            <Tab label="Dispensing" />
             <Tab label="Orders" />
             <Tab label="Suppliers" />
             <Tab label="Billing" />
@@ -57,15 +55,14 @@ const PharmacyPage = () => {
         </Box>
         <Box className={styles.tabContent}>
           {activeTab === 0 && <PharmacyInventory />}
-          {activeTab === 1 && <PharmacyDispensing />}
-          {activeTab === 2 && <PharmacyOrders />}
-          {activeTab === 3 && <PharmacySuppliers />}
-          {activeTab === 4 && <PharmacyBilling />}
-          {activeTab === 5 && <PharmacyFormulary />}
-          {activeTab === 6 && <PharmacyNarcotics />}
-          {activeTab === 7 && <PharmacyReports />}
-          {activeTab === 8 && <PharmacyForm />}
-          {activeTab === 9 && <PharmacyPharmacists />}
+          {activeTab === 1 && <PharmacyOrders />}
+          {activeTab === 2 && <PharmacySuppliers />}
+          {activeTab === 3 && <PharmacyBilling />}
+          {activeTab === 4 && <PharmacyFormulary />}
+          {activeTab === 5 && <PharmacyNarcotics />}
+          {activeTab === 6 && <PharmacyReports />}
+          {activeTab === 7 && <PharmacyForm />}
+          {activeTab === 8 && <PharmacyPharmacists />}
         </Box>
       </Paper>
     </Container>
