@@ -22,7 +22,7 @@ const PharmacyPage = () => {
   return (
     <Container maxWidth="xl" className={styles.container}>
       <Typography variant="h4" gutterBottom className={styles.title}>
-        Pharmacy Management System
+        Pharmacy Management
       </Typography>
       <Paper elevation={3} className={styles.paper}>
         <Box className={styles.tabsWrapper}>
