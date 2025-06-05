@@ -1,0 +1,30 @@
+model Doctor {
+  id                Int                   @id @default(autoincrement())
+  user              User?                 @relation
+  doctorId          String                @unique
+  specialty         String
+  licenseNumber     String                @unique
+  phone             String?
+  office            String?
+  departmentId      Int?
+  department        Department?           @relation(fields: [departmentId], references: [id])
+  createdAt         DateTime              @default(now())
+  updatedAt         DateTime              @updatedAt
+  admissions        Admission[]           @relation("DoctorAdmissions")
+  discharges        Discharge[]           @relation("DischargingDoctor")
+  appointments      Appointment[]         @relation("DoctorAppointments")
+  availability      DoctorAvailability[]
+  prescriptions     Prescription[]        @relation("Prescriptions")
+  prescriberId      Int?
+}
+
+model DoctorAvailability {
+  id            Int           @id @default(autoincrement())
+  doctorId      Int
+  doctor        Doctor        @relation(fields: [doctorId], references: [id])
+  startTime     DateTime
+  endTime       DateTime
+  status        String        @default("AVAILABLE") // AVAILABLE, UNAVAILABLE
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
+}
