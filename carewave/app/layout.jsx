@@ -2,7 +2,7 @@ import { Box } from '@mui/material';
 import Header from './Header';
 import Sidebar from './Sidebar';
 
-export default function RootLayout({ children }: { children: React.ReactNode }) {
+export default function RootLayout({ children }) {
   return (
     <Box sx={{ display: 'flex', minHeight: '100vh' }}>
       <Box sx={{ display: { xs: 'none', md: 'block' } }}>
