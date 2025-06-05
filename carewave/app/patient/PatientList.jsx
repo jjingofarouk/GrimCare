@@ -1,4 +1,5 @@
-"use client";
+'use client';
+
 import React, { useState, useEffect } from 'react';
 import { Box, Typography, Alert, Button, TextField, MenuItem, Skeleton } from '@mui/material';
 import { DataGrid, GridToolbarContainer, GridToolbarFilterButton } from '@mui/x-data-grid';
@@ -167,7 +168,7 @@ export default function PatientList() {
               pageSizeOptions={[5, 10, 25]}
               disableRowSelectionOnClick
               initialState={{
-                pagination: { paginationModel: { pageSize: nicho10 } },
+                pagination: { paginationModel: { pageSize: 10 } },
               }}
               className={styles.dataGrid}
               onCellEditStop={handleCellEditCommit}
