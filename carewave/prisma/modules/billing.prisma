@@ -1,0 +1,27 @@
+model Invoice {
+  id                Int               @id @default(autoincrement())
+  prescriptionId    Int               @unique
+  prescription      Prescription      @relation(fields: [prescriptionId], references: [id])
+  totalAmount       Float
+  status            String            @default("PENDING") // PENDING, PAID, REFUNDED
+  paymentMethod     String?
+  transactionId     Int?
+  transaction       Transaction?      @relation("TransactionInvoices", fields: [transactionId], references: [id])
+  createdAt         DateTime          @default(now())
+  updatedAt         DateTime          @updatedAt
+  dispensingRecords DispensingRecord[]
+  refunds           Refund[]
+}
+
+model Refund {
+  id            Int       @id @default(autoincrement())
+  invoiceId     Int
+  invoice       Invoice   @relation(fields: [invoiceId], references: [id])
+  reason        String
+  amount        Float
+  refundDate    DateTime  @default(now())
+  processedById Int
+  processedBy   User      @relation("ProcessedBy", fields: [processedById], references: [id])
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+}
