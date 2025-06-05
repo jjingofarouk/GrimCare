@@ -1,0 +1,59 @@
+model Prescription {
+  id                Int                @id @default(autoincrement())
+  patientId         Int
+  patient           Patient            @relation("Prescriptions", fields: [patientId], references: [id])
+  doctorId          Int
+  doctor            Doctor             @relation("Prescriptions", fields: [doctorId], references: [id])
+  status            String             @default("PENDING") // PENDING, DISPENSED, CANCELLED
+  prescriptionDate  DateTime           @default(now())
+  notes             String?
+  createdAt         DateTime           @default(now())
+  updatedAt         DateTime           @updatedAt
+  items             PrescriptionItem[]
+  dispensingRecords DispensingRecord[]
+  invoice           Invoice?
+}
+
+model PrescriptionItem {
+  id            Int           @id @default(autoincrement())
+  prescriptionId Int
+  prescription  Prescription  @relation(fields: [prescriptionId], references: [id])
+  medicationId  Int
+  medication    Medication    @relation(fields: [medicationId], references: [id])
+  dosage        String
+  quantity      Int
+  frequency     String
+  duration      String
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
+}
+
+model DispensingRecord {
+  id                Int           @id @default(autoincrement())
+  prescriptionId    Int
+  prescription      Prescription  @relation(fields: [prescriptionId], references: [id])
+  medicationId      Int
+  medication        Medication    @relation(fields: [medicationId], references: [id])
+  patientType       String        // INPATIENT, OUTPATIENT
+  quantity          Int
+  dispensedDate     DateTime      @default(now())
+  dispensedById     Int
+  dispensedBy       User          @relation("DispensedBy", fields: [dispensedById], references: [id])
+  createdAt         DateTime      @default(now())
+  updatedAt         DateTime      @updatedAt
+  invoiceId         Int?
+  invoice           Invoice?      @relation(fields: [invoiceId], references: [id])
+}
+
+model StockAdjustment {
+  id            Int           @id @default(autoincrement())
+  medicationId  Int
+  medication    Medication    @relation(fields: [medicationId], references: [id])
+  quantity      Int
+  reason        String
+  adjustedById  Int
+  adjustedBy    User          @relation("AdjustedBy", fields: [adjustedById], references: [id])
+  adjustmentDate DateTime     @default(now())
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
+}
