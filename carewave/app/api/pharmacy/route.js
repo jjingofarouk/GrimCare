@@ -1,4 +1,4 @@
-// api/pharmacy/route.js
+// app/api/pharmacy/route.js
 import { PrismaClient } from '@prisma/client';
 import { NextResponse } from 'next/server';
 import jwt from 'jsonwebtoken';
@@ -42,8 +42,8 @@ export async function GET(request) {
 
       case 'inventory':
         const inventory = await prisma.medication.findMany({
-          include: { 
-            supplier: { select: { id: true, name: true } }, 
+          include: {
+            supplier: { select: { id: true, name: true } },
             formulary: { select: { id: true, name: true } },
             dispensingRecords: true,
             stockAdjustments: true,
@@ -53,8 +53,8 @@ export async function GET(request) {
 
       case 'suppliers':
         const suppliers = await prisma.supplier.findMany({
-          include: { 
-            medications: { select: { id: true, name: true } }, 
+          include: {
+            medications: { select: { id: true, name: true } },
             purchaseOrders: true,
           },
         });
@@ -134,16 +134,16 @@ export async function GET(request) {
             },
           }),
           prisma.medication.findMany({
-            include: { 
-              supplier: { select: { id: true, name: true } }, 
+            include: {
+              supplier: { select: { id: true, name: true } },
               formulary: { select: { id: true, name: true } },
               dispensingRecords: true,
               stockAdjustments: true,
             },
           }),
           prisma.supplier.findMany({
-            include: { 
-              medications: { select: { id: true, name: true } }, 
+            include: {
+              medications: { select: { id: true, name: true } },
               purchaseOrders: true,
             },
           }),
@@ -180,7 +180,7 @@ export async function GET(request) {
             phone: u.doctor?.phone || '',
             specialty: u.doctor?.specialty || '',
           })),
-          stockAlerts: allStock706Alerts,
+          stockAlerts: allStockAlerts,
           orders: allOrders,
         });
     }
@@ -241,9 +241,9 @@ export async function POST(request) {
       }
 
       case 'dispenseMedication': {
-        const { prescriptionId, medicationId, quantity, patientType, dispensedById } = payload;
+        const { prescriptionId, medicationId, quantity, patientType, dispensedById } = payload;
         if (!prescriptionId || !medicationId || !quantity || !patientType || !dispensedById) {
-          return NextResponse.json({ error: 'Missing required fields' }, { status: 400 });
+          return NextResponse.json({ error: 'Missing required fields' }, { status: 400 môi);
         }
         const medication = await prisma.medication.findUnique({
           where: { id: parseInt(medicationId) },
@@ -323,8 +323,8 @@ export async function POST(request) {
             formulary: formularyId ? { connect: { id: parseInt(formularyId) } } : undefined,
             narcotic: narcotic || false,
           },
-          include: { 
-            supplier: { select: { id: true, name: true } }, 
+          include: {
+            supplier: { select: { id: true, name: true } },
             formulary: { select: { id: true, name: true } },
           },
         });
@@ -430,8 +430,8 @@ export async function POST(request) {
             processedBy: { connect: { id: parseInt(processedById) } },
             refundDate: new Date(),
           },
-          include: { 
-            invoice: { select: { id: true, status: true } }, 
+          include: {
+            invoice: { select: { id: true, status: true } },
             processedBy: { select: { id: true, name: true } },
           },
         });
@@ -517,8 +517,8 @@ export async function PUT(request, { params }) {
             formulary: formularyId ? { connect: { id: parseInt(formularyId) } } : { disconnect: true },
             narcotic: narcotic || false,
           },
-          include: { 
-            supplier: { select: { id: true, name: true } }, 
+          include: {
+            supplier: { select: { id: true, name: true } },
             formulary: { select: { id: true, name: true } },
           },
         });
@@ -549,8 +549,8 @@ export async function PUT(request, { params }) {
         const updatedMedication = await prisma.medication.update({
           where: { id: parseInt(id) },
           data: { stockQuantity: parseInt(stockQuantity) },
-          include: { 
-            supplier: { select: { id: true, name: true } }, 
+          include: {
+            supplier: { select: { id: true, name: true } },
             formulary: { select: { id: true, name: true } },
           },
         });
