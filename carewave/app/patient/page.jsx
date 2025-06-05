@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import PatientForm from './PatientForm';
-import PatientListWithFilte from './PatientList';
+import PatientList from './PatientList';
 import { getPatients } from './patientService';
 import styles from './PatientPage.module.css';
 
