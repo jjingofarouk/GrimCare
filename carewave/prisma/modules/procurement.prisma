@@ -1,0 +1,35 @@
+model Supplier {
+  id            Int                @id @default(autoincrement())
+  name          String
+  contact       String
+  email         String             @unique
+  address       String
+  createdAt     DateTime           @default(now())
+  updatedAt     DateTime           @updatedAt
+  medications   Medication[]
+  purchaseOrders PurchaseOrder[]
+}
+
+model PurchaseOrder {
+  id            Int                 @id @default(autoincrement())
+  supplierId    Int
+  supplier      Supplier            @relation(fields: [supplierId], references: [id])
+  orderDate     DateTime            @default(now())
+  status        String              @default("PENDING") // PENDING, PROCESSING, DELIVERED
+  totalAmount   Float
+  createdAt     DateTime            @default(now())
+  updatedAt     DateTime            @updatedAt
+  items         PurchaseOrderItem[]
+}
+
+model PurchaseOrderItem {
+  id            Int           @id @default(autoincrement())
+  purchaseOrderId Int
+  purchaseOrder PurchaseOrder @relation(fields: [purchaseOrderId], references: [id])
+  medicationId  Int
+  medication    Medication    @relation(fields: [medicationId], references: [id])
+  quantity      Int
+  unitPrice     Float
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
+}
