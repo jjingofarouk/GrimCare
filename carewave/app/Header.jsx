@@ -1,32 +1,34 @@
-// Header.jsx
+
+
 "use client";
 
 import React, { useState } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import {
-  AppBar,
-  Toolbar,
-  Typography,
-  Box,
-  Avatar,
-  Menu as MuiMenu,
-  MenuItem,
+import { 
+  AppBar, 
+  Toolbar, 
+  Typography, 
+  Button, 
+  Box, 
+  Avatar, 
+  Menu, 
+  MenuItem, 
   IconButton,
   Chip,
   Badge,
   Divider,
   useTheme,
-  alpha,
+  alpha
 } from '@mui/material';
 import {
-  Menu as MenuIcon,
-  Bell,
-  User,
-  Settings,
-  LogOut,
-  Home,
-} from 'lucide-react';
+  Bars3Icon,
+  BellIcon,
+  UserIcon,
+  CogIcon,
+  ArrowRightOnRectangleIcon,
+  HomeIcon
+} from '@heroicons/react/24/outline';
 import { AccountCircle, Notifications } from '@mui/icons-material';
 import Sidebar from './Sidebar';
 import useAuth from './useAuth';
@@ -38,7 +40,7 @@ const roleColors = {
   LAB_TECHNICIAN: '#ea580c',
   STAFF: '#0891b2',
   ADMIN: '#64748b',
-  GUEST: '#374151',
+  GUEST: '#374151'
 };
 
 const roleDisplayNames = {
@@ -48,7 +50,7 @@ const roleDisplayNames = {
   LAB_TECHNICIAN: 'Lab Tech',
   STAFF: 'Staff',
   ADMIN: 'Administrator',
-  GUEST: 'Guest',
+  GUEST: 'Guest'
 };
 
 export default function Header() {
@@ -64,47 +66,58 @@ export default function Header() {
   const handleMenuClose = () => setAnchorEl(null);
   const handleNotificationOpen = (event) => setNotificationAnchor(event.currentTarget);
   const handleNotificationClose = () => setNotificationAnchor(null);
-
+  
   const handleLogout = async () => {
     await logout();
     handleMenuClose();
   };
 
-  const userMenuItems = user
-    ? [
-        { name: 'Profile', path: '/profile', icon: User, description: 'View and edit your profile' },
-        { name: 'Settings', path: '/settings', icon: Settings, description: 'Application preferences' },
-        {
-          name: 'Logout',
-          path: '#',
-          onClick: handleLogout,
-          icon: LogOut,
-          description: 'Sign out of your account',
-          danger: true,
-        },
-      ]
-    : [
-        { name: 'Home', path: '/', icon: Home },
-        { name: 'Login', path: '/auth/login', icon: User },
-        { name: 'Register', path: '/auth/register', icon: User },
-      ];
+  const userMenuItems = user ? [
+    { 
+      name: 'Profile', 
+      path: '/profile', 
+      icon: UserIcon,
+      description: 'View and edit your profile'
+    },
+    { 
+      name: 'Settings', 
+      path: '/settings', 
+      icon: CogIcon,
+      description: 'Application preferences'
+    },
+    { 
+      name: 'Logout', 
+      path: '#', 
+      onClick: handleLogout, 
+      icon: ArrowRightOnRectangleIcon,
+      description: 'Sign out of your account',
+      danger: true
+    },
+  ] : [
+    { name: 'Home', path: '/', icon: HomeIcon },
+    { name: 'Login', path: '/auth/login', icon: UserIcon },
+    { name: 'Register', path: '/auth/register', icon: UserIcon },
+  ];
 
+  // Mock notifications - in real app, these would come from your notification system
   const notifications = [
     { id: 1, title: 'New appointment scheduled', time: '5 min ago', unread: true },
     { id: 2, title: 'Lab results available', time: '1 hour ago', unread: true },
     { id: 3, title: 'System maintenance tonight', time: '2 hours ago', unread: false },
   ];
 
-  const unreadCount = notifications.filter((n) => n.unread).length;
+  const unreadCount = notifications.filter(n => n.unread).length;
 
   const headerStyles = {
-    backgroundColor: '#1e3a8a',
-    color: '#f1f5f9',
+    background: 'linear-gradient(135deg, #ffffff 0%, #f8fafc 100%)',
+    backdropFilter: 'blur(10px)',
+    borderBottom: '1px solid #e2e8f0',
     boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)',
+    color: '#1e293b',
     '& .MuiToolbar-root': {
-      minHeight: '64px',
-      padding: '0 16px',
-    },
+      minHeight: '72px',
+      padding: '0 24px',
+    }
   };
 
   const logoContainerStyles = {
@@ -112,225 +125,292 @@ export default function Header() {
     alignItems: 'center',
     gap: '12px',
     cursor: 'pointer',
-    padding: '8px 12px',
-    borderRadius: '8px',
+    padding: '8px 16px',
+    borderRadius: '12px',
+    transition: 'all 0.2s ease',
     '&:hover': {
-      backgroundColor: '#2563eb',
-    },
+      backgroundColor: alpha(theme.palette.primary.main, 0.08),
+      transform: 'scale(1.02)',
+    }
   };
 
   const logoImageStyles = {
-    width: '32px',
-    height: '32px',
-    borderRadius: '6px',
+    width: '40px',
+    height: '40px',
+    borderRadius: '10px',
+    boxShadow: '0 2px 8px rgba(0, 0, 0, 0.1)',
   };
 
   const headerTitleStyles = {
-    fontWeight: 600,
-    fontSize: '1.25rem',
-    color: '#f1f5f9',
+    fontWeight: 700,
+    fontSize: '1.5rem',
+    background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+    backgroundClip: 'text',
+    WebkitBackgroundClip: 'text',
+    WebkitTextFillColor: 'transparent',
+    display: { xs: 'none', sm: 'block' }
+  };
+
+  const navButtonStyles = {
+    borderRadius: '10px',
+    padding: '8px 16px',
+    fontWeight: 500,
+    textTransform: 'none',
+    transition: 'all 0.2s ease',
+    '&:hover': {
+      backgroundColor: alpha(theme.palette.primary.main, 0.08),
+      transform: 'translateY(-1px)',
+    },
+    '&.active': {
+      backgroundColor: alpha(theme.palette.primary.main, 0.12),
+      color: theme.palette.primary.main,
+    }
   };
 
   const userInfoStyles = {
     display: 'flex',
     alignItems: 'center',
-    gap: '12px',
+    gap: '16px',
   };
 
   const userNameStyles = {
     fontWeight: 600,
-    color: '#f1f5f9',
-    display: { xs: 'none', sm: 'block' },
-  };
-
-  const avatarStyles = {
-    width: 32,
-    height: 32,
-    fontSize: '0.875rem',
-    fontWeight: 600,
-    backgroundColor: user ? roleColors[user.role] || '#64748b' : '#64748b',
-    '&:hover': {
-      transform: 'scale(1.05)',
-    },
-  };
-
-  const notificationStyles = {
-    color: '#cbd5e1',
-    '&:hover': {
-      color: '#ffffff',
-    },
+    color: '#1e293b',
+    display: { xs: 'none', md: 'block' }
   };
 
   const menuStyles = {
     '& .MuiPaper-root': {
-      borderRadius: '12px',
-      boxShadow: '0 8px 24px rgba(0, 0, 0, 0.2)',
-      backgroundColor: '#1e3a8a',
-      color: '#f1f5f9',
-      minWidth: '240px',
+      borderRadius: '16px',
+      boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)',
+      border: '1px solid #e2e8f0',
+      minWidth: '280px',
       marginTop: '8px',
-    },
+    }
   };
 
   const menuItemStyles = {
-    padding: '10px 16px',
+    padding: '12px 20px',
     borderRadius: '8px',
-    margin: '2px 8px',
+    margin: '4px 8px',
+    transition: 'all 0.2s ease',
     '&:hover': {
-      backgroundColor: '#2563eb',
+      backgroundColor: alpha(theme.palette.primary.main, 0.08),
     },
     '&.danger:hover': {
-      backgroundColor: '#ef4444',
-    },
+      backgroundColor: alpha('#ef4444', 0.08),
+      color: '#ef4444',
+    }
+  };
+
+  const avatarStyles = {
+    width: 36,
+    height: 36,
+    fontSize: '1rem',
+    fontWeight: 600,
+    backgroundColor: user ? roleColors[user.role] || '#64748b' : '#64748b',
+    transition: 'all 0.2s ease',
+    '&:hover': {
+      transform: 'scale(1.05)',
+    }
+  };
+
+  const notificationStyles = {
+    color: '#64748b',
+    transition: 'color 0.2s ease',
+    '&:hover': {
+      color: theme.palette.primary.main,
+    }
   };
 
   return (
     <>
-      <Box sx={{ display: 'flex', minHeight: '100vh' }}>
-        <Box sx={{ display: { xs: 'none', md: 'block' } }}>
-          <Sidebar isOpen={true} toggleSidebar={() => {}} />
-        </Box>
-        <Box sx={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
-          <AppBar position="fixed" sx={headerStyles} elevation={0}>
-            <Toolbar>
-              <Box sx={logoContainerStyles} onClick={toggleSidebar}>
-                <IconButton sx={{ p: 0, color: '#f1f5f9', '&:hover': { backgroundColor: 'transparent' } }}>
-                  <MenuIcon size={20} />
-                </IconButton>
-                <img src="/logo.png" alt="CareWave Logo" style={logoImageStyles} />
-                <Typography sx={headerTitleStyles}>CareWave</Typography>
-              </Box>
+      <AppBar position="fixed" sx={headerStyles} elevation={0}>
+        <Toolbar>
+          {/* Logo and Menu Toggle */}
+          <Box sx={logoContainerStyles} onClick={toggleSidebar}>
+            <IconButton 
+              sx={{ 
+                p: 0.5, 
+                color: '#64748b',
+                '&:hover': { backgroundColor: 'transparent' }
+              }}
+            >
+              <Bars3Icon style={{ width: '20px', height: '20px' }} />
+            </IconButton>
+            <img src="/logo.png" alt="CareWave Logo" style={logoImageStyles} />
+            <Typography sx={headerTitleStyles}>
+              CareWave
+            </Typography>
+          </Box>
 
-              <Box sx={{ flexGrow: 1 }} />
+          {/* Spacer */}
+          <Box sx={{ flexGrow: 1 }} />
 
-              <Box sx={userInfoStyles}>
-                {user && (
-                  <Box sx={{ textAlign: 'right', display: { xs: 'none', sm: 'block' } }}>
-                    <Typography sx={userNameStyles}>{user.name || user.email}</Typography>
-                    <Chip
-                      label={roleDisplayNames[user.role] || 'User'}
-                      size="small"
-                      sx={{
-                        backgroundColor: '#2563eb',
-                        color: '#f1f5f9',
-                        fontSize: '0.75rem',
-                        fontWeight: 600,
-                        height: '20px',
-                      }}
-                    />
-                  </Box>
-                )}
+          {/* Navigation Items (for non-authenticated users) */}
+          {!user && (
+            <Box sx={{ display: 'flex', gap: 1, mr: 2 }}>
+              {userMenuItems.slice(0, -1).map(({ name, path }) => (
+                <Button
+                  key={path}
+                  component={Link}
+                  href={path}
+                  sx={{
+                    ...navButtonStyles,
+                    ...(pathname === path && { 
+                      backgroundColor: alpha(theme.palette.primary.main, 0.12),
+                      color: theme.palette.primary.main 
+                    })
+                  }}
+                >
+                  {name}
+                </Button>
+              ))}
+            </Box>
+          )}
 
-                {user && (
-                  <IconButton onClick={handleNotificationOpen} sx={notificationStyles}>
-                    <Badge badgeContent={unreadCount} color="error">
-                      <Bell size={20} />
-                    </Badge>
-                  </IconButton>
-                )}
-
-                <IconButton onClick={handleMenuOpen} sx={{ p: 0 }}>
-                  {user ? (
-                    <Avatar sx={avatarStyles}>{user.name ? user.name.charAt(0).toUpperCase() : 'U'}</Avatar>
-                  ) : (
-                    <AccountCircle sx={{ fontSize: 32, color: '#cbd5e1' }} />
-                  )}
-                </IconButton>
-              </Box>
-            </Toolbar>
-          </AppBar>
-
-          <MuiMenu
-            anchorEl={anchorEl}
-            open={Boolean(anchorEl)}
-            onClose={handleMenuClose}
-            sx={menuStyles}
-            transformOrigin={{ horizontal: 'right', vertical: 'top' }}
-            anchorOrigin={{ horizontal: 'right', vertical: 'bottom' }}
-          >
+          {/* User Info Section */}
+          <Box sx={userInfoStyles}>
+            {/* User Name and Role */}
             {user && (
-              <Box sx={{ padding: '12px 16px', borderBottom: '1px solid #334155' }}>
-                <Typography variant="subtitle2" sx={{ fontWeight: 600, color: '#f1f5f9' }}>
+              <Box sx={{ textAlign: 'right', display: { xs: 'none', md: 'block' } }}>
+                <Typography sx={userNameStyles}>
                   {user.name || user.email}
                 </Typography>
-                <Typography variant="caption" sx={{ color: '#94a3b8' }}>
-                  {roleDisplayNames[user.role]} Account
-                </Typography>
+                <Chip
+                  label={roleDisplayNames[user.role] || 'User'}
+                  size="small"
+                  sx={{
+                    backgroundColor: alpha(roleColors[user.role] || '#64748b', 0.1),
+                    color: roleColors[user.role] || '#64748b',
+                    fontSize: '0.75rem',
+                    fontWeight: 600,
+                    height: '20px',
+                  }}
+                />
               </Box>
             )}
 
-            {userMenuItems.map(({ name, path, onClick, icon: Icon, description, danger }) => (
-              <MenuItem
-                key={path}
-                onClick={onClick || handleMenuClose}
-                component={onClick ? 'div' : Link}
-                href={onClick ? undefined : path}
-                sx={{ ...menuItemStyles, ...(danger && { '&:hover': { backgroundColor: '#ef4444' } }) }}
+            {/* Notifications */}
+            {user && (
+              <IconButton 
+                onClick={handleNotificationOpen}
+                sx={notificationStyles}
               >
-                <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, width: '100%' }}>
-                  {Icon && <Icon size={18} />}
-                  <Box>
-                    <Typography variant="body2" sx={{ fontWeight: 500, color: '#f1f5f9' }}>
-                      {name}
-                    </Typography>
-                    {description && (
-                      <Typography variant="caption" sx={{ color: '#94a3b8', display: 'block' }}>
-                        {description}
-                      </Typography>
-                    )}
-                  </Box>
-                </Box>
-              </MenuItem>
-            ))}
-          </MuiMenu>
+                <Badge badgeContent={unreadCount} color="error">
+                  <BellIcon style={{ width: '20px', height: '20px' }} />
+                </Badge>
+              </IconButton>
+            )}
 
-          {user && (
-            <MuiMenu
-              anchorEl={notificationAnchor}
-              open={Boolean(notificationAnchor)}
-              onClose={handleNotificationClose}
-              sx={menuStyles}
-              transformOrigin={{ horizontal: 'right', vertical: 'top' }}
-              anchorOrigin={{ horizontal: 'right', vertical: 'bottom' }}
+            {/* User Avatar/Menu */}
+            <IconButton onClick={handleMenuOpen} sx={{ p: 0 }}>
+              {user ? (
+                <Avatar sx={avatarStyles}>
+                  {user.name ? user.name.charAt(0).toUpperCase() : 'U'}
+                </Avatar>
+              ) : (
+                <AccountCircle sx={{ fontSize: 36, color: '#64748b' }} />
+              )}
+            </IconButton>
+          </Box>
+        </Toolbar>
+      </AppBar>
+
+      {/* User Menu */}
+      <Menu
+        anchorEl={anchorEl}
+        open={Boolean(anchorEl)}
+        onClose={handleMenuClose}
+        sx={menuStyles}
+        transformOrigin={{ horizontal: 'right', vertical: 'top' }}
+        anchorOrigin={{ horizontal: 'right', vertical: 'bottom' }}
+      >
+        {user && (
+          <Box sx={{ padding: '16px 20px', borderBottom: '1px solid #e2e8f0' }}>
+            <Typography variant="subtitle2" sx={{ fontWeight: 600, color: '#1e293b' }}>
+              {user.name || user.email}
+            </Typography>
+            <Typography variant="caption" sx={{ color: '#64748b' }}>
+              {roleDisplayNames[user.role]} Account
+            </Typography>
+          </Box>
+        )}
+        
+        {userMenuItems.map(({ name, path, onClick, icon: Icon, description, danger }) => (
+          <MenuItem
+            key={path}
+            onClick={onClick || handleMenuClose}
+            component={onClick ? 'div' : Link}
+            href={onClick ? undefined : path}
+            sx={{
+              ...menuItemStyles,
+              ...(danger && { '&:hover': { backgroundColor: alpha('#ef4444', 0.08), color: '#ef4444' } })
+            }}
+          >
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, width: '100%' }}>
+              {Icon && <Icon style={{ width: '18px', height: '18px' }} />}
+              <Box>
+                <Typography variant="body2" sx={{ fontWeight: 500 }}>
+                  {name}
+                </Typography>
+                {description && (
+                  <Typography variant="caption" sx={{ color: '#64748b', display: 'block' }}>
+                    {description}
+                  </Typography>
+                )}
+              </Box>
+            </Box>
+          </MenuItem>
+        ))}
+      </Menu>
+
+      {/* Notifications Menu */}
+      {user && (
+        <Menu
+          anchorEl={notificationAnchor}
+          open={Boolean(notificationAnchor)}
+          onClose={handleNotificationClose}
+          sx={menuStyles}
+          transformOrigin={{ horizontal: 'right', vertical: 'top' }}
+          anchorOrigin={{ horizontal: 'right', vertical: 'bottom' }}
+        >
+          <Box sx={{ padding: '16px 20px', borderBottom: '1px solid #e2e8f0' }}>
+            <Typography variant="subtitle2" sx={{ fontWeight: 600 }}>
+              Notifications
+            </Typography>
+          </Box>
+          
+          {notifications.map((notification, index) => (
+            <MenuItem
+              key={notification.id}
+              sx={{
+                ...menuItemStyles,
+                backgroundColor: notification.unread ? alpha(theme.palette.primary.main, 0.02) : 'transparent',
+                borderLeft: notification.unread ? `3px solid ${theme.palette.primary.main}` : '3px solid transparent',
+              }}
             >
-              <Box sx={{ padding: '12px 16px', borderBottom: '1px solid #334155' }}>
-                <Typography variant="subtitle2" sx={{ fontWeight: 600, color: '#f1f5f9' }}>
-                  Notifications
+              <Box>
+                <Typography variant="body2" sx={{ fontWeight: notification.unread ? 600 : 400 }}>
+                  {notification.title}
+                </Typography>
+                <Typography variant="caption" sx={{ color: '#64748b' }}>
+                  {notification.time}
                 </Typography>
               </Box>
+            </MenuItem>
+          ))}
+          
+          <Divider sx={{ margin: '8px 0' }} />
+          <MenuItem sx={menuItemStyles}>
+            <Typography variant="body2" sx={{ color: theme.palette.primary.main, fontWeight: 500 }}>
+              View all notifications
+            </Typography>
+          </MenuItem>
+        </Menu>
+      )}
 
-              {notifications.map((notification, index) => (
-                <MenuItem
-                  key={notification.id}
-                  sx={{
-                    ...menuItemStyles,
-                    backgroundColor: notification.unread ? '#2563eb' : 'transparent',
-                    borderLeft: notification.unread ? '3px solid #ffffff' : '3px solid transparent',
-                  }}
-                >
-                  <Box>
-                    <Typography variant="body2" sx={{ fontWeight: notification.unread ? 600 : 400, color: '#f1f5f9' }}>
-                      {notification.title}
-                    </Typography>
-                    <Typography variant="caption" sx={{ color: '#94a3b8' }}>
-                      {notification.time}
-                    </Typography>
-                  </Box>
-                </MenuItem>
-              ))}
-
-              <Divider sx={{ margin: '4px 0', backgroundColor: '#334155' }} />
-              <MenuItem sx={menuItemStyles}>
-                <Typography variant="body2" sx={{ color: '#ffffff', fontWeight: 500 }}>
-                  View all notifications
-                </Typography>
-              </MenuItem>
-            </MuiMenu>
-          )}
-
-          <Sidebar isOpen={sidebarOpen} toggleSidebar={toggleSidebar} />
-        </Box>
-      </Box>
+      <Sidebar isOpen={sidebarOpen} toggleSidebar={toggleSidebar} />
     </>
   );
 }
