@@ -1,40 +1,149 @@
+
+/* Sidebar.module.css - Enhanced styles for modern sidebar */
+
+/* Custom scrollbar for sidebar */
 .sidebar {
   scrollbar-width: thin;
-  scrollbar-color: #475569 #1e3a8a;
+  scrollbar-color: #cbd5e1 transparent;
 }
 
 .sidebar::-webkit-scrollbar {
-  width: 6px;
+  width: 4px;
 }
 
 .sidebar::-webkit-scrollbar-track {
-  background: #1e3a8a;
+  background: transparent;
 }
 
 .sidebar::-webkit-scrollbar-thumb {
-  background-color: #475569;
-  border-radius: 3px;
+  background-color: #cbd5e1;
+  border-radius: 2px;
 }
 
 .sidebar::-webkit-scrollbar-thumb:hover {
-  background-color: #64748b;
+  background-color: #94a3b8;
 }
 
-.navLink:focus-visible {
-  outline: 2px solid #ffffff;
-  outline-offset: 2px;
-}
-
-@media (prefers-color-scheme: dark) {
+/* Smooth transitions for mobile */
+@media (max-width: 768px) {
   .sidebar {
-    background-color: #1e3a8a;
-    border-right: 1px solid #334155;
+    transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   }
 }
 
+/* Focus states for accessibility */
+.navLink:focus-visible {
+  outline: 2px solid #3b82f6;
+  outline-offset: 2px;
+}
+
+/* Animation for category chips */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.categoryChip {
+  animation: fadeInUp 0.3s ease-out;
+}
+
+/* Enhanced hover effects */
+.navLink {
+  position: relative;
+  overflow: hidden;
+}
+
+.navLink::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0;
+  height: 100%;
+  width: 0;
+  background: linear-gradient(90deg, transparent, rgba(59, 130, 246, 0.1), transparent);
+  transition: width 0.3s ease;
+}
+
+.navLink:hover::before {
+  width: 100%;
+}
+
+/* Active state pulse animation */
+@keyframes activePulse {
+  0% {
+    box-shadow: 0 0 0 0 rgba(59, 130, 246, 0.4);
+  }
+  70% {
+    box-shadow: 0 0 0 6px rgba(59, 130, 246, 0);
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgba(59, 130, 246, 0);
+  }
+}
+
+.navLink.active {
+  animation: activePulse 2s infinite;
+}
+
+/* Logo hover effect */
+.logoContainer {
+  transition: transform 0.2s ease;
+}
+
+.logoContainer:hover {
+  transform: scale(1.02);
+}
+
+/* Micro-interactions */
+.navIcon {
+  transition: transform 0.2s ease;
+}
+
+.navLink:hover .navIcon {
+  transform: scale(1.1);
+}
+
+/* Glass morphism effect for modern browsers */
+@supports (backdrop-filter: blur(10px)) {
+  .glassEffect {
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+  }
+}
+
+/* Dark mode support */
+@media (prefers-color-scheme: dark) {
+  .sidebar {
+    background: linear-gradient(180deg, #1e293b 0%, #0f172a 100%);
+    border-right: 1px solid #334155;
+  }
+  
+  .categoryChip {
+    background-color: rgba(255, 255, 255, 0.1);
+    color: #e2e8f0;
+  }
+}
+
+/* Reduced motion for accessibility */
 @media (prefers-reduced-motion: reduce) {
   .navLink,
-  .navLink.active {
+  .logoContainer,
+  .navIcon {
     transition: none;
+  }
+  
+  .navLink.active {
+    animation: none;
+  }
+  
+  .categoryChip {
+    animation: none;
   }
 }
