@@ -271,13 +271,22 @@ export async function deleteMedication(id) {
   }
 }
 
+
+
+
+
+
 export async function getFormularies() {
   try {
     const token = localStorage.getItem('token');
     const response = await axios.get(`${BASE_URL}${API_ROUTES.PHARMACY}?resource=formularies`, {
       headers: { Authorization: `Bearer ${token}` },
     });
-    return response.data.formularies;
+    // Ensure medications is always an array
+    return response.data.formularies.map(formulary => ({
+      ...formulary,
+      medications: Array.isArray(formulary.medications) ? formulary.medications : [],
+    }));
   } catch (error) {
     console.error('Error fetching formularies:', error);
     throw new Error(error.response?.data?.error || 'Failed to fetch formularies');
@@ -292,14 +301,32 @@ export async function addFormulary(data) {
       payload: {
         name: data.name,
         description: data.description || null,
+        medicationIds: data.medicationIds || [], // Include medication IDs
       },
     }, {
       headers: { Authorization: `Bearer ${token}` },
     });
-    return response.data;
+    // Ensure medications is an array in the response
+    return {
+      ...response.data,
+      medications: Array.isArray(response.data.medications) ? response.data.medications : [],
+    };
   } catch (error) {
     console.error('Error adding formulary:', error);
     throw new Error(error.response?.data?.error || 'Failed to add formulary');
+  }
+}
+
+export async function getMedications() {
+  try {
+    const token = localStorage.getItem('token');
+    const response = await axios.get(`${BASE_URL}${API_ROUTES.PHARMACY}?resource=inventory`, {
+      headers: { Authorization: `Bearer ${token}` },
+    });
+    return response.data.inventory;
+  } catch (error) {
+    console.error('Error fetching medications:', error);
+    throw new Error(error.response?.data?.error || 'Failed to fetch medications');
   }
 }
 
