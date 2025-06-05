@@ -3,30 +3,29 @@
 import React, { useState } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { 
-  AppBar, 
-  Toolbar, 
-  Typography, 
-  Button, 
-  Box, 
-  Avatar, 
-  Menu, 
-  MenuItem, 
+import {
+  AppBar,
+  Toolbar,
+  Typography,
+  Box,
+  Avatar,
+  Menu,
+  MenuItem,
   IconButton,
   Chip,
   Badge,
   Divider,
   useTheme,
-  alpha
+  alpha,
 } from '@mui/material';
 import {
-  Bars3Icon,
-  BellIcon,
-  UserIcon,
-  CogIcon,
-  ArrowRightOnRectangleIcon,
-  HomeIcon
-} from '@heroicons/react/24/outline';
+  Menu,
+  Bell,
+  User,
+  Settings,
+  LogOut,
+  Home,
+} from 'lucide-react';
 import { AccountCircle, Notifications } from '@mui/icons-material';
 import Sidebar from './Sidebar';
 import useAuth from './useAuth';
@@ -38,7 +37,7 @@ const roleColors = {
   LAB_TECHNICIAN: '#ea580c',
   STAFF: '#0891b2',
   ADMIN: '#64748b',
-  GUEST: '#374151'
+  GUEST: '#374151',
 };
 
 const roleDisplayNames = {
@@ -48,74 +47,64 @@ const roleDisplayNames = {
   LAB_TECHNICIAN: 'Lab Tech',
   STAFF: 'Staff',
   ADMIN: 'Administrator',
-  GUEST: 'Guest'
+  GUEST: 'Guest',
 };
 
 export default function Header() {
   const pathname = usePathname();
   const theme = useTheme();
   const [sidebarOpen, setSidebarOpen] = useState(false);
-  const [anchorEl, setAnchorEl] = useState(null);
-  const [notificationAnchor, setNotificationAnchor] = useState(null);
+  const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
+  const [notificationAnchor, setNotificationAnchor] = useState<null | HTMLElement>(null);
   const { user, logout } = useAuth();
 
   const toggleSidebar = () => setSidebarOpen(!sidebarOpen);
-  const handleMenuOpen = (event) => setAnchorEl(event.currentTarget);
+  const handleMenuOpen = (event: React.MouseEvent<HTMLElement>) => setAnchorEl(event.currentTarget);
   const handleMenuClose = () => setAnchorEl(null);
-  const handleNotificationOpen = (event) => setNotificationAnchor(event.currentTarget);
+  const handleNotificationOpen = (event: React.MouseEvent<HTMLElement>) => setNotificationAnchor(event.currentTarget);
   const handleNotificationClose = () => setNotificationAnchor(null);
-  
+
   const handleLogout = async () => {
     await logout();
     handleMenuClose();
   };
 
-  const userMenuItems = user ? [
-    { 
-      name: 'Profile', 
-      path: '/profile', 
-      icon: UserIcon,
-      description: 'View and edit your profile'
-    },
-    { 
-      name: 'Settings', 
-      path: '/settings', 
-      icon: CogIcon,
-      description: 'Application preferences'
-    },
-    { 
-      name: 'Logout', 
-      path: '#', 
-      onClick: handleLogout, 
-      icon: ArrowRightOnRectangleIcon,
-      description: 'Sign out of your account',
-      danger: true
-    },
-  ] : [
-    { name: 'Home', path: '/', icon: HomeIcon },
-    { name: 'Login', path: '/auth/login', icon: UserIcon },
-    { name: 'Register', path: '/auth/register', icon: UserIcon },
-  ];
+  const userMenuItems = user
+    ? [
+        { name: 'Profile', path: '/profile', icon: User, description: 'View and edit your profile' },
+        { name: 'Settings', path: '/settings', icon: Settings, description: 'Application preferences' },
+        {
+          name: 'Logout',
+          path: '#',
+          onClick: handleLogout,
+          icon: LogOut,
+          description: 'Sign out of your account',
+          danger: true,
+        },
+      ]
+    : [
+        { name: 'Home', path: '/', icon: Home },
+        { name: 'Login', path: '/auth/login', icon: User },
+        { name: 'Register', path: '/auth/register', icon: User },
+      ];
 
-  // Mock notifications - in real app, these would come from your notification system
   const notifications = [
     { id: 1, title: 'New appointment scheduled', time: '5 min ago', unread: true },
     { id: 2, title: 'Lab results available', time: '1 hour ago', unread: true },
     { id: 3, title: 'System maintenance tonight', time: '2 hours ago', unread: false },
   ];
 
-  const unreadCount = notifications.filter(n => n.unread).length;
+  const unreadCount = notifications.filter((n) => n.unread).length;
 
   const headerStyles = {
-    background: 'linear-gradient(135deg, #ffffff 0%, #f8fafc 100%)',
-    backdropFilter: 'blur(10px)',
-    borderBottom: '1px solid #e2e8f0',
+    display: { xs: 'block', md: 'none' },
+    backgroundColor: '#1e3a8a',
+    color: '#f1f5f9',
     boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)',
-    color: '#1e293b',
     '& .MuiToolbar-root': {
-      minHeight: '72px',
-      padding: '0 24px',
-    }
+      minHeight: '64px',
+      padding: '0 16px',
+    },
   };
 
   const logoContainerStyles = {
@@ -123,164 +112,102 @@ export default function Header() {
     alignItems: 'center',
     gap: '12px',
     cursor: 'pointer',
-    padding: '8px 16px',
-    borderRadius: '12px',
-    transition: 'all 0.2s ease',
+    padding: '8px 12px',
+    borderRadius: '8px',
     '&:hover': {
-      backgroundColor: alpha(theme.palette.primary.main, 0.08),
-      transform: 'scale(1.02)',
-    }
+      backgroundColor: '#2563eb',
+    },
   };
 
   const logoImageStyles = {
-    width: '40px',
-    height: '40px',
-    borderRadius: '10px',
-    boxShadow: '0 2px 8px rgba(0, 0, 0, 0.1)',
+    width: '32px',
+    height: '32px',
+    borderRadius: '6px',
   };
 
   const headerTitleStyles = {
-    fontWeight: 700,
-    fontSize: '1.5rem',
-    background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-    backgroundClip: 'text',
-    WebkitBackgroundClip: 'text',
-    WebkitTextFillColor: 'transparent',
-    display: { xs: 'none', sm: 'block' }
-  };
-
-  const navButtonStyles = {
-    borderRadius: '10px',
-    padding: '8px 16px',
-    fontWeight: 500,
-    textTransform: 'none',
-    transition: 'all 0.2s ease',
-    '&:hover': {
-      backgroundColor: alpha(theme.palette.primary.main, 0.08),
-      transform: 'translateY(-1px)',
-    },
-    '&.active': {
-      backgroundColor: alpha(theme.palette.primary.main, 0.12),
-      color: theme.palette.primary.main,
-    }
+    fontWeight: 600,
+    fontSize: '1.25rem',
+    color: '#f1f5f9',
   };
 
   const userInfoStyles = {
     display: 'flex',
     alignItems: 'center',
-    gap: '16px',
+    gap: '12px',
   };
 
   const userNameStyles = {
     fontWeight: 600,
-    color: '#1e293b',
-    display: { xs: 'none', md: 'block' }
+    color: '#f1f5f9',
+    display: { xs: 'none', sm: 'block' },
+  };
+
+  const avatarStyles = {
+    width: 32,
+    height: 32,
+    fontSize: '0.875rem',
+    fontWeight: 600,
+    backgroundColor: user ? roleColors[user.role] || '#64748b' : '#64748b',
+    '&:hover': {
+      transform: 'scale(1.05)',
+    },
+  };
+
+  const notificationStyles = {
+    color: '#cbd5e1',
+    '&:hover': {
+      color: '#ffffff',
+    },
   };
 
   const menuStyles = {
     '& .MuiPaper-root': {
-      borderRadius: '16px',
-      boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)',
-      border: '1px solid #e2e8f0',
-      minWidth: '280px',
+      borderRadius: '12px',
+      boxShadow: '0 8px 24px rgba(0, 0, 0, 0.2)',
+      backgroundColor: '#1e3a8a',
+      color: '#f1f5f9',
+      minWidth: '240px',
       marginTop: '8px',
-    }
+    },
   };
 
   const menuItemStyles = {
-    padding: '12px 20px',
+    padding: '10px 16px',
     borderRadius: '8px',
-    margin: '4px 8px',
-    transition: 'all 0.2s ease',
+    margin: '2px 8px',
     '&:hover': {
-      backgroundColor: alpha(theme.palette.primary.main, 0.08),
+      backgroundColor: '#2563eb',
     },
     '&.danger:hover': {
-      backgroundColor: alpha('#ef4444', 0.08),
-      color: '#ef4444',
-    }
-  };
-
-  const avatarStyles = {
-    width: 36,
-    height: 36,
-    fontSize: '1rem',
-    fontWeight: 600,
-    backgroundColor: user ? roleColors[user.role] || '#64748b' : '#64748b',
-    transition: 'all 0.2s ease',
-    '&:hover': {
-      transform: 'scale(1.05)',
-    }
-  };
-
-  const notificationStyles = {
-    color: '#64748b',
-    transition: 'color 0.2s ease',
-    '&:hover': {
-      color: theme.palette.primary.main,
-    }
+      backgroundColor: '#ef4444',
+    },
   };
 
   return (
     <>
       <AppBar position="fixed" sx={headerStyles} elevation={0}>
         <Toolbar>
-          {/* Logo and Menu Toggle */}
           <Box sx={logoContainerStyles} onClick={toggleSidebar}>
-            <IconButton 
-              sx={{ 
-                p: 0.5, 
-                color: '#64748b',
-                '&:hover': { backgroundColor: 'transparent' }
-              }}
-            >
-              <Bars3Icon style={{ width: '20px', height: '20px' }} />
+            <IconButton sx={{ p: 0, color: '#f1f5f9', '&:hover': { backgroundColor: 'transparent' } }}>
+              <Menu size={20} />
             </IconButton>
             <img src="/logo.png" alt="CareWave Logo" style={logoImageStyles} />
-            <Typography sx={headerTitleStyles}>
-              CareWave
-            </Typography>
+            <Typography sx={headerTitleStyles}>CareWave</Typography>
           </Box>
 
-          {/* Spacer */}
           <Box sx={{ flexGrow: 1 }} />
 
-          {/* Navigation Items (for non-authenticated users) */}
-          {!user && (
-            <Box sx={{ display: 'flex', gap: 1, mr: 2 }}>
-              {userMenuItems.slice(0, -1).map(({ name, path }) => (
-                <Button
-                  key={path}
-                  component={Link}
-                  href={path}
-                  sx={{
-                    ...navButtonStyles,
-                    ...(pathname === path && { 
-                      backgroundColor: alpha(theme.palette.primary.main, 0.12),
-                      color: theme.palette.primary.main 
-                    })
-                  }}
-                >
-                  {name}
-                </Button>
-              ))}
-            </Box>
-          )}
-
-          {/* User Info Section */}
           <Box sx={userInfoStyles}>
-            {/* User Name and Role */}
             {user && (
-              <Box sx={{ textAlign: 'right', display: { xs: 'none', md: 'block' } }}>
-                <Typography sx={userNameStyles}>
-                  {user.name || user.email}
-                </Typography>
+              <Box sx={{ textAlign: 'right', display: { xs: 'none', sm: 'block' } }}>
+                <Typography sx={userNameStyles}>{user.name || user.email}</Typography>
                 <Chip
                   label={roleDisplayNames[user.role] || 'User'}
                   size="small"
                   sx={{
-                    backgroundColor: alpha(roleColors[user.role] || '#64748b', 0.1),
-                    color: roleColors[user.role] || '#64748b',
+                    backgroundColor: '#2563eb',
+                    color: '#f1f5f9',
                     fontSize: '0.75rem',
                     fontWeight: 600,
                     height: '20px',
@@ -289,33 +216,25 @@ export default function Header() {
               </Box>
             )}
 
-            {/* Notifications */}
             {user && (
-              <IconButton 
-                onClick={handleNotificationOpen}
-                sx={notificationStyles}
-              >
+              <IconButton onClick={handleNotificationOpen} sx={notificationStyles}>
                 <Badge badgeContent={unreadCount} color="error">
-                  <BellIcon style={{ width: '20px', height: '20px' }} />
+                  <Bell size={20} />
                 </Badge>
               </IconButton>
             )}
 
-            {/* User Avatar/Menu */}
             <IconButton onClick={handleMenuOpen} sx={{ p: 0 }}>
               {user ? (
-                <Avatar sx={avatarStyles}>
-                  {user.name ? user.name.charAt(0).toUpperCase() : 'U'}
-                </Avatar>
+                <Avatar sx={avatarStyles}>{user.name ? user.name.charAt(0).toUpperCase() : 'U'}</Avatar>
               ) : (
-                <AccountCircle sx={{ fontSize: 36, color: '#64748b' }} />
+                <AccountCircle sx={{ fontSize: 32, color: '#cbd5e1' }} />
               )}
             </IconButton>
           </Box>
         </Toolbar>
       </AppBar>
 
-      {/* User Menu */}
       <Menu
         anchorEl={anchorEl}
         open={Boolean(anchorEl)}
@@ -325,35 +244,32 @@ export default function Header() {
         anchorOrigin={{ horizontal: 'right', vertical: 'bottom' }}
       >
         {user && (
-          <Box sx={{ padding: '16px 20px', borderBottom: '1px solid #e2e8f0' }}>
-            <Typography variant="subtitle2" sx={{ fontWeight: 600, color: '#1e293b' }}>
+          <Box sx={{ padding: '12px 16px', borderBottom: '1px solid #334155' }}>
+            <Typography variant="subtitle2" sx={{ fontWeight: 600, color: '#f1f5f9' }}>
               {user.name || user.email}
             </Typography>
-            <Typography variant="caption" sx={{ color: '#64748b' }}>
+            <Typography variant="caption" sx={{ color: '#94a3b8' }}>
               {roleDisplayNames[user.role]} Account
             </Typography>
           </Box>
         )}
-        
+
         {userMenuItems.map(({ name, path, onClick, icon: Icon, description, danger }) => (
           <MenuItem
             key={path}
             onClick={onClick || handleMenuClose}
             component={onClick ? 'div' : Link}
             href={onClick ? undefined : path}
-            sx={{
-              ...menuItemStyles,
-              ...(danger && { '&:hover': { backgroundColor: alpha('#ef4444', 0.08), color: '#ef4444' } })
-            }}
+            sx={{ ...menuItemStyles, ...(danger && { '&:hover': { backgroundColor: '#ef4444' } }) }}
           >
             <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, width: '100%' }}>
-              {Icon && <Icon style={{ width: '18px', height: '18px' }} />}
+              {Icon && <Icon size={18} />}
               <Box>
-                <Typography variant="body2" sx={{ fontWeight: 500 }}>
+                <Typography variant="body2" sx={{ fontWeight: 500, color: '#f1f5f9' }}>
                   {name}
                 </Typography>
                 {description && (
-                  <Typography variant="caption" sx={{ color: '#64748b', display: 'block' }}>
+                  <Typography variant="caption" sx={{ color: '#94a3b8', display: 'block' }}>
                     {description}
                   </Typography>
                 )}
@@ -363,7 +279,6 @@ export default function Header() {
         ))}
       </Menu>
 
-      {/* Notifications Menu */}
       {user && (
         <Menu
           anchorEl={notificationAnchor}
@@ -373,35 +288,35 @@ export default function Header() {
           transformOrigin={{ horizontal: 'right', vertical: 'top' }}
           anchorOrigin={{ horizontal: 'right', vertical: 'bottom' }}
         >
-          <Box sx={{ padding: '16px 20px', borderBottom: '1px solid #e2e8f0' }}>
-            <Typography variant="subtitle2" sx={{ fontWeight: 600 }}>
+          <Box sx={{ padding: '12px 16px', borderBottom: '1px solid #334155' }}>
+            <Typography variant="subtitle2" sx={{ fontWeight: 600, color: '#f1f5f9' }}>
               Notifications
             </Typography>
           </Box>
-          
+
           {notifications.map((notification, index) => (
             <MenuItem
               key={notification.id}
               sx={{
                 ...menuItemStyles,
-                backgroundColor: notification.unread ? alpha(theme.palette.primary.main, 0.02) : 'transparent',
-                borderLeft: notification.unread ? `3px solid ${theme.palette.primary.main}` : '3px solid transparent',
+                backgroundColor: notification.unread ? '#2563eb' : 'transparent',
+                borderLeft: notification.unread ? '3px solid #ffffff' : '3px solid transparent',
               }}
             >
               <Box>
-                <Typography variant="body2" sx={{ fontWeight: notification.unread ? 600 : 400 }}>
+                <Typography variant="body2" sx={{ fontWeight: notification.unread ? 600 : 400, color: '#f1f5f9' }}>
                   {notification.title}
                 </Typography>
-                <Typography variant="caption" sx={{ color: '#64748b' }}>
+                <Typography variant="caption" sx={{ color: '#94a3b8' }}>
                   {notification.time}
                 </Typography>
               </Box>
             </MenuItem>
           ))}
-          
-          <Divider sx={{ margin: '8px 0' }} />
+
+          <Divider sx={{ margin: '4px 0', backgroundColor: '#334155' }} />
           <MenuItem sx={menuItemStyles}>
-            <Typography variant="body2" sx={{ color: theme.palette.primary.main, fontWeight: 500 }}>
+            <Typography variant="body2" sx={{ color: '#ffffff', fontWeight: 500 }}>
               View all notifications
             </Typography>
           </MenuItem>
