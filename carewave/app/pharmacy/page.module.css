@@ -2,18 +2,21 @@
 /* Styles for the main pharmacy dashboard page */
 
 .container {
-  padding: 20px;
+  width: 100%;
   max-width: 100%;
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
 }
 
 .title {
   font-weight: bold;
-  margin-bottom: 20px;
+  margin-bottom: 8px;
   color: #333;
 }
 
 .paper {
-  padding: 20px;
+  padding: 0;
   border-radius: 8px;
 }
 
@@ -22,9 +25,9 @@
 }
 
 .tabs {
-  margin-bottom: 20px;
+  margin-bottom: 8px;
 }
 
 .tabContent {
-  padding: 20px;
+  padding: 0;
 }
