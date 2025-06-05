@@ -1,108 +1,129 @@
+
 "use client";
 
 import React from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import {
-  Home,
-  User,
-  Calendar,
-  Calculator,
-  Settings,
-  Beaker,
-  Briefcase,
-  ClipboardList,
-  FileText,
-  Heart,
-  UserCheck,
-  Inbox,
-  Key,
-  Shield,
-  ShoppingCart,
-  Grid,
-  Table,
-  Users,
-  Wrench,
-  AlertCircle,
-} from 'lucide-react';
-import { Box, List, ListItem, ListItemIcon, ListItemText, Typography, Divider, useTheme } from '@mui/material';
+  HomeIcon,
+  UserIcon,
+  CalendarIcon,
+  CalculatorIcon,
+  CogIcon,
+  BeakerIcon,
+  BriefcaseIcon,
+  ClipboardDocumentListIcon,
+  DocumentTextIcon,
+  HeartIcon,
+  IdentificationIcon,
+  InboxIcon,
+  KeyIcon,
+  ShieldCheckIcon,
+  ShoppingCartIcon,
+  Squares2X2Icon,
+  TableCellsIcon,
+  UsersIcon,
+  WrenchIcon,
+  XCircleIcon,
+} from '@heroicons/react/24/outline';
+import { 
+  Drawer, 
+  List, 
+  ListItem, 
+  ListItemIcon, 
+  ListItemText, 
+  Typography, 
+  Box,
+  Divider,
+  Chip,
+  useTheme,
+  alpha
+} from '@mui/material';
 import useAuth from './useAuth';
 
 const roleBasedNavItems = {
   PATIENT: [
-    { name: 'Dashboard', path: '/', icon: Home, category: 'main' },
-    { name: 'Appointments', path: '/appointment', icon: Calendar, category: 'health' },
-    { name: 'Medical Records', path: '/medical-records', icon: FileText, category: 'health' },
-    { name: 'Billing', path: '/billing', icon: Table, category: 'finance' },
+    { name: 'Dashboard', path: '/', icon: HomeIcon, category: 'main' },
+    { name: 'Appointments', path: '/appointment', icon: CalendarIcon, category: 'health' },
+    { name: 'Medical Records', path: '/medical-records', icon: DocumentTextIcon, category: 'health' },
+    { name: 'Billing', path: '/billing', icon: TableCellsIcon, category: 'finance' },
   ],
   DOCTOR: [
-    { name: 'Dashboard', path: '/', icon: Home, category: 'main' },
-    { name: 'Patients', path: '/patient', icon: User, category: 'patient-care' },
-    { name: 'Appointments', path: '/appointment', icon: Calendar, category: 'patient-care' },
-    { name: 'Clinical', path: '/clinical', icon: Beaker, category: 'clinical' },
-    { name: 'Operation Theatre', path: '/operation-theatre', icon: Beaker, category: 'clinical' },
+    { name: 'Dashboard', path: '/', icon: HomeIcon, category: 'main' },
+    { name: 'Patients', path: '/patient', icon: UserIcon, category: 'patient-care' },
+    { name: 'Appointments', path: '/appointment', icon: CalendarIcon, category: 'patient-care' },
+    { name: 'Clinical', path: '/clinical', icon: BeakerIcon, category: 'clinical' },
+    { name: 'Operation Theatre', path: '/operation-theatre', icon: BeakerIcon, category: 'clinical' },
   ],
   NURSE: [
-    { name: 'Dashboard', path: '/', icon: Home, category: 'main' },
-    { name: 'Patients', path: '/patient', icon: User, category: 'patient-care' },
-    { name: 'Appointments', path: '/appointment', icon: Calendar, category: 'patient-care' },
-    { name: 'Nursing', path: '/nursing', icon: Heart, category: 'nursing' },
-    { name: 'Maternity', path: '/maternity', icon: Heart, category: 'nursing' },
+    { name: 'Dashboard', path: '/', icon: HomeIcon, category: 'main' },
+    { name: 'Patients', path: '/patient', icon: UserIcon, category: 'patient-care' },
+    { name: 'Appointments', path: '/appointment', icon: CalendarIcon, category: 'patient-care' },
+    { name: 'Nursing', path: '/nursing', icon: HeartIcon, category: 'nursing' },
+    { name: 'Maternity', path: '/maternity', icon: HeartIcon, category: 'nursing' },
   ],
   LAB_TECHNICIAN: [
-    { name: 'Dashboard', path: '/', icon: Home, category: 'main' },
-    { name: 'Laboratory', path: '/laboratory', icon: Beaker, category: 'lab' },
-    { name: 'Radiology', path: '/radiology', icon: Beaker, category: 'lab' },
+    { name: 'Dashboard', path: '/', icon: HomeIcon, category: 'main' },
+    { name: 'Laboratory', path: '/laboratory', icon: BeakerIcon, category: 'lab' },
+    { name: 'Radiology', path: '/radiology', icon: BeakerIcon, category: 'lab' },
   ],
   STAFF: [
-    { name: 'Dashboard', path: '/', icon: Home, category: 'main' },
-    { name: 'Helpdesk', path: '/helpdesk', icon: Users, category: 'support' },
-    { name: 'Inventory', path: '/inventory', icon: Grid, category: 'operations' },
-    { name: 'Procurement', path: '/procurement', icon: ShoppingCart, category: 'operations' },
+    { name: 'Dashboard', path: '/', icon: HomeIcon, category: 'main' },
+    { name: 'Helpdesk', path: '/helpdesk', icon: UsersIcon, category: 'support' },
+    { name: 'Inventory', path: '/inventory', icon: Squares2X2Icon, category: 'operations' },
+    { name: 'Procurement', path: '/procurement', icon: ShoppingCartIcon, category: 'operations' },
   ],
   ADMIN: [
-    { name: 'Dashboard', path: '/', icon: Home, category: 'main' },
-    { name: 'Patients', path: '/patient', icon: User, category: 'patient-care' },
-    { name: 'Doctor', path: '/doctor', icon: UserCheck, category: 'patient-care' },
-    { name: 'Appointments', path: '/appointment', icon: Calendar, category: 'patient-care' },
-    { name: 'ADT', path: '/adt', icon: ClipboardList, category: 'patient-care' },
-    { name: 'Emergency', path: '/emergency', icon: AlertCircle, category: 'patient-care' },
-    { name: 'Queue Management', path: '/queue-mgmt', icon: Users, category: 'patient-care' },
-    { name: 'Clinical', path: '/clinical', icon: Beaker, category: 'clinical' },
-    { name: 'Laboratory', path: '/laboratory', icon: Beaker, category: 'clinical' },
-    { name: 'Radiology', path: '/radiology', icon: Beaker, category: 'clinical' },
-    { name: 'Operation Theatre', path: '/operation-theatre', icon: Beaker, category: 'clinical' },
-    { name: 'Clinical Settings', path: '/clinical-settings', icon: Wrench, category: 'clinical' },
-    { name: 'CSSD', path: '/cssd', icon: Shield, category: 'clinical' },
-    { name: 'Nursing', path: '/nursing', icon: Heart, category: 'nursing' },
-    { name: 'Maternity', path: '/maternity', icon: Heart, category: 'nursing' },
-    { name: 'Vaccination', path: '/vaccination', icon: Heart, category: 'nursing' },
-    { name: 'Pharmacy', path: '/pharmacy', icon: Inbox, category: 'pharmacy' },
-    { name: 'Dispensary', path: '/dispensary', icon: Inbox, category: 'pharmacy' },
-    { name: 'Billing', path: '/billing', icon: Table, category: 'finance' },
-    { name: 'Accounting', path: '/accounting', icon: Calculator, category: 'finance' },
-    { name: 'Claim Management', path: '/claim-mgmt', icon: FileText, category: 'finance' },
-    { name: 'NHIF', path: '/nhif', icon: Shield, category: 'finance' },
-    { name: 'Incentive', path: '/incentive', icon: Key, category: 'finance' },
-    { name: 'Inventory', path: '/inventory', icon: Grid, category: 'operations' },
-    { name: 'Procurement', path: '/procurement', icon: ShoppingCart, category: 'operations' },
-    { name: 'Substore', path: '/substore', icon: Grid, category: 'operations' },
-    { name: 'Fixed Assets', path: '/fixed-assets', icon: Briefcase, category: 'operations' },
-    { name: 'Reports', path: '/reports', icon: Table, category: 'reports' },
-    { name: 'Dynamic Report', path: '/dynamic-report', icon: Table, category: 'reports' },
-    { name: 'Medical Records', path: '/medical-records', icon: FileText, category: 'reports' },
-    { name: 'Helpdesk', path: '/helpdesk', icon: Users, category: 'support' },
-    { name: 'Marketing Referral', path: '/mkt-referral', icon: Users, category: 'support' },
-    { name: 'Social Service', path: '/social-service', icon: Users, category: 'support' },
-    { name: 'Settings', path: '/settings', icon: Settings, category: 'admin' },
-    { name: 'System Admin', path: '/system-admin', icon: Wrench, category: 'admin' },
-    { name: 'Utilities', path: '/utilities', icon: Wrench, category: 'admin' },
-    { name: 'Verification', path: '/verification', icon: Shield, category: 'admin' },
+    { name: 'Dashboard', path: '/', icon: HomeIcon, category: 'main' },
+    { name: 'Patients', path: '/patient', icon: UserIcon, category: 'patient-care' },
+    { name: 'Doctor', path: '/doctor', icon: IdentificationIcon, category: 'patient-care' },
+    { name: 'Appointments', path: '/appointment', icon: CalendarIcon, category: 'patient-care' },
+    { name: 'ADT', path: '/adt', icon: ClipboardDocumentListIcon, category: 'patient-care' },
+    { name: 'Emergency', path: '/emergency', icon: XCircleIcon, category: 'patient-care' },
+    { name: 'Queue Management', path: '/queue-mgmt', icon: UsersIcon, category: 'patient-care' },
+    
+    { name: 'Clinical', path: '/clinical', icon: BeakerIcon, category: 'clinical' },
+    { name: 'Laboratory', path: '/laboratory', icon: BeakerIcon, category: 'clinical' },
+    { name: 'Radiology', path: '/radiology', icon: BeakerIcon, category: 'clinical' },
+    { name: 'Operation Theatre', path: '/operation-theatre', icon: BeakerIcon, category: 'clinical' },
+    { name: 'Clinical Settings', path: '/clinical-settings', icon: WrenchIcon, category: 'clinical' },
+    { name: 'CSSD', path: '/cssd', icon: ShieldCheckIcon, category: 'clinical' },
+    
+    { name: 'Nursing', path: '/nursing', icon: HeartIcon, category: 'nursing' },
+    { name: 'Maternity', path: '/maternity', icon: HeartIcon, category: 'nursing' },
+    { name: 'Vaccination', path: '/vaccination', icon: HeartIcon, category: 'nursing' },
+    
+    { name: 'Pharmacy', path: '/pharmacy', icon: InboxIcon, category: 'pharmacy' },
+    { name: 'Dispensary', path: '/dispensary', icon: InboxIcon, category: 'pharmacy' },
+    
+    { name: 'Billing', path: '/billing', icon: TableCellsIcon, category: 'finance' },
+    { name: 'Accounting', path: '/accounting', icon: CalculatorIcon, category: 'finance' },
+    { name: 'Claim Management', path: '/claim-mgmt', icon: DocumentTextIcon, category: 'finance' },
+    { name: 'NHIF', path: '/nhif', icon: ShieldCheckIcon, category: 'finance' },
+    { name: 'Incentive', path: '/incentive', icon: KeyIcon, category: 'finance' },
+    
+    { name: 'Inventory', path: '/inventory', icon: Squares2X2Icon, category: 'operations' },
+    { name: 'Procurement', path: '/procurement', icon: ShoppingCartIcon, category: 'operations' },
+    { name: 'Substore', path: '/substore', icon: Squares2X2Icon, category: 'operations' },
+    { name: 'Fixed Assets', path: '/fixed-assets', icon: BriefcaseIcon, category: 'operations' },
+    
+    { name: 'Reports', path: '/reports', icon: TableCellsIcon, category: 'reports' },
+    { name: 'Dynamic Report', path: '/dynamic-report', icon: TableCellsIcon, category: 'reports' },
+    { name: 'Medical Records', path: '/medical-records', icon: DocumentTextIcon, category: 'reports' },
+    
+    { name: 'Helpdesk', path: '/helpdesk', icon: UsersIcon, category: 'support' },
+    { name: 'Marketing Referral', path: '/mkt-referral', icon: UsersIcon, category: 'support' },
+    { name: 'Social Service', path: '/social-service', icon: UsersIcon, category: 'support' },
+    
+    { name: 'Settings', path: '/settings', icon: CogIcon, category: 'admin' },
+    { name: 'System Admin', path: '/system-admin', icon: WrenchIcon, category: 'admin' },
+    { name: 'Utilities', path: '/utilities', icon: WrenchIcon, category: 'admin' },
+    { name: 'Verification', path: '/verification', icon: ShieldCheckIcon, category: 'admin' },
   ],
   GUEST: [
-    { name: 'Home', path: '/', icon: Home, category: 'main' },
-    { name: 'Login', path: '/auth/login', icon: Key, category: 'auth' },
-    { name: 'Register', path: '/auth/register', icon: User, category: 'auth' },
+    { name: 'Home', path: '/', icon: HomeIcon, category: 'main' },
+    { name: 'Login', path: '/auth/login', icon: KeyIcon, category: 'auth' },
+    { name: 'Register', path: '/auth/register', icon: UserIcon, category: 'auth' },
   ],
 };
 
@@ -119,7 +140,23 @@ const categoryLabels = {
   support: 'Support Services',
   admin: 'Administration',
   auth: 'Authentication',
-  health: 'Health Services',
+  health: 'Health Services'
+};
+
+const categoryColors = {
+  main: '#2563eb',
+  'patient-care': '#059669',
+  clinical: '#7c3aed',
+  nursing: '#dc2626',
+  lab: '#ea580c',
+  pharmacy: '#0891b2',
+  finance: '#16a34a',
+  operations: '#9333ea',
+  reports: '#0d9488',
+  support: '#4338ca',
+  admin: '#64748b',
+  auth: '#374151',
+  health: '#059669'
 };
 
 export default function Sidebar({ toggleSidebar, isOpen }) {
@@ -128,6 +165,7 @@ export default function Sidebar({ toggleSidebar, isOpen }) {
   const theme = useTheme();
   const navItems = user ? roleBasedNavItems[user.role] || roleBasedNavItems.GUEST : roleBasedNavItems.GUEST;
 
+  // Group navigation items by category
   const groupedNavItems = navItems.reduce((acc, item) => {
     const category = item.category || 'main';
     if (!acc[category]) acc[category] = [];
@@ -136,94 +174,115 @@ export default function Sidebar({ toggleSidebar, isOpen }) {
   }, {});
 
   const sidebarStyles = {
-    width: { xs: 280, md: 240 },
-    height: '100vh',
-    backgroundColor: '#1e3a8a',
-    color: '#f1f5f9',
-    display: 'flex',
-    flexDirection: 'column',
-    position: { xs: 'fixed', md: 'sticky' },
-    top: 0,
-    left: 0,
-    zIndex: 1200,
-    transition: 'transform 0.3s ease',
-    transform: { xs: isOpen ? 'translateX(0)' : 'translateX(-100%)', md: 'translateX(0)' },
+    width: 280,
+    background: 'linear-gradient(180deg, #ffffff 0%, #f8fafc 100%)',
+    borderRight: '1px solid #e2e8f0',
+    boxShadow: '0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1)',
   };
 
   const logoStyles = {
-    padding: '20px 16px',
+    padding: '24px 20px',
+    borderBottom: '1px solid #e2e8f0',
+    background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+    color: 'white',
+    cursor: 'pointer',
+    transition: 'all 0.3s ease',
+    '&:hover': {
+      background: 'linear-gradient(135deg, #5a67d8 0%, #6b46c1 100%)',
+    }
+  };
+
+  const logoContainerStyles = {
     display: 'flex',
     alignItems: 'center',
     gap: '12px',
-    backgroundColor: '#172554',
+  };
+
+  const logoImageStyles = {
+    width: '32px',
+    height: '32px',
+    borderRadius: '8px',
+    filter: 'brightness(1.1)',
   };
 
   const navListStyles = {
-    padding: '8px 0',
+    padding: '16px 0',
     '& .MuiListItem-root': {
-      padding: '4px 16px',
-      borderRadius: '8px',
       margin: '2px 12px',
+      borderRadius: '12px',
       transition: 'all 0.2s ease',
       '&:hover': {
-        backgroundColor: '#2563eb',
+        backgroundColor: alpha(theme.palette.primary.main, 0.08),
         transform: 'translateX(4px)',
       },
       '&.active': {
-        backgroundColor: '#2563eb',
+        backgroundColor: alpha(theme.palette.primary.main, 0.12),
+        borderLeft: `3px solid ${theme.palette.primary.main}`,
         '& .MuiListItemIcon-root': {
-          color: '#ffffff',
+          color: theme.palette.primary.main,
         },
         '& .MuiListItemText-primary': {
-          color: '#ffffff',
+          color: theme.palette.primary.main,
           fontWeight: 600,
-        },
-      },
-    },
-    '& .MuiListItemIcon-root': {
-      minWidth: '36px',
-      color: '#cbd5e1',
-    },
-    '& .MuiListItemText-primary': {
-      fontSize: '0.875rem',
-      color: '#f1f5f9',
-    },
+        }
+      }
+    }
   };
 
   const categoryHeaderStyles = {
-    padding: '12px 20px',
-    color: '#94a3b8',
-    fontSize: '0.75rem',
-    fontWeight: 600,
-    textTransform: 'uppercase',
+    padding: '16px 20px 8px 20px',
+    display: 'flex',
+    alignItems: 'center',
+    gap: '8px',
   };
 
   const dividerStyles = {
-    margin: '4px 16px',
-    backgroundColor: '#334155',
+    margin: '8px 16px',
+    backgroundColor: '#e2e8f0',
   };
 
   return (
-    <Box
-      sx={{
-        ...sidebarStyles,
-        '@media (max-width: 767px)': {
-          boxShadow: isOpen ? '2px 0 8px rgba(0, 0, 0, 0.2)' : 'none',
-        },
+    <Drawer
+      variant="temporary"
+      open={isOpen}
+      onClose={toggleSidebar}
+      PaperProps={{
+        sx: sidebarStyles
       }}
+      ModalProps={{ keepMounted: true }}
     >
-      <Box sx={logoStyles}>
-        <img src="/logo.png" alt="CareWave Logo" style={{ width: '32px', height: '32px', borderRadius: '6px' }} />
-        <Typography variant="h6" sx={{ fontWeight: 600, fontSize: '1.125rem' }}>
-          CareWave
-        </Typography>
+      <Box sx={logoStyles} onClick={toggleSidebar}>
+        <Box sx={logoContainerStyles}>
+          <img 
+            src="/logo.png" 
+            alt="CareWave Logo" 
+            style={logoImageStyles}
+          />
+          <Typography variant="h6" sx={{ fontWeight: 700, fontSize: '1.25rem' }}>
+            CareWave
+          </Typography>
+        </Box>
       </Box>
 
-      <Box sx={{ overflowY: 'auto', flex: 1, scrollbarWidth: 'thin', scrollbarColor: '#475569 #1e3a8a' }}>
+      <Box sx={{ overflowY: 'auto', flex: 1 }}>
         {Object.entries(groupedNavItems).map(([category, items], index) => (
           <Box key={category}>
             {index > 0 && <Divider sx={dividerStyles} />}
-            <Typography sx={categoryHeaderStyles}>{categoryLabels[category] || category}</Typography>
+            
+            <Box sx={categoryHeaderStyles}>
+              <Chip
+                label={categoryLabels[category] || category}
+                size="small"
+                sx={{
+                  backgroundColor: alpha(categoryColors[category] || '#64748b', 0.1),
+                  color: categoryColors[category] || '#64748b',
+                  fontSize: '0.75rem',
+                  fontWeight: 600,
+                  height: '24px',
+                }}
+              />
+            </Box>
+
             <List sx={navListStyles}>
               {items.map(({ name, path, icon: Icon }) => (
                 <ListItem
@@ -234,10 +293,16 @@ export default function Sidebar({ toggleSidebar, isOpen }) {
                   onClick={toggleSidebar}
                   sx={{ cursor: 'pointer' }}
                 >
-                  <ListItemIcon>
-                    <Icon size={20} />
+                  <ListItemIcon sx={{ minWidth: '40px' }}>
+                    <Icon style={{ width: '20px', height: '20px' }} />
                   </ListItemIcon>
-                  <ListItemText primary={name} />
+                  <ListItemText 
+                    primary={name}
+                    primaryTypographyProps={{
+                      fontSize: '0.875rem',
+                      fontWeight: 500,
+                    }}
+                  />
                 </ListItem>
               ))}
             </List>
@@ -246,15 +311,27 @@ export default function Sidebar({ toggleSidebar, isOpen }) {
       </Box>
 
       {user && (
-        <Box sx={{ padding: '16px', borderTop: '1px solid #334155' }}>
-          <Typography variant="caption" sx={{ color: '#94a3b8', fontWeight: 500, display: 'block', mb: '4px' }}>
+        <Box sx={{ 
+          padding: '16px 20px', 
+          borderTop: '1px solid #e2e8f0',
+          backgroundColor: '#f8fafc'
+        }}>
+          <Typography variant="caption" sx={{ 
+            color: '#64748b', 
+            fontWeight: 500,
+            display: 'block',
+            marginBottom: '4px'
+          }}>
             Logged in as
           </Typography>
-          <Typography variant="body2" sx={{ fontWeight: 600, color: '#f1f5f9' }}>
+          <Typography variant="body2" sx={{ 
+            fontWeight: 600,
+            color: '#1e293b'
+          }}>
             {user.role?.replace('_', ' ')} User
           </Typography>
         </Box>
       )}
-    </Box>
+    </Drawer>
   );
 }
