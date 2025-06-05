@@ -243,7 +243,7 @@ export async function POST(request) {
       case 'dispenseMedication': {
         const { prescriptionId, medicationId, quantity, patientType, dispensedById } = payload;
         if (!prescriptionId || !medicationId || !quantity || !patientType || !dispensedById) {
-          return NextResponse.json({ error: 'Missing required fields' }, { status: 400 môi);
+          return NextResponse.json({ error: 'Missing required fields' }, { status: 400 });
         }
         const medication = await prisma.medication.findUnique({
           where: { id: parseInt(medicationId) },
@@ -481,14 +481,13 @@ export async function POST(request) {
 }
 
 // PUT handler for updating pharmacy resources
-export async function PUT(request, { params }) {
+export async function PUT(request) {
   const user = authenticate(request);
   if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 
   try {
     const data = await request.json();
-    const { action, payload } = data;
-    const { id } = params;
+    const { action, payload, id } = data;
 
     if (!id) {
       return NextResponse.json({ error: 'Missing resource ID' }, { status: 400 });
@@ -615,13 +614,13 @@ export async function PUT(request, { params }) {
 }
 
 // DELETE handler for removing pharmacy resources
-export async function DELETE(request, { params }) {
+export async function DELETE(request) {
   const user = authenticate(request);
   if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 
   try {
-    const { id } = params;
     const { searchParams } = new URL(request.url);
+    const id = searchParams.get('id');
     const resource = searchParams.get('resource');
 
     if (!id || !resource) {
