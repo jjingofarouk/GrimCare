@@ -1,0 +1,47 @@
+model Medication {
+  id                Int                @id @default(autoincrement())
+  name              String
+  genericName       String?
+  category          String
+  batchNumber       String
+  barcode           String?            @unique
+  rfid              String?            @unique
+  stockQuantity     Int
+  minStockThreshold Int                @default(10)
+  price             Float
+  expiryDate        DateTime
+  supplierId        Int?
+  supplier          Supplier?          @relation(fields: [supplierId], references: [id])
+  formulary         Formulary?         @relation(fields: [formularyId], references: [id])
+  formularyId       Int?
+  narcotic          Boolean            @default(false)
+  createdAt         DateTime           @default(now())
+  updatedAt         DateTime           @updatedAt
+  prescriptions     PrescriptionItem[]
+  dispensingRecords DispensingRecord[]
+  stockAdjustments  StockAdjustment[]
+  purchaseOrders    PurchaseOrderItem[]
+  drugInteractions1 DrugInteraction[]  @relation("Medication1")
+  drugInteractions2 DrugInteraction[]  @relation("Medication2")
+}
+
+model Formulary {
+  id            Int           @id @default(autoincrement())
+  name          String
+  description   String?
+  medications   Medication[]
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
+}
+
+model DrugInteraction {
+  id            Int           @id @default(autoincrement())
+  medicationId1 Int
+  medication1   Medication    @relation("Medication1", fields: [medicationId1], references: [id])
+  medicationId2 Int
+  medication2   Medication    @relation("Medication2", fields: [medicationId2], references: [id])
+  interaction   String
+  severity      String        // LOW, MODERATE, HIGH
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
+}
