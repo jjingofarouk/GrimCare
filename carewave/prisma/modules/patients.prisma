@@ -1,0 +1,48 @@
+model Patient {
+  id                    Int               @id @default(autoincrement())
+  user                  User?             @relation
+  patientId             String            @unique
+  dateOfBirth           DateTime?
+  gender                String?
+  phone                 String?
+  address               String?
+  emergencyContact      String?
+  emergencyContactPhone String?
+  insuranceProvider     String?
+  insurancePolicy       String?
+  bloodType             String?
+  allergies             String?
+  medicalHistory        String?
+  admissions            Admission[]
+  discharges            Discharge[]       @relation("DischargedPatient")
+  transactions          Transaction[]     @relation("PatientTransactions")
+  appointments          Appointment[]     @relation("PatientAppointments")
+  prescriptions         Prescription[]    @relation("Prescriptions")
+  prescribedToId        Int?
+  createdAt             DateTime          @default(now())
+  updatedAt             DateTime          @updatedAt
+}
+
+model User {
+  id                Int                @id @default(autoincrement())
+  email             String             @unique
+  name              String
+  password          String
+  role              String             @default("PATIENT") // PATIENT, DOCTOR, ADMIN, NURSE
+  createdAt         DateTime           @default(now())
+  updatedAt         DateTime           @updatedAt
+  doctor            Doctor?            @relation(fields: [doctorId], references: [id])
+  doctorId          Int?               @unique
+  patient           Patient?           @relation(fields: [patientId], references: [id])
+  patientId         Int?               @unique
+  payrolls          Payroll[]
+  cssdLogs          CSSDLog[]          @relation("LoggedBy")
+  cssdRequisitions  CSSDRequisition[]  @relation("RequisitionRequestedBy")
+  appointments      Appointment[]      @relation("BookedBy")
+  dispensingRecords DispensingRecord[] @relation("DispensedBy")
+  dispensedById     Int?
+  refunds           Refund[]           @relation("ProcessedBy")
+  processedById     Int?
+  stockAdjustments  StockAdjustment[]  @relation("AdjustedBy")
+  adjustedById      Int?
+}
