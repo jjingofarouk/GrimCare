@@ -4,77 +4,62 @@ const { faker } = require('@faker-js/faker');
 
 const prisma = new PrismaClient();
 
-// List of real medications with generic names, categories, narcotic status, and descriptions
-const realMedications = [
-  // Narcotics (40)
-  { name: 'Oxycodone', genericName: 'Oxycodone', category: 'Narcotics', narcotic: true, description: 'Opioid analgesic used to treat moderate to severe pain.' },
-  { name: 'Morphine', genericName: 'Morphine', category: 'Narcotics', narcotic: true, description: 'Opioid used for severe pain management, often in hospital settings.' },
-  { name: 'Fentanyl', genericName: 'Fentanyl', category: 'Narcotics', narcotic: true, description: 'Potent opioid used for chronic pain and surgical anesthesia.' },
-  { name: 'Hydrocodone', genericName: 'Hydrocodone', category: 'Narcotics', narcotic: true, description: 'Opioid used for pain relief and cough suppression.' },
-  { name: 'Codeine', genericName: 'Codeine', category: 'Narcotics', narcotic: true, description: 'Opioid used for mild to moderate pain and cough relief.' },
-  { name: 'Methadone', genericName: 'Methadone', category: 'Narcotics', narcotic: true, description: 'Opioid used for pain management and opioid addiction treatment.' },
-  { name: 'Tramadol', genericName: 'Tramadol', category: 'Narcotics', narcotic: true, description: 'Opioid-like analgesic for moderate to severe pain.' },
-  { name: 'Buprenorphine', genericName: 'Buprenorphine', category: 'Narcotics', narcotic: true, description: 'Partial opioid agonist for pain and opioid dependence.' },
-  { name: 'Hydromorphone', genericName: 'Hydromorphone', category: 'Narcotics', narcotic: true, description: 'Potent opioid for severe pain relief.' },
-  { name: 'Meperidine', genericName: 'Meperidine', category: 'Narcotics', narcotic: true, description: 'Opioid used for short-term pain management.' },
-  { name: 'Oxymorphone', genericName: 'Oxymorphone', category: 'Narcotics', narcotic: true, description: 'Opioid for severe pain, often in extended-release form.' },
-  { name: 'Tapentadol', genericName: 'Tapentadol', category: 'Narcotics', narcotic: true, description: 'Opioid for acute and chronic pain with norepinephrine reuptake inhibition.' },
-  { name: 'Sufentanil', genericName: 'Sufentanil', category: 'Narcotics', narcotic: true, description: 'Potent opioid used in anesthesia and pain management.' },
-  { name: 'Alfentanil', genericName: 'Alfentanil', category: 'Narcotics', narcotic: true, description: 'Short-acting opioid used in surgical anesthesia.' },
-  { name: 'Remifentanil', genericName: 'Remifentanil', category: 'Narcotics', narcotic: true, description: 'Ultra-short-acting opioid for anesthesia.' },
-  { name: 'Pentazocine', genericName: 'Pentazocine', category: 'Narcotics', narcotic: true, description: 'Mixed opioid agonist-antagonist for moderate pain.' },
-  { name: 'Nalbuphine', genericName: 'Nalbuphine', category: 'Narcotics', narcotic: true, description: 'Opioid agonist-antagonist for pain relief.' },
-  { name: 'Butorphanol', genericName: 'Butorphanol', category: 'Narcotics', narcotic: true, description: 'Opioid agonist-antagonist for pain and migraine.' },
-  { name: 'Dihydrocodeine', genericName: 'Dihydrocodeine', category: 'Narcotics', narcotic: true, description: 'Opioid for moderate pain and cough suppression.' },
-  { name: 'Levorphanol', genericName: 'Levorphanol', category: 'Narcotics', narcotic: true, description: 'Opioid for severe pain with long duration.' },
-  // Repeat some narcotics to reach 40
-  ...Array.from({ length: 20 }, (_, i) => ({
-    name: `${['Oxycodone', 'Morphine', 'Fentanyl', 'Hydrocodone'][i % 4]} (${i + 1})`,
-    genericName: `${['Oxycodone', 'Morphine', 'Fentanyl', 'Hydrocodone'][i % 4]}`,
-    category: 'Narcotics',
-    narcotic: true,
-    description: `Opioid analgesic for ${i % 2 === 0 ? 'severe' : 'moderate to severe'} pain management.`,
-  })),
+// Real medication data with categories and narcotic flags
+const medicationsList = [
+  // Non-narcotics (Analgesics, Antibiotics, Antivirals)
+  { name: 'Ibuprofen', genericName: 'Ibuprofen', category: 'Analgesics', narcotic: false },
+  { name: 'Paracetamol', genericName: 'Acetaminophen', category: 'Analgesics', narcotic: false },
+  { name: 'Aspirin', genericName: 'Acetylsalicylic Acid', category: 'Analgesics', narcotic: false },
+  { name: 'Naproxen', genericName: 'Naproxen', category: 'Analgesics', narcotic: false },
+  { name: 'Amoxicillin', genericName: 'Amoxicillin', category: 'Antibiotics', narcotic: false },
+  { name: 'Azithromycin', genericName: 'Azithromycin', category: 'Antibiotics', narcotic: false },
+  { name: 'Ciprofloxacin', genericName: 'Ciprofloxacin', category: 'Antibiotics', narcotic: false },
+  { name: 'Doxycycline', genericName: 'Doxycycline', category: 'Antibiotics', narcotic: false },
+  { name: 'Acyclovir', genericName: 'Acyclovir', category: 'Antivirals', narcotic: false },
+  { name: 'Oseltamivir', genericName: 'Oseltamivir', category: 'Antivirals', narcotic: false },
+  { name: 'Valacyclovir', genericName: 'Valacyclovir', category: 'Antivirals', narcotic: false },
+  { name: 'Zidovudine', genericName: 'Zidovudine', category: 'Antivirals', narcotic: false },
+  { name: 'Metformin', genericName: 'Metformin', category: 'Antidiabetics', narcotic: false },
+  { name: 'Lisinopril', genericName: 'Lisinopril', category: 'Antihypertensives', narcotic: false },
+  { name: 'Amlodipine', genericName: 'Amlodipine', category: 'Antihypertensives', narcotic: false },
+  { name: 'Atorvastatin', genericName: 'Atorvastatin', category: 'Statins', narcotic: false },
+  // Narcotics
+  { name: 'Oxycodone', genericName: 'Oxycodone', category: 'Narcotics', narcotic: true },
+  { name: 'Hydrocodone', genericName: 'Hydrocodone', category: 'Narcotics', narcotic: true },
+  { name: 'Morphine', genericName: 'Morphine', category: 'Narcotics', narcotic: true },
+  { name: 'Fentanyl', genericName: 'Fentanyl', category: 'Narcotics', narcotic: true },
+  { name: 'Codeine', genericName: 'Codeine', category: 'Narcotics', narcotic: true },
+  { name: 'Tramadol', genericName: 'Tramadol', category: 'Narcotics', narcotic: true },
+  { name: 'Diazepam', genericName: 'Diazepam', category: 'Narcotics', narcotic: true },
+  { name: 'Alprazolam', genericName: 'Alprazolam', category: 'Narcotics', narcotic: true },
+];
 
-  // Non-Narcotics (120)
-  { name: 'Amoxicillin', genericName: 'Amoxicillin', category: 'Antibiotics', narcotic: false, description: 'Penicillin antibiotic used to treat bacterial infections.' },
-  { name: 'Azithromycin', genericName: 'Azithromycin', category: 'Antibiotics', narcotic: false, description: 'Macrolide antibiotic for respiratory and skin infections.' },
-  { name: 'Ciprofloxacin', genericName: 'Ciprofloxacin', category: 'Antibiotics', narcotic: false, description: 'Fluoroquinolone antibiotic for urinary tract and other infections.' },
-  { name: 'Doxycycline', genericName: 'Doxycycline', category: 'Antibiotics', narcotic: false, description: 'Tetracycline antibiotic for acne and bacterial infections.' },
-  { name: 'Metronidazole', genericName: 'Metronidazole', category: 'Antibiotics', narcotic: false, description: 'Antibiotic for anaerobic bacterial and parasitic infections.' },
-  { name: 'Ibuprofen', genericName: 'Ibuprofen', category: 'Analgesics', narcotic: false, description: 'NSAID for pain, inflammation, and fever reduction.' },
-  { name: 'Acetaminophen', genericName: 'Acetaminophen', category: 'Analgesics', narcotic: false, description: 'Pain reliever and fever reducer.' },
-  { name: 'Aspirin', genericName: 'Acetylsalicylic acid', category: 'Analgesics GESTA', description: 'NSAID for pain, fever, and cardiovascular protection.' },
-  { name: 'Metformin', genericName: 'Metformin', category: 'Antidiabetic', narcotic: false, description: 'Biguanide for type 2 diabetes management.' },
-  { name: 'Atorvastatin', genericName: 'Atorvastatin', category: 'Statins', narcotic: false, description: 'Statin for cholesterol reduction.' },
-  { name: 'Lisinopril', genericName: 'Lisinopril', category: 'Antihypertensive', narcotic: false, description: 'ACE inhibitor for hypertension and heart failure.' },
-  { name: 'Losartan', genericName: 'Losartan', category: 'Antihypertensive', narcotic: false, description: 'ARB for blood pressure control.' },
-  { name: 'Omeprazole', genericName: 'Omeprazole', category: 'Proton Pump Inhibitor', narcotic: false, description: 'PPI for acid reflux and ulcers.' },
-  { name: 'Levothyroxine', genericName: 'Levothyroxine', category: 'Thyroid', narcotic: false, description: 'Thyroid hormone replacement for hypothyroidism.' },
-  { name: 'Albuterol', genericName: 'Albuterol', category: 'Bronchodilator', narcotic: false, description: 'Beta-agonist for asthma and COPD.' },
-  { name: 'Fluoxetine', genericName: 'Fluoxetine', category: 'Antidepressant', narcotic: false, description: 'SSRI for depression and anxiety.' },
-  { name: 'Sertraline', genericName: 'Sertraline', category: 'Antidepressant', narcotic: false, description: 'SSRI for depression, OCD, and PTSD.' },
-  { name: 'Gabapentin', genericName: 'Gabapentin', category: 'Anticonvulsant', narcotic: false, description: 'Used for neuropathic pain and seizures.' },
-  { name: 'Prednisone', genericName: 'Prednisone', category: 'Corticosteroid', narcotic: false, description: 'Steroid for inflammation and autoimmune conditions.' },
-  { name: 'Loratadine', genericName: 'Loratadine', category: 'Antihistamine', narcotic: false, description: 'Non-drowsy antihistamine for allergies.' },
-  { name: 'Acyclovir', genericName: 'Acyclovir', category: 'Antiviral', narcotic: false, description: 'Antiviral for herpes virus infections.' },
-  { name: 'Oseltamivir', genericName: 'Oseltamivir', category: 'Antiviral', narcotic: false, description: 'Antiviral for influenza treatment and prevention.' },
-  { name: 'Warfarin', genericName: 'Warfarin', category: 'Anticoagulant', narcotic: false, description: 'Anticoagulant for blood clot prevention.' },
-  { name: 'Clopidogrel', genericName: 'Clopidogrel', category: 'Antiplatelet', narcotic: false, description: 'Antiplatelet for preventing heart attack and stroke.' },
-  // Additional non-narcotics (repeat and vary)
-  ...Array.from({ length: 96 }, (_, i) => ({
-    name: `${
-      ['Amoxicillin', 'Ibuprofen', 'Metformin', 'Atorvastatin', 'Lisinopril', 'Omeprazole'][i % 6]
-    } (${i + 1})`,
-    genericName: `${
-      ['Amoxicillin', 'Ibuprofen', 'Metformin', 'Atorvastatin', 'Lisinopril', 'Omeprazole'][i % 6]
-    }`,
-    category: ['Antibiotics', 'Analgesics', 'Antidiabetic', 'Statins', 'Antihypertensive', 'Proton Pump Inhibitor'][i % 6],
-    narcotic: false,
-    description: `Used for ${
-      ['bacterial infections', 'pain relief', 'diabetes management', 'cholesterol reduction', 'hypertension', 'acid reflux'][i % 6]
-    }.`,
-  })),
+// Formulary descriptions
+const formularyDescriptions = [
+  'Standard formulary for pain management medications.',
+  'Antibiotic formulary for common bacterial infections.',
+  'Antiviral formulary for viral infection treatment.',
+  'Narcotic formulary for controlled substances.',
+  'General formulary for chronic disease management.',
+  'Emergency formulary for acute care medications.',
+  'Pediatric formulary for child-safe medications.',
+  'Cardiology formulary for heart-related treatments.',
+  'Neurology formulary for neurological disorders.',
+  'Primary care formulary for outpatient use.',
+];
+
+// Drug interaction descriptions
+const interactionDescriptions = [
+  'May increase risk of gastrointestinal bleeding when combined.',
+  'Concurrent use may enhance sedative effects, causing drowsiness.',
+  'Potential for increased toxicity due to metabolic interference.',
+  'Combination may reduce efficacy of one or both medications.',
+  'Risk of severe hypotension when taken together.',
+  'May cause additive respiratory depression in high doses.',
+  'Interaction may lead to elevated liver enzyme levels.',
+  'Combined use may increase risk of seizures.',
+  'Potential for prolonged QT interval, increasing arrhythmia risk.',
+  'May alter blood glucose levels when used concurrently.',
 ];
 
 async function seed() {
@@ -83,9 +68,9 @@ async function seed() {
 
     // Seed Suppliers (20 records)
     const suppliersData = Array.from({ length: 20 }, () => ({
-      name: faker.company.name(),
+      name: `${faker.company.name()} Pharmaceuticals`,
       contact: faker.phone.number(),
-      email: `${faker.internet.userName()}@pharmaseed2.com`, // Unique domain
+      email: `pharma${faker.string.uuid()}@example.com`, // Unique email
       address: faker.location.streetAddress(),
       createdAt: new Date(),
       updatedAt: new Date(),
@@ -110,9 +95,9 @@ async function seed() {
     const suppliers = await prisma.supplier.findMany();
 
     // Seed Formularies (10 records)
-    const formulariesData = Array.from({ length: 10 }, () => ({
-      name: `${faker.commerce.productAdjective()} Formulary SEED2-${faker.string.nanoid(4)}`,
-      description: faker.lorem.sentence(),
+    const formulariesData = Array.from({ length: 10 }, (_, index) => ({
+      name: `Formulary ${String.fromCharCode(65 + index)}`, // Formulary A, B, C, ...
+      description: formularyDescriptions[index] || faker.lorem.sentence(),
       createdAt: new Date(),
       updatedAt: new Date(),
     }));
@@ -136,24 +121,28 @@ async function seed() {
     const formularies = await prisma.formulary.findMany();
 
     // Seed Medications (160 records, 40 narcotics)
-    const medicationsData = realMedications.map(med => ({
-      name: med.name,
-      genericName: med.genericName,
-      category: med.category,
-      batchNumber: `BATCH-SEED2-${faker.string.alphanumeric(8)}`,
-      barcode: `SEED2-BAR-${faker.string.uuid()}`, // Unique barcode
-      rfid: med.narcotic ? `SEED2-RFID-${faker.string.uuid()}` : null, // Unique RFID for narcotics
-      stockQuantity: faker.number.int({ min: 10, max: 500 }),
-      minStockThreshold: faker.number.int({ min: 5, max: 50 }),
-      price: parseFloat(faker.commerce.price({ min: 5, max: 200, dec: 2 })),
-      expiryDate: faker.date.future({ years: 2 }),
-      supplierId: suppliers.length > 0 ? faker.helpers.arrayElement(suppliers).id : null,
-      formularyId: formularies.length > 0 ? faker.helpers.arrayElement(formularies).id : null,
-      narcotic: med.narcotic,
-      createdAt: new Date(),
-      updatedAt: new Date(),
-      description: med.description, // English description
-    }));
+    const medicationsData = Array.from({ length: 160 }, (_, index) => {
+      // Cycle through medicationsList to create multiple instances
+      const baseMed = medicationsList[index % medicationsList.length];
+      const isNarcotic = baseMed.narcotic;
+      return {
+        name: `${baseMed.name} ${faker.string.alphanumeric(3)}`, // Unique suffix
+        genericName: baseMed.genericName,
+        category: baseMed.category,
+        batchNumber: `BATCH2-${faker.string.alphanumeric(8)}`,
+        barcode: `SEED2-BAR-${faker.string.uuid()}`, // Unique barcode
+        rfid: isNarcotic ? `SEED2-RFID-${faker.string.uuid()}` : null, // Unique RFID for narcotics
+        stockQuantity: faker.number.int({ min: 20, max: 1000 }),
+        minStockThreshold: faker.number.int({ min: 10, max: 100 }),
+        price: parseFloat(faker.commerce.price({ min: 10, max: 500, dec: 2 })),
+        expiryDate: faker.date.future({ years: 3 }),
+        supplierId: suppliers.length > 0 ? faker.helpers.arrayElement(suppliers).id : null,
+        formularyId: formularies.length > 0 ? faker.helpers.arrayElement(formularies).id : null,
+        narcotic: isNarcotic,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      };
+    });
 
     let medicationCount = 0;
     let narcoticCount = 0;
@@ -178,12 +167,12 @@ async function seed() {
     // Seed Drug Interactions (10 records)
     let interactionCount = 0;
     if (medications.length >= 2) {
-      const drugInteractionsData = Array.from({ length: 10 }, () => {
+      const drugInteractionsData = Array.from({ length: 10 }, (_, index) => {
         const [med1, med2] = faker.helpers.shuffle(medications).slice(0, 2);
         return {
           medicationId1: med1.id,
           medicationId2: med2.id,
-          interaction: `Potential ${faker.lorem.words(3)} interaction between ${med1.name} and ${med2.name}.`,
+          interaction: interactionDescriptions[index] || faker.lorem.sentence(),
           severity: faker.helpers.arrayElement(['LOW', 'MODERATE', 'HIGH']),
           createdAt: new Date(),
           updatedAt: new Date(),
