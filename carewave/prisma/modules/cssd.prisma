@@ -1,0 +1,63 @@
+model CSSDInstrument {
+  id                 Int                @id @default(autoincrement())
+  name               String
+  serialNumber       String             @unique
+  type               String?
+  status             String             @default("AVAILABLE")
+  lastSterilized     DateTime?
+  location           String?
+  stockQuantity      Int                @default(1)
+  minStockThreshold  Int                @default(1)
+  createdAt          DateTime           @default(now())
+  updatedAt          DateTime           @updatedAt
+  cssdRecords        CSSDRecord[]
+  requisitions       CSSDRequisition[]  @relation("RequisitionInstrument")
+  logs               CSSDLog[]          @relation("InstrumentLogs")
+}
+
+model CSSDRecord {
+  id                 Int                @id @default(autoincrement())
+  instrumentId       Int
+  instrument         CSSDInstrument     @relation(fields: [instrumentId], references: [id])
+  sterilizationDate   DateTime?
+  sterilizationMethod String?
+  cycleNumber        String?
+  status             String             @default("PENDING")
+  qualityCheck       String?
+  notes              String?
+  createdAt          DateTime           @default(now())
+  updatedAt          DateTime           @updatedAt
+  logs               CSSDLog[]          @relation("RecordLogs")
+}
+
+model CSSDRequisition {
+  id              Int                @id @default(autoincrement())
+  instrumentId    Int
+  instrument      CSSDInstrument     @relation("RequisitionInstrument", fields: [instrumentId], references: [id])
+  department      String
+  requestedBy     Int
+  user            User               @relation("RequisitionRequestedBy", fields: [requestedBy], references: [id])
+  quantity        Int
+  requestDate     DateTime           @default(now())
+  dispatchDate    DateTime?
+  status          String             @default("PENDING")
+  notes           String?
+  createdAt       DateTime           @default(now())
+  updatedAt       DateTime           @updatedAt
+  logs            CSSDLog[]          @relation("RequisitionLogs")
+}
+
+model CSSDLog {
+  id              Int                @id @default(autoincrement())
+  instrumentId    Int?
+  instrument      CSSDInstrument?    @relation("InstrumentLogs", fields: [instrumentId], references: [id])
+  recordId        Int?
+  record          CSSDRecord?        @relation("RecordLogs", fields: [recordId], references: [id])
+  requisitionId   Int?
+  requisition     CSSDRequisition?   @relation("RequisitionLogs", fields: [requisitionId], references: [id])
+  userId          Int
+  user            User               @relation("LoggedBy", fields: [userId], references: [id])
+  action          String
+  details         String?
+  createdAt       DateTime           @default(now())
+}
