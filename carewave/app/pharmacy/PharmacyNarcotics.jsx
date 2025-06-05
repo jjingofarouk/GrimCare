@@ -18,9 +18,15 @@ const PharmacyNarcotics = () => {
   const fetchNarcotics = async () => {
     try {
       const inventory = await getInventory();
-      // Filter narcotic drugs (assuming narcotic is a boolean field; adjust if different)
+      // Log inventory for debugging
+      console.log('Inventory data:', inventory);
+      // Ensure inventory is an array and filter narcotic drugs
       const narcoticDrugs = Array.isArray(inventory)
-        ? inventory.filter(item => item?.narcotic === true || item?.formulary?.isNarcotic === true)
+        ? inventory.filter(item => {
+            const isNarcotic = item?.narcotic === true;
+            if (!isNarcotic) console.log('Non-narcotic item filtered out:', item);
+            return isNarcotic;
+          })
         : [];
       setNarcotics(narcoticDrugs);
     } catch (error) {
@@ -45,13 +51,23 @@ const PharmacyNarcotics = () => {
       headerName: 'History',
       width: 300,
       valueGetter: ({ row }) => {
+        // Log row data for debugging
+        console.log('Processing history for row:', row);
         // Ensure dispensingRecords and stockAdjustments are arrays
         const dispensingRecords = Array.isArray(row?.dispensingRecords) ? row.dispensingRecords : [];
         const stockAdjustments = Array.isArray(row?.stockAdjustments) ? row.stockAdjustments : [];
 
+        // Log arrays for debugging
+        console.log('Dispensing Records:', dispensingRecords);
+        console.log('Stock Adjustments:', stockAdjustments);
+
         const history = [...dispensingRecords, ...stockAdjustments]
-          .filter(record => record && record.createdAt && !isNaN(new Date(record.createdAt).getTime())) // Filter valid records
-          .map(record => `${record.quantity ?? 0} units ${record.quantity > 0 ? 'added' : 'dispensed'} on ${new Date(record.createdAt).toLocaleDateString()}`)
+          .filter(record => {
+            const isValid = record && record.createdAt && !isNaN(new Date(record.createdAt).getTime()) && typeof record.quantity === 'number';
+            if (!isValid) console.log('Invalid record filtered out:', record);
+            return isValid;
+          })
+          .map(record => `${record.quantity} units ${record.quantity > 0 ? 'added' : 'dispensed'} on ${new Date(record.createdAt).toLocaleDateString()}`)
           .join(', ');
         return history || 'No history available';
       },
@@ -67,6 +83,18 @@ const PharmacyNarcotics = () => {
       headerName: 'Formulary',
       width: 150,
       valueGetter: ({ row }) => row?.formulary?.name ?? 'Unknown',
+    },
+    {
+      field: 'category',
+      headerName: 'Category',
+      width: 150,
+      valueGetter: ({ row }) => row?.category ?? 'Unknown',
+    },
+    {
+      field: 'price',
+      headerName: 'Price',
+      width: 120,
+      valueFormatter: ({ value }) => (typeof value === 'number' ? `$${value.toFixed(2)}` : '-'),
     },
   ];
 
