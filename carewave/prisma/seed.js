@@ -18,11 +18,20 @@ async function seed() {
       updatedAt: new Date(),
     }));
 
-    await prisma.supplier.createMany({
-      data: suppliersData,
-      skipDuplicates: true, // Avoid duplicating emails
-    });
-    console.log('Seeded 10 suppliers');
+    let supplierCount = 0;
+    for (const supplier of suppliersData) {
+      try {
+        await prisma.supplier.create({ data: supplier });
+        supplierCount++;
+      } catch (error) {
+        if (error.code === 'P2002' && error.meta?.target?.includes('email')) {
+          console.log(`Skipped duplicate supplier email: ${supplier.email}`);
+        } else {
+          console.error(`Error creating supplier:`, error);
+        }
+      }
+    }
+    console.log(`Seeded ${supplierCount} suppliers`);
 
     // Fetch created suppliers to use their IDs
     const suppliers = await prisma.supplier.findMany();
@@ -35,11 +44,20 @@ async function seed() {
       updatedAt: new Date(),
     }));
 
-    await prisma.formulary.createMany({
-      data: formulariesData,
-      skipDuplicates: true, // Avoid duplicating names
-    });
-    console.log('Seeded 5 formularies');
+    let formularyCount = 0;
+    for (const formulary of formulariesData) {
+      try {
+        await prisma.formulary.create({ data: formulary });
+        formularyCount++;
+      } catch (error) {
+        if (error.code === 'P2002' && error.meta?.target?.includes('name')) {
+          console.log(`Skipped duplicate formulary name: ${formulary.name}`);
+        } else {
+          console.error(`Error creating formulary:`, error);
+        }
+      }
+    }
+    console.log(`Seeded ${formularyCount} formularies`);
 
     // Fetch created formularies to use their IDs
     const formularies = await prisma.formulary.findMany();
@@ -67,16 +85,26 @@ async function seed() {
       };
     });
 
-    await prisma.medication.createMany({
-      data: medicationsData,
-      skipDuplicates: true, // Avoid duplicating barcodes and RFIDs
-    });
-    console.log('Seeded 80 medications (20 narcotics)');
+    let medicationCount = 0;
+    for (const medication of medicationsData) {
+      try {
+        await prisma.medication.create({ data: medication });
+        medicationCount++;
+      } catch (error) {
+        if (error.code === 'P2002' && error.meta?.target?.some(field => ['barcode', 'rfid'].includes(field))) {
+          console.log(`Skipped duplicate medication barcode/rfid: ${medication.barcode}/${medication.rfid}`);
+        } else {
+          console.error(`Error creating medication:`, error);
+        }
+      }
+    }
+    console.log(`Seeded ${medicationCount} medications (${medicationCount >= 20 ? 20 : medicationCount} narcotics)`);
 
     // Fetch created medications to use for drug interactions
     const medications = await prisma.medication.findMany();
 
     // Seed Drug Interactions (5 records)
+    let interactionCount = 0;
     if (medications.length >= 2) {
       const drugInteractionsData = Array.from({ length: 5 }, () => {
         const [med1, med2] = faker.helpers.shuffle(medications).slice(0, 2); // Random pair
@@ -90,11 +118,19 @@ async function seed() {
         };
       });
 
-      await prisma.drugInteraction.createMany({
-        data: drugInteractionsData,
-        skipDuplicates: true, // Avoid duplicating medication pairs
-      });
-      console.log('Seeded 5 drug interactions');
+      for (const interaction of drugInteractionsData) {
+        try {
+          await prisma.drugInteraction.create({ data: interaction });
+          interactionCount++;
+        } catch (error) {
+          if (error.code === 'P2002' && error.meta?.target?.includes('medicationId1_medicationId2')) {
+            console.log(`Skipped duplicate drug interaction: ${interaction.medicationId1}-${interaction.medicationId2}`);
+          } else {
+            console.error(`Error creating drug interaction:`, error);
+          }
+        }
+      }
+      console.log(`Seeded ${interactionCount} drug interactions`);
     } else {
       console.log('Skipped drug interactions: not enough medications');
     }
