@@ -30,7 +30,7 @@ const DoctorPage = () => {
     <ErrorBoundary>
       <Container maxWidth="xl" className={styles.container}>
         <Typography variant="h4" gutterBottom className={styles.title}>
-          Doctor Management System
+          Doctor Management
         </Typography>
         <Paper elevation={3} className={styles.paper}>
           <Box className={styles.tabsWrapper}>
