@@ -2,7 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import { Box, Typography, Alert, Button, TextField, MenuItem, Skeleton } from '@mui/material';
 import { DataGrid, GridToolbarContainer, GridToolbarFilterButton } from '@mui/x-data-grid';
-import { getPatients, updatePatient, deletePatient } from './adtService';
+import { getPatients, updatePatient, deletePatient } from '../adt/adtService';
 import styles from './PatientList.module.css';
 
 export default function PatientList() {
