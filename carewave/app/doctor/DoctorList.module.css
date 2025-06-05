@@ -34,11 +34,41 @@
   box-sizing: border-box;
 }
 
-.dataGrid {
+.dataGridWrapper {
+  width: 100%; /* Full width for DataGrid wrapper */
+  margin: 0; /* Remove margins */
+  padding: 0; /* Remove padding */
+  box-sizing: border-box;
+}
+
+.dataGridWrapper .dataGrid {
   width: 100%; /* Full width for DataGrid */
   margin: 0; /* Remove margins */
   padding: 0; /* Remove padding */
   border: none; /* Remove default borders */
+}
+
+/* Style MUI DataGrid elements under the local wrapper */
+.dataGridWrapper .MuiDataGrid-root {
+  width: 100% !important; /* Override MUI defaults */
+  border: none !important; /* Remove default border */
+}
+
+/* Remove padding from DataGrid cells */
+.dataGridWrapper .MuiDataGrid-cell {
+  padding: 0 8px; /* Minimal padding for content */
+}
+
+/* Ensure columns stretch to fill available space */
+.dataGridWrapper .MuiDataGrid-columnHeaders {
+  width: 100% !important;
+  margin: 0;
+  padding: 0;
+}
+
+/* Remove overlay scroll padding */
+.dataGridWrapper .MuiDataGrid-overlay {
+  padding: 0 !important;
 }
 
 /* Style for the action button to ensure consistency */
@@ -47,27 +77,4 @@
   padding: 6px 12px; /* Comfortable button size */
   font-size: 0.875rem;
   text-transform: none; /* Prevent uppercase text */
-}
-
-/* Ensure DataGrid internal elements use full width */
-:global(.MuiDataGrid-root) {
-  width: 100% !important; /* Override MUI defaults */
-  border: none !important; /* Remove default border */
-}
-
-/* Remove padding from DataGrid cells */
-:global(.MuiDataGrid-cell) {
-  padding: 0 8px; /* Minimal padding for content */
-}
-
-/* Ensure columns stretch to fill available space */
-:global(.MuiDataGrid-columnHeaders) {
-  width: 100% !important;
-  margin: 0;
-  padding: 0;
-}
-
-/* Remove overlay scroll padding */
-:global(.MuiDataGrid-overlay) {
-  padding: 0 !important;
 }
