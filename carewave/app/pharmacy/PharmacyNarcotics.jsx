@@ -38,6 +38,7 @@ const PharmacyNarcotics = () => {
   const columns = [
     { field: 'id', headerName: 'ID', width: 90, valueGetter: ({ row }) => row?.id ?? 'N/A' },
     { field: 'name', headerName: 'Medication', width: 200, valueGetter: ({ row }) => row?.name ?? 'Unknown' },
+    { field: 'category', headerName: 'Category', width: 150, valueGetter: ({ row }) => row?.category ?? 'Unknown' },
     { field: 'stockQuantity', headerName: 'Stock', width: 120, valueGetter: ({ row }) => row?.stockQuantity ?? 0 },
     { field: 'batchNumber', headerName: 'Batch Number', width: 150, valueGetter: ({ row }) => row?.batchNumber ?? 'N/A' },
     {
@@ -45,6 +46,24 @@ const PharmacyNarcotics = () => {
       headerName: 'Expiry Date',
       width: 150,
       valueFormatter: ({ value }) => (value && !isNaN(new Date(value).getTime()) ? new Date(value).toLocaleDateString() : '-'),
+    },
+    {
+      field: 'price',
+      headerName: 'Price',
+      width: 120,
+      valueFormatter: ({ value }) => (typeof value === 'number' ? `$${value.toFixed(2)}` : '-'),
+    },
+    {
+      field: 'supplier',
+      headerName: 'Supplier',
+      width: 150,
+      valueGetter: ({ row }) => row?.supplier?.name ?? 'Unknown',
+    },
+    {
+      field: 'formulary',
+      headerName: 'Formulary',
+      width: 150,
+      valueGetter: ({ row }) => row?.formulary?.name ?? 'Unknown',
     },
     {
       field: 'history',
@@ -61,40 +80,19 @@ const PharmacyNarcotics = () => {
         console.log('Dispensing Records:', dispensingRecords);
         console.log('Stock Adjustments:', stockAdjustments);
 
-        const history = [...dispensingRecords, ...stockAdjustments]
+        const history = [
+          ...dispensingRecords.map(record => ({ ...record, date: record.dispensedDate })),
+          ...stockAdjustments.map(record => ({ ...record, date: record.adjustmentDate })),
+        ]
           .filter(record => {
-            const isValid = record && record.createdAt && !isNaN(new Date(record.createdAt).getTime()) && typeof record.quantity === 'number';
+            const isValid = record && record.date && !isNaN(new Date(record.date).getTime()) && typeof record.quantity === 'number';
             if (!isValid) console.log('Invalid record filtered out:', record);
             return isValid;
           })
-          .map(record => `${record.quantity} units ${record.quantity > 0 ? 'added' : 'dispensed'} on ${new Date(record.createdAt).toLocaleDateString()}`)
+          .map(record => `${record.quantity} units ${record.quantity > 0 ? 'added' : 'dispensed'} on ${new Date(record.date).toLocaleDateString()}`)
           .join(', ');
         return history || 'No history available';
       },
-    },
-    {
-      field: 'supplier',
-      headerName: 'Supplier',
-      width: 150,
-      valueGetter: ({ row }) => row?.supplier?.name ?? 'Unknown',
-    },
-    {
-      field: 'formulary',
-      headerName: 'Formulary',
-      width: 150,
-      valueGetter: ({ row }) => row?.formulary?.name ?? 'Unknown',
-    },
-    {
-      field: 'category',
-      headerName: 'Category',
-      width: 150,
-      valueGetter: ({ row }) => row?.category ?? 'Unknown',
-    },
-    {
-      field: 'price',
-      headerName: 'Price',
-      width: 120,
-      valueFormatter: ({ value }) => (typeof value === 'number' ? `$${value.toFixed(2)}` : '-'),
     },
   ];
 
@@ -110,6 +108,7 @@ const PharmacyNarcotics = () => {
         value={search ?? ''}
         onChange={(e) => setSearch(e.target.value ?? '')}
         fullWidth
+        margin="normal"
       />
       <DataGrid
         rows={filteredNarcotics}
