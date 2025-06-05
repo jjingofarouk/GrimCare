@@ -1,11 +1,11 @@
-"use client";
+'use client';
 import React, { useState, useEffect } from 'react';
 import { Box, Typography, Alert, Button } from '@mui/material';
 import { DataGrid } from '@mui/x-data-grid';
 import { getDoctors, updateDoctor, deleteDoctor } from './doctorService';
 import styles from './DoctorList.module.css';
 
-export default function DoctorList() {
+export default function DoctorList({ onEdit, onSelect }) {
   const [doctors, setDoctors] = useState([]);
   const [error, setError] = useState(null);
 
@@ -105,17 +105,19 @@ export default function DoctorList() {
         </Alert>
       )}
       <Box className={styles.tableWrapper}>
-        <DataGrid
-          rows={doctors}
-          columns={columns}
-          pageSizeOptions={[5, 10, 25]}
-          disableRowSelectionOnClick
-          initialState={{
-            pagination: { paginationModel: { pageSize: 10 } },
-          }}
-          className={styles.dataGrid}
-          onCellEditStop={handleCellEditStop}
-        />
+        <Box className={styles.dataGridWrapper}>
+          <DataGrid
+            rows={doctors}
+            columns={columns}
+            pageSizeOptions={[5, 10, 25]}
+            disableRowSelectionOnClick
+            initialState={{
+              pagination: { paginationModel: { pageSize: 10 } },
+            }}
+            className={styles.dataGrid}
+            onCellEditStop={handleCellEditStop}
+          />
+        </Box>
       </Box>
     </Box>
   );
