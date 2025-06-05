@@ -1,1 +1,2 @@
 
+touch queue-mgmt.prisma clinical.prisma laboratory.prisma radiology.prisma operation-theatre.prisma clinical-settings.prisma nursing.prisma maternity.prisma vaccination.prisma claim-mgmt.prisma nhif.prisma inventory.prisma substore.prisma reports.prisma dynamic-report.prisma medical-records.prisma helpdesk.prisma mkt-referral.prisma social-service.prisma settings.prisma system-admin.prisma utilities.prisma verification.prisma home.prisma login.prisma register.prisma
