@@ -1,5 +1,3 @@
-
-
 "use client";
 
 import React, { useState } from 'react';
@@ -17,30 +15,29 @@ import {
   IconButton,
   Chip,
   Badge,
-  Divider,
-  useTheme,
-  alpha
+  Divider
 } from '@mui/material';
 import {
-  Bars3Icon,
-  BellIcon,
-  UserIcon,
-  CogIcon,
-  ArrowRightOnRectangleIcon,
-  HomeIcon
-} from '@heroicons/react/24/outline';
-import { AccountCircle, Notifications } from '@mui/icons-material';
+  Menu as MenuIcon,
+  Bell,
+  User,
+  Settings,
+  LogOut,
+  Home,
+  UserCircle
+} from 'lucide-react';
 import Sidebar from './Sidebar';
 import useAuth from './useAuth';
+import './hospital-header-styles.css';
 
 const roleColors = {
-  PATIENT: '#059669',
-  DOCTOR: '#7c3aed',
-  NURSE: '#dc2626',
-  LAB_TECHNICIAN: '#ea580c',
-  STAFF: '#0891b2',
-  ADMIN: '#64748b',
-  GUEST: '#374151'
+  PATIENT: 'patient',
+  DOCTOR: 'doctor',
+  NURSE: 'nurse',
+  LAB_TECHNICIAN: 'lab',
+  STAFF: 'staff',
+  ADMIN: 'admin',
+  GUEST: 'guest'
 };
 
 const roleDisplayNames = {
@@ -55,7 +52,6 @@ const roleDisplayNames = {
 
 export default function Header() {
   const pathname = usePathname();
-  const theme = useTheme();
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [anchorEl, setAnchorEl] = useState(null);
   const [notificationAnchor, setNotificationAnchor] = useState(null);
@@ -76,30 +72,30 @@ export default function Header() {
     { 
       name: 'Profile', 
       path: '/profile', 
-      icon: UserIcon,
+      icon: User,
       description: 'View and edit your profile'
     },
     { 
       name: 'Settings', 
       path: '/settings', 
-      icon: CogIcon,
+      icon: Settings,
       description: 'Application preferences'
     },
     { 
       name: 'Logout', 
       path: '#', 
       onClick: handleLogout, 
-      icon: ArrowRightOnRectangleIcon,
+      icon: LogOut,
       description: 'Sign out of your account',
       danger: true
     },
   ] : [
-    { name: 'Home', path: '/', icon: HomeIcon },
-    { name: 'Login', path: '/auth/login', icon: UserIcon },
-    { name: 'Register', path: '/auth/register', icon: UserIcon },
+    { name: 'Home', path: '/', icon: Home },
+    { name: 'Login', path: '/auth/login', icon: User },
+    { name: 'Register', path: '/auth/register', icon: User },
   ];
 
-  // Mock notifications - in real app, these would come from your notification system
+  // Mock notifications
   const notifications = [
     { id: 1, title: 'New appointment scheduled', time: '5 min ago', unread: true },
     { id: 2, title: 'Lab results available', time: '1 hour ago', unread: true },
@@ -108,138 +104,17 @@ export default function Header() {
 
   const unreadCount = notifications.filter(n => n.unread).length;
 
-  const headerStyles = {
-    background: 'linear-gradient(135deg, #ffffff 0%, #f8fafc 100%)',
-    backdropFilter: 'blur(10px)',
-    borderBottom: '1px solid #e2e8f0',
-    boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)',
-    color: '#1e293b',
-    '& .MuiToolbar-root': {
-      minHeight: '72px',
-      padding: '0 24px',
-    }
-  };
-
-  const logoContainerStyles = {
-    display: 'flex',
-    alignItems: 'center',
-    gap: '12px',
-    cursor: 'pointer',
-    padding: '8px 16px',
-    borderRadius: '12px',
-    transition: 'all 0.2s ease',
-    '&:hover': {
-      backgroundColor: alpha(theme.palette.primary.main, 0.08),
-      transform: 'scale(1.02)',
-    }
-  };
-
-  const logoImageStyles = {
-    width: '40px',
-    height: '40px',
-    borderRadius: '10px',
-    boxShadow: '0 2px 8px rgba(0, 0, 0, 0.1)',
-  };
-
-  const headerTitleStyles = {
-    fontWeight: 700,
-    fontSize: '1.5rem',
-    background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-    backgroundClip: 'text',
-    WebkitBackgroundClip: 'text',
-    WebkitTextFillColor: 'transparent',
-    display: { xs: 'none', sm: 'block' }
-  };
-
-  const navButtonStyles = {
-    borderRadius: '10px',
-    padding: '8px 16px',
-    fontWeight: 500,
-    textTransform: 'none',
-    transition: 'all 0.2s ease',
-    '&:hover': {
-      backgroundColor: alpha(theme.palette.primary.main, 0.08),
-      transform: 'translateY(-1px)',
-    },
-    '&.active': {
-      backgroundColor: alpha(theme.palette.primary.main, 0.12),
-      color: theme.palette.primary.main,
-    }
-  };
-
-  const userInfoStyles = {
-    display: 'flex',
-    alignItems: 'center',
-    gap: '16px',
-  };
-
-  const userNameStyles = {
-    fontWeight: 600,
-    color: '#1e293b',
-    display: { xs: 'none', md: 'block' }
-  };
-
-  const menuStyles = {
-    '& .MuiPaper-root': {
-      borderRadius: '16px',
-      boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)',
-      border: '1px solid #e2e8f0',
-      minWidth: '280px',
-      marginTop: '8px',
-    }
-  };
-
-  const menuItemStyles = {
-    padding: '12px 20px',
-    borderRadius: '8px',
-    margin: '4px 8px',
-    transition: 'all 0.2s ease',
-    '&:hover': {
-      backgroundColor: alpha(theme.palette.primary.main, 0.08),
-    },
-    '&.danger:hover': {
-      backgroundColor: alpha('#ef4444', 0.08),
-      color: '#ef4444',
-    }
-  };
-
-  const avatarStyles = {
-    width: 36,
-    height: 36,
-    fontSize: '1rem',
-    fontWeight: 600,
-    backgroundColor: user ? roleColors[user.role] || '#64748b' : '#64748b',
-    transition: 'all 0.2s ease',
-    '&:hover': {
-      transform: 'scale(1.05)',
-    }
-  };
-
-  const notificationStyles = {
-    color: '#64748b',
-    transition: 'color 0.2s ease',
-    '&:hover': {
-      color: theme.palette.primary.main,
-    }
-  };
-
   return (
     <>
-      <AppBar position="fixed" sx={headerStyles} elevation={0}>
+      <AppBar position="fixed" className="hospital-header" elevation={0}>
         <Toolbar>
           {/* Logo and Menu Toggle */}
-          <Box sx={logoContainerStyles} onClick={toggleSidebar}>
-            <IconButton 
-              sx={{ 
-                p: 0.5, 
-                color: '#64748b',
-                '&:hover': { backgroundColor: 'transparent' }
-              }}
-            >
-              <Bars3Icon style={{ width: '20px', height: '20px' }} />
+          <Box className="hospital-logo-container" onClick={toggleSidebar}>
+            <IconButton className="hospital-menu-toggle">
+              <MenuIcon size={20} />
             </IconButton>
-            <img src="/logo.png" alt="CareWave Logo" style={logoImageStyles} />
-            <Typography sx={headerTitleStyles}>
+            <img src="/logo.png" alt="CareWave Logo" className="hospital-logo-image" />
+            <Typography className="hospital-title hospital-title-mobile">
               CareWave
             </Typography>
           </Box>
@@ -255,13 +130,7 @@ export default function Header() {
                   key={path}
                   component={Link}
                   href={path}
-                  sx={{
-                    ...navButtonStyles,
-                    ...(pathname === path && { 
-                      backgroundColor: alpha(theme.palette.primary.main, 0.12),
-                      color: theme.palette.primary.main 
-                    })
-                  }}
+                  className={`hospital-nav-button ${pathname === path ? 'active' : ''}`}
                 >
                   {name}
                 </Button>
@@ -270,23 +139,17 @@ export default function Header() {
           )}
 
           {/* User Info Section */}
-          <Box sx={userInfoStyles}>
+          <Box className="hospital-user-info">
             {/* User Name and Role */}
             {user && (
-              <Box sx={{ textAlign: 'right', display: { xs: 'none', md: 'block' } }}>
-                <Typography sx={userNameStyles}>
+              <Box sx={{ textAlign: 'right' }} className="hospital-user-name-mobile">
+                <Typography className="hospital-user-name">
                   {user.name || user.email}
                 </Typography>
                 <Chip
                   label={roleDisplayNames[user.role] || 'User'}
                   size="small"
-                  sx={{
-                    backgroundColor: alpha(roleColors[user.role] || '#64748b', 0.1),
-                    color: roleColors[user.role] || '#64748b',
-                    fontSize: '0.75rem',
-                    fontWeight: 600,
-                    height: '20px',
-                  }}
+                  className={`hospital-role-chip hospital-role-${roleColors[user.role] || 'guest'}`}
                 />
               </Box>
             )}
@@ -295,10 +158,10 @@ export default function Header() {
             {user && (
               <IconButton 
                 onClick={handleNotificationOpen}
-                sx={notificationStyles}
+                className="hospital-notification-btn"
               >
                 <Badge badgeContent={unreadCount} color="error">
-                  <BellIcon style={{ width: '20px', height: '20px' }} />
+                  <Bell size={20} />
                 </Badge>
               </IconButton>
             )}
@@ -306,11 +169,11 @@ export default function Header() {
             {/* User Avatar/Menu */}
             <IconButton onClick={handleMenuOpen} sx={{ p: 0 }}>
               {user ? (
-                <Avatar sx={avatarStyles}>
+                <Avatar className={`hospital-avatar hospital-avatar-${roleColors[user.role] || 'guest'}`}>
                   {user.name ? user.name.charAt(0).toUpperCase() : 'U'}
                 </Avatar>
               ) : (
-                <AccountCircle sx={{ fontSize: 36, color: '#64748b' }} />
+                <UserCircle size={34} color="white" />
               )}
             </IconButton>
           </Box>
@@ -322,16 +185,16 @@ export default function Header() {
         anchorEl={anchorEl}
         open={Boolean(anchorEl)}
         onClose={handleMenuClose}
-        sx={menuStyles}
+        className="hospital-menu"
         transformOrigin={{ horizontal: 'right', vertical: 'top' }}
         anchorOrigin={{ horizontal: 'right', vertical: 'bottom' }}
       >
         {user && (
-          <Box sx={{ padding: '16px 20px', borderBottom: '1px solid #e2e8f0' }}>
-            <Typography variant="subtitle2" sx={{ fontWeight: 600, color: '#1e293b' }}>
+          <Box className="hospital-menu-header">
+            <Typography className="hospital-user-title">
               {user.name || user.email}
             </Typography>
-            <Typography variant="caption" sx={{ color: '#64748b' }}>
+            <Typography className="hospital-user-subtitle">
               {roleDisplayNames[user.role]} Account
             </Typography>
           </Box>
@@ -343,19 +206,16 @@ export default function Header() {
             onClick={onClick || handleMenuClose}
             component={onClick ? 'div' : Link}
             href={onClick ? undefined : path}
-            sx={{
-              ...menuItemStyles,
-              ...(danger && { '&:hover': { backgroundColor: alpha('#ef4444', 0.08), color: '#ef4444' } })
-            }}
+            className={`hospital-menu-item ${danger ? 'danger' : ''}`}
           >
-            <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, width: '100%' }}>
-              {Icon && <Icon style={{ width: '18px', height: '18px' }} />}
-              <Box>
-                <Typography variant="body2" sx={{ fontWeight: 500 }}>
+            <Box className="hospital-menu-item-content">
+              {Icon && <Icon size={18} />}
+              <Box className="hospital-menu-item-text">
+                <Typography className="hospital-menu-item-title">
                   {name}
                 </Typography>
                 {description && (
-                  <Typography variant="caption" sx={{ color: '#64748b', display: 'block' }}>
+                  <Typography className="hospital-menu-item-desc">
                     {description}
                   </Typography>
                 )}
@@ -371,39 +231,35 @@ export default function Header() {
           anchorEl={notificationAnchor}
           open={Boolean(notificationAnchor)}
           onClose={handleNotificationClose}
-          sx={menuStyles}
+          className="hospital-menu"
           transformOrigin={{ horizontal: 'right', vertical: 'top' }}
           anchorOrigin={{ horizontal: 'right', vertical: 'bottom' }}
         >
-          <Box sx={{ padding: '16px 20px', borderBottom: '1px solid #e2e8f0' }}>
-            <Typography variant="subtitle2" sx={{ fontWeight: 600 }}>
+          <Box className="hospital-menu-header">
+            <Typography className="hospital-user-title">
               Notifications
             </Typography>
           </Box>
           
-          {notifications.map((notification, index) => (
+          {notifications.map((notification) => (
             <MenuItem
               key={notification.id}
-              sx={{
-                ...menuItemStyles,
-                backgroundColor: notification.unread ? alpha(theme.palette.primary.main, 0.02) : 'transparent',
-                borderLeft: notification.unread ? `3px solid ${theme.palette.primary.main}` : '3px solid transparent',
-              }}
+              className={`hospital-notification-item ${notification.unread ? 'unread' : ''}`}
             >
               <Box>
-                <Typography variant="body2" sx={{ fontWeight: notification.unread ? 600 : 400 }}>
+                <Typography className={`hospital-notification-title ${notification.unread ? 'unread' : ''}`}>
                   {notification.title}
                 </Typography>
-                <Typography variant="caption" sx={{ color: '#64748b' }}>
+                <Typography className="hospital-notification-time">
                   {notification.time}
                 </Typography>
               </Box>
             </MenuItem>
           ))}
           
-          <Divider sx={{ margin: '8px 0' }} />
-          <MenuItem sx={menuItemStyles}>
-            <Typography variant="body2" sx={{ color: theme.palette.primary.main, fontWeight: 500 }}>
+          <Divider className="hospital-divider" />
+          <MenuItem className="hospital-notification-footer">
+            <Typography className="hospital-notification-footer-text">
               View all notifications
             </Typography>
           </MenuItem>
