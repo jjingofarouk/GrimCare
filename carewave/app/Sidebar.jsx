@@ -70,7 +70,7 @@ const roleBasedNavItems = {
     { name: 'Queue Management', path: '/queue-mgmt', icon: Users, category: 'patient-care' },
     { name: 'Clinical', path: '/clinical', icon: Beaker, category: 'clinical' },
     { name: 'Laboratory', path: '/laboratory', icon: Beaker, category: 'clinical' },
-    { name: 'Radiology', path: '/radiology', icon Curves, category: 'clinical' },
+    { name: 'Radiology', path: '/radiology', icon: Beaker, category: 'clinical' },
     { name: 'Operation Theatre', path: '/operation-theatre', icon: Beaker, category: 'clinical' },
     { name: 'Clinical Settings', path: '/clinical-settings', icon: Wrench, category: 'clinical' },
     { name: 'CSSD', path: '/cssd', icon: Shield, category: 'clinical' },
@@ -122,7 +122,7 @@ const categoryLabels = {
   health: 'Health Services',
 };
 
-export default function Sidebar({ toggleSidebar, isOpen }: { toggleSidebar: () => void; isOpen: boolean }) {
+export default function Sidebar({ toggleSidebar, isOpen }) {
   const pathname = usePathname();
   const { user } = useAuth();
   const theme = useTheme();
