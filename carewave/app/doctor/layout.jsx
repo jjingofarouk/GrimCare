@@ -1,23 +1,21 @@
-
-
 "use client";
-// app/doctor/layout.jsx
 import React from 'react';
-import { AppBar, Toolbar, Typography, Container, Box } from '@mui/material';
+import { AppBar, Toolbar, Typography, Box } from '@mui/material';
+import styles from './layout.module.css';
 
 const DoctorLayout = ({ children }) => {
   return (
-    <Box sx={{ minHeight: '100vh', bgcolor: 'grey.100' }}>
-      <AppBar position="static" color="primary">
-        <Toolbar>
-          <Typography variant="h6" sx={{ fontWeight: 'bold' }}>
+    <Box className={styles.container}>
+      <AppBar position="static" color="primary" className={styles.appBar}>
+        <Toolbar className={styles.toolbar}>
+          <Typography variant="h6" className={styles.title}>
             Doctor Management - Uganda Health System
           </Typography>
         </Toolbar>
       </AppBar>
-      <Container sx={{ mt: 4, p: 2 }}>
+      <Box className={styles.content}>
         {children}
-      </Container>
+      </Box>
     </Box>
   );
 };
