@@ -1,149 +1,255 @@
+/* Hospital Management System Sidebar Styles */
 
-/* Sidebar.module.css - Enhanced styles for modern sidebar */
-
-/* Custom scrollbar for sidebar */
-.sidebar {
-  scrollbar-width: thin;
-  scrollbar-color: #cbd5e1 transparent;
+/* Sidebar Container */
+.hospital-sidebar {
+  width: 280px;
+  background-color: var(--hospital-white);
+  border-right: 1px solid var(--hospital-gray-200);
+  box-shadow: var(--shadow-lg);
 }
 
-.sidebar::-webkit-scrollbar {
-  width: 4px;
+/* Sidebar Header */
+.hospital-sidebar-header {
+  padding: 20px;
+  border-bottom: 1px solid var(--hospital-gray-200);
+  background-color: var(--hospital-teal);
+  color: var(--hospital-white);
+  cursor: pointer;
+  transition: all 0.2s ease;
 }
 
-.sidebar::-webkit-scrollbar-track {
-  background: transparent;
+.hospital-sidebar-header:hover {
+  background-color: var(--hospital-teal-light);
 }
 
-.sidebar::-webkit-scrollbar-thumb {
-  background-color: #cbd5e1;
-  border-radius: 2px;
+.hospital-sidebar-logo-container {
+  display: flex;
+  align-items: center;
+  gap: 12px;
 }
 
-.sidebar::-webkit-scrollbar-thumb:hover {
-  background-color: #94a3b8;
+.hospital-sidebar-logo {
+  width: 32px;
+  height: 32px;
+  border-radius: 6px;
+  background-color: var(--hospital-white);
+  padding: 2px;
 }
 
-/* Smooth transitions for mobile */
+.hospital-sidebar-title {
+  font-weight: 600 !important;
+  font-size: 1.25rem !important;
+  color: var(--hospital-white) !important;
+  letter-spacing: -0.025em;
+}
+
+/* Sidebar Content */
+.hospital-sidebar-content {
+  overflow-y: auto;
+  flex: 1;
+  padding-bottom: 16px;
+}
+
+/* Category Sections */
+.hospital-category-header {
+  padding: 16px 20px 8px 20px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.hospital-category-chip {
+  font-size: 0.75rem !important;
+  font-weight: 600 !important;
+  height: 22px !important;
+  border-radius: 11px !important;
+  text-transform: uppercase;
+  letter-spacing: 0.025em;
+}
+
+/* Category Color Variants */
+.hospital-category-main {
+  background-color: rgba(37, 99, 235, 0.1) !important;
+  color: #2563eb !important;
+}
+
+.hospital-category-patient-care {
+  background-color: rgba(5, 150, 105, 0.1) !important;
+  color: #059669 !important;
+}
+
+.hospital-category-clinical {
+  background-color: rgba(124, 58, 237, 0.1) !important;
+  color: #7c3aed !important;
+}
+
+.hospital-category-nursing {
+  background-color: rgba(220, 38, 38, 0.1) !important;
+  color: #dc2626 !important;
+}
+
+.hospital-category-lab {
+  background-color: rgba(234, 88, 12, 0.1) !important;
+  color: #ea580c !important;
+}
+
+.hospital-category-pharmacy {
+  background-color: rgba(8, 145, 178, 0.1) !important;
+  color: #0891b2 !important;
+}
+
+.hospital-category-finance {
+  background-color: rgba(22, 163, 74, 0.1) !important;
+  color: #16a34a !important;
+}
+
+.hospital-category-operations {
+  background-color: rgba(147, 51, 234, 0.1) !important;
+  color: #9333ea !important;
+}
+
+.hospital-category-reports {
+  background-color: rgba(13, 148, 136, 0.1) !important;
+  color: #0d9488 !important;
+}
+
+.hospital-category-support {
+  background-color: rgba(67, 56, 202, 0.1) !important;
+  color: #4338ca !important;
+}
+
+.hospital-category-admin {
+  background-color: rgba(100, 116, 139, 0.1) !important;
+  color: #64748b !important;
+}
+
+.hospital-category-auth {
+  background-color: rgba(55, 65, 81, 0.1) !important;
+  color: #374151 !important;
+}
+
+.hospital-category-health {
+  background-color: rgba(5, 150, 105, 0.1) !important;
+  color: #059669 !important;
+}
+
+/* Navigation List */
+.hospital-nav-list {
+  padding: 8px 0 !important;
+}
+
+.hospital-nav-list .MuiListItem-root {
+  margin: 2px 12px !important;
+  border-radius: 8px !important;
+  transition: all 0.2s ease !important;
+  padding: 8px 12px !important;
+  cursor: pointer;
+}
+
+.hospital-nav-list .MuiListItem-root:hover {
+  background-color: var(--hospital-gray-50) !important;
+  transform: translateX(2px);
+}
+
+.hospital-nav-list .MuiListItem-root.active {
+  background-color: rgba(15, 76, 76, 0.08) !important;
+  border-left: 3px solid var(--hospital-teal) !important;
+  font-weight: 600;
+}
+
+.hospital-nav-list .MuiListItem-root.active .MuiListItemIcon-root {
+  color: var(--hospital-teal) !important;
+}
+
+.hospital-nav-list .MuiListItem-root.active .MuiListItemText-primary {
+  color: var(--hospital-teal) !important;
+  font-weight: 600 !important;
+}
+
+/* List Item Icons */
+.hospital-nav-list .MuiListItemIcon-root {
+  min-width: 36px !important;
+  color: var(--hospital-gray-500);
+}
+
+/* List Item Text */
+.hospital-nav-list .MuiListItemText-primary {
+  font-size: 0.875rem !important;
+  font-weight: 500 !important;
+  color: var(--hospital-gray-700) !important;
+}
+
+/* Section Dividers */
+.hospital-section-divider {
+  margin: 12px 16px !important;
+  background-color: var(--hospital-gray-200) !important;
+}
+
+/* Sidebar Footer */
+.hospital-sidebar-footer {
+  padding: 16px 20px;
+  border-top: 1px solid var(--hospital-gray-200);
+  background-color: var(--hospital-gray-50);
+}
+
+.hospital-sidebar-footer .hospital-footer-caption {
+  color: var(--hospital-gray-500) !important;
+  font-weight: 500 !important;
+  font-size: 0.75rem !important;
+  display: block;
+  margin-bottom: 4px !important;
+}
+
+.hospital-sidebar-footer .hospital-footer-user {
+  font-weight: 600 !important;
+  color: var(--hospital-gray-800) !important;
+  font-size: 0.875rem !important;
+}
+
+/* Responsive Design */
 @media (max-width: 768px) {
-  .sidebar {
-    transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  .hospital-sidebar {
+    width: 260px;
+  }
+  
+  .hospital-sidebar-header {
+    padding: 16px;
+  }
+  
+  .hospital-category-header {
+    padding: 12px 16px 6px 16px;
+  }
+  
+  .hospital-nav-list .MuiListItem-root {
+    margin: 2px 8px !important;
+    padding: 6px 10px !important;
+  }
+  
+  .hospital-sidebar-footer {
+    padding: 12px 16px;
   }
 }
 
-/* Focus states for accessibility */
-.navLink:focus-visible {
-  outline: 2px solid #3b82f6;
+/* Accessibility */
+.hospital-nav-list .MuiListItem-root:focus {
+  outline: 2px solid var(--hospital-teal);
   outline-offset: 2px;
 }
 
-/* Animation for category chips */
-@keyframes fadeInUp {
-  from {
-    opacity: 0;
-    transform: translateY(10px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
+/* Scrollbar Styling for Webkit browsers */
+.hospital-sidebar-content::-webkit-scrollbar {
+  width: 4px;
 }
 
-.categoryChip {
-  animation: fadeInUp 0.3s ease-out;
+.hospital-sidebar-content::-webkit-scrollbar-track {
+  background: var(--hospital-gray-100);
 }
 
-/* Enhanced hover effects */
-.navLink {
-  position: relative;
-  overflow: hidden;
+.hospital-sidebar-content::-webkit-scrollbar-thumb {
+  background: var(--hospital-gray-300);
+  border-radius: 2px;
 }
 
-.navLink::before {
-  content: '';
-  position: absolute;
-  left: 0;
-  top: 0;
-  height: 100%;
-  width: 0;
-  background: linear-gradient(90deg, transparent, rgba(59, 130, 246, 0.1), transparent);
-  transition: width 0.3s ease;
-}
-
-.navLink:hover::before {
-  width: 100%;
-}
-
-/* Active state pulse animation */
-@keyframes activePulse {
-  0% {
-    box-shadow: 0 0 0 0 rgba(59, 130, 246, 0.4);
-  }
-  70% {
-    box-shadow: 0 0 0 6px rgba(59, 130, 246, 0);
-  }
-  100% {
-    box-shadow: 0 0 0 0 rgba(59, 130, 246, 0);
-  }
-}
-
-.navLink.active {
-  animation: activePulse 2s infinite;
-}
-
-/* Logo hover effect */
-.logoContainer {
-  transition: transform 0.2s ease;
-}
-
-.logoContainer:hover {
-  transform: scale(1.02);
-}
-
-/* Micro-interactions */
-.navIcon {
-  transition: transform 0.2s ease;
-}
-
-.navLink:hover .navIcon {
-  transform: scale(1.1);
-}
-
-/* Glass morphism effect for modern browsers */
-@supports (backdrop-filter: blur(10px)) {
-  .glassEffect {
-    background: rgba(255, 255, 255, 0.95);
-    backdrop-filter: blur(10px);
-    border: 1px solid rgba(255, 255, 255, 0.2);
-  }
-}
-
-/* Dark mode support */
-@media (prefers-color-scheme: dark) {
-  .sidebar {
-    background: linear-gradient(180deg, #1e293b 0%, #0f172a 100%);
-    border-right: 1px solid #334155;
-  }
-  
-  .categoryChip {
-    background-color: rgba(255, 255, 255, 0.1);
-    color: #e2e8f0;
-  }
-}
-
-/* Reduced motion for accessibility */
-@media (prefers-reduced-motion: reduce) {
-  .navLink,
-  .logoContainer,
-  .navIcon {
-    transition: none;
-  }
-  
-  .navLink.active {
-    animation: none;
-  }
-  
-  .categoryChip {
-    animation: none;
-  }
+.hospital-sidebar-content::-webkit-scrollbar-thumb:hover {
+  background: var(--hospital-gray-400);
 }
