@@ -1,3 +1,4 @@
+// modules/departments.prisma
 model Department {
   id            Int           @id @default(autoincrement())
   name          String        @unique
