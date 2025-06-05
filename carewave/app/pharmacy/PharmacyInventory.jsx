@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { DataGrid } from '@mui/x-data-grid';
 import { TextField, Box, Typography, IconButton, Alert } from '@mui/material';
@@ -135,18 +134,19 @@ const PharmacyInventory = () => {
           </IconButton>
         </Box>
       </Box>
-      <DataGrid
-        rows={filteredInventory}
-        columns={columns}
-        pageSizeOptions={[10, 25, 50]}
-        className={styles.grid}
-        autoHeight
-        onCellEditStop={(params, event) => {
-          if (params.reason === 'enterKeyDown' || params.reason === 'cellFocusOut') {
-            handleStockUpdate(params.row.id, params.value);
-          }
-        }}
-      />
+      <Box sx={{ height: 600, width: '100%' }}>
+        <DataGrid
+          rows={filteredInventory}
+          columns={columns}
+          pageSizeOptions={[10, 25, 50]}
+          className={styles.grid}
+          onCellEditStop={(params, event) => {
+            if (params.reason === 'enterKeyDown' || params.reason === 'cellFocusOut') {
+              handleStockUpdate(params.row.id, params.value);
+            }
+          }}
+        />
+      </Box>
     </Box>
   );
 };
