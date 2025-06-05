@@ -1,74 +1,62 @@
+/* PatientPage.module.css */
 
-/* patient/PatientPage.module.css */
 .container {
-  max-width: 1200px;
-  margin: 0 auto;
-  padding: 20px;
+  width: 100vw;
+  max-width: 100%;
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
 }
 
-.tabsContainer {
-  overflow-x: auto;
-  white-space: nowrap;
-  -webkit-overflow-scrolling: touch;
-  scrollbar-width: none;
-  -ms-overflow-style: none;
+.title {
+  font-weight: bold;
+  font-size: 2rem;
+  margin: 0 0 20px 0;
+  padding: 16px;
+  color: #333;
+  width: 100%;
+  box-sizing: border-box;
+  background-color: #f5f5f5;
 }
 
-.tabsContainer::-webkit-scrollbar {
-  display: none;
+.paper {
+  width: 100%;
+  margin: 0;
+  padding: 0;
+  border-radius: 8px;
+  box-shadow: 0px 3px 3px -2px rgba(0,0,0,0.2), 0px 3px 4px 0px rgba(0,0,0,0.14), 0px 1px 8px 0px rgba(0,0,0,0.12);
+  box-sizing: border-box;
+}
+
+.tabsWrapper {
+  width: 100%;
+  margin: 0;
+  padding: 0;
+  border-bottom: 1px solid #e0e0e0;
 }
 
 .tabs {
-  display: flex;
-  gap: 8px;
-  padding: 0 10px;
-  margin-bottom: 20px;
+  width: 100%;
+  margin: 0;
+  padding: 0;
+}
+
+.tabContent {
+  width: 100%;
+  margin: 0;
+  padding: 0;
 }
 
 .tab {
-  flex: 0 0 auto;
-  padding: 10px 16px;
-  background-color: #f0f0f0;
-  border: none;
-  border-radius: 4px;
+  padding: 10px 20px;
   cursor: pointer;
-  font-size: 14px;
-  white-space: nowrap;
-  transition: background-color 0.3s;
+  background: none;
+  border: none;
+  font-size: 1rem;
+  color: #333;
 }
 
 .tab.active {
-  background-color: #007bff;
-  color: white;
-}
-
-.tab:hover {
-  background-color: #e0e0e0;
-}
-
-.content {
-  background-color: white;
-  padding: 20px;
-  border-radius: 8px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-}
-
-@media (max-width: 600px) {
-  .container {
-    padding: 10px;
-  }
-
-  .tabs {
-    gap: 6px;
-    padding: 0 5px;
-  }
-
-  .tab {
-    padding: 8px 12px;
-    font-size: 12px;
-  }
-
-  .content {
-    padding: 10px;
-  }
+  border-bottom: 2px solid #1976d2;
+  color: #1976d2;
 }
