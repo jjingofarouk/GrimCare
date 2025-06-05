@@ -1,0 +1,26 @@
+model Transaction {
+  id            Int           @id @default(autoincrement())
+  description   String
+  amount        Float
+  category      String
+  status        String
+  date          DateTime      @default(now())
+  type          String
+  costCenterId  Int?
+  costCenter    CostCenter?   @relation(fields: [costCenterId], references: [id])
+  patientId     Int?
+  patient       Patient?      @relation("PatientTransactions", fields: [patientId], references: [id])
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
+  invoices      Invoice[]     @relation("TransactionInvoices")
+  transactionId Int?
+}
+
+model CostCenter {
+  id            Int           @id @default(autoincrement())
+  name          String
+  department    String
+  transactions  Transaction[]
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
+}
