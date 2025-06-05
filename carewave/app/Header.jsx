@@ -20,7 +20,7 @@ import {
   alpha
 } from '@mui/material';
 import {
-  MenuIcon,
+  Bars3Icon,
   BellIcon,
   UserIcon,
   CogIcon,
@@ -234,7 +234,7 @@ export default function Header() {
                 '&:hover': { backgroundColor: 'transparent' }
               }}
             >
-              <MenuIcon style={{ width: '20px', height: '20px' }} />
+              <Bars3Icon style={{ width: '20px', height: '20px' }} />
             </IconButton>
             <img src="/logo.png" alt="CareWave Logo" style={logoImageStyles} />
             <Typography sx={headerTitleStyles}>
