@@ -527,3 +527,34 @@ export async function checkDrugInteractions(medicationIds) {
     throw new Error(error.response?.data?.error || 'Failed to check drug interactions');
   }
 }
+
+export async function getDoctors() {
+  try {
+    const response = await axios.get(`${BASE_URL}${API_ROUTES.DOCTOR}`);
+    return response.data;
+  } catch (error) {
+    console.error('Error fetching doctors:', error);
+    throw error;
+  }
+}
+
+export async function updateDoctor(id, data) {
+  try {
+    const response = await axios.put(`${BASE_URL}${API_ROUTES.DOCTOR}/${id}`, data);
+    return response.data;
+  } catch (error) {
+    console.error('Error updating doctor:', error);
+    throw error;
+  }
+}
+
+export async function deleteDoctor(id) {
+  try {
+    const response = await axios.delete(`${BASE_URL}${API_ROUTES.DOCTOR}/${id}`);
+    return response.data;
+  } catch (error) {
+    console.error('Error deleting doctor:', error);
+    throw error;
+  }
+}
+
