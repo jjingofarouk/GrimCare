@@ -98,7 +98,6 @@ export default function Header() {
   const unreadCount = notifications.filter((n) => n.unread).length;
 
   const headerStyles = {
-    display: { xs: 'block', md: 'none' },
     backgroundColor: '#1e3a8a',
     color: '#f1f5f9',
     boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)',
@@ -187,144 +186,151 @@ export default function Header() {
 
   return (
     <>
-      <AppBar position="fixed" sx={headerStyles} elevation={0}>
-        <Toolbar>
-          <Box sx={logoContainerStyles} onClick={toggleSidebar}>
-            <IconButton sx={{ p: 0, color: '#f1f5f9', '&:hover': { backgroundColor: 'transparent' } }}>
-              <MenuIcon size={20} />
-            </IconButton>
-            <img src="/logo.png" alt="CareWave Logo" style={logoImageStyles} />
-            <Typography sx={headerTitleStyles}>CareWave</Typography>
-          </Box>
-
-          <Box sx={{ flexGrow: 1 }} />
-
-          <Box sx={userInfoStyles}>
-            {user && (
-              <Box sx={{ textAlign: 'right', display: { xs: 'none', sm: 'block' } }}>
-                <Typography sx={userNameStyles}>{user.name || user.email}</Typography>
-                <Chip
-                  label={roleDisplayNames[user.role] || 'User'}
-                  size="small"
-                  sx={{
-                    backgroundColor: '#2563eb',
-                    color: '#f1f5f9',
-                    fontSize: '0.75rem',
-                    fontWeight: 600,
-                    height: '20px',
-                  }}
-                />
+      <Box sx={{ display: 'flex', minHeight: '100vh' }}>
+        <Box sx={{ display: { xs: 'none', md: 'block' } }}>
+          <Sidebar isOpen={true} toggleSidebar={() => {}} />
+        </Box>
+        <Box sx={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
+          <AppBar position="fixed" sx={headerStyles} elevation={0}>
+            <Toolbar>
+              <Box sx={logoContainerStyles} onClick={toggleSidebar}>
+                <IconButton sx={{ p: 0, color: '#f1f5f9', '&:hover': { backgroundColor: 'transparent' } }}>
+                  <MenuIcon size={20} />
+                </IconButton>
+                <img src="/logo.png" alt="CareWave Logo" style={logoImageStyles} />
+                <Typography sx={headerTitleStyles}>CareWave</Typography>
               </Box>
-            )}
 
-            {user && (
-              <IconButton onClick={handleNotificationOpen} sx={notificationStyles}>
-                <Badge badgeContent={unreadCount} color="error">
-                  <Bell size={20} />
-                </Badge>
-              </IconButton>
-            )}
+              <Box sx={{ flexGrow: 1 }} />
 
-            <IconButton onClick={handleMenuOpen} sx={{ p: 0 }}>
-              {user ? (
-                <Avatar sx={avatarStyles}>{user.name ? user.name.charAt(0).toUpperCase() : 'U'}</Avatar>
-              ) : (
-                <AccountCircle sx={{ fontSize: 32, color: '#cbd5e1' }} />
-              )}
-            </IconButton>
-          </Box>
-        </Toolbar>
-      </AppBar>
-
-      <MuiMenu
-        anchorEl={anchorEl}
-        open={Boolean(anchorEl)}
-        onClose={handleMenuClose}
-        sx={menuStyles}
-        transformOrigin={{ horizontal: 'right', vertical: 'top' }}
-        anchorOrigin={{ horizontal: 'right', vertical: 'bottom' }}
-      >
-        {user && (
-          <Box sx={{ padding: '12px 16px', borderBottom: '1px solid #334155' }}>
-            <Typography variant="subtitle2" sx={{ fontWeight: 600, color: '#f1f5f9' }}>
-              {user.name || user.email}
-            </Typography>
-            <Typography variant="caption" sx={{ color: '#94a3b8' }}>
-              {roleDisplayNames[user.role]} Account
-            </Typography>
-          </Box>
-        )}
-
-        {userMenuItems.map(({ name, path, onClick, icon: Icon, description, danger }) => (
-          <MenuItem
-            key={path}
-            onClick={onClick || handleMenuClose}
-            component={onClick ? 'div' : Link}
-            href={onClick ? undefined : path}
-            sx={{ ...menuItemStyles, ...(danger && { '&:hover': { backgroundColor: '#ef4444' } }) }}
-          >
-            <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, width: '100%' }}>
-              {Icon && <Icon size={18} />}
-              <Box>
-                <Typography variant="body2" sx={{ fontWeight: 500, color: '#f1f5f9' }}>
-                  {name}
-                </Typography>
-                {description && (
-                  <Typography variant="caption" sx={{ color: '#94a3b8', display: 'block' }}>
-                    {description}
-                  </Typography>
+              <Box sx={userInfoStyles}>
+                {user && (
+                  <Box sx={{ textAlign: 'right', display: { xs: 'none', sm: 'block' } }}>
+                    <Typography sx={userNameStyles}>{user.name || user.email}</Typography>
+                    <Chip
+                      label={roleDisplayNames[user.role] || 'User'}
+                      size="small"
+                      sx={{
+                        backgroundColor: '#2563eb',
+                        color: '#f1f5f9',
+                        fontSize: '0.75rem',
+                        fontWeight: 600,
+                        height: '20px',
+                      }}
+                    />
+                  </Box>
                 )}
+
+                {user && (
+                  <IconButton onClick={handleNotificationOpen} sx={notificationStyles}>
+                    <Badge badgeContent={unreadCount} color="error">
+                      <Bell size={20} />
+                    </Badge>
+                  </IconButton>
+                )}
+
+                <IconButton onClick={handleMenuOpen} sx={{ p: 0 }}>
+                  {user ? (
+                    <Avatar sx={avatarStyles}>{user.name ? user.name.charAt(0).toUpperCase() : 'U'}</Avatar>
+                  ) : (
+                    <AccountCircle sx={{ fontSize: 32, color: '#cbd5e1' }} />
+                  )}
+                </IconButton>
               </Box>
-            </Box>
-          </MenuItem>
-        ))}
-      </MuiMenu>
+            </Toolbar>
+          </AppBar>
 
-      {user && (
-        <MuiMenu
-          anchorEl={notificationAnchor}
-          open={Boolean(notificationAnchor)}
-          onClose={handleNotificationClose}
-          sx={menuStyles}
-          transformOrigin={{ horizontal: 'right', vertical: 'top' }}
-          anchorOrigin={{ horizontal: 'right', vertical: 'bottom' }}
-        >
-          <Box sx={{ padding: '12px 16px', borderBottom: '1px solid #334155' }}>
-            <Typography variant="subtitle2" sx={{ fontWeight: 600, color: '#f1f5f9' }}>
-              Notifications
-            </Typography>
-          </Box>
-
-          {notifications.map((notification, index) => (
-            <MenuItem
-              key={notification.id}
-              sx={{
-                ...menuItemStyles,
-                backgroundColor: notification.unread ? '#2563eb' : 'transparent',
-                borderLeft: notification.unread ? '3px solid #ffffff' : '3px solid transparent',
-              }}
-            >
-              <Box>
-                <Typography variant="body2" sx={{ fontWeight: notification.unread ? 600 : 400, color: '#f1f5f9' }}>
-                  {notification.title}
+          <MuiMenu
+            anchorEl={anchorEl}
+            open={Boolean(anchorEl)}
+            onClose={handleMenuClose}
+            sx={menuStyles}
+            transformOrigin={{ horizontal: 'right', vertical: 'top' }}
+            anchorOrigin={{ horizontal: 'right', vertical: 'bottom' }}
+          >
+            {user && (
+              <Box sx={{ padding: '12px 16px', borderBottom: '1px solid #334155' }}>
+                <Typography variant="subtitle2" sx={{ fontWeight: 600, color: '#f1f5f9' }}>
+                  {user.name || user.email}
                 </Typography>
                 <Typography variant="caption" sx={{ color: '#94a3b8' }}>
-                  {notification.time}
+                  {roleDisplayNames[user.role]} Account
                 </Typography>
               </Box>
-            </MenuItem>
-          ))}
+            )}
 
-          <Divider sx={{ margin: '4px 0', backgroundColor: '#334155' }} />
-          <MenuItem sx={menuItemStyles}>
-            <Typography variant="body2" sx={{ color: '#ffffff', fontWeight: 500 }}>
-              View all notifications
-            </Typography>
-          </MenuItem>
-        </MuiMenu>
-      )}
+            {userMenuItems.map(({ name, path, onClick, icon: Icon, description, danger }) => (
+              <MenuItem
+                key={path}
+                onClick={onClick || handleMenuClose}
+                component={onClick ? 'div' : Link}
+                href={onClick ? undefined : path}
+                sx={{ ...menuItemStyles, ...(danger && { '&:hover': { backgroundColor: '#ef4444' } }) }}
+              >
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, width: '100%' }}>
+                  {Icon && <Icon size={18} />}
+                  <Box>
+                    <Typography variant="body2" sx={{ fontWeight: 500, color: '#f1f5f9' }}>
+                      {name}
+                    </Typography>
+                    {description && (
+                      <Typography variant="caption" sx={{ color: '#94a3b8', display: 'block' }}>
+                        {description}
+                      </Typography>
+                    )}
+                  </Box>
+                </Box>
+              </MenuItem>
+            ))}
+          </MuiMenu>
 
-      <Sidebar isOpen={sidebarOpen} toggleSidebar={toggleSidebar} />
+          {user && (
+            <MuiMenu
+              anchorEl={notificationAnchor}
+              open={Boolean(notificationAnchor)}
+              onClose={handleNotificationClose}
+              sx={menuStyles}
+              transformOrigin={{ horizontal: 'right', vertical: 'top' }}
+              anchorOrigin={{ horizontal: 'right', vertical: 'bottom' }}
+            >
+              <Box sx={{ padding: '12px 16px', borderBottom: '1px solid #334155' }}>
+                <Typography variant="subtitle2" sx={{ fontWeight: 600, color: '#f1f5f9' }}>
+                  Notifications
+                </Typography>
+              </Box>
+
+              {notifications.map((notification, index) => (
+                <MenuItem
+                  key={notification.id}
+                  sx={{
+                    ...menuItemStyles,
+                    backgroundColor: notification.unread ? '#2563eb' : 'transparent',
+                    borderLeft: notification.unread ? '3px solid #ffffff' : '3px solid transparent',
+                  }}
+                >
+                  <Box>
+                    <Typography variant="body2" sx={{ fontWeight: notification.unread ? 600 : 400, color: '#f1f5f9' }}>
+                      {notification.title}
+                    </Typography>
+                    <Typography variant="caption" sx={{ color: '#94a3b8' }}>
+                      {notification.time}
+                    </Typography>
+                  </Box>
+                </MenuItem>
+              ))}
+
+              <Divider sx={{ margin: '4px 0', backgroundColor: '#334155' }} />
+              <MenuItem sx={menuItemStyles}>
+                <Typography variant="body2" sx={{ color: '#ffffff', fontWeight: 500 }}>
+                  View all notifications
+                </Typography>
+              </MenuItem>
+            </MuiMenu>
+          )}
+
+          <Sidebar isOpen={sidebarOpen} toggleSidebar={toggleSidebar} />
+        </Box>
+      </Box>
     </>
   );
 }
