@@ -18,9 +18,9 @@ const PharmacyNarcotics = () => {
   const fetchNarcotics = async () => {
     try {
       const inventory = await getInventory();
-      // Ensure inventory is an array and filter narcotic drugs
+      // Filter narcotic drugs (assuming narcotic is a boolean field; adjust if different)
       const narcoticDrugs = Array.isArray(inventory)
-        ? inventory.filter(item => item?.narcotic === true)
+        ? inventory.filter(item => item?.narcotic === true || item?.formulary?.isNarcotic === true)
         : [];
       setNarcotics(narcoticDrugs);
     } catch (error) {
@@ -55,6 +55,18 @@ const PharmacyNarcotics = () => {
           .join(', ');
         return history || 'No history available';
       },
+    },
+    {
+      field: 'supplier',
+      headerName: 'Supplier',
+      width: 150,
+      valueGetter: ({ row }) => row?.supplier?.name ?? 'Unknown',
+    },
+    {
+      field: 'formulary',
+      headerName: 'Formulary',
+      width: 150,
+      valueGetter: ({ row }) => row?.formulary?.name ?? 'Unknown',
     },
   ];
 
