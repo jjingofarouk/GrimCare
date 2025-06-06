@@ -26,25 +26,25 @@ model Patient {
 }
 
 model User {
-  id                Int                @id @default(autoincrement())
-  email             String             @unique
-  name              String
-  password          String
-  role              String             @default("PATIENT") // PATIENT, DOCTOR, ADMIN, NURSE
-  createdAt         DateTime           @default(now())
-  updatedAt         DateTime           @updatedAt
-  doctor            Doctor?            @relation(fields: [doctorId], references: [id])
-  doctorId          Int?               @unique
-  patient           Patient?           @relation(fields: [patientId], references: [id])
-  patientId         Int?               @unique
-  payrolls          Payroll[]
-  cssdLogs          CSSDLog[]          @relation("LoggedBy")
-  cssdRequisitions  CSSDRequisition[]  @relation("RequisitionRequestedBy")
-  appointments      Appointment[]      @relation("BookedBy")
-  dispensingRecords DispensingRecord[] @relation("DispensedBy")
-  dispensedById     Int?
-  refunds           Refund[]           @relation("ProcessedBy")
-  processedById     Int?
-  stockAdjustments  StockAdjustment[]  @relation("AdjustedBy")
-  adjustedById      Int?
+id                Int                @id @default(autoincrement())
+email             String             @unique
+name              String
+password          String
+role              String             @default("PATIENT") // PATIENT, DOCTOR, ADMIN, NURSE
+createdAt         DateTime           @default(now())
+updatedAt         DateTime           @updatedAt
+doctor            Doctor?            @relation(fields: [doctorId], references: [id])
+doctorId          Int?               @unique
+patient           Patient?           @relation(fields: [patientId], references: [id])
+patientId         Int?               @unique
+payrolls          Payroll[]
+cssdLogs          CSSDLog[]          @relation("LoggedBy")
+cssdRequisitions  CSSDRequisition[]  @relation("RequisitionRequestedBy")
+appointments      Appointment[]      @relation("BookedBy")
+dispensingRecords DispensingRecord[] @relation("DispensedBy")
+dispensedById     Int?
+refunds           Refund[]           @relation("ProcessedBy")
+processedById     Int?
+stockAdjustments  StockAdjustment[]  @relation("AdjustedBy")
+adjustedById      Int?
 }
