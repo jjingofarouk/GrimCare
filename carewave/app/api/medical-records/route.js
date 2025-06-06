@@ -5,6 +5,9 @@ const prisma = new PrismaClient();
 
 export async function GET() {
   try {
+    if (!prisma.medicalRecord) {
+      throw new Error('MedicalRecord model is not defined in Prisma schema');
+    }
     const medicalRecords = await prisma.medicalRecord.findMany({
       include: { patient: { include: { user: true } } },
     });
