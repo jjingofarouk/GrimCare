@@ -4,10 +4,13 @@ import { Container, Paper, Tabs, Tab, Box, Typography } from '@mui/material';
 import PatientForm from './PatientForm';
 import PatientList from './PatientList';
 import HistoryTakingForm from './HistoryTakingForm';
+import MedicalRecordsList from './MedicalRecordsList';
 import { getPatients } from './patientService';
+import { getMedicalRecords } from '../medical-records/medicalRecordsService';
 
 export default function PatientPage() {
   const [patients, setPatients] = useState([]);
+  const [medicalRecords, setMedicalRecords] = useState([]);
   const [selectedPatient, setSelectedPatient] = useState(null);
   const [tabValue, setTabValue] = useState(0);
   const [refreshKey, setRefreshKey] = useState(0);
@@ -15,10 +18,11 @@ export default function PatientPage() {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const patientsData = await getPatients();
+        const [patientsData, recordsData] = await Promise.all([getPatients(), getMedicalRecords()]);
         setPatients(patientsData);
+        setMedicalRecords(recordsData);
       } catch (err) {
-        console.error('Failed to fetch patients', err);
+        console.error('Failed to fetch data', err);
       }
     };
     fetchData();
@@ -60,6 +64,7 @@ export default function PatientPage() {
             <Tab label="All Patients" />
             <Tab label={selectedPatient ? 'Edit Patient' : 'Add Patient'} />
             <Tab label="History Taking" />
+            <Tab label="Medical Records" />
           </Tabs>
         </Box>
         <Box>
@@ -79,6 +84,12 @@ export default function PatientPage() {
           {tabValue === 2 && (
             <HistoryTakingForm
               patients={patients}
+              onSuccess={handleSuccess}
+            />
+          )}
+          {tabValue === 3 && (
+            <MedicalRecordsList
+              medicalRecords={medicalRecords}
               onSuccess={handleSuccess}
             />
           )}
