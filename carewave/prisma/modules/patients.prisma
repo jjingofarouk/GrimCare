@@ -1,6 +1,7 @@
 model Patient {
   id                    Int               @id @default(autoincrement())
-  user                  User?             @relation
+  user                  User?             @relation(fields: [userId], references: [id])
+  userId                Int?              @unique
   patientId             String            @unique
   dateOfBirth           DateTime?
   gender                String?
@@ -19,6 +20,7 @@ model Patient {
   appointments          Appointment[]     @relation("PatientAppointments")
   prescriptions         Prescription[]    @relation("Prescriptions")
   prescribedToId        Int?
+  medicalRecords        MedicalRecord[]   @relation("PatientMedicalRecords")
   createdAt             DateTime          @default(now())
   updatedAt             DateTime          @updatedAt
 }
