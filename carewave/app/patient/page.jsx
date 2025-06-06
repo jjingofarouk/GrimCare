@@ -1,11 +1,10 @@
 'use client';
-
 import React, { useState, useEffect } from 'react';
 import { Container, Paper, Tabs, Tab, Box, Typography } from '@mui/material';
 import PatientForm from './PatientForm';
 import PatientList from './PatientList';
-import { getPatients } from '../adt/adtService';
-import styles from './PatientPage.module.css';
+import HistoryTakingForm from './HistoryTakingForm';
+import { getPatients } from './patientService';
 
 export default function PatientPage() {
   const [patients, setPatients] = useState([]);
@@ -27,7 +26,7 @@ export default function PatientPage() {
 
   const handleTabChange = (event, newValue) => {
     setTabValue(newValue);
-    if (newValue !== 1) {
+    if (newValue !== 1 && newValue !== 2) {
       setSelectedPatient(null);
     }
   };
@@ -44,33 +43,26 @@ export default function PatientPage() {
   };
 
   return (
-    <Container maxWidth="xl" className={styles.container}>
-      <Typography variant="h4" gutterBottom className={styles.title}>
-        Patient Management
-      </Typography>
-      <Paper elevation={3} className={styles.paper}>
-        <Box className={styles.tabsWrapper}>
+    <Container maxWidth="xl" sx={{ mt: 4, mb: 4 }}>
+      <Typography variant="h4" gutterBottom>Patient Management</Typography>
+      <Paper elevation={3} sx={{ p: 4 }}>
+        <Box sx={{ mb: 3 }}>
           <Tabs
             value={tabValue}
             onChange={handleTabChange}
             variant="scrollable"
             scrollButtons="auto"
-            className={styles.tabs}
             sx={{
-              '& .MuiTabs-flexContainer': {
-                flexWrap: 'nowrap',
-              },
-              '& .MuiTab-root': {
-                minWidth: { xs: 100, sm: 120 },
-                fontSize: { xs: '0.8rem', sm: '0.875rem' },
-              },
+              '& .MuiTabs-flexContainer': { flexWrap: 'nowrap' },
+              '& .MuiTab-root': { minWidth: { xs: 100, sm: 120 }, fontSize: { xs: '0.8rem', sm: '0.875rem' } },
             }}
           >
             <Tab label="All Patients" />
             <Tab label={selectedPatient ? 'Edit Patient' : 'Add Patient'} />
+            <Tab label="History Taking" />
           </Tabs>
         </Box>
-        <Box className={styles.tabContent}>
+        <Box>
           {tabValue === 0 && (
             <PatientList
               key={refreshKey}
@@ -81,6 +73,12 @@ export default function PatientPage() {
           {tabValue === 1 && (
             <PatientForm
               patient={selectedPatient}
+              onSuccess={handleSuccess}
+            />
+          )}
+          {tabValue === 2 && (
+            <HistoryTakingForm
+              patients={patients}
               onSuccess={handleSuccess}
             />
           )}
