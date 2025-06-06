@@ -25,18 +25,18 @@ import {
   WrenchIcon,
   XCircleIcon,
 } from '@heroicons/react/24/outline';
-import { 
-  Drawer, 
-  List, 
-  ListItem, 
-  ListItemIcon, 
-  ListItemText, 
-  Typography, 
+import {
+  Drawer,
+  List,
+  ListItem,
+  ListItemIcon,
+  ListItemText,
+  Typography,
   Box,
   Divider,
   Chip,
   useTheme,
-  alpha
+  alpha,
 } from '@mui/material';
 import useAuth from './useAuth';
 
@@ -80,40 +80,32 @@ const roleBasedNavItems = {
     { name: 'ADT', path: '/adt', icon: ClipboardDocumentListIcon, category: 'patient-care' },
     { name: 'Emergency', path: '/emergency', icon: XCircleIcon, category: 'patient-care' },
     { name: 'Queue Management', path: '/queue-mgmt', icon: UsersIcon, category: 'patient-care' },
-    
     { name: 'Clinical', path: '/clinical', icon: BeakerIcon, category: 'clinical' },
     { name: 'Laboratory', path: '/laboratory', icon: BeakerIcon, category: 'clinical' },
     { name: 'Radiology', path: '/radiology', icon: BeakerIcon, category: 'clinical' },
     { name: 'Operation Theatre', path: '/operation-theatre', icon: BeakerIcon, category: 'clinical' },
     { name: 'Clinical Settings', path: '/clinical-settings', icon: WrenchIcon, category: 'clinical' },
     { name: 'CSSD', path: '/cssd', icon: ShieldCheckIcon, category: 'clinical' },
-    
     { name: 'Nursing', path: '/nursing', icon: HeartIcon, category: 'nursing' },
     { name: 'Maternity', path: '/maternity', icon: HeartIcon, category: 'nursing' },
     { name: 'Vaccination', path: '/vaccination', icon: HeartIcon, category: 'nursing' },
-    
     { name: 'Pharmacy', path: '/pharmacy', icon: InboxIcon, category: 'pharmacy' },
     { name: 'Dispensary', path: '/dispensary', icon: InboxIcon, category: 'pharmacy' },
-    
     { name: 'Billing', path: '/billing', icon: TableCellsIcon, category: 'finance' },
     { name: 'Accounting', path: '/accounting', icon: CalculatorIcon, category: 'finance' },
     { name: 'Claim Management', path: '/claim-mgmt', icon: DocumentTextIcon, category: 'finance' },
     { name: 'NHIF', path: '/nhif', icon: ShieldCheckIcon, category: 'finance' },
     { name: 'Incentive', path: '/incentive', icon: KeyIcon, category: 'finance' },
-    
     { name: 'Inventory', path: '/inventory', icon: Squares2X2Icon, category: 'operations' },
     { name: 'Procurement', path: '/procurement', icon: ShoppingCartIcon, category: 'operations' },
     { name: 'Substore', path: '/substore', icon: Squares2X2Icon, category: 'operations' },
     { name: 'Fixed Assets', path: '/fixed-assets', icon: BriefcaseIcon, category: 'operations' },
-    
     { name: 'Reports', path: '/reports', icon: TableCellsIcon, category: 'reports' },
     { name: 'Dynamic Report', path: '/dynamic-report', icon: TableCellsIcon, category: 'reports' },
     { name: 'Medical Records', path: '/medical-records', icon: DocumentTextIcon, category: 'reports' },
-    
     { name: 'Helpdesk', path: '/helpdesk', icon: UsersIcon, category: 'support' },
     { name: 'Marketing Referral', path: '/mkt-referral', icon: UsersIcon, category: 'support' },
     { name: 'Social Service', path: '/social-service', icon: UsersIcon, category: 'support' },
-    
     { name: 'Settings', path: '/settings', icon: CogIcon, category: 'admin' },
     { name: 'System Admin', path: '/system-admin', icon: WrenchIcon, category: 'admin' },
     { name: 'Utilities', path: '/utilities', icon: WrenchIcon, category: 'admin' },
@@ -139,7 +131,7 @@ const categoryLabels = {
   support: 'Support Services',
   admin: 'Administration',
   auth: 'Authentication',
-  health: 'Health Services'
+  health: 'Health Services',
 };
 
 const categoryColors = {
@@ -155,7 +147,7 @@ const categoryColors = {
   support: '#3730a3',
   admin: '#4b5563',
   auth: '#1f2937',
-  health: '#0d9488'
+  health: '#0d9488',
 };
 
 export default function Sidebar({ toggleSidebar, isOpen }) {
@@ -164,7 +156,6 @@ export default function Sidebar({ toggleSidebar, isOpen }) {
   const theme = useTheme();
   const navItems = user ? roleBasedNavItems[user.role] || roleBasedNavItems.GUEST : roleBasedNavItems.GUEST;
 
-  // Group navigation items by category
   const groupedNavItems = navItems.reduce((acc, item) => {
     const category = item.category || 'main';
     if (!acc[category]) acc[category] = [];
@@ -174,8 +165,8 @@ export default function Sidebar({ toggleSidebar, isOpen }) {
 
   const sidebarStyles = {
     width: 280,
-    background: '#0f766e', // Dark teal background
-    color: '#ffffff', // White text
+    background: '#0f766e',
+    color: '#ffffff',
     borderRight: '1px solid #115e59',
     boxShadow: '0 10px 25px -5px rgba(0, 0, 0, 0.3), 0 8px 10px -6px rgba(0, 0, 0, 0.2)',
   };
@@ -183,13 +174,13 @@ export default function Sidebar({ toggleSidebar, isOpen }) {
   const logoStyles = {
     padding: '24px 20px',
     borderBottom: '1px solid #115e59',
-    background: 'linear-gradient(135deg, #0d9488 0%, #115e59 100%)', // Dark teal gradient
-    color: '#ffffff', // White text
+    background: 'linear-gradient(135deg, #0d9488 0%, #115e59 100%)',
+    color: '#ffffff',
     cursor: 'pointer',
     transition: 'all 0.3s ease',
     '&:hover': {
-      background: 'linear-gradient(135deg, #0e7490 0%, #134e4a 100%)', // Slightly different teal gradient on hover
-    }
+      background: 'linear-gradient(135deg, #0e7490 0%, #134e4a 100%)',
+    },
   };
 
   const logoContainerStyles = {
@@ -211,7 +202,7 @@ export default function Sidebar({ toggleSidebar, isOpen }) {
       margin: '2px 12px',
       borderRadius: '12px',
       transition: 'all 0.2s ease',
-      color: '#ffffff', // White text for nav items
+      color: '#ffffff',
       '&:hover': {
         backgroundColor: alpha(theme.palette.primary.main, 0.2),
         transform: 'translateX(4px)',
@@ -220,14 +211,14 @@ export default function Sidebar({ toggleSidebar, isOpen }) {
         backgroundColor: alpha(theme.palette.primary.main, 0.3),
         borderLeft: `3px solid ${theme.palette.primary.main}`,
         '& .MuiListItemIcon-root': {
-          color: '#ffffff', // White icons for active items
+          color: '#ffffff',
         },
         '& .MuiListItemText-primary': {
-          color: '#ffffff', // White text for active items
+          color: '#ffffff',
           fontWeight: 600,
-        }
-      }
-    }
+        },
+      },
+    },
   };
 
   const categoryHeaderStyles = {
@@ -239,7 +230,7 @@ export default function Sidebar({ toggleSidebar, isOpen }) {
 
   const dividerStyles = {
     margin: '8px 16px',
-    backgroundColor: '#115e59', // Darker teal divider
+    backgroundColor: '#115e59',
   };
 
   return (
@@ -247,15 +238,97 @@ export default function Sidebar({ toggleSidebar, isOpen }) {
       variant="temporary"
       open={isOpen}
       onClose={toggleSidebar}
-      PaperProps={{
-        sx: sidebarStyles
-      }}
+      PaperProps={{ sx: sidebarStyles }}
       ModalProps={{ keepMounted: true }}
     >
       <Box sx={logoStyles} onClick={toggleSidebar}>
         <Box sx={logoContainerStyles}>
-          <img 
-            src="/logo.png" 
-            alt="CareWave Logo" 
+          <img
+            src="/logo.png"
+            alt="CareWave Logo"
             style={logoImageStyles}
           />
+          <Typography
+            variant="h6"
+            sx={{ fontWeight: 700, fontSize: '1.25rem', color: '#ffffff' }}
+          >
+            CareWave
+          </Typography>
+        </Box>
+      </Box>
+
+      <Box sx={{ overflowY: 'auto', flex: 1 }}>
+        {Object.entries(groupedNavItems).map(([category, items], index) => (
+          <Box key={category}>
+            {index > 0 && <Divider sx={dividerStyles} />}
+            <Box sx={categoryHeaderStyles}>
+              <Chip
+                label={categoryLabels[category] || category}
+                size="small"
+                sx={{
+                  backgroundColor: alpha(categoryColors[category] || '#4b5563', 0.2),
+                  color: '#ffffff',
+                  fontSize: '0.75rem',
+                  fontWeight: 600,
+                  height: '24px',
+                }}
+              />
+            </Box>
+            <List sx={navListStyles}>
+              {items.map(({ name, path, icon: Icon }) => (
+                <ListItem
+                  key={path}
+                  component={Link}
+                  href={path}
+                  className={pathname === path ? 'active' : ''}
+                  onClick={toggleSidebar}
+                  sx={{ cursor: 'pointer' }}
+                >
+                  <ListItemIcon sx={{ minWidth: '40px', color: '#ffffff' }}>
+                    <Icon style={{ width: '20px', height: '20px' }} />
+                  </ListItemIcon>
+                  <ListItemText
+                    primary={name}
+                    primaryTypographyProps={{
+                      fontSize: '0.875rem',
+                      fontWeight: 500,
+                      color: '#ffffff',
+                    }}
+                  />
+                </ListItem>
+              ))}
+            </List>
+          </Box>
+        ))}
+      </Box>
+
+      {user && (
+        <Box
+          sx={{
+            padding: '16px 20px',
+            borderTop: '1px solid #115e59',
+            backgroundColor: '#134e4a',
+          }}
+        >
+          <Typography
+            variant="caption"
+            sx={{
+              color: '#d1d5db',
+              fontWeight: 500,
+              display: 'block',
+              marginBottom: '4px',
+            }}
+          >
+            Logged in as
+          </Typography>
+          <Typography
+            variant="body2"
+            sx={{ fontWeight: 600, color: '#ffffff' }}
+          >
+            {user.role?.replace('_', ' ')} User
+          </Typography>
+        </Box>
+      )}
+    </Drawer>
+  );
+}
