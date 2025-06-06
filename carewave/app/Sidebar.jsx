@@ -143,19 +143,19 @@ const categoryLabels = {
 };
 
 const categoryColors = {
-  main: '#2563eb',
-  'patient-care': '#059669',
-  clinical: '#7c3aed',
-  nursing: '#dc2626',
-  lab: '#ea580c',
-  pharmacy: '#0891b2',
-  finance: '#16a34a',
-  operations: '#9333ea',
-  reports: '#0d9488',
-  support: '#4338ca',
-  admin: '#64748b',
-  auth: '#374151',
-  health: '#059669'
+  main: '#115e59',
+  'patient-care': '#0d9488',
+  clinical: '#5b21b6',
+  nursing: '#b91c1c',
+  lab: '#c2410c',
+  pharmacy: '#0e7490',
+  finance: '#15803d',
+  operations: '#7e22ce',
+  reports: '#0f766e',
+  support: '#3730a3',
+  admin: '#4b5563',
+  auth: '#1f2937',
+  health: '#0d9488'
 };
 
 export default function Sidebar({ toggleSidebar, isOpen }) {
@@ -174,20 +174,21 @@ export default function Sidebar({ toggleSidebar, isOpen }) {
 
   const sidebarStyles = {
     width: 280,
-    background: 'linear-gradient(180deg, #ffffff 0%, #f8fafc 100%)',
-    borderRight: '1px solid #e2e8f0',
-    boxShadow: '0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1)',
+    background: '#0f766e', // Dark teal background
+    color: '#ffffff', // White text
+    borderRight: '1px solid #115e59',
+    boxShadow: '0 10px 25px -5px rgba(0, 0, 0, 0.3), 0 8px 10px -6px rgba(0, 0, 0, 0.2)',
   };
 
   const logoStyles = {
     padding: '24px 20px',
-    borderBottom: '1px solid #e2e8f0',
-    background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-    color: 'white',
+    borderBottom: '1px solid #115e59',
+    background: 'linear-gradient(135deg, #0d9488 0%, #115e59 100%)', // Dark teal gradient
+    color: '#ffffff', // White text
     cursor: 'pointer',
     transition: 'all 0.3s ease',
     '&:hover': {
-      background: 'linear-gradient(135deg, #5a67d8 0%, #6b46c1 100%)',
+      background: 'linear-gradient(135deg, #0e7490 0%, #134e4a 100%)', // Slightly different teal gradient on hover
     }
   };
 
@@ -201,7 +202,7 @@ export default function Sidebar({ toggleSidebar, isOpen }) {
     width: '32px',
     height: '32px',
     borderRadius: '8px',
-    filter: 'brightness(1.1)',
+    filter: 'brightness(1.2)',
   };
 
   const navListStyles = {
@@ -210,18 +211,19 @@ export default function Sidebar({ toggleSidebar, isOpen }) {
       margin: '2px 12px',
       borderRadius: '12px',
       transition: 'all 0.2s ease',
+      color: '#ffffff', // White text for nav items
       '&:hover': {
-        backgroundColor: alpha(theme.palette.primary.main, 0.08),
+        backgroundColor: alpha(theme.palette.primary.main, 0.2),
         transform: 'translateX(4px)',
       },
       '&.active': {
-        backgroundColor: alpha(theme.palette.primary.main, 0.12),
+        backgroundColor: alpha(theme.palette.primary.main, 0.3),
         borderLeft: `3px solid ${theme.palette.primary.main}`,
         '& .MuiListItemIcon-root': {
-          color: theme.palette.primary.main,
+          color: '#ffffff', // White icons for active items
         },
         '& .MuiListItemText-primary': {
-          color: theme.palette.primary.main,
+          color: '#ffffff', // White text for active items
           fontWeight: 600,
         }
       }
@@ -237,7 +239,7 @@ export default function Sidebar({ toggleSidebar, isOpen }) {
 
   const dividerStyles = {
     margin: '8px 16px',
-    backgroundColor: '#e2e8f0',
+    backgroundColor: '#115e59', // Darker teal divider
   };
 
   return (
@@ -257,80 +259,3 @@ export default function Sidebar({ toggleSidebar, isOpen }) {
             alt="CareWave Logo" 
             style={logoImageStyles}
           />
-          <Typography variant="h6" sx={{ fontWeight: 700, fontSize: '1.25rem' }}>
-            CareWave
-          </Typography>
-        </Box>
-      </Box>
-
-      <Box sx={{ overflowY: 'auto', flex: 1 }}>
-        {Object.entries(groupedNavItems).map(([category, items], index) => (
-          <Box key={category}>
-            {index > 0 && <Divider sx={dividerStyles} />}
-            
-            <Box sx={categoryHeaderStyles}>
-              <Chip
-                label={categoryLabels[category] || category}
-                size="small"
-                sx={{
-                  backgroundColor: alpha(categoryColors[category] || '#64748b', 0.1),
-                  color: categoryColors[category] || '#64748b',
-                  fontSize: '0.75rem',
-                  fontWeight: 600,
-                  height: '24px',
-                }}
-              />
-            </Box>
-
-            <List sx={navListStyles}>
-              {items.map(({ name, path, icon: Icon }) => (
-                <ListItem
-                  key={path}
-                  component={Link}
-                  href={path}
-                  className={pathname === path ? 'active' : ''}
-                  onClick={toggleSidebar}
-                  sx={{ cursor: 'pointer' }}
-                >
-                  <ListItemIcon sx={{ minWidth: '40px' }}>
-                    <Icon style={{ width: '20px', height: '20px' }} />
-                  </ListItemIcon>
-                  <ListItemText 
-                    primary={name}
-                    primaryTypographyProps={{
-                      fontSize: '0.875rem',
-                      fontWeight: 500,
-                    }}
-                  />
-                </ListItem>
-              ))}
-            </List>
-          </Box>
-        ))}
-      </Box>
-
-      {user && (
-        <Box sx={{ 
-          padding: '16px 20px', 
-          borderTop: '1px solid #e2e8f0',
-          backgroundColor: '#f8fafc'
-        }}>
-          <Typography variant="caption" sx={{ 
-            color: '#64748b', 
-            fontWeight: 500,
-            display: 'block',
-            marginBottom: '4px'
-          }}>
-            Logged in as
-          </Typography>
-          <Typography variant="body2" sx={{ 
-            fontWeight: 600,
-            color: '#1e293b'
-          }}>
-            {user.role?.replace('_', ' ')} User
-          </Typography>
-        </Box>
-      )}
-    </Drawer>
-  );
-}
