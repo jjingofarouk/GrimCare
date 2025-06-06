@@ -143,7 +143,7 @@ const categoryColors = {
   pharmacy: '#0e7490',
   finance: '#15803d',
   operations: '#7e22ce',
-  reports: '#0f766e',
+  reports: '#0d5c66',
   support: '#3730a3',
   admin: '#4b5563',
   auth: '#1f2937',
@@ -165,7 +165,7 @@ export default function Sidebar({ toggleSidebar, isOpen }) {
 
   const sidebarStyles = {
     width: 280,
-    background: '#0f766e',
+    background: '#0d5c66',
     color: '#ffffff',
     borderRight: '1px solid #115e59',
     boxShadow: '0 10px 25px -5px rgba(0, 0, 0, 0.3), 0 8px 10px -6px rgba(0, 0, 0, 0.2)',
