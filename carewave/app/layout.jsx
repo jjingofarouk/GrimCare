@@ -5,10 +5,10 @@ import Header from './Header';
 export default function RootLayout({ children }) {
   return (
     <html lang="en">
-      <body>
-        <Box sx={{ display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
+      <body style={{ margin: 0, padding: 0 }}>
+        <Box sx={{ display: 'flex', flexDirection: 'column', minHeight: '100vh', m: 0, p: 0 }}>
           <Header />
-          <Box component="main" sx={{ flex: 1, p: { xs: 2, md: 3 }, mt: '64px' }}>
+          <Box component="main" sx={{ flex: 1, m: 0, p: 0 }}>
             {children}
           </Box>
         </Box>
