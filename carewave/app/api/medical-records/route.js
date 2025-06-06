@@ -3,6 +3,20 @@ import { NextResponse } from 'next/server';
 
 const prisma = new PrismaClient();
 
+export async function GET() {
+  try {
+    const medicalRecords = await prisma.medicalRecord.findMany({
+      include: { patient: { include: { user: true } } },
+    });
+    return NextResponse.json(medicalRecords);
+  } catch (error) {
+    console.error('GET /api/medical-records error:', error);
+    return NextResponse.json({ error: 'Failed to fetch medical records', details: error.message }, { status: 500 });
+  } finally {
+    await prisma.$disconnect();
+  }
+}
+
 export async function POST(request) {
   try {
     const data = await request.json();
@@ -11,7 +25,7 @@ export async function POST(request) {
     }
     const medicalRecord = await prisma.medicalRecord.create({
       data: {
-        patientId: data.patientId,
+        patient: { connect: { patientId: data.patientId } },
         recordId: data.recordId,
         diagnosis: data.diagnosis,
         presentingComplaint: data.presentingComplaint || null,
@@ -23,7 +37,7 @@ export async function POST(request) {
         date: new Date(data.date),
         doctorName: data.doctorName,
       },
-      include: { patient: true },
+      include: { patient: { include: { user: true } } },
     });
     return NextResponse.json(medicalRecord, { status: 201 });
   } catch (error) {
